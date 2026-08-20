@@ -1,13 +1,28 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useId, useState } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Button } from "@/components/Button";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { updateCompetitorDetails, type EditFormState } from "@/features/competitors/actions";
-import { normalizeDomainInput, originOf } from "@/features/competitors/domain";
+import { normalizeDomainInput, originOf, replaceUrlHost } from "@/features/competitors/domain";
+import { domainMismatchError, formatUrlError } from "@/features/competitors/rowValidation";
+import { pageLabel } from "@/features/competitors/validation";
 import styles from "./page.module.css";
+
+const LABEL_OPTIONS = [
+  "Pricing",
+  "Homepage",
+  "Changelog",
+  "Blog",
+  "Docs",
+  "Careers",
+  "Features",
+  "Integrations",
+];
+
+type Row = { id: string; label: string; url: string };
 
 function SubmitButton({ canSubmit }: { canSubmit: boolean }) {
   const { pending } = useFormStatus();
@@ -18,30 +33,56 @@ function SubmitButton({ canSubmit }: { canSubmit: boolean }) {
   );
 }
 
-// Strips a page's own current origin off its URL, leaving path + query +
-// hash intact — this is what's shown/edited under the domain field above,
-// regardless of whether the page happens to already match that domain.
-function pathOf(url: string): string {
-  const origin = originOf(url);
-  return origin && url.startsWith(origin) ? url.slice(origin.length) : url;
+function labelError(label: string): string | null {
+  const result = pageLabel.safeParse(label);
+  return result.success ? null : result.error.issues[0].message;
 }
 
 export function EditCompetitorForm({ competitor }: { competitor: CompetitorRow }) {
   const [state, formAction] = useActionState<EditFormState, FormData>(updateCompetitorDetails, null);
+  const listId = useId();
   const [name, setName] = useState(competitor.name);
   const [domain, setDomain] = useState(
     (originOf(competitor.pages[0]?.url ?? "") ?? "").replace(/^https?:\/\//, ""),
   );
-  const [paths, setPaths] = useState(() =>
-    competitor.pages.map((p) => ({ id: p.id, label: p.label, path: pathOf(p.url) })),
+  const [rows, setRows] = useState<Row[]>(() =>
+    competitor.pages.map((p) => ({ id: p.id, label: p.label, url: p.url })),
   );
 
   const normalizedOrigin = normalizeDomainInput(domain);
-  const canSubmit = name.trim().length > 0 && normalizedOrigin !== null;
 
-  function updatePath(id: string, value: string) {
-    setPaths((rows) => rows.map((r) => (r.id === id ? { ...r, path: value } : r)));
+  // Editing the domain moves every page under it, each keeping its own
+  // path — that's the "fix one typo, not five URLs" case. The page URLs
+  // themselves stay freely editable below.
+  function updateDomain(value: string) {
+    setDomain(value);
+    const origin = normalizeDomainInput(value);
+    if (!origin) return;
+    setRows((current) =>
+      current.map((row) => {
+        try {
+          return { ...row, url: replaceUrlHost(row.url, origin) };
+        } catch {
+          return row; // unparseable URL — leave it for its own inline error
+        }
+      }),
+    );
   }
+
+  function updateRow(id: string, field: "label" | "url", value: string) {
+    setRows((current) => current.map((row) => (row.id === id ? { ...row, [field]: value } : row)));
+  }
+
+  function urlError(url: string): string | null {
+    if (!url.trim()) return "Enter a URL.";
+    return formatUrlError(url) ?? domainMismatchError(url, normalizedOrigin);
+  }
+
+  const rowErrors = rows.map((row) => ({ url: urlError(row.url), label: labelError(row.label) }));
+  const canSubmit =
+    name.trim().length > 0 &&
+    normalizedOrigin !== null &&
+    rowErrors.every((e) => !e.url && !e.label);
 
   return (
     <div className={styles.wrap}>
@@ -64,40 +105,62 @@ export function EditCompetitorForm({ competitor }: { competitor: CompetitorRow }
           className={styles.nameInput}
         />
 
+        {/* Client-side only: a shortcut for rewriting every page URL below. */}
         <label className={styles.fieldLabel} htmlFor="edit-domain">
           Domain
         </label>
         <input
           id="edit-domain"
-          name="domain"
           value={domain}
-          onChange={(e) => setDomain(e.target.value)}
+          onChange={(e) => updateDomain(e.target.value)}
           placeholder="example.com"
           className={styles.domainInput}
         />
         <p className={styles.domainHint}>
-          Every page below moves under this domain when you save — only the domain changes, each
-          page keeps its own path.
+          Changing this moves every page below to the new domain, each keeping its own path. You
+          can also edit any page&rsquo;s full URL directly.
         </p>
 
-        <div className={styles.pagesHead}>Pages</div>
-        <div className={styles.pageRows}>
-          {paths.map((row) => (
-            <div key={row.id} className={styles.pageRow}>
-              <div className={styles.pageLabel}>{row.label}</div>
-              <div className={styles.urlLocked}>
-                <span className={styles.urlLockedPrefix}>{normalizedOrigin ?? (domain || "https://…")}</span>
-                <input
-                  value={row.path}
-                  onChange={(e) => updatePath(row.id, e.target.value)}
-                  placeholder="/pricing"
-                  className={styles.urlLockedPath}
-                />
-              </div>
-              <input type="hidden" name="pageId" value={row.id} />
-              <input type="hidden" name="pagePath" value={row.path} />
-            </div>
+        <datalist id={listId}>
+          {LABEL_OPTIONS.map((opt) => (
+            <option key={opt} value={opt} />
           ))}
+        </datalist>
+
+        <div className={styles.pagesHead}>Pages</div>
+        <div className={styles.colLabels}>
+          <div className={styles.colLabelUrl}>Page URL</div>
+          <div className={styles.colLabelName}>Page name</div>
+        </div>
+
+        <div className={styles.pageRows}>
+          {rows.map((row, index) => {
+            const errors = rowErrors[index];
+            return (
+              <div key={row.id} className={styles.pageGroup}>
+                <div className={styles.pageRow}>
+                  <input type="hidden" name="pageId" value={row.id} />
+                  <input
+                    name="url"
+                    value={row.url}
+                    onChange={(e) => updateRow(row.id, "url", e.target.value)}
+                    placeholder="https://competitor.com/pricing"
+                    className={errors.url ? styles.urlInputError : styles.urlInput}
+                  />
+                  <input
+                    name="label"
+                    list={listId}
+                    value={row.label}
+                    onChange={(e) => updateRow(row.id, "label", e.target.value)}
+                    placeholder="e.g. Pricing"
+                    className={errors.label ? styles.labelInputError : styles.labelInput}
+                  />
+                </div>
+                {errors.url ? <div className={styles.rowError}>{errors.url}</div> : null}
+                {errors.label ? <div className={styles.rowError}>{errors.label}</div> : null}
+              </div>
+            );
+          })}
         </div>
 
         <div className={styles.actions}>

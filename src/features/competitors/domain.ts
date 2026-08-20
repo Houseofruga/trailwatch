@@ -26,3 +26,14 @@ export function sameOrigin(urlA: string, urlB: string): boolean {
   const b = originOf(urlB);
   return a !== null && a === b;
 }
+
+// Swaps the scheme+host on `url` for `newOrigin`'s, keeping path/query/hash
+// intact — lets the edit page's domain field move every page at once
+// without the reader having to retype each URL.
+export function replaceUrlHost(url: string, newOrigin: string): string {
+  const target = new URL(url);
+  const next = new URL(newOrigin);
+  target.protocol = next.protocol;
+  target.host = next.host;
+  return target.toString();
+}

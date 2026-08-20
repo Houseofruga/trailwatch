@@ -6,7 +6,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { LIMITS, type Plan } from "@/features/plan/limits";
 import { competitorName, pageRow } from "./validation";
-import { normalizeDomainInput, originOf, sameOrigin } from "./domain";
+import { originOf, sameOrigin } from "./domain";
 
 export type FormState = { error: string } | null;
 
@@ -177,21 +177,20 @@ export async function updateCompetitorDetails(
   const nameResult = competitorName.safeParse(formData.get("name"));
   if (!nameResult.success) return { error: nameResult.error.issues[0].message };
 
-  const newOrigin = normalizeDomainInput(String(formData.get("domain") ?? ""));
-  if (!newOrigin) return { error: "Enter a valid domain, like example.com." };
+  // The form posts each page's full URL and label; the domain field is a
+  // client-side convenience for rewriting them all, so it isn't submitted.
+  const ids = formData.getAll("pageId").map(String);
+  const urls = formData.getAll("url").map((v) => String(v).trim());
+  const labels = formData.getAll("label").map((v) => String(v).trim());
+  if (ids.length === 0) return { error: "A competitor needs at least one page." };
 
-  const pageIds = formData.getAll("pageId").map(String);
-  const pagePaths = formData.getAll("pagePath").map(String);
-  const pages = pageIds.map((id, i) => ({ id, path: pagePaths[i] ?? "" }));
+  const rowsResult = z
+    .array(pageRow)
+    .safeParse(ids.map((_, i) => ({ url: urls[i] ?? "", label: labels[i] ?? "" })));
+  if (!rowsResult.success) return { error: rowsResult.error.issues[0].message };
 
-  const urls = pages.map(({ id, path }) => {
-    try {
-      return { id, url: new URL(path, newOrigin).toString() };
-    } catch {
-      return null;
-    }
-  });
-  if (urls.some((u) => u === null)) return { error: "One of those page paths isn't valid. Try again." };
+  const domainError = findDomainMismatch(rowsResult.data[0].url, rowsResult.data);
+  if (domainError) return { error: domainError };
 
   const supabase = await createClient();
 
@@ -201,10 +200,12 @@ export async function updateCompetitorDetails(
     .eq("id", competitorId);
   if (nameError) return { error: "Couldn't save that name. Try again." };
 
-  for (const page of urls) {
-    if (!page) continue;
-    const { error: urlError } = await supabase.from("pages").update({ url: page.url }).eq("id", page.id);
-    if (urlError) return { error: "Updated the name, but couldn't update every page's URL. Try again." };
+  for (const [i, id] of ids.entries()) {
+    const { error: pageError } = await supabase
+      .from("pages")
+      .update({ url: rowsResult.data[i].url, label: rowsResult.data[i].label })
+      .eq("id", id);
+    if (pageError) return { error: "Updated the name, but couldn't update every page. Try again." };
   }
 
   revalidatePath("/dashboard");

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeDomainInput, originOf, sameOrigin } from "./domain";
+import { normalizeDomainInput, originOf, replaceUrlHost, sameOrigin } from "./domain";
 
 describe("originOf", () => {
   it("returns the origin for a valid URL", () => {
@@ -37,5 +37,19 @@ describe("sameOrigin", () => {
 
   it("is false if either URL is unparseable", () => {
     expect(sameOrigin("https://vercel.com/pricing", "not a url")).toBe(false);
+  });
+});
+
+describe("replaceUrlHost", () => {
+  it("swaps the host while preserving path, query, and hash", () => {
+    expect(replaceUrlHost("https://vercel.com/pricing?tab=pro#faq", "https://vercell.com")).toBe(
+      "https://vercell.com/pricing?tab=pro#faq",
+    );
+  });
+
+  it("swaps the protocol too", () => {
+    expect(replaceUrlHost("http://vercel.com/pricing", "https://vercel.com")).toBe(
+      "https://vercel.com/pricing",
+    );
   });
 });
