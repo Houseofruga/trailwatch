@@ -7,6 +7,7 @@ import { Button } from "@/components/Button";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { updateCompetitorDetails, type EditFormState } from "@/features/competitors/actions";
 import { normalizeDomainInput, originOf, replaceUrlHost } from "@/features/competitors/domain";
+import { PlusIcon } from "@/components/icons";
 import { domainMismatchError, formatUrlError } from "@/features/competitors/rowValidation";
 import { pageLabel } from "@/features/competitors/validation";
 import styles from "./page.module.css";
@@ -213,7 +214,8 @@ export function EditCompetitorForm({
 
         {!rowsMaxed ? (
           <button type="button" className={styles.addRow} onClick={addRow}>
-            + Add another page
+            <PlusIcon size={12} />
+            Add another page
           </button>
         ) : (
           <div className={styles.rowsMaxedNote}>That&rsquo;s all {pagesPerCompetitor} pages on this plan.</div>

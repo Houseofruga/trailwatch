@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/Button";
 import { createCompetitor, type FormState } from "@/features/competitors/actions";
 import { originOf } from "@/features/competitors/domain";
+import { PlusIcon } from "@/components/icons";
 import { domainMismatchError, formatUrlError } from "@/features/competitors/rowValidation";
 import styles from "./page.module.css";
 
@@ -129,7 +130,8 @@ export function AddForm({ slotsLeft, totalCompetitorSlots, pagesPerCompetitor }:
 
         {!rowsMaxed ? (
           <button type="button" className={styles.addRow} onClick={addRow}>
-            + Add another page
+            <PlusIcon size={12} />
+            Add another page
           </button>
         ) : (
           <div className={styles.rowsMaxedNote}>That&rsquo;s all {pagesPerCompetitor} pages on this plan.</div>

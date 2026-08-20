@@ -83,6 +83,9 @@
 }
 
 .addPage {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 12.5px;
   color: var(--accent-ink);
   cursor: pointer;
@@ -100,6 +103,9 @@
 }
 
 .editComp {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 12.5px;
   color: var(--ink-5);
   cursor: pointer;
@@ -111,9 +117,13 @@
 
 .editComp:hover {
   color: var(--ink);
+  text-decoration: none;
 }
 
 .deleteComp {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 12.5px;
   color: var(--ink-5);
   cursor: pointer;

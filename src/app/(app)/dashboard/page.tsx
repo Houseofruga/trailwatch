@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { ButtonLink } from "@/components/Button";
+import { PlusIcon } from "@/components/icons";
 import { FlashToast } from "@/components/FlashToast";
 import { getAccount } from "@/features/account/queries";
 import { getCompetitorsWithPages, type CompetitorRow } from "@/features/competitors/queries";
@@ -82,7 +83,10 @@ export default async function DashboardPage() {
             No changes recorded yet — the daily check engine lands in a later slice.
           </p>
         </div>
-        <ButtonLink href="/competitors/add">+ Add competitor</ButtonLink>
+        <ButtonLink href="/competitors/add">
+          <PlusIcon />
+          Add competitor
+        </ButtonLink>
       </div>
 
       <div className={styles.stats}>

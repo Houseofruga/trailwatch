@@ -114,6 +114,9 @@
 }
 
 .addRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   margin-top: 12px;
   font-size: 13px;
   color: var(--accent-ink);

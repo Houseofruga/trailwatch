@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { ButtonLink } from "@/components/Button";
+import { PlusIcon } from "@/components/icons";
 import { FlashToast } from "@/components/FlashToast";
 import { getCompetitorsWithPages } from "@/features/competitors/queries";
 import { getAccount } from "@/features/account/queries";
@@ -18,7 +19,10 @@ export default async function CompetitorsPage() {
           <h1 className={styles.title}>Competitors</h1>
           <p className={styles.sub}>Pause a page to stop checking it without losing its history.</p>
         </div>
-        <ButtonLink href="/competitors/add">Add competitor</ButtonLink>
+        <ButtonLink href="/competitors/add">
+          <PlusIcon />
+          Add competitor
+        </ButtonLink>
       </div>
 
       <ManageBoard competitors={competitors} pagesPerCompetitor={pagesPerCompetitor} />

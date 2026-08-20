@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { AddPageDialog } from "@/components/AddPageDialog";
+import { PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { deleteCompetitor, deletePage, togglePageActive } from "@/features/competitors/actions";
 import { originOf } from "@/features/competitors/domain";
@@ -64,7 +65,8 @@ export function ManageBoard({
                       })
                     }
                   >
-                    + Add page
+                    <PlusIcon size={13} />
+                    Add page
                   </button>
                 ) : (
                   <Link href={`/competitors/add?for=${c.id}`} className={styles.atLimit}>
@@ -72,6 +74,7 @@ export function ManageBoard({
                   </Link>
                 )}
                 <Link href={`/competitors/${c.id}/edit`} className={styles.editComp}>
+                  <PencilIcon />
                   Edit
                 </Link>
                 <button
@@ -81,6 +84,7 @@ export function ManageBoard({
                     setPendingDelete({ kind: "competitor", id: c.id, name: c.name, pageCount: c.pages.length })
                   }
                 >
+                  <TrashIcon />
                   Delete competitor
                 </button>
               </div>
