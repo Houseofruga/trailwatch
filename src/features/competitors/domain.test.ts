@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeDomainInput, originOf, replaceUrlHost } from "./domain";
+import { normalizeDomainInput, originOf, replaceUrlHost, sameOrigin } from "./domain";
 
 describe("originOf", () => {
   it("returns the origin for a valid URL", () => {
@@ -23,6 +23,20 @@ describe("normalizeDomainInput", () => {
   it("returns null for empty or unparseable input", () => {
     expect(normalizeDomainInput("")).toBeNull();
     expect(normalizeDomainInput("   ")).toBeNull();
+  });
+});
+
+describe("sameOrigin", () => {
+  it("is true for two URLs on the same domain", () => {
+    expect(sameOrigin("https://vercel.com/pricing", "https://vercel.com/changelog")).toBe(true);
+  });
+
+  it("is false for different domains", () => {
+    expect(sameOrigin("https://vercel.com/pricing", "https://notion.so/pricing")).toBe(false);
+  });
+
+  it("is false if either URL is unparseable", () => {
+    expect(sameOrigin("https://vercel.com/pricing", "not a url")).toBe(false);
   });
 });
 

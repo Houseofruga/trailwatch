@@ -5,6 +5,7 @@ import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Button } from "@/components/Button";
 import { addPages, createCompetitor, type FormState } from "@/features/competitors/actions";
+import { originOf } from "@/features/competitors/domain";
 import { pageUrl } from "@/features/competitors/validation";
 import styles from "./page.module.css";
 
@@ -21,7 +22,7 @@ const LABEL_OPTIONS = [
 
 type Row = { key: string; url: string; label: string };
 
-function urlError(url: string): string | null {
+function formatError(url: string): string | null {
   if (!url.trim()) return null; // blank rows aren't errors, just unused slots
   const result = pageUrl.safeParse(url);
   return result.success ? null : result.error.issues[0].message;
@@ -38,7 +39,14 @@ function SubmitButton({ label, canSubmit }: { label: string; canSubmit: boolean 
 
 type AddFormProps =
   | { mode: "new"; slotsLeft: number; totalCompetitorSlots: number; pagesPerCompetitor: number }
-  | { mode: "page"; competitorId: string; competitorName: string; slotsLeft: number; pagesPerCompetitor: number };
+  | {
+      mode: "page";
+      competitorId: string;
+      competitorName: string;
+      existingDomain: string;
+      slotsLeft: number;
+      pagesPerCompetitor: number;
+    };
 
 export function AddForm(props: AddFormProps) {
   const { mode, slotsLeft, pagesPerCompetitor } = props;
@@ -46,6 +54,10 @@ export function AddForm(props: AddFormProps) {
   const action = mode === "new" ? createCompetitor : addPages;
   const [state, formAction] = useActionState<FormState, FormData>(action, null);
   const [rows, setRows] = useState<Row[]>([{ key: "0", url: "", label: "Pricing" }]);
+
+  // Pages under one competitor must share a domain. "new" mode: row 0 sets
+  // it. "page" mode: it's already fixed by the competitor's existing pages.
+  const establishedOrigin = mode === "page" ? props.existingDomain : originOf(rows[0]?.url ?? "");
 
   function addRow() {
     setRows((r) => (r.length >= pagesPerCompetitor ? r : [...r, { key: String(r.length + Date.now()), url: "", label: "" }]));
@@ -59,9 +71,19 @@ export function AddForm(props: AddFormProps) {
     setRows((r) => r.map((row) => (row.key === key ? { ...row, [field]: value } : row)));
   }
 
+  function rowError(row: Row, index: number): string | null {
+    const formatIssue = formatError(row.url);
+    if (formatIssue) return formatIssue;
+    if (!row.url.trim()) return null;
+    if (mode === "new" && index === 0) return null; // this row establishes the domain
+    if (!establishedOrigin || originOf(row.url) === establishedOrigin) return null;
+    return `Must be on ${establishedOrigin.replace(/^https?:\/\//, "")} — add a separate competitor for other domains.`;
+  }
+
   const rowsMaxed = rows.length >= pagesPerCompetitor;
-  const hasAnyValidUrl = rows.some((row) => row.url.trim() && !urlError(row.url));
-  const hasAnyInvalidUrl = rows.some((row) => urlError(row.url));
+  const rowErrors = rows.map((row, index) => rowError(row, index));
+  const hasAnyValidUrl = rows.some((row, index) => row.url.trim() && !rowErrors[index]);
+  const hasAnyInvalidUrl = rowErrors.some(Boolean);
   const canSubmit = hasAnyValidUrl && !hasAnyInvalidUrl;
 
   return (
@@ -107,8 +129,8 @@ export function AddForm(props: AddFormProps) {
         </div>
 
         <div className={styles.rows}>
-          {rows.map((row) => {
-            const error = urlError(row.url);
+          {rows.map((row, index) => {
+            const error = rowErrors[index];
             return (
               <div key={row.key} className={styles.rowGroup}>
                 <div className={styles.rowLine}>

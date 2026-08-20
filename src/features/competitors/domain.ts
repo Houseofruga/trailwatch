@@ -21,6 +21,12 @@ export function normalizeDomainInput(input: string): string | null {
   return originOf(`https://${trimmed}`);
 }
 
+export function sameOrigin(urlA: string, urlB: string): boolean {
+  const a = originOf(urlA);
+  const b = originOf(urlB);
+  return a !== null && a === b;
+}
+
 // Swaps the scheme+host on `url` for `newOrigin`'s, keeping the original's
 // path/query/hash intact — this is what makes a domain-typo fix cheap.
 export function replaceUrlHost(url: string, newOrigin: string): string {

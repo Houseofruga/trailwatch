@@ -6,7 +6,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { LIMITS, type Plan } from "@/features/plan/limits";
 import { competitorName, pageRow } from "./validation";
-import { normalizeDomainInput, originOf, replaceUrlHost } from "./domain";
+import { normalizeDomainInput, originOf, replaceUrlHost, sameOrigin } from "./domain";
 
 export type FormState = { error: string } | null;
 
@@ -32,6 +32,17 @@ async function loadPlanAndUsage(supabase: Awaited<ReturnType<typeof createClient
 
   const plan: Plan = profile?.plan === "paid" ? "paid" : "free";
   return { userId: user.id, plan, competitorCount: competitors?.length ?? 0 };
+}
+
+// Pages under one competitor must share a domain — different domains
+// belong to different competitors. `establishedUrl` is the URL that sets
+// the domain (the competitor's first existing page, or the first row on
+// a brand-new competitor).
+function findDomainMismatch(establishedUrl: string, rows: { url: string }[]): string | null {
+  const domain = originOf(establishedUrl);
+  const mismatch = rows.find((r) => !sameOrigin(establishedUrl, r.url));
+  if (!mismatch) return null;
+  return `All pages for one competitor must be on ${domain} — add a separate competitor for other domains.`;
 }
 
 function readPageRows(formData: FormData) {
@@ -67,6 +78,9 @@ export async function createCompetitor(_prev: FormState, formData: FormData): Pr
   const rowsResult = z.array(pageRow).safeParse(rawRows);
   if (!rowsResult.success) return { error: rowsResult.error.issues[0].message };
 
+  const domainError = findDomainMismatch(rowsResult.data[0].url, rowsResult.data);
+  if (domainError) return { error: domainError };
+
   const { data: competitor, error: competitorError } = await supabase
     .from("competitors")
     .insert({ name: nameResult.data, user_id: userId })
@@ -99,7 +113,7 @@ export async function addPages(_prev: FormState, formData: FormData): Promise<Fo
 
   const { data: competitor } = await supabase
     .from("competitors")
-    .select("id, name, pages(id)")
+    .select("id, name, pages(id, url)")
     .eq("id", competitorId)
     .single();
   if (!competitor) return { error: "That competitor no longer exists." };
@@ -115,6 +129,10 @@ export async function addPages(_prev: FormState, formData: FormData): Promise<Fo
 
   const rowsResult = z.array(pageRow).safeParse(rawRows);
   if (!rowsResult.success) return { error: rowsResult.error.issues[0].message };
+
+  const establishedUrl = competitor.pages?.[0]?.url ?? rowsResult.data[0].url;
+  const domainError = findDomainMismatch(establishedUrl, rowsResult.data);
+  if (domainError) return { error: domainError };
 
   const { error } = await supabase
     .from("pages")
