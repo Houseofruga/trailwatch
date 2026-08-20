@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { EditCompetitorDialog } from "@/components/EditCompetitorDialog";
+import { AddPageDialog } from "@/components/AddPageDialog";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { deleteCompetitor, deletePage, togglePageActive } from "@/features/competitors/actions";
 import { originOf } from "@/features/competitors/domain";
@@ -15,7 +15,7 @@ type PendingDelete =
   | { kind: "competitor"; id: string; name: string; pageCount: number }
   | { kind: "page"; id: string; competitorName: string; label: string };
 
-type EditingCompetitor = { id: string; name: string; domain: string; hasMixedDomains: boolean };
+type AddingPageFor = { competitorId: string; competitorName: string; existingDomain: string; slotsLeft: number };
 
 export function ManageBoard({
   competitors,
@@ -26,7 +26,7 @@ export function ManageBoard({
 }) {
   const [openMenuPageId, setOpenMenuPageId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
-  const [editingCompetitor, setEditingCompetitor] = useState<EditingCompetitor | null>(null);
+  const [addingPageFor, setAddingPageFor] = useState<AddingPageFor | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -52,29 +52,28 @@ export function ManageBoard({
               </div>
               <div className={styles.cardHeadRight}>
                 {canAddPage ? (
-                  <Link href={`/competitors/add?for=${c.id}`} className={styles.addPage}>
+                  <button
+                    type="button"
+                    className={styles.addPage}
+                    onClick={() =>
+                      setAddingPageFor({
+                        competitorId: c.id,
+                        competitorName: c.name,
+                        existingDomain: originOf(c.pages[0]?.url ?? "") ?? "",
+                        slotsLeft: pagesPerCompetitor - c.pages.length,
+                      })
+                    }
+                  >
                     + Add page
-                  </Link>
+                  </button>
                 ) : (
                   <Link href={`/competitors/add?for=${c.id}`} className={styles.atLimit}>
                     Upgrade to add more pages
                   </Link>
                 )}
-                <button
-                  type="button"
-                  className={styles.editComp}
-                  onClick={() => {
-                    const domains = new Set(c.pages.map((p) => originOf(p.url)).filter(Boolean));
-                    setEditingCompetitor({
-                      id: c.id,
-                      name: c.name,
-                      domain: (originOf(c.pages[0]?.url ?? "") ?? "").replace(/^https?:\/\//, ""),
-                      hasMixedDomains: domains.size > 1,
-                    });
-                  }}
-                >
+                <Link href={`/competitors/${c.id}/edit`} className={styles.editComp}>
                   Edit
-                </button>
+                </Link>
                 <button
                   type="button"
                   className={styles.deleteComp}
@@ -173,14 +172,14 @@ export function ManageBoard({
         />
       ) : null}
 
-      {editingCompetitor ? (
-        <EditCompetitorDialog
-          competitorId={editingCompetitor.id}
-          initialName={editingCompetitor.name}
-          initialDomain={editingCompetitor.domain}
-          hasMixedDomains={editingCompetitor.hasMixedDomains}
-          onClose={() => setEditingCompetitor(null)}
-          onSaved={() => setToast("Competitor updated")}
+      {addingPageFor ? (
+        <AddPageDialog
+          competitorId={addingPageFor.competitorId}
+          competitorName={addingPageFor.competitorName}
+          existingDomain={addingPageFor.existingDomain}
+          slotsLeft={addingPageFor.slotsLeft}
+          pagesPerCompetitor={pagesPerCompetitor}
+          onClose={() => setAddingPageFor(null)}
         />
       ) : null}
 

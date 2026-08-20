@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/Button";
 import { getAccount } from "@/features/account/queries";
 import { getCompetitorsWithPages } from "@/features/competitors/queries";
-import { originOf } from "@/features/competitors/domain";
 import { LIMITS, PLAN_LABEL } from "@/features/plan/limits";
 import { AddForm } from "./AddForm";
 import styles from "./page.module.css";
@@ -20,14 +19,15 @@ export default async function AddCompetitorPage({
   const limits = LIMITS[account.plan];
   const planLabel = PLAN_LABEL[account.plan];
 
-  // Page-add mode: adding pages to an existing competitor.
+  // Reached only via "Upgrade to add more pages" — adding a page when
+  // there's room now happens in a modal on the Competitors page instead.
   if (competitorId) {
     const competitors = await getCompetitorsWithPages();
     const competitor = competitors.find((c) => c.id === competitorId);
     if (!competitor) redirect("/competitors");
 
     const slotsLeft = limits.pagesPerCompetitor - competitor.pages.length;
-    const blocked = slotsLeft <= 0;
+    if (slotsLeft > 0) redirect("/competitors");
 
     return (
       <div className={styles.wrap}>
@@ -35,24 +35,13 @@ export default async function AddCompetitorPage({
           ← Competitors
         </Link>
 
-        {blocked ? (
-          <BlockedUpsell
-            title={`${competitor.name} is at its page limit`}
-            body={`${competitor.name} already tracks ${limits.pagesPerCompetitor} pages on ${planLabel}. Upgrade for more pages per competitor, or remove one first.`}
-            swapHref="/competitors"
-            swapLabel="Or manage its existing pages →"
-            showUpsell={account.plan === "free"}
-          />
-        ) : (
-          <AddForm
-            mode="page"
-            competitorId={competitor.id}
-            competitorName={competitor.name}
-            existingDomain={originOf(competitor.pages[0]?.url ?? "") ?? ""}
-            slotsLeft={slotsLeft}
-            pagesPerCompetitor={limits.pagesPerCompetitor}
-          />
-        )}
+        <BlockedUpsell
+          title={`${competitor.name} is at its page limit`}
+          body={`${competitor.name} already tracks ${limits.pagesPerCompetitor} pages on ${planLabel}. Upgrade for more pages per competitor, or remove one first.`}
+          swapHref="/competitors"
+          swapLabel="Or manage its existing pages →"
+          showUpsell={account.plan === "free"}
+        />
       </div>
     );
   }
@@ -81,7 +70,6 @@ export default async function AddCompetitorPage({
         />
       ) : (
         <AddForm
-          mode="new"
           slotsLeft={slotsLeft}
           totalCompetitorSlots={limits.competitors}
           pagesPerCompetitor={limits.pagesPerCompetitor}

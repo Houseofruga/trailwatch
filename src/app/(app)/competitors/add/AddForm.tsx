@@ -4,9 +4,9 @@ import { useActionState, useId, useState } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Button } from "@/components/Button";
-import { addPages, createCompetitor, type FormState } from "@/features/competitors/actions";
+import { createCompetitor, type FormState } from "@/features/competitors/actions";
 import { originOf } from "@/features/competitors/domain";
-import { pageUrl } from "@/features/competitors/validation";
+import { domainMismatchError, formatUrlError } from "@/features/competitors/rowValidation";
 import styles from "./page.module.css";
 
 const LABEL_OPTIONS = [
@@ -22,12 +22,6 @@ const LABEL_OPTIONS = [
 
 type Row = { key: string; url: string; label: string };
 
-function formatError(url: string): string | null {
-  if (!url.trim()) return null; // blank rows aren't errors, just unused slots
-  const result = pageUrl.safeParse(url);
-  return result.success ? null : result.error.issues[0].message;
-}
-
 function SubmitButton({ label, canSubmit }: { label: string; canSubmit: boolean }) {
   const { pending } = useFormStatus();
   return (
@@ -37,27 +31,15 @@ function SubmitButton({ label, canSubmit }: { label: string; canSubmit: boolean 
   );
 }
 
-type AddFormProps =
-  | { mode: "new"; slotsLeft: number; totalCompetitorSlots: number; pagesPerCompetitor: number }
-  | {
-      mode: "page";
-      competitorId: string;
-      competitorName: string;
-      existingDomain: string;
-      slotsLeft: number;
-      pagesPerCompetitor: number;
-    };
+type AddFormProps = { slotsLeft: number; totalCompetitorSlots: number; pagesPerCompetitor: number };
 
-export function AddForm(props: AddFormProps) {
-  const { mode, slotsLeft, pagesPerCompetitor } = props;
+export function AddForm({ slotsLeft, totalCompetitorSlots, pagesPerCompetitor }: AddFormProps) {
   const listId = useId();
-  const action = mode === "new" ? createCompetitor : addPages;
-  const [state, formAction] = useActionState<FormState, FormData>(action, null);
+  const [state, formAction] = useActionState<FormState, FormData>(createCompetitor, null);
   const [rows, setRows] = useState<Row[]>([{ key: "0", url: "", label: "Pricing" }]);
 
-  // Pages under one competitor must share a domain. "new" mode: row 0 sets
-  // it. "page" mode: it's already fixed by the competitor's existing pages.
-  const establishedOrigin = mode === "page" ? props.existingDomain : originOf(rows[0]?.url ?? "");
+  // Row 0 sets the domain every later row must share.
+  const establishedOrigin = originOf(rows[0]?.url ?? "");
 
   function addRow() {
     setRows((r) => (r.length >= pagesPerCompetitor ? r : [...r, { key: String(r.length + Date.now()), url: "", label: "" }]));
@@ -72,12 +54,7 @@ export function AddForm(props: AddFormProps) {
   }
 
   function rowError(row: Row, index: number): string | null {
-    const formatIssue = formatError(row.url);
-    if (formatIssue) return formatIssue;
-    if (!row.url.trim()) return null;
-    if (mode === "new" && index === 0) return null; // this row establishes the domain
-    if (!establishedOrigin || originOf(row.url) === establishedOrigin) return null;
-    return `Must be on ${establishedOrigin.replace(/^https?:\/\//, "")} — add a separate competitor for other domains.`;
+    return formatUrlError(row.url) ?? (index === 0 ? null : domainMismatchError(row.url, establishedOrigin));
   }
 
   const rowsMaxed = rows.length >= pagesPerCompetitor;
@@ -88,28 +65,14 @@ export function AddForm(props: AddFormProps) {
 
   return (
     <div>
-      <h1 className={styles.title}>{mode === "new" ? "Add a competitor" : `Add a page to ${props.competitorName}`}</h1>
-      <p className={styles.slotsNote}>
-        {mode === "new"
-          ? `${slotsLeft} of ${props.totalCompetitorSlots} competitor slots left.`
-          : `${slotsLeft} of ${pagesPerCompetitor} page slots left for ${props.competitorName}.`}
-      </p>
+      <h1 className={styles.title}>Add a competitor</h1>
+      <p className={styles.slotsNote}>{slotsLeft} of {totalCompetitorSlots} competitor slots left.</p>
 
       <form action={formAction}>
-        {mode === "page" ? (
-          <>
-            <input type="hidden" name="competitorId" value={props.competitorId} />
-            <div className={styles.competitorFixed}>Competitor</div>
-            <div className={styles.competitorFixedName}>{props.competitorName}</div>
-          </>
-        ) : (
-          <>
-            <label className={styles.fieldLabel} htmlFor="name">
-              Competitor name
-            </label>
-            <input id="name" name="name" placeholder="Linear" className={styles.nameInput} />
-          </>
-        )}
+        <label className={styles.fieldLabel} htmlFor="name">
+          Competitor name
+        </label>
+        <input id="name" name="name" placeholder="Linear" className={styles.nameInput} />
 
         <div className={styles.rowsHead}>
           <span className={styles.rowsHeadLabel}>Pages to watch</span>
@@ -173,7 +136,7 @@ export function AddForm(props: AddFormProps) {
         )}
 
         <div className={styles.actions}>
-          <SubmitButton label={mode === "new" ? "Start tracking" : "Add pages"} canSubmit={canSubmit} />
+          <SubmitButton label="Start tracking" canSubmit={canSubmit} />
           <Link href="/dashboard" className={styles.cancel}>
             Cancel
           </Link>

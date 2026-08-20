@@ -6,7 +6,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { LIMITS, type Plan } from "@/features/plan/limits";
 import { competitorName, pageRow } from "./validation";
-import { normalizeDomainInput, originOf, replaceUrlHost, sameOrigin } from "./domain";
+import { normalizeDomainInput, originOf, sameOrigin } from "./domain";
 
 export type FormState = { error: string } | null;
 
@@ -165,16 +165,33 @@ export async function deletePage(pageId: string) {
   revalidatePath("/competitors");
 }
 
-export async function updateCompetitor(
-  competitorId: string,
-  name: string,
-  domainInput: string,
-): Promise<{ error?: string }> {
-  const nameResult = competitorName.safeParse(name);
+export type EditFormState = { error: string } | null;
+
+export async function updateCompetitorDetails(
+  _prev: EditFormState,
+  formData: FormData,
+): Promise<EditFormState> {
+  const competitorId = String(formData.get("competitorId") ?? "");
+  if (!competitorId) return { error: "Missing competitor." };
+
+  const nameResult = competitorName.safeParse(formData.get("name"));
   if (!nameResult.success) return { error: nameResult.error.issues[0].message };
 
-  const newOrigin = normalizeDomainInput(domainInput);
+  const newOrigin = normalizeDomainInput(String(formData.get("domain") ?? ""));
   if (!newOrigin) return { error: "Enter a valid domain, like example.com." };
+
+  const pageIds = formData.getAll("pageId").map(String);
+  const pagePaths = formData.getAll("pagePath").map(String);
+  const pages = pageIds.map((id, i) => ({ id, path: pagePaths[i] ?? "" }));
+
+  const urls = pages.map(({ id, path }) => {
+    try {
+      return { id, url: new URL(path, newOrigin).toString() };
+    } catch {
+      return null;
+    }
+  });
+  if (urls.some((u) => u === null)) return { error: "One of those page paths isn't valid. Try again." };
 
   const supabase = await createClient();
 
@@ -184,27 +201,15 @@ export async function updateCompetitor(
     .eq("id", competitorId);
   if (nameError) return { error: "Couldn't save that name. Try again." };
 
-  const { data: pages, error: pagesError } = await supabase
-    .from("pages")
-    .select("id, url")
-    .eq("competitor_id", competitorId);
-  if (pagesError) return { error: "Couldn't load that competitor's pages. Try again." };
-
-  // Only move pages that were already on the domain being edited. A page
-  // that's on some other domain wasn't part of "this" domain to begin with
-  // — cascading to it would silently corrupt an intentionally different URL.
-  const priorOrigin = originOf(pages?.[0]?.url ?? "");
-  for (const page of pages ?? []) {
-    if (originOf(page.url) !== priorOrigin) continue;
-    const nextUrl = replaceUrlHost(page.url, newOrigin);
-    if (nextUrl === page.url) continue;
-    const { error: urlError } = await supabase.from("pages").update({ url: nextUrl }).eq("id", page.id);
+  for (const page of urls) {
+    if (!page) continue;
+    const { error: urlError } = await supabase.from("pages").update({ url: page.url }).eq("id", page.id);
     if (urlError) return { error: "Updated the name, but couldn't update every page's URL. Try again." };
   }
 
   revalidatePath("/dashboard");
   revalidatePath("/competitors");
-  return {};
+  redirect(flashUrl("/competitors", `${nameResult.data} updated`));
 }
 
 export async function deleteCompetitor(competitorId: string) {
