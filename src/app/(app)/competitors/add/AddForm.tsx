@@ -5,7 +5,7 @@ import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Button } from "@/components/Button";
 import { addPages, createCompetitor, type FormState } from "@/features/competitors/actions";
-import { originOf } from "@/features/competitors/domain";
+import { pageUrl } from "@/features/competitors/validation";
 import styles from "./page.module.css";
 
 const LABEL_OPTIONS = [
@@ -21,10 +21,16 @@ const LABEL_OPTIONS = [
 
 type Row = { key: string; url: string; label: string };
 
-function SubmitButton({ label }: { label: string }) {
+function urlError(url: string): string | null {
+  if (!url.trim()) return null; // blank rows aren't errors, just unused slots
+  const result = pageUrl.safeParse(url);
+  return result.success ? null : result.error.issues[0].message;
+}
+
+function SubmitButton({ label, canSubmit }: { label: string; canSubmit: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending}>
+    <Button type="submit" disabled={pending || !canSubmit}>
       {pending ? "One moment…" : label}
     </Button>
   );
@@ -32,14 +38,7 @@ function SubmitButton({ label }: { label: string }) {
 
 type AddFormProps =
   | { mode: "new"; slotsLeft: number; totalCompetitorSlots: number; pagesPerCompetitor: number }
-  | {
-      mode: "page";
-      competitorId: string;
-      competitorName: string;
-      existingDomain: string;
-      slotsLeft: number;
-      pagesPerCompetitor: number;
-    };
+  | { mode: "page"; competitorId: string; competitorName: string; slotsLeft: number; pagesPerCompetitor: number };
 
 export function AddForm(props: AddFormProps) {
   const { mode, slotsLeft, pagesPerCompetitor } = props;
@@ -48,16 +47,8 @@ export function AddForm(props: AddFormProps) {
   const [state, formAction] = useActionState<FormState, FormData>(action, null);
   const [rows, setRows] = useState<Row[]>([{ key: "0", url: "", label: "Pricing" }]);
 
-  // "page" mode: every row is locked to the competitor's existing domain.
-  // "new" mode: row 0 is free text and sets the domain for every row after it.
-  const domain = mode === "page" ? props.existingDomain : originOf(rows[0]?.url ?? "");
-
   function addRow() {
-    setRows((r) =>
-      r.length >= pagesPerCompetitor
-        ? r
-        : [...r, { key: String(r.length + Date.now()), url: domain ?? "", label: "" }],
-    );
+    setRows((r) => (r.length >= pagesPerCompetitor ? r : [...r, { key: String(r.length + Date.now()), url: "", label: "" }]));
   }
 
   function removeRow(key: string) {
@@ -69,6 +60,9 @@ export function AddForm(props: AddFormProps) {
   }
 
   const rowsMaxed = rows.length >= pagesPerCompetitor;
+  const hasAnyValidUrl = rows.some((row) => row.url.trim() && !urlError(row.url));
+  const hasAnyInvalidUrl = rows.some((row) => urlError(row.url));
+  const canSubmit = hasAnyValidUrl && !hasAnyInvalidUrl;
 
   return (
     <div>
@@ -113,57 +107,37 @@ export function AddForm(props: AddFormProps) {
         </div>
 
         <div className={styles.rows}>
-          {rows.map((row, index) => {
-            // In "page" mode every row is locked; in "new" mode row 0 is the
-            // free-text field that establishes the domain for the rest.
-            const locked = mode === "page" || index > 0;
-
+          {rows.map((row) => {
+            const error = urlError(row.url);
             return (
-            <div key={row.key} className={styles.rowLine}>
-              {locked ? (
-                domain ? (
-                  <div className={styles.urlLocked}>
-                    <span className={styles.urlLockedPrefix}>{domain}</span>
-                    <input
-                      name="url"
-                      value={row.url.startsWith(domain) ? row.url.slice(domain.length) : ""}
-                      onChange={(e) => updateRow(row.key, "url", domain + e.target.value)}
-                      placeholder="/pricing"
-                      className={styles.urlLockedPath}
-                    />
-                  </div>
-                ) : (
-                  <div className={styles.urlLockedDisabled}>
-                    <span className={styles.urlLockedHint}>Set the first page&rsquo;s URL to set the domain</span>
-                    <input type="hidden" name="url" value="" />
-                  </div>
-                )
-              ) : (
-                <input
-                  name="url"
-                  value={row.url}
-                  onChange={(e) => updateRow(row.key, "url", e.target.value)}
-                  placeholder="https://competitor.com/pricing"
-                  className={styles.urlInput}
-                />
-              )}
-              <input
-                name="label"
-                list={listId}
-                value={row.label}
-                onChange={(e) => updateRow(row.key, "label", e.target.value)}
-                placeholder="e.g. Pricing"
-                className={styles.labelInput}
-              />
-              <button
-                type="button"
-                className={styles.removeRow}
-                onClick={() => removeRow(row.key)}
-                disabled={rows.length === 1}
-              >
-                Remove
-              </button>
-            </div>
+              <div key={row.key} className={styles.rowGroup}>
+                <div className={styles.rowLine}>
+                  <input
+                    name="url"
+                    value={row.url}
+                    onChange={(e) => updateRow(row.key, "url", e.target.value)}
+                    placeholder="https://competitor.com/pricing"
+                    className={error ? styles.urlInputError : styles.urlInput}
+                  />
+                  <input
+                    name="label"
+                    list={listId}
+                    value={row.label}
+                    onChange={(e) => updateRow(row.key, "label", e.target.value)}
+                    placeholder="e.g. Pricing"
+                    className={styles.labelInput}
+                  />
+                  <button
+                    type="button"
+                    className={styles.removeRow}
+                    onClick={() => removeRow(row.key)}
+                    disabled={rows.length === 1}
+                  >
+                    Remove
+                  </button>
+                </div>
+                {error ? <div className={styles.rowError}>{error}</div> : null}
+              </div>
             );
           })}
         </div>
@@ -177,7 +151,7 @@ export function AddForm(props: AddFormProps) {
         )}
 
         <div className={styles.actions}>
-          <SubmitButton label={mode === "new" ? "Start tracking" : "Add pages"} />
+          <SubmitButton label={mode === "new" ? "Start tracking" : "Add pages"} canSubmit={canSubmit} />
           <Link href="/dashboard" className={styles.cancel}>
             Cancel
           </Link>

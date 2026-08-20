@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/Button";
 import { getAccount } from "@/features/account/queries";
 import { getCompetitorsWithPages } from "@/features/competitors/queries";
-import { originOf } from "@/features/competitors/domain";
 import { LIMITS, PLAN_LABEL } from "@/features/plan/limits";
 import { AddForm } from "./AddForm";
 import styles from "./page.module.css";
@@ -48,7 +47,6 @@ export default async function AddCompetitorPage({
             mode="page"
             competitorId={competitor.id}
             competitorName={competitor.name}
-            existingDomain={originOf(competitor.pages[0]?.url ?? "") ?? ""}
             slotsLeft={slotsLeft}
             pagesPerCompetitor={limits.pagesPerCompetitor}
           />
