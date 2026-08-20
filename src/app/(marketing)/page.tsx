@@ -28,8 +28,8 @@ export default function LandingPage() {
         <Image
           src="/logo.svg"
           alt="Trailwatch"
-          width={90}
-          height={24}
+          width={180}
+          height={48}
           className={styles.logo}
           priority
         />
