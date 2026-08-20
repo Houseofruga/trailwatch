@@ -47,7 +47,7 @@ function readPageRows(formData: FormData) {
 
 export async function createCompetitor(_prev: FormState, formData: FormData): Promise<FormState> {
   const supabase = await createClient();
-  const { plan, competitorCount } = await loadPlanAndUsage(supabase);
+  const { userId, plan, competitorCount } = await loadPlanAndUsage(supabase);
   const limits = LIMITS[plan];
 
   if (competitorCount >= limits.competitors) {
@@ -68,7 +68,7 @@ export async function createCompetitor(_prev: FormState, formData: FormData): Pr
 
   const { data: competitor, error: competitorError } = await supabase
     .from("competitors")
-    .insert({ name: nameResult.data })
+    .insert({ name: nameResult.data, user_id: userId })
     .select("id")
     .single();
   if (competitorError || !competitor) return { error: "Couldn't create the competitor. Try again." };
