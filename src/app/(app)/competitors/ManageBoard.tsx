@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { deleteCompetitor, deletePage, togglePageActive } from "@/features/competitors/actions";
+import { checkPageNow } from "@/features/checks/actions";
 import toastStyles from "@/components/Toast.module.css";
 import styles from "./page.module.css";
 
@@ -87,6 +88,16 @@ export function ManageBoard({
                     </button>
                     {openMenuPageId === p.id ? (
                       <div className={styles.menu} role="menu">
+                        <button
+                          type="button"
+                          className={styles.menuItem}
+                          onClick={() => {
+                            setOpenMenuPageId(null);
+                            void checkPageNow(p.id).then((message) => setToast(message));
+                          }}
+                        >
+                          Check now
+                        </button>
                         <button
                           type="button"
                           className={styles.menuItem}
