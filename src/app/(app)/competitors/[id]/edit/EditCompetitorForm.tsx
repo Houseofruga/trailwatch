@@ -4,6 +4,7 @@ import { useActionState, useId, useState } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { Button } from "@/components/Button";
+import { BackLink } from "@/components/BackLink";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { updateCompetitorDetails, type EditFormState } from "@/features/competitors/actions";
 import { normalizeDomainInput, originOf, replaceUrlHost } from "@/features/competitors/domain";
@@ -125,9 +126,7 @@ export function EditCompetitorForm({
 
   return (
     <div className={styles.wrap}>
-      <Link href="/competitors" className={styles.back}>
-        ← Competitors
-      </Link>
+      <BackLink href="/competitors">Competitors</BackLink>
       <h1 className={styles.title}>Edit {competitor.name}</h1>
 
       <form action={formAction}>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/Button";
+import { BackLink } from "@/components/BackLink";
 import { getAccount } from "@/features/account/queries";
 import { getCompetitorsWithPages } from "@/features/competitors/queries";
 import { LIMITS, PLAN_LABEL } from "@/features/plan/limits";
@@ -31,9 +32,7 @@ export default async function AddCompetitorPage({
 
     return (
       <div className={styles.wrap}>
-        <Link href="/competitors" className={styles.back}>
-          ← Competitors
-        </Link>
+        <BackLink href="/competitors">Competitors</BackLink>
 
         <BlockedUpsell
           title={`${competitor.name} is at its page limit`}
@@ -52,9 +51,7 @@ export default async function AddCompetitorPage({
 
   return (
     <div className={styles.wrap}>
-      <Link href="/dashboard" className={styles.back}>
-        ← Dashboard
-      </Link>
+      <BackLink href="/dashboard">Dashboard</BackLink>
 
       {blocked ? (
         <BlockedUpsell

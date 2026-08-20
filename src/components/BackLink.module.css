@@ -1,0 +1,32 @@
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  color: var(--ink-4);
+  cursor: pointer;
+  margin-bottom: 22px;
+}
+
+.back:hover {
+  color: var(--accent-ink);
+  text-decoration: none;
+}
+
+/* Square box matching the app's zero-radius, 1px-border surfaces. */
+.iconBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-3);
+}
+
+.back:hover .iconBox {
+  border-color: var(--accent-ink);
+  color: var(--accent-ink);
+}
