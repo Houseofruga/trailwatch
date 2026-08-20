@@ -48,26 +48,26 @@
   text-decoration: none;
 }
 
-/* Wash sweeps left-to-right into a yellow bar pinned to the right edge. */
+/* Wash sweeps left-to-right into a lime bar pinned to the right edge. */
 .navItemActive {
   composes: navItem;
   font-weight: 500;
   background: linear-gradient(
     90deg,
-    #f1f1f4 0%,
-    #f1f1f4 55%,
-    rgba(245, 217, 10, 0.26) 84%,
-    rgba(245, 217, 10, 0.5) 100%
+    var(--surface-sunken) 0%,
+    var(--surface-sunken) 55%,
+    var(--accent-wash) 84%,
+    var(--accent-line) 100%
   );
 }
 
 .navItemActive:hover {
   background: linear-gradient(
     90deg,
-    #f1f1f4 0%,
-    #f1f1f4 55%,
-    rgba(245, 217, 10, 0.26) 84%,
-    rgba(245, 217, 10, 0.5) 100%
+    var(--surface-sunken) 0%,
+    var(--surface-sunken) 55%,
+    var(--accent-wash) 84%,
+    var(--accent-line) 100%
   );
 }
 
