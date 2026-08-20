@@ -203,6 +203,49 @@
   color: var(--ink);
 }
 
+.urlLocked {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-input);
+  background: #fff;
+}
+
+.urlLockedPrefix {
+  padding: 10px 0 10px 12px;
+  font-size: 13.5px;
+  font-family: var(--font-geist-mono), monospace;
+  color: var(--ink-4);
+  white-space: nowrap;
+}
+
+.urlLockedPath {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  padding: 10px 12px 10px 1px;
+  font-size: 13.5px;
+  font-family: var(--font-geist-mono), monospace;
+  background: transparent;
+  color: var(--ink);
+}
+
+.urlLockedPath:focus {
+  outline: none;
+}
+
+.urlLockedDisabled {
+  composes: urlLocked;
+  opacity: 0.55;
+}
+
+.urlLockedHint {
+  padding: 10px 12px;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
 .labelInput {
   flex: 0 0 132px;
   min-width: 0;

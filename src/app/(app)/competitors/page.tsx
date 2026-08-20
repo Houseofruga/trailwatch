@@ -18,9 +18,7 @@ export default async function CompetitorsPage() {
           <h1 className={styles.title}>Competitors</h1>
           <p className={styles.sub}>Pause a page to stop checking it without losing its history.</p>
         </div>
-        <ButtonLink href="/competitors/add" variant="secondary">
-          Add competitor
-        </ButtonLink>
+        <ButtonLink href="/competitors/add">Add competitor</ButtonLink>
       </div>
 
       <ManageBoard competitors={competitors} pagesPerCompetitor={pagesPerCompetitor} />

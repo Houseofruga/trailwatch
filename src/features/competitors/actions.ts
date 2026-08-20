@@ -6,6 +6,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { LIMITS, type Plan } from "@/features/plan/limits";
 import { competitorName, pageRow } from "./validation";
+import { normalizeDomainInput, replaceUrlHost } from "./domain";
 
 export type FormState = { error: string } | null;
 
@@ -144,6 +145,43 @@ export async function deletePage(pageId: string) {
   if (error) throw new Error("Couldn't delete that page.");
   revalidatePath("/dashboard");
   revalidatePath("/competitors");
+}
+
+export async function updateCompetitor(
+  competitorId: string,
+  name: string,
+  domainInput: string,
+): Promise<{ error?: string }> {
+  const nameResult = competitorName.safeParse(name);
+  if (!nameResult.success) return { error: nameResult.error.issues[0].message };
+
+  const newOrigin = normalizeDomainInput(domainInput);
+  if (!newOrigin) return { error: "Enter a valid domain, like example.com." };
+
+  const supabase = await createClient();
+
+  const { error: nameError } = await supabase
+    .from("competitors")
+    .update({ name: nameResult.data })
+    .eq("id", competitorId);
+  if (nameError) return { error: "Couldn't save that name. Try again." };
+
+  const { data: pages, error: pagesError } = await supabase
+    .from("pages")
+    .select("id, url")
+    .eq("competitor_id", competitorId);
+  if (pagesError) return { error: "Couldn't load that competitor's pages. Try again." };
+
+  for (const page of pages ?? []) {
+    const nextUrl = replaceUrlHost(page.url, newOrigin);
+    if (nextUrl === page.url) continue;
+    const { error: urlError } = await supabase.from("pages").update({ url: nextUrl }).eq("id", page.id);
+    if (urlError) return { error: "Updated the name, but couldn't update every page's URL. Try again." };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/competitors");
+  return {};
 }
 
 export async function deleteCompetitor(competitorId: string) {

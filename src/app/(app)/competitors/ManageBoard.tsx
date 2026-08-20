@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { EditCompetitorDialog } from "@/components/EditCompetitorDialog";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { deleteCompetitor, deletePage, togglePageActive } from "@/features/competitors/actions";
+import { originOf } from "@/features/competitors/domain";
 import { checkPageNow } from "@/features/checks/actions";
 import toastStyles from "@/components/Toast.module.css";
 import styles from "./page.module.css";
@@ -12,6 +14,8 @@ import styles from "./page.module.css";
 type PendingDelete =
   | { kind: "competitor"; id: string; name: string; pageCount: number }
   | { kind: "page"; id: string; competitorName: string; label: string };
+
+type EditingCompetitor = { id: string; name: string; domain: string };
 
 export function ManageBoard({
   competitors,
@@ -22,6 +26,7 @@ export function ManageBoard({
 }) {
   const [openMenuPageId, setOpenMenuPageId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+  const [editingCompetitor, setEditingCompetitor] = useState<EditingCompetitor | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -51,8 +56,23 @@ export function ManageBoard({
                     + Add page
                   </Link>
                 ) : (
-                  <span className={styles.atLimit}>At page limit</span>
+                  <Link href={`/competitors/add?for=${c.id}`} className={styles.atLimit}>
+                    Upgrade to add more pages
+                  </Link>
                 )}
+                <button
+                  type="button"
+                  className={styles.editComp}
+                  onClick={() =>
+                    setEditingCompetitor({
+                      id: c.id,
+                      name: c.name,
+                      domain: (originOf(c.pages[0]?.url ?? "") ?? "").replace(/^https?:\/\//, ""),
+                    })
+                  }
+                >
+                  Edit
+                </button>
                 <button
                   type="button"
                   className={styles.deleteComp}
@@ -148,6 +168,16 @@ export function ManageBoard({
           cta="Delete page"
           onConfirm={() => deletePage(pendingDelete.id).then(() => setToast("Page deleted"))}
           onClose={() => setPendingDelete(null)}
+        />
+      ) : null}
+
+      {editingCompetitor ? (
+        <EditCompetitorDialog
+          competitorId={editingCompetitor.id}
+          initialName={editingCompetitor.name}
+          initialDomain={editingCompetitor.domain}
+          onClose={() => setEditingCompetitor(null)}
+          onSaved={() => setToast("Competitor updated")}
         />
       ) : null}
 
