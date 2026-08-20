@@ -179,20 +179,30 @@ export async function updateCompetitorDetails(
 
   // The form posts each page's full URL and label; the domain field is a
   // client-side convenience for rewriting them all, so it isn't submitted.
+  // A blank pageId means a row added on this screen — insert, don't update.
   const ids = formData.getAll("pageId").map(String);
   const urls = formData.getAll("url").map((v) => String(v).trim());
   const labels = formData.getAll("label").map((v) => String(v).trim());
-  if (ids.length === 0) return { error: "A competitor needs at least one page." };
 
-  const rowsResult = z
-    .array(pageRow)
-    .safeParse(ids.map((_, i) => ({ url: urls[i] ?? "", label: labels[i] ?? "" })));
+  const rows = ids
+    .map((id, i) => ({ id, url: urls[i] ?? "", label: labels[i] ?? "" }))
+    .filter((row) => row.id || row.url || row.label); // drop untouched new slots
+  if (rows.length === 0) return { error: "A competitor needs at least one page." };
+
+  const supabase = await createClient();
+  const { plan } = await loadPlanAndUsage(supabase);
+  const limits = LIMITS[plan];
+  if (rows.length > limits.pagesPerCompetitor) {
+    return {
+      error: `${plan === "free" ? "Free" : "Pro"} allows up to ${limits.pagesPerCompetitor} pages per competitor.`,
+    };
+  }
+
+  const rowsResult = z.array(pageRow).safeParse(rows.map(({ url, label }) => ({ url, label })));
   if (!rowsResult.success) return { error: rowsResult.error.issues[0].message };
 
   const domainError = findDomainMismatch(rowsResult.data[0].url, rowsResult.data);
   if (domainError) return { error: domainError };
-
-  const supabase = await createClient();
 
   const { error: nameError } = await supabase
     .from("competitors")
@@ -200,12 +210,12 @@ export async function updateCompetitorDetails(
     .eq("id", competitorId);
   if (nameError) return { error: "Couldn't save that name. Try again." };
 
-  for (const [i, id] of ids.entries()) {
-    const { error: pageError } = await supabase
-      .from("pages")
-      .update({ url: rowsResult.data[i].url, label: rowsResult.data[i].label })
-      .eq("id", id);
-    if (pageError) return { error: "Updated the name, but couldn't update every page. Try again." };
+  for (const [i, row] of rows.entries()) {
+    const { url, label } = rowsResult.data[i];
+    const { error: pageError } = row.id
+      ? await supabase.from("pages").update({ url, label }).eq("id", row.id)
+      : await supabase.from("pages").insert({ competitor_id: competitorId, url, label });
+    if (pageError) return { error: "Updated the name, but couldn't save every page. Try again." };
   }
 
   revalidatePath("/dashboard");

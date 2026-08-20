@@ -136,6 +136,51 @@
   color: var(--danger);
 }
 
+.colLabelSpacer {
+  flex: 0 0 auto;
+  width: 62px;
+}
+
+.removeSpacer {
+  flex: 0 0 auto;
+  width: 62px;
+}
+
+.removeRow {
+  flex: 0 0 auto;
+  width: 62px;
+  font-size: 13px;
+  color: var(--ink-faint);
+  cursor: pointer;
+  text-align: right;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+}
+
+.removeRow:hover {
+  color: var(--danger);
+}
+
+.addRow {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--accent-ink);
+  cursor: pointer;
+  font-weight: 500;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+}
+
+.rowsMaxedNote {
+  margin-top: 14px;
+  font-size: 12.5px;
+  color: var(--ink-4);
+}
+
 .actions {
   margin-top: 36px;
   padding-top: 24px;
