@@ -15,7 +15,7 @@ type PendingDelete =
   | { kind: "competitor"; id: string; name: string; pageCount: number }
   | { kind: "page"; id: string; competitorName: string; label: string };
 
-type EditingCompetitor = { id: string; name: string; domain: string };
+type EditingCompetitor = { id: string; name: string; domain: string; hasMixedDomains: boolean };
 
 export function ManageBoard({
   competitors,
@@ -63,13 +63,15 @@ export function ManageBoard({
                 <button
                   type="button"
                   className={styles.editComp}
-                  onClick={() =>
+                  onClick={() => {
+                    const domains = new Set(c.pages.map((p) => originOf(p.url)).filter(Boolean));
                     setEditingCompetitor({
                       id: c.id,
                       name: c.name,
                       domain: (originOf(c.pages[0]?.url ?? "") ?? "").replace(/^https?:\/\//, ""),
-                    })
-                  }
+                      hasMixedDomains: domains.size > 1,
+                    });
+                  }}
                 >
                   Edit
                 </button>
@@ -176,6 +178,7 @@ export function ManageBoard({
           competitorId={editingCompetitor.id}
           initialName={editingCompetitor.name}
           initialDomain={editingCompetitor.domain}
+          hasMixedDomains={editingCompetitor.hasMixedDomains}
           onClose={() => setEditingCompetitor(null)}
           onSaved={() => setToast("Competitor updated")}
         />

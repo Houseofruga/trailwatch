@@ -6,7 +6,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { LIMITS, type Plan } from "@/features/plan/limits";
 import { competitorName, pageRow } from "./validation";
-import { normalizeDomainInput, replaceUrlHost } from "./domain";
+import { normalizeDomainInput, originOf, replaceUrlHost } from "./domain";
 
 export type FormState = { error: string } | null;
 
@@ -172,7 +172,12 @@ export async function updateCompetitor(
     .eq("competitor_id", competitorId);
   if (pagesError) return { error: "Couldn't load that competitor's pages. Try again." };
 
+  // Only move pages that were already on the domain being edited. A page
+  // that's on some other domain wasn't part of "this" domain to begin with
+  // — cascading to it would silently corrupt an intentionally different URL.
+  const priorOrigin = originOf(pages?.[0]?.url ?? "");
   for (const page of pages ?? []) {
+    if (originOf(page.url) !== priorOrigin) continue;
     const nextUrl = replaceUrlHost(page.url, newOrigin);
     if (nextUrl === page.url) continue;
     const { error: urlError } = await supabase.from("pages").update({ url: nextUrl }).eq("id", page.id);

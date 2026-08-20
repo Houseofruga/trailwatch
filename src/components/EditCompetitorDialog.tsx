@@ -9,6 +9,7 @@ type EditCompetitorDialogProps = {
   competitorId: string;
   initialName: string;
   initialDomain: string;
+  hasMixedDomains: boolean;
   onClose: () => void;
   onSaved: () => void;
 };
@@ -17,6 +18,7 @@ export function EditCompetitorDialog({
   competitorId,
   initialName,
   initialDomain,
+  hasMixedDomains,
   onClose,
   onSaved,
 }: EditCompetitorDialogProps) {
@@ -63,8 +65,9 @@ export function EditCompetitorDialog({
           placeholder="example.com"
         />
         <p className={styles.hint}>
-          Every page you track for this competitor moves to the new domain — only the domain
-          changes, each page keeps its own path.
+          {hasMixedDomains
+            ? `Only pages currently on ${initialDomain || "this domain"} move to the new one — pages already on a different domain are left as-is.`
+            : "Every page you track for this competitor moves to the new domain — only the domain changes, each page keeps its own path."}
         </p>
 
         {error ? <div className={styles.error}>{error}</div> : null}
