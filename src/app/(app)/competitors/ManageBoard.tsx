@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { AddPageDialog } from "@/components/AddPageDialog";
+import { EditPageDialog } from "@/components/EditPageDialog";
 import { PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { deleteCompetitor, deletePage, togglePageActive } from "@/features/competitors/actions";
@@ -18,6 +19,8 @@ type PendingDelete =
 
 type AddingPageFor = { competitorId: string; competitorName: string; existingDomain: string; slotsLeft: number };
 
+type EditingPage = { id: string; url: string; label: string; siblingDomain: string | null };
+
 export function ManageBoard({
   competitors,
   pagesPerCompetitor,
@@ -28,6 +31,7 @@ export function ManageBoard({
   const [openMenuPageId, setOpenMenuPageId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
   const [addingPageFor, setAddingPageFor] = useState<AddingPageFor | null>(null);
+  const [editingPage, setEditingPage] = useState<EditingPage | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -128,6 +132,22 @@ export function ManageBoard({
                           className={styles.menuItem}
                           onClick={() => {
                             setOpenMenuPageId(null);
+                            const sibling = c.pages.find((other) => other.id !== p.id);
+                            setEditingPage({
+                              id: p.id,
+                              url: p.url,
+                              label: p.label,
+                              siblingDomain: sibling ? originOf(sibling.url) : null,
+                            });
+                          }}
+                        >
+                          Edit page
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.menuItem}
+                          onClick={() => {
+                            setOpenMenuPageId(null);
                             const nextActive = !p.isActive;
                             void togglePageActive(p.id, nextActive).then(() =>
                               setToast(`${c.name} ${p.label.toLowerCase()} ${nextActive ? "resumed" : "paused"}`),
@@ -184,6 +204,17 @@ export function ManageBoard({
           slotsLeft={addingPageFor.slotsLeft}
           pagesPerCompetitor={pagesPerCompetitor}
           onClose={() => setAddingPageFor(null)}
+        />
+      ) : null}
+
+      {editingPage ? (
+        <EditPageDialog
+          pageId={editingPage.id}
+          initialUrl={editingPage.url}
+          initialLabel={editingPage.label}
+          siblingDomain={editingPage.siblingDomain}
+          onClose={() => setEditingPage(null)}
+          onSaved={() => setToast("Page updated")}
         />
       ) : null}
 

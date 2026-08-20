@@ -165,6 +165,49 @@ export async function deletePage(pageId: string) {
   revalidatePath("/competitors");
 }
 
+export async function updatePage(
+  pageId: string,
+  url: string,
+  label: string,
+): Promise<{ error?: string }> {
+  const rowResult = pageRow.safeParse({ url, label });
+  if (!rowResult.success) return { error: rowResult.error.issues[0].message };
+
+  const supabase = await createClient();
+
+  const { data: page } = await supabase
+    .from("pages")
+    .select("id, competitor_id")
+    .eq("id", pageId)
+    .single();
+  if (!page) return { error: "That page no longer exists." };
+
+  // The competitor's domain is set by its *other* pages. If this is the only
+  // page, it defines the domain itself, so any domain is fair game.
+  const { data: siblings } = await supabase
+    .from("pages")
+    .select("url")
+    .eq("competitor_id", page.competitor_id)
+    .neq("id", pageId);
+
+  const sibling = siblings?.[0];
+  if (sibling && !sameOrigin(sibling.url, rowResult.data.url)) {
+    return {
+      error: `Must be on ${originOf(sibling.url)} — use Edit to move every page to a new domain.`,
+    };
+  }
+
+  const { error } = await supabase
+    .from("pages")
+    .update({ url: rowResult.data.url, label: rowResult.data.label })
+    .eq("id", pageId);
+  if (error) return { error: "Couldn't save that page. Try again." };
+
+  revalidatePath("/dashboard");
+  revalidatePath("/competitors");
+  return {};
+}
+
 export type EditFormState = { error: string } | null;
 
 export async function updateCompetitorDetails(
