@@ -1,0 +1,65 @@
+.base {
+  border-radius: 0;
+  border: none;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 10px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.base:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+/* Yellow. The one primary action on any given screen. */
+.primary {
+  composes: base;
+  background: var(--accent);
+  color: var(--ink);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* Outlined. Secondary actions that still deserve a button. */
+.secondary {
+  composes: base;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border-input);
+  font-weight: 400;
+}
+
+.secondary:hover:not(:disabled) {
+  border-color: var(--accent-ink);
+  color: var(--accent-ink);
+  text-decoration: none;
+}
+
+/* Solid dark. Used where yellow would compete with a nearby primary. */
+.dark {
+  composes: base;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 400;
+}
+
+.dark:hover:not(:disabled) {
+  color: #fff;
+  text-decoration: none;
+}
+
+.full {
+  width: 100%;
+}

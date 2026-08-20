@@ -1,0 +1,54 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 26, 23, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+  padding: 24px;
+}
+
+.card {
+  background: var(--surface);
+  padding: 26px 28px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 18px 50px rgba(26, 26, 23, 0.16);
+}
+
+.title {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+}
+
+.body {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-3);
+  margin: 0 0 24px 0;
+  text-wrap: pretty;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.danger {
+  background: var(--danger);
+  color: #fff;
+  border: none;
+  border-radius: 0;
+  padding: 9px 15px;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.danger:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

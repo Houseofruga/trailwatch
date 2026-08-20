@@ -1,0 +1,112 @@
+/*
+ * Design tokens extracted from trailwatch v2/Competitor Radar.dc.html
+ * (the v2 palette/type refresh superseded the original trailwatch/ bundle —
+ * lime-green accent + blue links + DM Sans, no serif anywhere).
+ */
+
+:root {
+  /* surfaces */
+  --bg: #f5f5f5;
+  --surface: #ffffff;
+  --surface-alt: #fcfbf9;
+  --surface-sunken: #efede8;
+
+  /* borders, lightest last */
+  --border: #e6e2da;
+  --border-soft: #efece6;
+  --border-softer: #f3f1ec;
+  --border-input: #dcd8d0;
+  --border-input-hover: #b9b4aa;
+  --rule: #edeae4;
+
+  /* ink, darkest first */
+  --ink: #1a1a17;
+  --ink-2: #4a4740;
+  --ink-3: #6e6b63;
+  --ink-4: #8b877e;
+  --ink-5: #948f86;
+  --ink-faint: #a8a49a;
+  --ink-hint: #ddd9d1;
+
+  /* brand accent — lime green. Buttons, badges, meters, "upgrade" chrome. */
+  --accent: #9ff50a;
+  --accent-hover: #8ad800;
+  --accent-ink: #557a00;
+  --accent-wash: #eefbc7;
+  --accent-line: #d6f59b;
+  --accent-focus: #d6f59b;
+  --accent-mark-border: #dcf5a0;
+
+  /* links — blue. Plain hyperlinks only; not the brand accent. */
+  --link: #2563eb;
+  --link-hover: #1d4ed8;
+
+  /* semantic accents used by the dashboard stat tiles */
+  --green-wash: #eaf3ea;
+  --green-ink: #3a7d4f;
+  --amber-wash: #fbf1df;
+  --amber-ink: #b4791e;
+  --warn-border: #dee8c9;
+  --warn-wash: #f6fbea;
+
+  /* destructive */
+  --danger: #dc2626;
+  --danger-wash: #fbeeec;
+
+  --selection: #dce7e0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+}
+
+body {
+  color: var(--ink);
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
+::selection {
+  background: var(--selection);
+}
+
+input,
+button,
+textarea,
+select {
+  font-family: inherit;
+}
+
+input:focus {
+  outline: 2px solid var(--accent-focus);
+  outline-offset: 0;
+}
+
+input[list]::-webkit-calendar-picker-indicator {
+  display: none !important;
+}
+
+/* The design has no rounded corners anywhere. */
+button {
+  border-radius: 0;
+}

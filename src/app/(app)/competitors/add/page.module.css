@@ -1,0 +1,281 @@
+.wrap {
+  padding: 48px 56px 80px 56px;
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.back {
+  font-size: 12.5px;
+  color: var(--ink-4);
+  cursor: pointer;
+  margin-bottom: 22px;
+  display: inline-block;
+}
+
+.back:hover {
+  color: var(--accent-ink);
+  text-decoration: none;
+}
+
+/* ------------------------------------------------------------- blocked */
+
+.blockTitle {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0 0 12px 0;
+}
+
+.blockBody {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-3);
+  margin: 0 0 30px 0;
+  max-width: 480px;
+  text-wrap: pretty;
+}
+
+.upsell {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 22px 24px;
+  max-width: 460px;
+}
+
+.upsellHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 16px;
+}
+
+.upsellName {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.upsellPrice {
+  font-size: 15px;
+}
+
+.upsellPricePer {
+  color: var(--ink-4);
+  font-size: 13px;
+}
+
+.upsellFeatures {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  margin-bottom: 20px;
+}
+
+.upsellCta {
+  width: 100%;
+  padding: 11px;
+  font-size: 13.5px;
+}
+
+.swap {
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--ink-3);
+  cursor: pointer;
+  display: inline-block;
+}
+
+.swap:hover {
+  color: var(--accent-ink);
+  text-decoration: none;
+}
+
+/* ---------------------------------------------------------------- form */
+
+.title {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0 0 10px 0;
+}
+
+.slotsNote {
+  font-size: 14px;
+  color: var(--ink-3);
+  margin: 0 0 34px 0;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.competitorFixed {
+  font-size: 12.5px;
+  color: var(--ink-4);
+  margin-bottom: 6px;
+}
+
+.competitorFixedName {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.nameInput {
+  width: 100%;
+  max-width: 340px;
+  border: 1px solid var(--border-input);
+  border-radius: 0;
+  padding: 10px 12px;
+  font-size: 14px;
+  background: #fff;
+  color: var(--ink);
+}
+
+.rowsHead {
+  margin-top: 34px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.rowsHeadLabel {
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.rowsHeadNote {
+  font-size: 12px;
+  color: var(--ink-4);
+}
+
+.colLabels {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.colLabelUrl {
+  flex: 1;
+  font-size: 11.5px;
+  color: var(--ink-4);
+}
+
+.colLabelName {
+  flex: 0 0 132px;
+  font-size: 11.5px;
+  color: var(--ink-4);
+}
+
+.colLabelSpacer {
+  flex: 0 0 auto;
+  width: 52px;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rowLine {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.urlInput {
+  flex: 1;
+  border: 1px solid var(--border-input);
+  border-radius: 0;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  font-family: var(--font-geist-mono), monospace;
+  background: #fff;
+  color: var(--ink);
+}
+
+.labelInput {
+  flex: 0 0 132px;
+  min-width: 0;
+  border: 1px solid var(--border-input);
+  border-radius: 0;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  background: #fff;
+  color: var(--ink);
+}
+
+.removeRow {
+  flex: 0 0 52px;
+  font-size: 13px;
+  color: var(--ink-faint);
+  cursor: pointer;
+  text-align: right;
+  background: none;
+  border: none;
+  font-family: inherit;
+}
+
+.removeRow:hover {
+  color: var(--danger);
+}
+
+.addRow {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--accent-ink);
+  cursor: pointer;
+  font-weight: 500;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+}
+
+.rowsMaxedNote {
+  margin-top: 12px;
+  font-size: 12.5px;
+  color: var(--ink-4);
+}
+
+.actions {
+  margin-top: 36px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cancel {
+  font-size: 13.5px;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+
+.cancel:hover {
+  color: var(--accent-ink);
+  text-decoration: none;
+}
+
+.formError {
+  font-size: 13px;
+  color: var(--danger);
+}
+
+.hint {
+  margin-top: 22px;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  max-width: 440px;
+  line-height: 1.6;
+}

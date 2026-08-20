@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Geist+Mono:wght@400&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin:0; padding:0; background:#F5F5F5; }
+  * { box-sizing:border-box; }
+  a { color:#8A6D00; text-decoration:none; }
+  a:hover { color:#DEC400; text-decoration:underline; }
+  ::selection { background:#DCE7E0; }
+  input, button, textarea, select { font-family:inherit; }
+  input:focus { outline:2px solid #EEE49B; outline-offset:0; }
+  input[list]::-webkit-calendar-picker-indicator { display:none !important; }
+</style>
+</helmet>
+
+<div style="font-family:'Geist',system-ui,sans-serif;color:#1A1A17;background:#F5F5F5;min-height:100vh;-webkit-font-smoothing:antialiased">
+
+<div style="position:fixed;top:12px;right:16px;z-index:200;display:flex;align-items:center;gap:9px;background:#1A1A17;border-radius:0;padding:6px 8px 6px 14px;box-shadow:0 8px 24px rgba(0,0,0,0.22)">
+  <span style="font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#8B877E">Prototype views</span>
+  <span onClick="{{ goLanding }}" style="font-size:11.5px;color:#E8E6E0;background:rgba(255,255,255,0.08);border-radius:0;padding:4px 11px;cursor:pointer" style-hover="background:rgba(255,255,255,0.18)">Landing</span>
+  <span onClick="{{ goAuth }}" style="font-size:11.5px;color:#E8E6E0;background:rgba(255,255,255,0.08);border-radius:0;padding:4px 11px;cursor:pointer" style-hover="background:rgba(255,255,255,0.18)">Sign in</span>
+  <span onClick="{{ goEmpty }}" style="font-size:11.5px;color:#E8E6E0;background:rgba(255,255,255,0.08);border-radius:0;padding:4px 11px;cursor:pointer" style-hover="background:rgba(255,255,255,0.18)">Empty state</span>
+  <span onClick="{{ goDashboard }}" style="font-size:11.5px;color:#E8E6E0;background:rgba(255,255,255,0.08);border-radius:0;padding:4px 11px;cursor:pointer" style-hover="background:rgba(255,255,255,0.18)">App</span>
+</div>
+
+<sc-if value="{{ isApp }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;min-height:100vh;align-items:stretch">
+
+  <!-- SIDEBAR -->
+  <aside style="width:252px;flex:0 0 252px;background:#FFFFFF;border-right:1px solid #E6E2DA;display:flex;flex-direction:column;position:sticky;top:0;height:100vh">
+    <div style="padding:22px 20px 18px 20px;display:flex;align-items:center">
+      <img src="./logo.svg" alt="Competitor Radar" style="width:75%;height:auto;display:block" />
+    </div>
+
+    <nav style="display:flex;flex-direction:column;gap:2px;padding:6px 12px">
+      <div onClick="{{ goDashboard }}" style="{{ navDashboardStyle }}" style-hover="background:#F5F5F5">
+        <span>Dashboard</span>
+        <sc-if value="{{ unreadCount }}" hint-placeholder-val="{{ true }}"><span style="font-size:11.5px;color:#8A6D00;background:#FBF3C7;border-radius:0;padding:2px 7px;font-variant-numeric:tabular-nums">{{ unreadCount }}</span></sc-if>
+        <div style="{{ navDashboardBar }}"></div>
+      </div>
+      <div onClick="{{ goManage }}" style="{{ navManageStyle }}" style-hover="background:#F5F5F5">Competitors<div style="{{ navManageBar }}"></div></div>
+      <div onClick="{{ goDigest }}" style="{{ navDigestStyle }}" style-hover="background:#F5F5F5">Weekly digest<div style="{{ navDigestBar }}"></div></div>
+      <div onClick="{{ goBilling }}" style="{{ navBillingStyle }}" style-hover="background:#F5F5F5">Plan &amp; billing<div style="{{ navBillingBar }}"></div></div>
+    </nav>
+
+    <div style="margin-top:auto;padding:16px 16px 18px 16px;display:flex;flex-direction:column;gap:14px">
+      <div style="border:1px solid #E6E2DA;border-radius:0;padding:13px 14px;background:#FCFBF9">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:12.5px;font-weight:500">{{ planName }} plan</span>
+          <span style="font-size:11.5px;color:#8B877E">{{ planPrice }}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#6E6B63"><span>Competitors</span><span style="font-variant-numeric:tabular-nums;color:#1A1A17">{{ usageComp }}</span></div>
+          <div style="height:3px;background:#EDEAE4;border-radius:0;overflow:hidden"><div style="height:100%;background:#F5D90A;width:{{ compBarWidth }}"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#6E6B63;margin-top:2px"><span>Pages tracked</span><span style="font-variant-numeric:tabular-nums;color:#1A1A17">{{ usagePages }}</span></div>
+          <div style="height:3px;background:#EDEAE4;border-radius:0;overflow:hidden"><div style="height:100%;background:#F5D90A;width:{{ pageBarWidth }}"></div></div>
+        </div>
+        <sc-if value="{{ isFree }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ goBilling }}" style="margin-top:12px;font-size:12px;color:#8A6D00;cursor:pointer;font-weight:500">Upgrade to Pro &rarr;</div>
+        </sc-if>
+      </div>
+
+
+      <div style="position:relative;margin:0 -16px -18px -16px;padding:14px 16px 18px 16px;border-top:1px solid #E6E2DA">
+        <div onClick="{{ toggleProfileMenu }}" style="display:flex;align-items:center;gap:9px;cursor:pointer;border-radius:0;padding:6px;margin:-6px" style-hover="background:#F5F5F5">
+          <div style="width:26px;height:26px;border-radius:0;background:#FBF3C7;color:#8A6D00;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:0 0 auto">MK</div>
+          <div style="line-height:1.25;flex:1;min-width:0">
+            <div style="font-size:12px">Mara Kessler</div>
+            <div style="font-size:11px;color:#948F86;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">mara@stackpilot.io</div>
+          </div>
+          <span style="flex:0 0 auto;display:flex;color:#A8A49A;transition:transform 0.15s ease;{{ profileChevronStyle }}"><svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+        <sc-if value="{{ profileMenuOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;bottom:calc(100% + 8px);left:0;right:0;background:#FFFFFF;border:1px solid #E6E2DA;border-radius:0;box-shadow:0 12px 30px rgba(26,26,23,0.14);overflow:hidden;z-index:30">
+            <div style="padding:10px 14px;font-size:13px;color:#1A1A17;cursor:pointer" style-hover="background:#F5F5F5">Settings</div>
+            <div style="padding:10px 14px;font-size:13px;color:#9B3B2E;cursor:pointer;border-top:1px solid #F1EEE8" style-hover="background:#FBEEEC">Log out</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+
+    <!-- DASHBOARD -->
+    <sc-if value="{{ onDashboard }}" hint-placeholder-val="{{ true }}">
+    <div style="padding:48px 56px 80px 56px;max-width:1000px;width:100%;margin:0 auto">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:8px">
+        <div>
+          <h1 style="font-family:'Lora',Georgia,serif;font-size:30px;font-weight:600;letter-spacing:-0.015em;margin:0 0 8px 0">This week</h1>
+          <p style="margin:0;font-size:14px;color:#6E6B63">{{ weekSummary }}</p>
+        </div>
+        <button onClick="{{ goAdd }}" style="background:#F5D90A;color:#1A1A17;border:none;border-radius:0;padding:10px 16px 10px 14px;font-size:13.5px;font-weight:500;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px" style-hover="background:#DEC400"><span style="font-size:16px;line-height:1">+</span>Add competitor</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:24px 0 30px 0">
+        <div style="background:#FFFFFF;border:1px solid #E6E2DA;border-radius:0;padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
+            <div style="width:26px;height:26px;border-radius:0;background:#FBF3C7;color:#8A6D00;display:flex;align-items:center;justify-content:center;font-size:13px">&#9673;</div>
+            <span style="font-size:12px;color:#8B877E">Changes this week</span>
+          </div>
+          <div style="font-size:22px;font-weight:500;font-variant-numeric:tabular-nums">{{ statChanges }}</div>
+        </div>
+        <div style="background:#FFFFFF;border:1px solid #E6E2DA;border-radius:0;padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
+            <div style="width:26px;height:26px;border-radius:0;background:#EAF3EA;color:#3A7D4F;display:flex;align-items:center;justify-content:center;font-size:13px">&#9673;</div>
+            <span style="font-size:12px;color:#8B877E">Pages tracked</span>
+          </div>
+          <div style="font-size:22px;font-weight:500;font-variant-numeric:tabular-nums">{{ statPages }}</div>
+        </div>
+        <div style="background:#FFFFFF;border:1px solid #E6E2DA;border-radius:0;padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
+            <div style="width:26px;height:26px;border-radius:0;background:#FBF1DF;color:#B4791E;display:flex;align-items:center;justify-content:center;font-size:13px">&#9673;</div>
+            <span style="font-size:12px;color:#8B877E">Trivial edits filtered</span>
+          </div>
+          <div style="font-size:22px;font-weight:500;font-variant-numeric:tabular-nums">{{ statFiltered }}</div>
+        </div>
+      </div>
+      <div style="font-size:12.5px;color:#948F86;margin:0 0 26px 0;padding:9px 0;border-top:1px solid #E6E2DA;border-bottom:1px solid #E6E2DA;display:flex;gap:20px;flex-wrap:wrap">
+        <span>Last check {{ lastCheck }}</span>
+        <span>Next digest {{ nextDigest }}</span>
+      </div>
+
+      <sc-if value="{{ showUpgradeBanner }}" hint-placeholder-val="{{ false }}">
+      <div style="border:1px solid #E8DFC9;background:#FBF6EA;border-radius:0;padding:16px 18px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:20px">
+        <div>
+          <div style="font-size:13.5px;font-weight:500;margin-bottom:3px">You're over the Free plan limit</div>
+          <div style="font-size:13px;color:#6E6B63">Free tracks 1 competitor and 3 pages. {{ overLimitNote }}</div>
+        </div>
+        <button onClick="{{ goBilling }}" style="background:#1A1A17;color:#fff;border:none;border-radius:0;padding:9px 14px;font-size:13px;cursor:pointer;white-space:nowrap">See Pro</button>
+      </div>
+      </sc-if>
+
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <sc-for list="{{ comps }}" as="c" hint-placeholder-count="3">
+          <section style="background:#FFFFFF;border:1px solid #E6E2DA;border-radius:0;overflow:hidden">
+            <div style="padding:16px 20px 14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #EFECE6">
+              <div style="display:flex;align-items:center;gap:11px;min-width:0">
+                <div style="width:26px;height:26px;border-radius:0;background:#F1EEE8;color:#5D5A53;font-size:11.5px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:0 0 auto">{{ c.initials }}</div>
+                <div style="font-size:15px;font-weight:500;letter-spacing:-0.005em">{{ c.name }}</div>
+                <div style="font-size:12.5px;color:#A8A49A">{{ c.domain }}</div>
+              </div>
+              <div style="font-size:12px;color:#948F86;white-space:nowrap">{{ c.meta }}</div>
+            </div>
+
+            <sc-for list="{{ c.pages }}" as="p" hint-placeholder-count="3">
+              <div onClick="{{ p.open }}" style="padding:17px 20px;border-bottom:1px solid #F3F1EC;cursor:pointer;display:flex;gap:18px;align-items:center" style-hover="background:#FCFBF9">
+                <div style="flex:0 0 96px;align-self:flex-start;padding-top:1px">
+                  <div style="font-size:11px;letter-spacing:0.07em;text-transform:uppercase;color:#8B877E">{{ p.label }}</div>
+                  <sc-if value="{{ p.paused }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:10.5px;color:#A8A49A;margin-top:5px;border:1px solid #E6E2DA;border-radius:0;padding:1px 7px;display:inline-block">Paused</div>
+                  </sc-if>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <sc-if value="{{ p.hasChange }}" hint-placeholder-val="{{ true }}">
+                    <div style="font-family:'Lora',Georgia,serif;font-size:16px;line-height:1.5;color:#1A1A17;text-wrap:pretty;margin-bottom:7px">{{ p.summary }}</div>
+                    <div style="font-size:12px;color:#948F86">{{ p.when }}</div>
+                  </sc-if>
+                  <sc-if value="{{ p.noChange }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:14px;color:#A8A49A;padding-top:1px">{{ p.quietNote }}</div>
+                  </sc-if>
+                </div>
+                <sc-if value="{{ p.hasChange }}" hint-placeholder-val="{{ true }}">
+                  <div title="Read change" style="flex:0 0 auto;width:30px;height:30px;border-radius:0;background:#FBF3C7;color:#8A6D00;display:flex;align-items:center;justify-content:center;font-size:15px">&rarr;</div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- EMPTY DASHBOARD -->
+    <sc-if value="{{ onEmpty }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:120px 56px;max-width:640px;width:100%;margin:0 auto;text-align:center">
+      <div style="width:52px;height:52px;border-radius:0;border:1.5px solid #F0E4A0;margin:0 auto 26px auto;display:flex;align-items:center;justify-content:center">
+        <div style="width:12px;height:12px;border-radius:0;background:#FBF3C7;border:1.5px solid #DEC400"></div>
+      </div>
+      <h1 style="font-family:'Lora',Georgia,serif;font-size:29px;font-weight:600;letter-spacing:-0.015em;margin:0 0 14px 0">Nothing on the radar yet</h1>
+      <p style="font-size:15px;line-height:1.6;color:#6E6B63;margin:0 auto 30px auto;max-width:420px;text-wrap:pretty">Add one competitor and the pages you care about. We check them every day and email you a digest each Monday.</p>
+      <button onClick="{{ goAdd }}" style="background:#F5D90A;color:#1A1A17;border:none;border-radius:0;padding:12px 22px;font-size:14px;font-weight:500;cursor:pointer" style-hover="background:#DEC400">Add your first competitor</button>
+      <div style="margin-top:52px;border-top:1px solid #E6E2DA;padding-top:26px;text-align:left">
+        <div style="font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#A8A49A;margin-bottom:14px">Most people start with</div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;gap:12px;align-items:baseline;font-size:13.5px;color:#6E6B63"><span style="font-family:'Geist Mono',monospace;font-size:11.5px;color:#A8A49A">01</span><span>Their pricing page &mdash; the change that matters most</span></div>
+          <div style="display:flex;gap:12px;align-items:baseline;font-size:13.5px;color:#6E6B63"><span style="font-family:'Geist Mono',monospace;font-size:11.5px;color:#A8A49A">02</span><span>Their changelog &mdash; what they're shipping</span></div>
+          <div style="display:flex;gap:12px;align-items:baseline;font-size:13.5px;color:#6E6B63"><span style="font-family:'Geist Mono',monospace;font-size:11.5px;color:#A8A49A">03</span><span>Their homepage &mdash; how the positioning moves</span></div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ADD COMPETITOR -->
+    <sc-if value="{{ onAdd }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:48px 56px 80px 56px;max-width:720px;width:100%;margin:0 auto">
+      <div onClick="{{ goDashboard }}" style="font-size:12.5px;color:#8B877E;cursor:pointer;margin-bottom:22px" style-hover="color:#8A6D00">&larr; Dashboard</div>
+
+      <sc-if value="{{ addBlocked }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <h1 style="font-family:'Lora',Georgia,serif;font-size:28px;font-weight:600;letter-spacing:-0.015em;margin:0 0 12px 0">{{ addBlockedTitle }}</h1>
+        <p style="font-size:15px;line-height:1.6;color:#6E6B63;margin:0 0 30px 0;max-width:480px;text-wrap:pretty">{{ addBlockedBody }}</p>
+        <div style="background:#FFFFFF;border:1px solid #E6E2DA;border-radius:0;padding:22px 24px;max-width:460px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px">
+            <div style="font-size:15px;font-weight:500">Pro</div>
+            <div style="font-size:15px"><span style="font-weight:500">$19</span><span style="color:#8B877E;font-size:13px">/month</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px;font-size:13.5px;color:#4A4740;margin-bottom:20px">
+            <div>10 competitors, 10 pages each</div>
+            <div>Daily checks with noise filtering</div>
+            <div>Weekly email digest</div>
+            <div>Cancel any time</div>
+          </div>
+          <button onClick="{{ goBilling }}" style="width:100%;background:#F5D90A;color:#1A1A17;border:none;border-radius:0;padding:11px;font-size:13.5px;font-weight:500;cursor:pointer" style-hover="background:#DEC400">Upgrade to Pro</button>
+        </div>
+        <div onClick="{{ goManage }}" style="margin-top:20px;font-size:13px;color:#6E6B63;cursor:pointer" style-hover="color:#8A6D00">Or swap out an existing competitor &rarr;</div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ addAllowed }}" hint-placeholder-val="{{ true }}">
+      <div>
+        <h1 style="font-family:'Lora',Georgia,serif;font-size:28px;font-weight:600;letter-spacing:-0.015em;margin:0 0 10px 0">{{ addHeader }}</h1>
+        <p style="font-size:14px;color:#6E6B63;margin:0 0 34px 0">{{ addSlotsNote }}</p>
+
+        <sc-if value="{{ isPageAddMode }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12.5px;color:#948F86;margin-bottom:6px">Competitor</div>
+          <div style="font-size:15px;font-weight:500;margin-bottom:8px">{{ formName }}</div>
+        </sc-if>
+        <sc-if value="{{ isNewCompMode }}" hint-placeholder-val="{{ true }}">
+          <label style="display:block;font-size:12.5px;font-weight:500;margin-bottom:8px">Competitor name</label>
+          <input value="{{ formName }}" onChange="{{ setFormName }}" placeholder="Linear" style="width:100%;max-width:340px;border:1px solid #DCD8D0;border-radius:0;padding:10px 12px;font-size:14px;background:#fff;color:#1A1A17" />
+        </sc-if>
+
+        <div style="margin-top:34px;display:flex;align-items:baseline;justify-content:space-between">
+          <label style="font-size:12.5px;font-weight:500">Pages to watch</label>
+          <span style="font-size:12px;color:#948F86">{{ pageSlotsNote }}</span>
+        </div>
+
+        <datalist id="page-label-options">
+          <option value="Pricing"></option>
+          <option value="Homepage"></option>
+          <option value="Changelog"></option>
+          <option value="Blog"></option>
+          <option value="Docs"></option>
+          <option value="Careers"></option>
+          <option value="Features"></option>
+          <option value="Integrations"></option>
+        </datalist>
+        <div style="display:flex;gap:10px;margin-top:20px;margin-bottom:10px">
+          <div style="flex:1;font-size:11.5px;color:#948F86">Page URL</div>
+          <div style="flex:0 0 132px;font-size:11.5px;color:#948F86">Page name</div>
+          <div style="flex:0 0 auto;width:52px"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <sc-for list="{{ formPages }}" as="row" hint-placeholder-count="2">
+            <div style="display:flex;gap:10px;align-items:center">
+              <input value="{{ row.url }}" onChange="{{ row.setUrl }}" placeholder="https://competitor.com/pricing" style="flex:1;border:1px solid #DCD8D0;border-radius:0;padding:10px 12px;font-size:13.5px;font-family:'Geist Mono',monospace;background:#fff;color:#1A1A17" />
+              <input list="page-label-options" value="{{ row.label }}" onChange="{{ row.setLabel }}" placeholder="e.g. Pricing" style="flex:0 0 132px;min-width:0;border:1px solid #DCD8D0;border-radius:0;padding:10px 12px;font-size:13.5px;background:#fff;color:#1A1A17" />
+              <span onClick="{{ row.remove }}" style="flex:0 0 52px;font-size:13px;color:#A8A49A;cursor:pointer;text-align:right" style-hover="color:#9B3B2E">Remove</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ canAddRow }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ addRow }}" style="margin-top:12px;font-size:13px;color:#8A6D00;cursor:pointer;font-weight:500">+ Add another page</div>
+        </sc-if>
+        <sc-if value="{{ rowsMaxed }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:12px;font-size:12.5px;color:#8B877E">{{ rowsMaxedNote }}</div>
+        </sc-if>
+
+        <div style="margin-top:36px;padding-top:24px;border-top:1px solid #E6E2DA;display:flex;align-items:center;gap:14px">
+          <button onClick="{{ submitAdd }}" style="background:#F5D90A;color:#1A1A17;border:none;border-radius:0;padding:11px 18px;font-size:13.5px;font-weight:500;cursor:pointer" style-hover="background:#DEC400">Start tracking</button>
+          <span onClick="{{ goDashboard }}" style="font-size:13.5px;color:#6E6B63;cursor:pointer">Cancel</span>
+          <sc-if value="{{ formError }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#9B3B2E">{{ formError }}</span></sc-if>
+        </div>
+        <p style="margin-top:22px;font-size:12.5px;color:#A8A49A;max-width:440px;line-height:1.6">First check runs within an hour. After that, once a day &mdash; and we only tell you when something actually changed.</p>
+      </div>
+      </sc-if>
+    </div>
+    </sc-if>
+
+    <!-- MANAGE -->
+    <sc-if value="{{ onManage }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:48px 56px 80px 56px;max-width:920px;width:100%;margin:0 auto">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:30px">
+        <div>
+          <h1 style="font-family:'Lora',Georgia,serif;font-size:28px;font-weight:600;letter-spacing:-0.015em;margin:0 0 8px 0">Competitors</h1>
+          <p style="margin:0;font-size:14px;color:#6E6B63">Pause a page to stop checking it without losing its history.</p>
+        </div>
+        <button onClick="{{ goAdd }}" style="background:#FFFFFF;color:#1A1A17;border:1px solid #DCD8D0;border-radius:0;padding:9px 15px;font-size:13.5px;cursor:pointer" style-hover="border-color:#8A6D00;color:#8A6D00">Add competitor</button>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <sc-for list="{{ comps }}" as="c" hint-placeholder-count="3">
+          <section style="background:#FFFFFF;border:1px solid #E6E2DA;border-radius:0">
+            <div style="padding:15px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #EFECE6">
+              <div style="display:flex;align-items:center;gap:11px">
+                <div style="width:24px;height:24px;border-radius:0;background:#F1EEE8;color:#5D5A53;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center">{{ c.initials }}</div>
+                <span style="font-size:14.5px;font-weight:500">{{ c.name }}</span>
+                <span style="font-size:12.5px;color:#A8A49A">{{ c.pageCountLabel }}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:20px">
+                <sc-if value="{{ c.canAddPage }}" hint-placeholder-val="{{ true }}">
+                  <span onClick="{{ c.addPage }}" style="font-size:12.5px;color:#8A6D00;cursor:pointer;font-weight:500">+ Add page</span>
+                </sc-if>
+                <sc-if value="{{ c.pageLimitReached }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size:12.5px;color:#A8A49A">At page limit</span>
+                </sc-if>
+                <span onClick="{{ c.askDelete }}" style="font-size:12.5px;color:#948F86;cursor:pointer" style-hover="color:#9B3B2E">Delete competitor</span>
+              </div>
+            </div>
+            <sc-for list="{{ c.pages }}" as="p" hint-placeholder-count="3">
+              <div style="padding:13px 20px;border-bottom:1px solid #F3F1EC;display:flex;align-items:center;gap:16px">
+                <div style="flex:0 0 92px;font-size:11px;letter-spacing:0.07em;text-transform:uppercase;color:#8B877E">{{ p.label }}</div>
+                <a href="{{ p.url }}" target="_blank" rel="noreferrer" style="flex:1;min-width:0;display:flex;align-items:center;gap:6px;font-family:'Geist Mono',monospace;font-size:12.5px;color:#6E6B63">
+                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.url }}</span>
+                  <span style="flex:0 0 auto;color:#A8A49A;font-family:'Geist',sans-serif">&#8599;</span>
+                </a>
+                <div style="flex:0 0 auto;display:flex;align-items:center;gap:10px">
+                  <sc-if value="{{ p.paused }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:11.5px;color:#8B877E;border:1px solid #E6E2DA;border-radius:0;padding:2px 9px;margin-right:6px">Paused</span>
+                  </sc-if>
+                  <sc-if value="{{ p.active }}" hint-placeholder-val="{{ true }}">
+                    <span style="font-size:11.5px;color:#8A6D00;background:#FBF3C7;border-radius:0;padding:2px 9px;margin-right:6px">Checking daily</span>
+                  </sc-if>
+                  <div style="position:relative">
+                    <span onClick="{{ p.toggleMenu }}" style="width:26px;height:26px;border-radius:0;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#948F86;font-size:16px;letter-spacing:1px" style-hover="background:#F1EEE8">&#8942;</span>
+                    <sc-if value="{{ p.menuOpen }}" hint-placeholder-val="{{ false }}">
+                      <div style="position:absolute;top:30px;right:0;background:#FFFFFF;border:1px solid #E6E2DA;border-radius:0;box-shadow:0 10px 28px rgba(26,26,23,0.12);min-width:140px;z-index:20;overflow:hidden">
+                        <div onClick="{{ p.toggle }}" style="padding:9px 14px;font-size:13px;color:#1A1A17;cursor:pointer" style-hover="background:#F5F5F5">{{ p.toggleLabel }}</div>
+                        <div onClick="{{ p.askDelete }}" style="padding:9px 14px;font-size:13px;color:#9B3B2E;cursor:pointer;border-top:1px solid #F1EEE8" style-hover="background:#FBEEEC">Delete page</div>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- CHANGE DETAIL -->
+    <sc-if value="{{ onDetail }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:48px 56px 90px 56px;max-width:760px;width:100%;margin:0 auto">
+      <div onClick="{{ goDashboard }}" style="font-size:12.5px;color:#8B877E;cursor:pointer;margin-bottom:30px" style-hover="color:#8A6D00">&larr; This week</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <span style="font-size:13.5px;font-weight:500">{{ detailComp }}</span>
+        <span style="color:#DDD9D1">&middot;</span>
+        <span style="font-size:11px;letter-spacing:0.07em;text-transform:uppercase;color:#8B877E">{{ detailLabel }}</span>
+      </div>
+      <h1 style="font-family:'Lora',Georgia,serif;font-size:26px;line-height:1.42;font-weight:500;letter-spacing:-0.01em;margin:0 0 22px 0;text-wrap:pretty">{{ detailSummary }}</h1>
+      <div style="display:flex;gap:18px;font-size:12.5px;color:#948F86;padding-bottom:26px;border-bottom:1px solid #E6E2DA">
+        <span>Detected {{ detailDate }}</span>
+        <a href="{{ detailHref }}" target="_blank" rel="noreferrer">View live page &nearr;</a>
+      </div>
+
+      <div style="margin-top:30px">
+        <div style="font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#A8A49A;margin-bottom:14px">What the page said</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div style="background:#FFFFFF;border:1px solid #E6E2DA;border-radius:0;padding:16px 18px">
+            <div style="font-size:11.5px;color:#948F86;margin-bottom:9px">Before &mdash; {{ detailBeforeDate }}</div>
+            <div style="font-family:'Geist Mono',monospace;font-size:12.5px;line-height:1.65;color:#6E6B63">{{ detailBefore }}</div>
+          </div>
+          <div style="background:#FFFFFF;border:1px solid #EEE49B;border-radius:0;padding:16px 18px">
+            <div style="font-size:11.5px;color:#8A6D00;margin-bottom:9px">After &mdash; {{ detailAfterDate }}</div>
+            <div style="font-family:'Geist Mono',monospace;font-size:12.5px;line-height:1.65;color:#2A2A25">{{ detailAfter }}</div>
+          </div>
+        </div>
+        <p style="margin:16px 0 0 0;font-size:12.5px;color:#A8A49A;line-height:1.6">Excerpt only &mdash; the part of the page our filter judged meaningful. {{ detailIgnored }}</p>
+      </div>
+
+      <div style="margin-top:40px;padding-top:22px;border-top:1px solid #E6E2DA;display:flex;justify-content:space-between;align-items:center">
+        <span onClick="{{ goDashboard }}" style="font-size:13.5px;color:#6E6B63;cursor:pointer" style-hover="color:#8A6D00">Back to this week</span>
+        <a href="{{ detailHref }}" target="_blank" rel="noreferrer" style="font-size:13.5px">Open {{ detailDomain }} &nearr;</a>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- DIGEST -->
+    <sc-if value="{{ onDigest }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:44px 56px 80px 56px;width:100%">
+      <div style="max-width:640px">
+        <h1 style="font-family:'Lora',Georgia,serif;font-size:28px;font-weight:600;letter-spacing:-0.015em;margin:0 0 8px 0">Weekly digest</h1>
+        <p style="margin:0 0 30px 0;font-size:14px;color:#6E6B63">Sent Mondays at 8am to mara@stackpilot.io. This is the email going out {{ nextDigest }}.</p>
+      </div>
+
+      <div style="background:#EFEDE8;border:1px solid #E6E2DA;border-radius:0;padding:34px 20px">
+        <div style="max-width:600px;margin:0 auto;background:#FFFFFF;border:1px solid #E4E1DA;border-radius:0;padding:36px 38px;font-family:'Geist',system-ui,sans-serif">
+          <div style="font-size:12px;color:#948F86;padding-bottom:20px;border-bottom:1px solid #EDEAE4;display:flex;justify-content:space-between">
+            <span>Competitor Radar</span><span>{{ digestRange }}</span>
+          </div>
+
+          <div style="padding:26px 0 22px 0">
+            <div style="font-family:'Lora',Georgia,serif;font-size:20px;font-weight:600;margin-bottom:8px">{{ digestHeadline }}</div>
+            <div style="font-size:13.5px;color:#6E6B63;line-height:1.6">{{ digestSub }}</div>
+          </div>
+
+          <sc-for list="{{ digestGroups }}" as="g" hint-placeholder-count="3">
+            <div style="padding:20px 0;border-top:1px solid #EDEAE4">
+              <div style="font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#1A1A17;margin-bottom:14px">{{ g.name }}</div>
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <sc-for list="{{ g.items }}" as="i" hint-placeholder-count="2">
+                  <div style="display:flex;gap:12px;align-items:flex-start">
+                    <div style="flex:0 0 74px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:#8B877E;padding-top:3px">{{ i.label }}</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="font-family:'Lora',Georgia,serif;font-size:15px;line-height:1.55;color:#1A1A17;text-wrap:pretty">{{ i.summary }}</div>
+                      <a href="{{ i.href }}" target="_blank" rel="noreferrer" style="font-size:12.5px">{{ i.linkText }}</a>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+
+          <div style="padding:20px 0 0 0;border-top:1px solid #EDEAE4">
+            <div style="font-size:13px;color:#6E6B63;line-height:1.65">{{ digestQuiet }}</div>
+          </div>
+
+          <div style="margin-top:26px;padding-top:18px;border-top:1px solid #EDEAE4;font-size:11.5px;color:#A8A49A;line-height:1.7">
+            <div>{{ digestFilterNote }}</div>
+            <div style="margin-top:8px"><a href="#" style="color:#8B877E">Open dashboard</a> &nbsp;&middot;&nbsp; <a href="#" style="color:#8B877E">Digest settings</a> &nbsp;&middot;&nbsp; <a href="#" style="color:#8B877E">Unsubscribe</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- BILLING -->
+    <sc-if value="{{ onBilling }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:48px 56px 80px 56px;max-width:820px;width:100%;margin:0 auto">
+      <h1 style="font-family:'Lora',Georgia,serif;font-size:28px;font-weight:600;letter-spacing:-0.015em;margin:0 0 8px 0">Plan &amp; billing</h1>
+      <p style="margin:0 0 32px 0;font-size:14px;color:#6E6B63">{{ billingSub }}</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div style="background:#FFFFFF;border:1px solid #E6E2DA;border-radius:0;padding:24px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+            <div style="font-size:16px;font-weight:500">Free</div>
+            <sc-if value="{{ isFree }}" hint-placeholder-val="{{ true }}"><span style="font-size:11.5px;color:#8A6D00;background:#FBF3C7;border-radius:0;padding:2px 9px">Current</span></sc-if>
+          </div>
+          <div style="font-family:'Lora',Georgia,serif;font-size:26px;margin:10px 0 20px 0">$0</div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px;color:#4A4740">
+            <div>1 competitor</div>
+            <div>3 pages on that competitor</div>
+            <div>Daily checks, noise filtered</div>
+            <div>Weekly email digest</div>
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF;border:1px solid #EEE49B;border-radius:0;padding:24px;position:relative">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+            <div style="font-size:16px;font-weight:500">Pro</div>
+            <sc-if value="{{ isPaid }}" hint-placeholder-val="{{ false }}"><span style="font-size:11.5px;color:#8A6D00;background:#FBF3C7;border-radius:0;padding:2px 9px">Current</span></sc-if>
+          </div>
+          <div style="font-family:'Lora',Georgia,serif;font-size:26px;margin:10px 0 20px 0">$19<span style="font-size:14px;font-family:'Geist',sans-serif;color:#8B877E">/month</span></div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px;color:#4A4740">
+            <div>10 competitors</div>
+            <div>10 pages per competitor</div>
+            <div>Daily checks, noise filtered</div>
+            <div>Weekly email digest</div>
+          </div>
+          <sc-if value="{{ isFree }}" hint-placeholder-val="{{ true }}">
+            <button onClick="{{ upgrade }}" style="margin-top:24px;width:100%;background:#F5D90A;color:#1A1A17;border:none;border-radius:0;padding:10px;font-size:13.5px;font-weight:500;cursor:pointer" style-hover="background:#DEC400">Continue to checkout</button>
+            <div style="margin-top:10px;font-size:11.5px;color:#A8A49A;text-align:center">Secure checkout by Stripe &middot; cancel any time</div>
+          </sc-if>
+          <sc-if value="{{ isPaid }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ askDowngrade }}" style="margin-top:24px;width:100%;background:#FFFFFF;color:#6E6B63;border:1px solid #DCD8D0;border-radius:0;padding:10px;font-size:13.5px;cursor:pointer" style-hover="border-color:#9B3B2E;color:#9B3B2E">Cancel Pro</button>
+          </sc-if>
+        </div>
+      </div>
+
+      <sc-if value="{{ isPaid }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:30px;background:#FFFFFF;border:1px solid #E6E2DA;border-radius:0;padding:20px 24px">
+        <div style="font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#A8A49A;margin-bottom:16px">Billing</div>
+        <div style="display:flex;flex-direction:column;gap:12px;font-size:13.5px">
+          <div style="display:flex;justify-content:space-between"><span style="color:#6E6B63">Next charge</span><span>$19.00 on 1 Sep 2026</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:#6E6B63">Card</span><span>Visa ending 4242</span></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:#6E6B63">Receipts</span><a href="#">Manage in Stripe &nearr;</a></div>
+        </div>
+      </div>
+      </sc-if>
+
+      <p style="margin-top:26px;font-size:12.5px;color:#A8A49A;max-width:520px;line-height:1.65">One paid plan, no add-ons, no annual lock-in. If you cancel you keep your first competitor and three pages on Free.</p>
+    </div>
+    </sc-if>
+
+  </main>
+
+  <!-- CONFIRM -->
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(26,26,23,0.28);display:flex;align-items:center;justify-content:center;z-index:60;padding:24px">
+    <div style="background:#FFFFFF;border-radius:0;padding:26px 28px;max-width:420px;width:100%;box-shadow:0 18px 50px rgba(26,26,23,0.16)">
+      <div style="font-family:'Lora',Georgia,serif;font-size:19px;font-weight:600;margin-bottom:10px">{{ confirmTitle }}</div>
+      <div style="font-size:13.5px;line-height:1.6;color:#6E6B63;margin-bottom:24px;text-wrap:pretty">{{ confirmBody }}</div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeConfirm }}" style="background:#FFFFFF;border:1px solid #DCD8D0;border-radius:0;padding:9px 15px;font-size:13.5px;cursor:pointer;color:#4A4740">Keep it</button>
+        <button onClick="{{ confirmAction }}" style="background:#9B3B2E;color:#fff;border:none;border-radius:0;padding:9px 15px;font-size:13.5px;cursor:pointer">{{ confirmCta }}</button>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:#1A1A17;color:#F5F5F5;font-size:13px;padding:10px 18px;border-radius:0;z-index:70">{{ toast }}</div>
+  </sc-if>
+
+</div>
+</sc-if>
+
+<!-- LANDING -->
+<sc-if value="{{ onLanding }}" hint-placeholder-val="{{ false }}">
+<div style="background:#F5F5F5">
+  <header style="max-width:1080px;margin:0 auto;padding:26px 40px;display:flex;align-items:center;justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:10px">
+      <img src="./logo.svg" alt="Competitor Radar" style="height:24px;width:auto;display:block" />
+    </div>
+    <div style="display:flex;align-items:center;gap:22px">
+      <span onClick="{{ goAuth }}" style="font-size:13.5px;color:#4A4740;cursor:pointer">Log in</span>
+      <button onClick="{{ goAuth }}" style="background:#F5D90A;color:#1A1A17;border:none;border-radius:0;padding:9px 16px;font-size:13.5px;font-weight:500;cursor:pointer" style-hover="background:#DEC400">Start free</button>
+    </div>
+  </header>
+
+  <section style="max-width:1080px;margin:0 auto;padding:74px 40px 70px 40px">
+    <div style="max-width:660px">
+      <div style="font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#8B877E;margin-bottom:22px">Competitor page monitoring for small teams</div>
+      <h1 style="font-family:'Lora',Georgia,serif;font-size:56px;line-height:1.1;font-weight:600;letter-spacing:-0.025em;margin:0 0 24px 0;text-wrap:balance">Stop manually checking competitor sites.</h1>
+      <p style="font-size:18px;line-height:1.62;color:#4A4740;margin:0 0 34px 0;max-width:540px;text-wrap:pretty">We watch the pages that matter &mdash; pricing, homepage, changelog &mdash; and email you one digest a week explaining what actually changed. In sentences, not diffs.</p>
+      <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <button onClick="{{ goAuth }}" style="background:#F5D90A;color:#1A1A17;border:none;border-radius:0;padding:13px 24px;font-size:15px;font-weight:500;cursor:pointer" style-hover="background:#DEC400">Start free &mdash; 1 competitor</button>
+        <span style="font-size:13.5px;color:#8B877E">No credit card. Pro is $19/mo when you need more.</span>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width:1080px;margin:0 auto;padding:0 40px 80px 40px">
+    <div style="background:#FFFFFF;border:1px solid #E6E2DA;border-radius:0;padding:30px 34px;max-width:720px">
+      <div style="font-size:11px;letter-spacing:0.09em;text-transform:uppercase;color:#A8A49A;margin-bottom:20px">A line from last Monday's digest</div>
+      <div style="display:flex;gap:16px;align-items:flex-start;padding-bottom:20px;border-bottom:1px solid #F1EEE8">
+        <div style="flex:0 0 86px;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:#8B877E;padding-top:5px">Pricing</div>
+        <div style="flex:1">
+          <div style="font-family:'Lora',Georgia,serif;font-size:19px;line-height:1.5;text-wrap:pretty">Vercel cut the Pro plan's included bandwidth from 1&nbsp;TB to 100&nbsp;GB and now bills overage at $0.15 per GB.</div>
+          <div style="font-size:12.5px;color:#948F86;margin-top:9px">Detected 14 Aug &middot; vercel.com/pricing</div>
+        </div>
+      </div>
+      <div style="padding-top:18px;font-size:13px;color:#948F86">And 31 trivial edits that week we didn't send you: cookie banners, rotating testimonials, tracking scripts.</div>
+    </div>
+  </section>
+
+  <section style="background:#FFFFFF;border-top:1px solid #E6E2DA;border-bottom:1px solid #E6E2DA">
+    <div style="max-width:1080px;margin:0 auto;padding:70px 40px">
+      <h2 style="font-family:'Lora',Georgia,serif;font-size:30px;font-weight:600;letter-spacing:-0.015em;margin:0 0 46px 0">How it works</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:38px">
+        <div>
+          <div style="font-family:'Geist Mono',monospace;font-size:12px;color:#8A6D00;margin-bottom:14px">01</div>
+          <div style="font-size:17px;font-weight:500;margin-bottom:10px">Paste the pages</div>
+          <p style="margin:0;font-size:14.5px;line-height:1.65;color:#6E6B63;text-wrap:pretty">Add a competitor, then the URLs you care about with a label like &ldquo;pricing&rdquo;. Takes about a minute.</p>
+        </div>
+        <div>
+          <div style="font-family:'Geist Mono',monospace;font-size:12px;color:#8A6D00;margin-bottom:14px">02</div>
+          <div style="font-size:17px;font-weight:500;margin-bottom:10px">We check daily and filter</div>
+          <p style="margin:0;font-size:14.5px;line-height:1.65;color:#6E6B63;text-wrap:pretty">Timestamps, rotating quotes, script tags and layout noise get dropped before anything reaches you.</p>
+        </div>
+        <div>
+          <div style="font-family:'Geist Mono',monospace;font-size:12px;color:#8A6D00;margin-bottom:14px">03</div>
+          <div style="font-size:17px;font-weight:500;margin-bottom:10px">One email on Monday</div>
+          <p style="margin:0;font-size:14.5px;line-height:1.65;color:#6E6B63;text-wrap:pretty">Grouped by competitor, one plain sentence per change, with a link if you want the detail. Read it in 30 seconds.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width:1080px;margin:0 auto;padding:76px 40px">
+    <h2 style="font-family:'Lora',Georgia,serif;font-size:30px;font-weight:600;letter-spacing:-0.015em;margin:0 0 12px 0">Two plans</h2>
+    <p style="font-size:15px;color:#6E6B63;margin:0 0 40px 0">Start free. Upgrade when you're watching more than one company.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:760px">
+      <div style="background:#FFFFFF;border:1px solid #E6E2DA;border-radius:0;padding:28px">
+        <div style="font-size:17px;font-weight:500">Free</div>
+        <div style="font-family:'Lora',Georgia,serif;font-size:34px;margin:14px 0 24px 0">$0</div>
+        <div style="display:flex;flex-direction:column;gap:11px;font-size:14px;color:#4A4740">
+          <div>1 competitor</div>
+          <div>3 pages</div>
+          <div>Weekly email digest</div>
+        </div>
+        <button onClick="{{ goAuth }}" style="margin-top:28px;width:100%;background:#FFFFFF;border:1px solid #DCD8D0;border-radius:0;padding:11px;font-size:14px;cursor:pointer;color:#1A1A17" style-hover="border-color:#8A6D00;color:#8A6D00">Start free</button>
+      </div>
+      <div style="background:#FFFFFF;border:1px solid #EEE49B;border-radius:0;padding:28px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:17px;font-weight:500">Pro</div>
+          <span style="font-size:11.5px;color:#8A6D00;background:#FBF3C7;border-radius:0;padding:3px 10px">For 2&ndash;10 competitors</span>
+        </div>
+        <div style="font-family:'Lora',Georgia,serif;font-size:34px;margin:14px 0 24px 0">$19<span style="font-family:'Geist',sans-serif;font-size:15px;color:#8B877E">/month</span></div>
+        <div style="display:flex;flex-direction:column;gap:11px;font-size:14px;color:#4A4740">
+          <div>10 competitors</div>
+          <div>10 pages each</div>
+          <div>Weekly email digest</div>
+        </div>
+        <button onClick="{{ goAuth }}" style="margin-top:28px;width:100%;background:#F5D90A;color:#1A1A17;border:none;border-radius:0;padding:11px;font-size:14px;font-weight:500;cursor:pointer" style-hover="background:#DEC400">Start free, upgrade later</button>
+      </div>
+    </div>
+  </section>
+
+  <footer style="border-top:1px solid #E6E2DA">
+    <div style="max-width:1080px;margin:0 auto;padding:34px 40px;display:flex;justify-content:space-between;font-size:12.5px;color:#948F86;flex-wrap:wrap;gap:16px">
+      <span>Competitor Radar</span>
+      <span onClick="{{ goDashboard }}" style="cursor:pointer">View the prototype dashboard &rarr;</span>
+    </div>
+  </footer>
+</div>
+</sc-if>
+
+<!-- AUTH -->
+<sc-if value="{{ onAuth }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px">
+  <div style="width:100%;max-width:376px">
+    <div onClick="{{ goLanding }}" style="display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:34px;cursor:pointer">
+      <img src="./logo.svg" alt="Competitor Radar" style="height:24px;width:auto;display:block" />
+    </div>
+    <div style="background:#FFFFFF;border:1px solid #E6E2DA;border-radius:0;padding:30px 30px 26px 30px">
+      <h1 style="font-family:'Lora',Georgia,serif;font-size:22px;font-weight:600;margin:0 0 6px 0">{{ authTitle }}</h1>
+      <p style="font-size:13.5px;color:#6E6B63;margin:0 0 24px 0">{{ authSub }}</p>
+
+      <button onClick="{{ signIn }}" style="width:100%;background:#FFFFFF;border:1px solid #DCD8D0;border-radius:0;padding:11px;font-size:13.5px;cursor:pointer;color:#1A1A17;display:flex;align-items:center;justify-content:center;gap:9px" style-hover="border-color:#B9B4AA">
+        <span style="font-family:'Geist',sans-serif;font-weight:600;color:#4A4740">G</span> Continue with Google
+      </button>
+      <div style="display:flex;align-items:center;gap:12px;margin:20px 0">
+        <div style="flex:1;height:1px;background:#EDEAE4"></div><span style="font-size:11.5px;color:#A8A49A">or</span><div style="flex:1;height:1px;background:#EDEAE4"></div>
+      </div>
+      <label style="display:block;font-size:12px;font-weight:500;margin-bottom:7px">Email</label>
+      <input placeholder="you@company.com" style="width:100%;border:1px solid #DCD8D0;border-radius:0;padding:10px 12px;font-size:13.5px;margin-bottom:16px;background:#fff" />
+      <label style="display:block;font-size:12px;font-weight:500;margin-bottom:7px">Password</label>
+      <input type="password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" style="width:100%;border:1px solid #DCD8D0;border-radius:0;padding:10px 12px;font-size:13.5px;margin-bottom:20px;background:#fff" />
+      <button onClick="{{ signIn }}" style="width:100%;background:#F5D90A;color:#1A1A17;border:none;border-radius:0;padding:11px;font-size:13.5px;font-weight:500;cursor:pointer" style-hover="background:#DEC400">{{ authCta }}</button>
+    </div>
+    <div style="text-align:center;margin-top:18px;font-size:13px;color:#6E6B63">
+      <span>{{ authSwitchText }} </span><span onClick="{{ toggleAuth }}" style="color:#8A6D00;cursor:pointer;font-weight:500">{{ authSwitchCta }}</span>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:940}}">
+const LIMITS = { free: { comps: 1, pages: 3 }, paid: { comps: 10, pages: 10 } };
+
+const SEED = [
+  { id: 'linear', name: 'Linear', domain: 'linear.app', pages: [
+    { id: 'l1', label: 'Pricing', url: 'https://linear.app/pricing', paused: false,
+      summary: 'Linear raised the Business plan from $14 to $16 per user per month and introduced a 250 GB workspace file cap.',
+      when: '2 days ago', date: '18 Aug 2026', beforeDate: '11 Aug', afterDate: '18 Aug',
+      before: 'Business — $14 per user / month, billed annually. Unlimited file uploads.',
+      after: 'Business — $16 per user / month, billed annually. 250 GB workspace file storage.',
+      ignored: '4 other edits on this page were ignored as boilerplate.' },
+    { id: 'l2', label: 'Changelog', url: 'https://linear.app/changelog', paused: false,
+      summary: 'Shipped a customer-request inbox that turns support emails into triaged issues without a Zapier step.',
+      when: '4 days ago', date: '16 Aug 2026', beforeDate: '9 Aug', afterDate: '16 Aug',
+      before: 'Latest: Improved sub-issue drag behaviour in the board view.',
+      after: 'New: Customer Requests inbox — forward support email to a workspace address and Linear drafts a triaged issue.',
+      ignored: 'Two typo fixes on older entries were ignored.' },
+    { id: 'l3', label: 'Homepage', url: 'https://linear.app', paused: true,
+      summary: null, when: null, quiet: 'Paused 6 days ago' }
+  ]},
+  { id: 'notion', name: 'Notion', domain: 'notion.so', pages: [
+    { id: 'n1', label: 'Pricing', url: 'https://notion.so/pricing', paused: false,
+      summary: 'Notion AI is now bundled into the Business plan and the $10 standalone AI add-on row was removed entirely.',
+      when: '3 days ago', date: '17 Aug 2026', beforeDate: '10 Aug', afterDate: '17 Aug',
+      before: 'Notion AI — add to any plan for $10 per member / month.',
+      after: 'Notion AI — included with Business and Enterprise. No separate add-on.',
+      ignored: 'Currency-switcher markup changes were ignored.' },
+    { id: 'n2', label: 'Blog', url: 'https://notion.so/blog', paused: false,
+      summary: null, when: null, quiet: 'No meaningful changes in 9 days' },
+    { id: 'n3', label: 'Changelog', url: 'https://notion.so/releases', paused: false,
+      summary: 'Database views can now be shared as read-only public links with a per-link expiry date.',
+      when: '6 days ago', date: '14 Aug 2026', beforeDate: '7 Aug', afterDate: '14 Aug',
+      before: 'Public links are permanent until revoked by a workspace admin.',
+      after: 'Set an expiry on any public database link — 24 hours, 7 days, or a custom date.',
+      ignored: 'Release-note reordering was ignored.' }
+  ]},
+  { id: 'vercel', name: 'Vercel', domain: 'vercel.com', pages: [
+    { id: 'v1', label: 'Pricing', url: 'https://vercel.com/pricing', paused: false,
+      summary: "Vercel cut the Pro plan's included bandwidth from 1 TB to 100 GB and now bills overage at $0.15 per GB.",
+      when: '6 days ago', date: '14 Aug 2026', beforeDate: '7 Aug', afterDate: '14 Aug',
+      before: 'Pro — includes 1 TB bandwidth per month. Additional usage billed at $0.10 / GB.',
+      after: 'Pro — includes 100 GB bandwidth per month. Additional usage billed at $0.15 / GB.',
+      ignored: '31 trivial edits across your pages were filtered out the same week.' },
+    { id: 'v2', label: 'Changelog', url: 'https://vercel.com/changelog', paused: false,
+      summary: 'Fluid compute is now the default for new projects, replacing per-request isolate billing.',
+      when: 'Yesterday', date: '19 Aug 2026', beforeDate: '12 Aug', afterDate: '19 Aug',
+      before: 'Fluid compute is available as an opt-in setting per project.',
+      after: 'Fluid compute is enabled by default on all new projects created after 19 August.',
+      ignored: 'Author avatars and dates were ignored.' }
+  ]},
+  { id: 'figma', name: 'Figma', domain: 'figma.com', pages: [
+    { id: 'f1', label: 'Pricing', url: 'https://figma.com/pricing', paused: false,
+      summary: null, when: null, quiet: 'No meaningful changes in 22 days' },
+    { id: 'f2', label: 'Homepage', url: 'https://figma.com', paused: false,
+      summary: 'The hero headline moved from "Think bigger. Build faster." to a line about shipping production code from design files.',
+      when: '5 days ago', date: '15 Aug 2026', beforeDate: '8 Aug', afterDate: '15 Aug',
+      before: 'Think bigger. Build faster. One place for your whole design process.',
+      after: 'From design file to production code. Figma Make writes the front end with you.',
+      ignored: 'Hero video poster swap was ignored.' }
+  ]}
+];
+
+class Component extends DCLogic {
+  state = {
+    screen: 'dashboard', plan: 'paid', comps: SEED, detail: null,
+    confirm: null, toast: null, authMode: 'signup',
+    form: { compId: null, name: '', pages: [{ url: '', label: 'Pricing' }] }, formError: null,
+    openMenu: null, profileMenuOpen: false
+  };
+
+  toggleMenu = (pageId) => this.setState(s => ({ openMenu: s.openMenu === pageId ? null : pageId }));
+  closeMenu = () => this.setState({ openMenu: null });
+  toggleProfileMenu = () => this.setState(s => ({ profileMenuOpen: !s.profileMenuOpen }));
+
+  go = (screen) => this.setState({ screen, formError: null });
+  flash = (toast) => { this.setState({ toast }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: null }), 2200); };
+
+  limits() { return LIMITS[this.state.plan]; }
+  pageCount() { return this.state.comps.reduce((n, c) => n + c.pages.length, 0); }
+
+  openDetail = (compId, pageId) => {
+    const c = this.state.comps.find(x => x.id === compId);
+    const p = c.pages.find(x => x.id === pageId);
+    if (!p.summary) { this.flash('No change recorded on this page yet'); return; }
+    this.setState({ screen: 'detail', detail: { comp: c, page: p } });
+  };
+
+  togglePause = (compId, pageId) => {
+    this.setState(s => ({ comps: s.comps.map(c => c.id !== compId ? c : Object.assign({}, c, {
+      pages: c.pages.map(p => p.id !== pageId ? p : Object.assign({}, p, { paused: !p.paused }))
+    })) }));
+    const c = this.state.comps.find(x => x.id === compId);
+    const p = c.pages.find(x => x.id === pageId);
+    this.flash(p.paused ? c.name + ' ' + p.label.toLowerCase() + ' resumed' : c.name + ' ' + p.label.toLowerCase() + ' paused');
+  };
+
+  askDeletePage = (compId, pageId) => {
+    const c = this.state.comps.find(x => x.id === compId);
+    const p = c.pages.find(x => x.id === pageId);
+    this.setState({ confirm: {
+      title: 'Delete this page?',
+      body: 'We\u2019ll stop checking ' + c.name + '\u2019s ' + p.label.toLowerCase() + ' page and its recorded changes go with it. You can add the URL again later.',
+      cta: 'Delete page',
+      run: () => { this.setState(s => ({ comps: s.comps.map(c2 => c2.id !== compId ? c2 : Object.assign({}, c2, { pages: c2.pages.filter(p2 => p2.id !== pageId) })) })); this.flash('Page deleted'); }
+    }});
+  };
+
+  askDeleteComp = (compId) => {
+    const c = this.state.comps.find(x => x.id === compId);
+    this.setState({ confirm: {
+      title: 'Delete ' + c.name + '?',
+      body: 'This removes ' + c.pages.length + ' tracked page' + (c.pages.length === 1 ? '' : 's') + ' and everything we\u2019ve recorded about them. Pausing keeps the history if you only need a break.',
+      cta: 'Delete ' + c.name,
+      run: () => { this.setState(s => ({ comps: s.comps.filter(c2 => c2.id !== compId) })); this.flash(c.name + ' deleted'); }
+    }});
+  };
+
+  askDowngrade = () => this.setState({ confirm: {
+    title: 'Cancel Pro?',
+    body: 'You stay on Pro until 1 September, then drop to Free \u2014 one competitor and three pages. Extra competitors are paused, not deleted.',
+    cta: 'Cancel Pro', run: () => { this.setState({ plan: 'free' }); this.flash('Switched to Free'); }
+  }});
+
+  closeConfirm = () => this.setState({ confirm: null });
+  runConfirm = () => { const c = this.state.confirm; this.setState({ confirm: null }); if (c) c.run(); };
+
+  upgrade = () => { this.setState({ plan: 'paid' }); this.flash('You\u2019re on Pro \u2014 10 competitors unlocked'); };
+
+  startAddNew = () => this.setState({ screen: 'add', formError: null, form: { compId: null, name: '', pages: [{ url: '', label: 'Pricing' }] } });
+  startAddPage = (compId) => {
+    const c = this.state.comps.find(x => x.id === compId);
+    this.setState({ screen: 'add', formError: null, form: { compId, name: c.name, pages: [{ url: '', label: 'Pricing' }] } });
+  };
+
+  setName = (e) => { const v = e.target.value; this.setState(s => ({ form: Object.assign({}, s.form, { name: v }) })); };
+  setRow = (i, key, v) => this.setState(s => ({ form: Object.assign({}, s.form, {
+    pages: s.form.pages.map((r, j) => j !== i ? r : Object.assign({}, r, { [key]: v })) }) }));
+  addRow = () => this.setState(s => ({ form: Object.assign({}, s.form, { pages: s.form.pages.concat([{ url: '', label: 'Homepage' }]) }) }));
+  removeRow = (i) => this.setState(s => ({ form: Object.assign({}, s.form, {
+    pages: s.form.pages.length === 1 ? s.form.pages : s.form.pages.filter((r, j) => j !== i) }) }));
+
+  submitAdd = () => {
+    const f = this.state.form;
+    const rows = f.pages.filter(r => r.url.trim());
+    if (!rows.length) { this.setState({ formError: 'Add at least one page URL.' }); return; }
+    if (f.compId) {
+      const newPages = rows.map((r, i) => ({ id: f.compId + '-' + Date.now() + '-' + i, label: r.label, url: r.url, paused: false,
+        summary: null, when: null, quiet: 'First check runs within the hour' }));
+      this.setState(s => ({ comps: s.comps.map(c => c.id !== f.compId ? c : Object.assign({}, c, { pages: c.pages.concat(newPages) })),
+        screen: 'manage', formError: null, form: { compId: null, name: '', pages: [{ url: '', label: 'Pricing' }] } }));
+      this.flash(rows.length + ' page' + (rows.length === 1 ? '' : 's') + ' added to ' + f.name);
+      return;
+    }
+    if (!f.name.trim()) { this.setState({ formError: 'Give the competitor a name.' }); return; }
+    const id = 'c' + Date.now();
+    const comp = { id, name: f.name.trim(), domain: rows[0].url.replace(/^https?:\/\//, '').split('/')[0],
+      pages: rows.map((r, i) => ({ id: id + '-' + i, label: r.label, url: r.url, paused: false,
+        summary: null, when: null, quiet: 'First check runs within the hour' })) };
+    this.setState(s => ({ comps: s.comps.concat([comp]), screen: 'dashboard', formError: null,
+      form: { compId: null, name: '', pages: [{ url: '', label: 'Pricing' }] } }));
+    this.flash(comp.name + ' added \u2014 ' + rows.length + ' page' + (rows.length === 1 ? '' : 's') + ' tracked');
+  };
+
+  navStyle(active, flex) {
+    let s = flex ? 'display:flex;align-items:center;justify-content:space-between;' : '';
+    s += 'position:relative;overflow:hidden;padding:9px 14px 9px 12px;font-size:13.5px;cursor:pointer;';
+    if (active) {
+      s += 'color:#1A1A17;font-weight:500;background:linear-gradient(90deg,#F1F1F4 0%,#F1F1F4 55%,rgba(245,217,10,0.26) 84%,rgba(245,217,10,0.5) 100%);';
+    } else {
+      s += 'color:#1A1A17;';
+    }
+    return s;
+  }
+  navBar(active) {
+    return active
+      ? 'position:absolute;top:8px;bottom:8px;right:0;width:5px;border-radius:3px 0 0 3px;background:#F5D90A;pointer-events:none;'
+      : 'display:none;';
+  }
+
+  renderVals() {
+    const s = this.state, L = this.limits(), pc = this.pageCount();
+    const screen = s.screen;
+    const isApp = ['dashboard', 'empty', 'add', 'manage', 'detail', 'digest', 'billing'].indexOf(screen) >= 0;
+    const isFree = s.plan === 'free';
+    const changed = [];
+    s.comps.forEach(c => c.pages.forEach(p => { if (p.summary && !p.paused) changed.push({ c, p }); }));
+    const quietCount = s.comps.reduce((n, c) => n + c.pages.filter(p => !p.summary).length, 0);
+
+    const comps = s.comps.map(c => {
+      const withChange = c.pages.filter(p => p.summary && !p.paused).length;
+      return {
+        id: c.id, name: c.name, domain: c.domain,
+        initials: c.name.slice(0, 2).toUpperCase(),
+        meta: withChange === 0 ? 'Quiet this week' : withChange + (withChange === 1 ? ' change' : ' changes') + ' this week',
+        pageCountLabel: c.pages.length + ' of ' + L.pages + ' pages',
+        askDelete: () => this.askDeleteComp(c.id),
+        canAddPage: c.pages.length < L.pages,
+        pageLimitReached: c.pages.length >= L.pages,
+        addPage: () => this.startAddPage(c.id),
+        pages: c.pages.map(p => ({
+          id: p.id, label: p.label, url: p.url, paused: !!p.paused, active: !p.paused,
+          hasChange: !!p.summary && !p.paused, noChange: !p.summary || !!p.paused,
+          summary: p.summary, when: p.when, quietNote: p.quiet || 'Paused',
+          toggleLabel: p.paused ? 'Resume checking' : 'Pause checking',
+          open: () => this.openDetail(c.id, p.id),
+          toggle: () => { this.closeMenu(); this.togglePause(c.id, p.id); },
+          askDelete: () => { this.closeMenu(); this.askDeletePage(c.id, p.id); },
+          menuOpen: s.openMenu === p.id,
+          toggleMenu: () => this.toggleMenu(p.id)
+        }))
+      };
+    });
+
+    const d = s.detail;
+    const overComp = s.comps.length > L.comps, overPages = pc > L.pages;
+    const canAddComp = s.comps.length < L.comps;
+    const rowsUsed = s.form.pages.length;
+    const targetComp = s.form.compId ? s.comps.find(c => c.id === s.form.compId) : null;
+    const isPageAddMode = !!targetComp;
+    const canAddThis = isPageAddMode ? targetComp.pages.length < L.pages : canAddComp;
+
+    const digestGroups = s.comps.map(c => ({
+      name: c.name,
+      items: c.pages.filter(p => p.summary && !p.paused).map(p => ({
+        label: p.label, summary: p.summary, href: p.url,
+        linkText: p.url.replace(/^https?:\/\//, '')
+      }))
+    })).filter(g => g.items.length);
+
+    return {
+      isApp, onDashboard: screen === 'dashboard', onEmpty: screen === 'empty', onAdd: screen === 'add',
+      onManage: screen === 'manage', onDetail: screen === 'detail' && !!d, onDigest: screen === 'digest',
+      onBilling: screen === 'billing', onLanding: screen === 'landing', onAuth: screen === 'auth',
+
+      goDashboard: () => this.go('dashboard'), goManage: () => this.go('manage'), goAdd: () => this.go('add'),
+      goDigest: () => this.go('digest'), goBilling: () => this.go('billing'), goLanding: () => this.go('landing'),
+      goAuth: () => this.go('auth'), goEmpty: () => this.go('empty'), goAdd: this.startAddNew,
+      signIn: () => this.setState({ screen: this.state.authMode === 'signup' ? 'empty' : 'dashboard' }),
+      toggleAuth: () => this.setState(st => ({ authMode: st.authMode === 'signup' ? 'login' : 'signup' })),
+      authTitle: s.authMode === 'signup' ? 'Create your account' : 'Welcome back',
+      authSub: s.authMode === 'signup' ? 'Free plan, one competitor, no card.' : 'Sign in to see this week.',
+      authCta: s.authMode === 'signup' ? 'Create account' : 'Log in',
+      authSwitchText: s.authMode === 'signup' ? 'Already have an account?' : 'New here?',
+      authSwitchCta: s.authMode === 'signup' ? 'Log in' : 'Create one',
+
+      planName: isFree ? 'Free' : 'Pro', planPrice: isFree ? '$0' : '$19/mo', isFree, isPaid: !isFree,
+      usageComp: s.comps.length + ' / ' + L.comps, usagePages: pc + ' / ' + (L.pages * Math.max(1, s.comps.length)),
+      compBarWidth: Math.min(100, (s.comps.length / L.comps) * 100) + '%',
+      pageBarWidth: Math.min(100, (pc / (L.pages * Math.max(1, s.comps.length))) * 100) + '%',
+      unreadCount: changed.length ? String(changed.length) : null,
+      navDashboardStyle: this.navStyle(screen === 'dashboard', true),
+      navManageStyle: this.navStyle(screen === 'manage' || screen === 'detail', false),
+      navDigestStyle: this.navStyle(screen === 'digest', false),
+      navBillingStyle: this.navStyle(screen === 'billing', false),
+      navDashboardBar: this.navBar(screen === 'dashboard'),
+      navManageBar: this.navBar(screen === 'manage' || screen === 'detail'),
+      navDigestBar: this.navBar(screen === 'digest'),
+      navBillingBar: this.navBar(screen === 'billing'),
+
+      comps,
+      weekSummary: changed.length
+        ? changed.length + ' meaningful ' + (changed.length === 1 ? 'change' : 'changes') + ' across ' + s.comps.length + ' competitor' + (s.comps.length === 1 ? '' : 's') + '.'
+        : 'Nothing meaningful changed. We checked anyway.',
+      filteredNote: '47 trivial edits filtered out',
+      statChanges: String(changed.length), statPages: String(pc), statFiltered: '47',
+      lastCheck: 'today, 6:04am', nextDigest: 'Monday 8am',
+      showUpgradeBanner: isFree && (overComp || overPages),
+      overLimitNote: overComp ? 'You\u2019re tracking ' + s.comps.length + ' \u2014 the extras are read-only until you upgrade.' : 'You\u2019re over the page allowance.',
+
+      addBlocked: !canAddThis, addAllowed: canAddThis,
+      isPageAddMode, isNewCompMode: !isPageAddMode,
+      addHeader: isPageAddMode ? 'Add a page to ' + targetComp.name : 'Add a competitor',
+      addBlockedTitle: isPageAddMode ? targetComp.name + ' is at its page limit' : 'You\u2019ve used your ' + (isFree ? 'Free' : 'Pro') + ' competitor' + (L.comps === 1 ? '' : 's'),
+      addBlockedBody: isPageAddMode
+        ? targetComp.name + ' already tracks ' + L.pages + ' pages on ' + (isFree ? 'Free' : 'Pro') + '. Upgrade for more pages per competitor, or remove one first.'
+        : (isFree ? 'Free tracks one competitor with up to three pages. Pro raises that to ten competitors and ten pages each \u2014 same daily checks, same weekly digest.' : 'You\u2019re tracking all ' + L.comps + ' competitors Pro allows.'),
+      addSlotsNote: isPageAddMode ? (L.pages - targetComp.pages.length) + ' of ' + L.pages + ' page slots left for ' + targetComp.name + '.' : (L.comps - s.comps.length) + ' of ' + L.comps + ' competitor slots left on ' + (isFree ? 'Free' : 'Pro') + '.',
+      pageSlotsNote: 'Up to ' + L.pages + ' on this plan',
+      formName: s.form.name, setFormName: this.setName,
+      formPages: s.form.pages.map((r, i) => ({
+        url: r.url, label: r.label,
+        setUrl: (e) => this.setRow(i, 'url', e.target.value),
+        setLabel: (e) => this.setRow(i, 'label', e.target.value),
+        remove: () => this.removeRow(i)
+      })),
+      canAddRow: rowsUsed < L.pages, rowsMaxed: rowsUsed >= L.pages,
+      rowsMaxedNote: 'That\u2019s all ' + L.pages + ' pages on ' + (isFree ? 'Free' : 'Pro') + '.',
+      addRow: this.addRow, submitAdd: this.submitAdd, formError: s.formError,
+
+      detailComp: d ? d.comp.name : '', detailLabel: d ? d.page.label : '',
+      detailSummary: d ? d.page.summary : '', detailDate: d ? d.page.date : '',
+      detailHref: d ? d.page.url : '#', detailDomain: d ? d.comp.domain : '',
+      detailBefore: d ? d.page.before : '', detailAfter: d ? d.page.after : '',
+      detailBeforeDate: d ? d.page.beforeDate : '', detailAfterDate: d ? d.page.afterDate : '',
+      detailIgnored: d ? d.page.ignored : '',
+
+      digestGroups, digestRange: '11\u201317 August 2026',
+      digestHeadline: changed.length + ' things changed last week',
+      digestSub: 'Across ' + s.comps.length + ' competitors and ' + pc + ' pages. Everything else held steady.',
+      digestQuiet: quietCount ? 'Quiet: ' + s.comps.map(c => c.pages.filter(p => !p.summary).length ? c.name + ' (' + c.pages.filter(p => !p.summary).map(p => p.label.toLowerCase()).join(', ') + ')' : null).filter(Boolean).join(', ') + '.' : 'Every page you track changed this week.',
+      digestFilterNote: 'We looked at 47 other edits and judged them noise \u2014 cookie banners, rotating testimonials, script tags.',
+
+      billingSub: isFree ? 'You\u2019re on Free. Pro is the only paid plan \u2014 no tiers, no add-ons.' : 'You\u2019re on Pro, billed monthly. Cancel any time.',
+      upgrade: this.upgrade, askDowngrade: this.askDowngrade,
+
+      confirmOpen: !!s.confirm, confirmTitle: s.confirm ? s.confirm.title : '',
+      confirmBody: s.confirm ? s.confirm.body : '', confirmCta: s.confirm ? s.confirm.cta : '',
+      closeConfirm: this.closeConfirm, confirmAction: this.runConfirm,
+      toast: s.toast,
+      profileMenuOpen: s.profileMenuOpen, toggleProfileMenu: this.toggleProfileMenu,
+      profileChevronStyle: s.profileMenuOpen ? 'transform:rotate(180deg)' : ''
+    };
+  }
+}
+
+</script>
+</body>
+</html>

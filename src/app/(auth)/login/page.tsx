@@ -1,0 +1,27 @@
+import { Suspense } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { AuthForm } from "@/features/auth/AuthForm";
+import styles from "./page.module.css";
+
+export default function LoginPage() {
+  return (
+    <div className={styles.wrap}>
+      <div className={styles.inner}>
+        <Link href="/" className={styles.logoLink}>
+          <Image
+            src="/logo.svg"
+            alt="Trailwatch"
+            width={90}
+            height={24}
+            className={styles.logo}
+            priority
+          />
+        </Link>
+        <Suspense fallback={null}>
+          <AuthForm initialMode="login" />
+        </Suspense>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,306 @@
+.empty {
+  padding: 120px 56px;
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Square-in-a-square: the radar mark, drawn rather than imported. */
+.mark {
+  width: 52px;
+  height: 52px;
+  border: 1.5px solid var(--accent-mark-border);
+  margin: 0 auto 26px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.markDot {
+  width: 12px;
+  height: 12px;
+  background: var(--accent-wash);
+  border: 1.5px solid var(--accent-hover);
+}
+
+.title {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 29px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0 0 14px 0;
+}
+
+.body {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-3);
+  margin: 0 auto 30px auto;
+  max-width: 420px;
+  text-wrap: pretty;
+}
+
+.cta {
+  padding: 12px 22px;
+  font-size: 14px;
+}
+
+.suggestions {
+  margin-top: 52px;
+  border-top: 1px solid var(--border);
+  padding-top: 26px;
+  text-align: left;
+}
+
+.suggestionsLabel {
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 14px;
+}
+
+.suggestionList {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.suggestion {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  font-size: 13.5px;
+  color: var(--ink-3);
+}
+
+.suggestionNum {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
+/* ----------------------------------------------------- populated view */
+
+.wrap {
+  padding: 48px 56px 80px 56px;
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 8px;
+}
+
+.heading {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0 0 8px 0;
+}
+
+.headSub {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin: 24px 0 30px 0;
+}
+
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 16px 18px;
+}
+
+.statIcon {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.statIconAmber {
+  composes: statIcon;
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+}
+
+.statIconGreen {
+  composes: statIcon;
+  background: var(--green-wash);
+  color: var(--green-ink);
+}
+
+.statIconWarn {
+  composes: statIcon;
+  background: var(--amber-wash);
+  color: var(--amber-ink);
+}
+
+.statLabelRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 10px;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: var(--ink-4);
+}
+
+.statValue {
+  font-size: 22px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.metaRow {
+  font-size: 12.5px;
+  color: var(--ink-5);
+  margin: 0 0 26px 0;
+  padding: 9px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.upgradeBanner {
+  border: 1px solid var(--warn-border);
+  background: var(--warn-wash);
+  padding: 16px 18px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.upgradeBannerTitle {
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+
+.upgradeBannerBody {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.compList {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.compCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.compHead {
+  padding: 16px 20px 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.compHeadLeft {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+.compAvatar {
+  width: 26px;
+  height: 26px;
+  background: var(--surface-sunken);
+  color: #5d5a53;
+  font-size: 11.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.compName {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+.compDomain {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+.compMeta {
+  font-size: 12px;
+  color: var(--ink-5);
+  white-space: nowrap;
+}
+
+.pageRow {
+  padding: 17px 20px;
+  border-bottom: 1px solid var(--border-softer);
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+.pageRow:last-child {
+  border-bottom: none;
+}
+
+.pageMeta {
+  flex: 0 0 96px;
+  align-self: flex-start;
+  padding-top: 1px;
+}
+
+.pageLabel {
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.pagePaused {
+  font-size: 10.5px;
+  color: var(--ink-faint);
+  margin-top: 5px;
+  border: 1px solid var(--border);
+  padding: 1px 7px;
+  display: inline-block;
+}
+
+.pageQuiet {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  color: var(--ink-faint);
+  padding-top: 1px;
+}
