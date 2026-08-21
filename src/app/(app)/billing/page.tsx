@@ -4,6 +4,7 @@ import { getNextChargeDate } from "@/features/billing/queries";
 import { LIMITS, PLAN_PRICE } from "@/features/plan/limits";
 import { UpgradeButton } from "@/features/billing/UpgradeButton";
 import { CancelButton } from "@/features/billing/CancelButton";
+import { ManageBillingButton } from "@/features/billing/ManageBillingButton";
 import styles from "./page.module.css";
 
 function planFeatures(comp: number, pages: number): string[] {
@@ -116,6 +117,10 @@ export default async function BillingPage() {
             <div className={styles.billingRow}>
               <span className={styles.billingKey}>Billed</span>
               <span>Monthly, in USD</span>
+            </div>
+            <div className={styles.billingRow}>
+              <span className={styles.billingKey}>Invoices</span>
+              <ManageBillingButton />
             </div>
           </div>
         </div>
