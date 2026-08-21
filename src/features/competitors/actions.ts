@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { LIMITS, type Plan } from "@/features/plan/limits";
+import { resolvePlan } from "@/features/plan/comp";
 import { competitorName, pageRow } from "./validation";
 import { originOf, sameOrigin } from "./domain";
 
@@ -30,7 +31,7 @@ async function loadPlanAndUsage(supabase: Awaited<ReturnType<typeof createClient
     supabase.from("competitors").select("id"),
   ]);
 
-  const plan: Plan = profile?.plan === "paid" ? "paid" : "free";
+  const plan: Plan = resolvePlan(user.email, profile?.plan === "paid" ? "paid" : "free");
   return { userId: user.id, plan, competitorCount: competitors?.length ?? 0 };
 }
 

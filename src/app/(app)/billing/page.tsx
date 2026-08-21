@@ -34,7 +34,10 @@ export default async function BillingPage() {
 
   const isFree = account.plan === "free";
 
-  // Only paid users have a subscription to show a next-charge date for.
+  // A paid user normally has a Paddle subscription — but a comp (founder) account
+  // is Pro with none. Distinguish them so we don't show Cancel/Invoices for a
+  // subscription that doesn't exist.
+  let hasSubscription = false;
   let nextCharge: string | null = null;
   if (!isFree) {
     const { data: profile } = await supabase
@@ -42,8 +45,9 @@ export default async function BillingPage() {
       .select("paddle_subscription_id")
       .eq("id", user.id)
       .single();
-    if (profile?.paddle_subscription_id) {
-      nextCharge = await getNextChargeDate(profile.paddle_subscription_id);
+    hasSubscription = Boolean(profile?.paddle_subscription_id);
+    if (hasSubscription) {
+      nextCharge = await getNextChargeDate(profile!.paddle_subscription_id!);
     }
   }
 
@@ -96,15 +100,19 @@ export default async function BillingPage() {
               <UpgradeButton email={account.email} userId={user.id} />
               <div className={styles.checkoutNote}>Secure checkout by Paddle · cancel any time</div>
             </div>
-          ) : (
+          ) : hasSubscription ? (
             <div className={styles.action}>
               <CancelButton />
+            </div>
+          ) : (
+            <div className={styles.action}>
+              <div className={styles.compNote}>Complimentary Pro — no billing on this account.</div>
             </div>
           )}
         </div>
       </div>
 
-      {!isFree ? (
+      {!isFree && hasSubscription ? (
         <div className={styles.billingBox}>
           <div className={styles.billingLabel}>Billing</div>
           <div className={styles.billingRows}>

@@ -116,6 +116,12 @@
   text-align: center;
 }
 
+.compNote {
+  font-size: 13px;
+  color: var(--ink-3);
+  line-height: 1.5;
+}
+
 .billingBox {
   margin-top: 30px;
   background: var(--surface);

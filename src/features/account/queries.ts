@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { LIMITS, type Plan } from "@/features/plan/limits";
+import { resolvePlan } from "@/features/plan/comp";
 
 export type Account = {
   email: string;
@@ -39,7 +40,7 @@ export async function getAccount(): Promise<Account | null> {
   ]);
 
   const email = profileResult.data?.email ?? user.email ?? "";
-  const plan: Plan = profileResult.data?.plan === "paid" ? "paid" : "free";
+  const plan: Plan = resolvePlan(email, profileResult.data?.plan === "paid" ? "paid" : "free");
   const displayName = deriveDisplayName(email, user.user_metadata?.full_name);
 
   const competitorCount = competitorsResult.data?.length ?? 0;
