@@ -124,10 +124,17 @@ export function Sidebar({ account }: { account: Account }) {
               <div className={styles.profileName}>{account.displayName}</div>
               <div className={styles.profileEmail}>{account.email}</div>
             </div>
-            <span className={menuOpen ? styles.chevronOpen : styles.chevron}>
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+            <span className={styles.chevron}>
+              <svg width="11" height="14" viewBox="0 0 11 14" fill="none" aria-hidden="true">
                 <path
-                  d="M1 1l4 4 4-4"
+                  d="M3 5.5 5.5 3 8 5.5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M3 8.5 5.5 11 8 8.5"
                   stroke="currentColor"
                   strokeWidth="1.5"
                   strokeLinecap="round"
