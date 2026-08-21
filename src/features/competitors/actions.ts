@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { LIMITS, type Plan } from "@/features/plan/limits";
 import { resolvePlan } from "@/features/plan/comp";
 import { competitorName, pageRow } from "./validation";
-import { originOf, sameOrigin } from "./domain";
+import { originOf, sameSite, siteOf } from "./domain";
 
 export type FormState = { error: string } | null;
 
@@ -35,13 +35,14 @@ async function loadPlanAndUsage(supabase: Awaited<ReturnType<typeof createClient
   return { userId: user.id, plan, competitorCount: competitors?.length ?? 0 };
 }
 
-// Pages under one competitor must share a domain — different domains
-// belong to different competitors. `establishedUrl` is the URL that sets
+// Pages under one competitor must share a registrable domain — subdomains of
+// the same site (www., docs., app.) count as the same competitor; different
+// domains belong to different competitors. `establishedUrl` is the URL that sets
 // the domain (the competitor's first existing page, or the first row on
 // a brand-new competitor).
 function findDomainMismatch(establishedUrl: string, rows: { url: string }[]): string | null {
-  const domain = originOf(establishedUrl);
-  const mismatch = rows.find((r) => !sameOrigin(establishedUrl, r.url));
+  const domain = siteOf(establishedUrl) ?? originOf(establishedUrl);
+  const mismatch = rows.find((r) => !sameSite(establishedUrl, r.url));
   if (!mismatch) return null;
   return `All pages for one competitor must be on ${domain} — add a separate competitor for other domains.`;
 }
@@ -192,9 +193,9 @@ export async function updatePage(
     .neq("id", pageId);
 
   const sibling = siblings?.[0];
-  if (sibling && !sameOrigin(sibling.url, rowResult.data.url)) {
+  if (sibling && !sameSite(sibling.url, rowResult.data.url)) {
     return {
-      error: `Must be on ${originOf(sibling.url)} — use Edit to move every page to a new domain.`,
+      error: `Must be on ${siteOf(sibling.url) ?? originOf(sibling.url)} — use Edit to move every page to a new domain.`,
     };
   }
 

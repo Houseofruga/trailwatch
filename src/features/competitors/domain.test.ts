@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeDomainInput, originOf, replaceUrlHost, sameOrigin } from "./domain";
+import { normalizeDomainInput, originOf, replaceUrlHost, sameOrigin, sameSite, siteOf } from "./domain";
 
 describe("originOf", () => {
   it("returns the origin for a valid URL", () => {
@@ -37,6 +37,42 @@ describe("sameOrigin", () => {
 
   it("is false if either URL is unparseable", () => {
     expect(sameOrigin("https://vercel.com/pricing", "not a url")).toBe(false);
+  });
+});
+
+describe("siteOf", () => {
+  it("strips subdomains to the registrable domain", () => {
+    expect(siteOf("https://www.tryprofound.com/pricing")).toBe("tryprofound.com");
+    expect(siteOf("https://docs.tryprofound.com/rest-api/changelog")).toBe("tryprofound.com");
+  });
+
+  it("keeps multi-part public suffixes intact", () => {
+    expect(siteOf("https://shop.marks.co.uk")).toBe("marks.co.uk");
+    expect(siteOf("https://www.example.com.au")).toBe("example.com.au");
+  });
+
+  it("returns null for unparseable input", () => {
+    expect(siteOf("not a url")).toBeNull();
+  });
+});
+
+describe("sameSite", () => {
+  it("treats subdomains of one site as the same competitor", () => {
+    expect(
+      sameSite("https://www.tryprofound.com/pricing", "https://docs.tryprofound.com/rest-api"),
+    ).toBe(true);
+  });
+
+  it("still separates genuinely different domains", () => {
+    expect(sameSite("https://tryprofound.com", "https://profound.com")).toBe(false);
+  });
+
+  it("does not confuse different sites under the same public suffix", () => {
+    expect(sameSite("https://marks.co.uk", "https://spencer.co.uk")).toBe(false);
+  });
+
+  it("is false if either URL is unparseable", () => {
+    expect(sameSite("https://tryprofound.com", "not a url")).toBe(false);
   });
 });
 

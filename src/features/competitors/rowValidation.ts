@@ -2,7 +2,7 @@
 // (adding pages to an existing competitor) — both render a list of URL rows
 // with the same live format + one-domain-per-competitor validation.
 
-import { originOf } from "./domain";
+import { siteOf } from "./domain";
 import { pageUrl } from "./validation";
 
 export function formatUrlError(url: string): string | null {
@@ -11,8 +11,13 @@ export function formatUrlError(url: string): string | null {
   return result.success ? null : result.error.issues[0].message;
 }
 
-export function domainMismatchError(url: string, establishedOrigin: string | null): string | null {
-  if (!url.trim() || !establishedOrigin) return null;
-  if (originOf(url) === establishedOrigin) return null;
-  return `Must be on ${establishedOrigin.replace(/^https?:\/\//, "")} — add a separate competitor for other domains.`;
+// Pages under one competitor must share a registrable domain — subdomains of the
+// same site (www., docs., app.) are fine, other domains aren't. `established`
+// can be a URL or a bare domain; we compare the sites of both.
+export function domainMismatchError(url: string, established: string | null): string | null {
+  if (!url.trim() || !established) return null;
+  const site = siteOf(established);
+  if (!site) return null; // can't derive a site to compare against
+  if (siteOf(url) === site) return null;
+  return `Must be on ${site} — add a separate competitor for other domains.`;
 }
