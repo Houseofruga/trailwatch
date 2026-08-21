@@ -15,7 +15,7 @@ const NAV = [
   { href: "/dashboard", label: "Dashboard", pending: false },
   { href: "/competitors", label: "Competitors", pending: false },
   { href: "/digest", label: "Weekly digest", pending: true },
-  { href: "/billing", label: "Plan & billing", pending: true },
+  { href: "/billing", label: "Plan & billing", pending: false },
 ] as const;
 
 function percent(used: number, allowed: number): string {
@@ -114,7 +114,11 @@ export function Sidebar({ account }: { account: Account }) {
             </div>
           </div>
 
-          {isFree ? <span className={styles.upgrade}>Upgrade to Pro &rarr;</span> : null}
+          {isFree ? (
+            <Link href="/billing" className={styles.upgrade}>
+              Upgrade to Pro &rarr;
+            </Link>
+          ) : null}
         </div>
 
         <div className={styles.profile} ref={profileRef}>
