@@ -18,8 +18,9 @@ export async function checkPageNow(pageId: string): Promise<string> {
     case "first-check":
       return "First check complete — this is now the baseline.";
     case "recorded":
-      return result.meaningful
-        ? "Meaningful change detected."
-        : "Changed, but it looked trivial — filtered out.";
+      if (!result.meaningful) return "Changed, but it looked trivial — filtered out.";
+      return result.summarized
+        ? "Meaningful change detected and summarized."
+        : "Meaningful change detected (summary unavailable).";
   }
 }

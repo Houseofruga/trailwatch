@@ -5,13 +5,14 @@ import { normalizeText } from "./normalize";
 import { hashContent } from "./hash";
 import { isMeaningfulChange } from "./noiseFilter";
 import { fetchPageIfAllowed } from "./fetchPage";
+import { getSummarizer } from "@/features/summaries";
 
 export type CheckResult =
   | { status: "skipped-robots" }
   | { status: "fetch-error"; message: string }
   | { status: "unchanged" }
   | { status: "first-check" }
-  | { status: "recorded"; meaningful: boolean };
+  | { status: "recorded"; meaningful: boolean; summarized?: boolean };
 
 // Excerpts are the raw normalized text for now, capped as a cheap safeguard —
 // slice 4's LLM step replaces this with a real focused excerpt.
@@ -28,7 +29,7 @@ export async function runCheckForPage(pageId: string): Promise<CheckResult> {
 
   const { data: page, error: pageError } = await userClient
     .from("pages")
-    .select("id, url, latest_snapshot_id")
+    .select("id, url, label, latest_snapshot_id")
     .eq("id", pageId)
     .single();
   if (pageError || !page) throw new Error("Page not found.");
@@ -80,15 +81,44 @@ export async function runCheckForPage(pageId: string): Promise<CheckResult> {
   }
 
   const result = isMeaningfulChange(previousSnapshot.content_text, normalized);
+
+  // Only meaningful changes cost an LLM call. The summarizer may also decline
+  // (belt-and-suspenders per SPEC.md F5), in which case we suppress the change.
+  let summary: string | null = null;
+  let meaningful = result.meaningful;
+  let filterReason = result.reason;
+
+  if (result.meaningful) {
+    try {
+      const summarized = await getSummarizer().summarize({
+        label: page.label,
+        oldText: previousSnapshot.content_text,
+        newText: normalized,
+      });
+      if ("summary" in summarized) {
+        summary = summarized.summary;
+      } else {
+        // Model vetoed — treat as not meaningful, no summary/excerpts.
+        meaningful = false;
+        filterReason = summarized.reason;
+      }
+    } catch {
+      // Rate limit, network, etc. — still record the change, just unsummarized,
+      // so one flaky API call doesn't lose a real detected change.
+      filterReason = `${result.reason} (summary unavailable)`;
+    }
+  }
+
   await service.from("changes").insert({
     page_id: pageId,
     from_snapshot_id: page.latest_snapshot_id,
     to_snapshot_id: newSnapshot.id,
-    is_meaningful: result.meaningful,
-    filter_reason: result.reason,
-    excerpt_before: result.meaningful ? previousSnapshot.content_text.slice(0, EXCERPT_CAP) : null,
-    excerpt_after: result.meaningful ? normalized.slice(0, EXCERPT_CAP) : null,
+    is_meaningful: meaningful,
+    filter_reason: filterReason,
+    summary,
+    excerpt_before: meaningful ? previousSnapshot.content_text.slice(0, EXCERPT_CAP) : null,
+    excerpt_after: meaningful ? normalized.slice(0, EXCERPT_CAP) : null,
   });
 
-  return { status: "recorded", meaningful: result.meaningful };
+  return { status: "recorded", meaningful, summarized: summary !== null };
 }
