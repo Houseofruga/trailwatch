@@ -1,16 +1,27 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAccount } from "@/features/account/queries";
-import { LIMITS, PLAN_LABEL, PLAN_PRICE } from "@/features/plan/limits";
+import { getNextChargeDate } from "@/features/billing/queries";
+import { LIMITS, PLAN_PRICE } from "@/features/plan/limits";
 import { UpgradeButton } from "@/features/billing/UpgradeButton";
 import { CancelButton } from "@/features/billing/CancelButton";
 import styles from "./page.module.css";
 
-const PRO_PERKS = [
-  `Track up to ${LIMITS.paid.competitors} competitors`,
-  `Up to ${LIMITS.paid.pagesPerCompetitor} pages per competitor`,
-  "Daily checks with AI change summaries",
-  "Weekly digest email",
-];
+function planFeatures(comp: number, pages: number): string[] {
+  return [
+    `${comp} competitor${comp === 1 ? "" : "s"}`,
+    comp === 1 ? `${pages} pages on that competitor` : `${pages} pages per competitor`,
+    "Daily checks, noise filtered",
+    "Weekly email digest",
+  ];
+}
+
+function formatDate(iso: string): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(iso));
+}
 
 export default async function BillingPage() {
   const account = await getAccount();
@@ -18,41 +29,102 @@ export default async function BillingPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
   if (!account || !user) return null;
 
   const isFree = account.plan === "free";
 
+  // Only paid users have a subscription to show a next-charge date for.
+  let nextCharge: string | null = null;
+  if (!isFree) {
+    const { data: profile } = await supabase
+      .from("users")
+      .select("paddle_subscription_id")
+      .eq("id", user.id)
+      .single();
+    if (profile?.paddle_subscription_id) {
+      nextCharge = await getNextChargeDate(profile.paddle_subscription_id);
+    }
+  }
+
   return (
     <div className={styles.wrap}>
       <h1 className={styles.heading}>Plan &amp; billing</h1>
-      <p className={styles.sub}>Payments are handled securely by Paddle.</p>
+      <p className={styles.sub}>
+        {isFree
+          ? "You’re on Free. Pro is the only paid plan — no tiers, no add-ons."
+          : "You’re on Pro, billed monthly. Cancel any time."}
+      </p>
 
-      <section className={styles.card}>
-        <div className={styles.cardHead}>
-          <div>
-            <div className={styles.planLabel}>Current plan</div>
-            <div className={styles.planName}>{PLAN_LABEL[account.plan]}</div>
+      <div className={styles.grid}>
+        {/* Free */}
+        <div className={styles.card}>
+          <div className={styles.cardHead}>
+            <div className={styles.planName}>Free</div>
+            {isFree ? <span className={styles.current}>Current</span> : null}
           </div>
-          <div className={styles.planPrice}>{PLAN_PRICE[account.plan]}</div>
+          <div className={styles.price}>{PLAN_PRICE.free}</div>
+          <ul className={styles.features}>
+            {planFeatures(LIMITS.free.competitors, LIMITS.free.pagesPerCompetitor).map((f) => (
+              <li key={f} className={styles.feature}>
+                {f}
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <ul className={styles.perks}>
-          {PRO_PERKS.map((perk) => (
-            <li key={perk} className={styles.perk}>
-              {perk}
-            </li>
-          ))}
-        </ul>
+        {/* Pro */}
+        <div className={`${styles.card} ${styles.cardPro}`}>
+          <div className={styles.cardHead}>
+            <div className={styles.planName}>Pro</div>
+            {!isFree ? <span className={styles.current}>Current</span> : null}
+          </div>
+          <div className={styles.price}>
+            <span className={styles.priceAmount}>$19</span>
+            <span className={styles.pricePer}>/month</span>
+          </div>
+          <ul className={styles.features}>
+            {planFeatures(LIMITS.paid.competitors, LIMITS.paid.pagesPerCompetitor).map((f) => (
+              <li key={f} className={styles.feature}>
+                {f}
+              </li>
+            ))}
+          </ul>
 
-        <div className={styles.action}>
           {isFree ? (
-            <UpgradeButton email={account.email} userId={user.id} />
+            <div className={styles.action}>
+              <UpgradeButton email={account.email} userId={user.id} />
+              <div className={styles.checkoutNote}>Secure checkout by Paddle · cancel any time</div>
+            </div>
           ) : (
-            <CancelButton />
+            <div className={styles.action}>
+              <CancelButton />
+            </div>
           )}
         </div>
-      </section>
+      </div>
+
+      {!isFree ? (
+        <div className={styles.billingBox}>
+          <div className={styles.billingLabel}>Billing</div>
+          <div className={styles.billingRows}>
+            <div className={styles.billingRow}>
+              <span className={styles.billingKey}>Next charge</span>
+              <span>
+                {nextCharge ? `${PLAN_PRICE.paid.replace("/mo", "")}.00 on ${formatDate(nextCharge)}` : "—"}
+              </span>
+            </div>
+            <div className={styles.billingRow}>
+              <span className={styles.billingKey}>Billed</span>
+              <span>Monthly, in USD</span>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <p className={styles.footNote}>
+        One paid plan, no add-ons, no annual lock-in. If you cancel you keep your first competitor
+        and three pages on Free.
+      </p>
     </div>
   );
 }

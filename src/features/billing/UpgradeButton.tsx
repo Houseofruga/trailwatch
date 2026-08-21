@@ -71,7 +71,9 @@ export function UpgradeButton({ email, userId }: { email: string; userId: string
   if (finalizing) {
     return (
       <div>
-        <Button disabled>Finalizing your upgrade…</Button>
+        <Button full disabled>
+          Finalizing your upgrade…
+        </Button>
         {timedOut ? (
           <p style={{ marginTop: 12, fontSize: 13, color: "var(--ink-3)" }}>
             Payment received. If this doesn&rsquo;t update in a moment, refresh the page.
@@ -82,8 +84,8 @@ export function UpgradeButton({ email, userId }: { email: string; userId: string
   }
 
   return (
-    <Button onClick={openCheckout} disabled={!configured || !paddle}>
-      {configured ? "Upgrade to Pro" : "Upgrade unavailable — billing not configured"}
+    <Button full onClick={openCheckout} disabled={!configured || !paddle}>
+      {configured ? "Continue to checkout" : "Upgrade unavailable — billing not configured"}
     </Button>
   );
 }
