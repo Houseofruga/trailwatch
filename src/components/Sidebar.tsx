@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { ButtonLink } from "@/components/Button";
 import { usePathname } from "next/navigation";
 import { logOut } from "@/features/auth/actions";
 import type { Account } from "@/features/account/queries";
@@ -104,9 +105,9 @@ export function Sidebar({ account }: { account: Account }) {
           </div>
 
           {isFree ? (
-            <Link href="/billing" className={styles.upgrade}>
-              Upgrade to Pro &rarr;
-            </Link>
+            <ButtonLink href="/billing" full className={styles.upgradeBtn}>
+              Upgrade to Pro
+            </ButtonLink>
           ) : null}
         </div>
 

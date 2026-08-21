@@ -171,13 +171,8 @@
   background: var(--accent);
 }
 
-.upgrade {
-  display: block;
-  margin-top: 12px;
-  font-size: 12px;
-  color: var(--accent-ink);
-  cursor: pointer;
-  font-weight: 500;
+.upgradeBtn {
+  margin-top: 14px;
 }
 
 /* ------------------------------------------------------------ profile */
