@@ -9,13 +9,12 @@ import type { Account } from "@/features/account/queries";
 import { LIMITS, PLAN_LABEL, PLAN_PRICE } from "@/features/plan/limits";
 import styles from "./Sidebar.module.css";
 
-// `pending` routes are built in later slices; they render in place but don't
-// navigate, rather than linking to a 404.
+// The digest is email-only (no in-app page — an in-app history is out of scope
+// per SPEC §6), so it isn't a nav destination.
 const NAV = [
-  { href: "/dashboard", label: "Dashboard", pending: false },
-  { href: "/competitors", label: "Competitors", pending: false },
-  { href: "/digest", label: "Weekly digest", pending: true },
-  { href: "/billing", label: "Plan & billing", pending: false },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/competitors", label: "Competitors" },
+  { href: "/billing", label: "Plan & billing" },
 ] as const;
 
 function percent(used: number, allowed: number): string {
@@ -57,15 +56,6 @@ export function Sidebar({ account }: { account: Account }) {
       <nav className={styles.nav}>
         {NAV.map((item) => {
           const active = pathname.startsWith(item.href);
-
-          if (item.pending) {
-            return (
-              <span key={item.href} className={styles.navItemPending}>
-                {item.label}
-              </span>
-            );
-          }
-
           return (
             <Link
               key={item.href}

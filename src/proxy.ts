@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/env";
 
-const APP_PREFIXES = ["/dashboard", "/competitors", "/digest", "/billing"];
+const APP_PREFIXES = ["/dashboard", "/competitors", "/billing"];
 const AUTH_PATHS = ["/login"];
 
 /**
