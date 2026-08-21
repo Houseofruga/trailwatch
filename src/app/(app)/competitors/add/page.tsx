@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/Button";
+import { ButtonLink } from "@/components/Button";
 import { BackLink } from "@/components/BackLink";
 import { getAccount } from "@/features/account/queries";
 import { getCompetitorsWithPages } from "@/features/competitors/queries";
@@ -109,10 +109,9 @@ function BlockedUpsell({
             <div>Weekly email digest</div>
             <div>Cancel any time</div>
           </div>
-          {/* Billing lands in slice 8 — the upgrade path isn't wired yet. */}
-          <Button className={styles.upsellCta} disabled>
-            Upgrade to Pro (coming soon)
-          </Button>
+          <ButtonLink href="/billing" className={styles.upsellCta}>
+            Upgrade to Pro
+          </ButtonLink>
         </div>
       ) : null}
 
