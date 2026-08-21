@@ -85,7 +85,7 @@ export function UpgradeButton({ email, userId }: { email: string; userId: string
 
   return (
     <Button full onClick={openCheckout} disabled={!configured || !paddle}>
-      {configured ? "Continue to checkout" : "Upgrade unavailable — billing not configured"}
+      {configured ? "Upgrade to Pro" : "Upgrade unavailable — billing not configured"}
     </Button>
   );
 }
