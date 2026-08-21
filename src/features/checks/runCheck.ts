@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { extractMainText } from "./extract";
@@ -19,13 +20,18 @@ export type CheckResult =
 const EXCERPT_CAP = 4000;
 
 /**
- * SPEC.md F3 steps 1-6, single page. Reads go through the caller's RLS-scoped
- * client (ownership enforced for free — an unowned pageId just isn't found).
- * Writes go through the service client — see runCheck's sibling doc comment
- * in lib/supabase/service.ts for why.
+ * SPEC.md F3 steps 1-6, single page. Reads go through `reader`: the manual
+ * trigger passes nothing, so it defaults to the caller's RLS-scoped client
+ * (ownership enforced for free — an unowned pageId just isn't found). The daily
+ * cron has no logged-in user, so it passes the service client to read any page.
+ * Writes always go through the service client — see the sibling doc comment in
+ * lib/supabase/service.ts for why.
  */
-export async function runCheckForPage(pageId: string): Promise<CheckResult> {
-  const userClient = await createClient();
+export async function runCheckForPage(
+  pageId: string,
+  reader?: SupabaseClient,
+): Promise<CheckResult> {
+  const userClient = reader ?? (await createClient());
 
   const { data: page, error: pageError } = await userClient
     .from("pages")
