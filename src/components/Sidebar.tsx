@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logOut } from "@/features/auth/actions";
 import type { Account } from "@/features/account/queries";
-import { LIMITS, PLAN_LABEL, PLAN_PRICE } from "@/features/plan/limits";
+import { LIMITS, PLAN_LABEL } from "@/features/plan/limits";
 import styles from "./Sidebar.module.css";
 
 // The digest is email-only (no in-app page — an in-app history is out of scope
@@ -73,7 +73,6 @@ export function Sidebar({ account }: { account: Account }) {
         <div className={styles.usage}>
           <div className={styles.usageHead}>
             <span className={styles.usagePlan}>{PLAN_LABEL[account.plan]} plan</span>
-            <span className={styles.usagePrice}>{PLAN_PRICE[account.plan]}</span>
           </div>
 
           <div className={styles.meters}>
