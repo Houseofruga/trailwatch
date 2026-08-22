@@ -13,6 +13,7 @@ import {
   CompetitorsIcon,
   BillingIcon,
   SettingsIcon,
+  LogoutIcon,
 } from "@/components/icons";
 import styles from "./Sidebar.module.css";
 
@@ -158,6 +159,7 @@ export function Sidebar({ account }: { account: Account }) {
             <div className={styles.menu} role="menu">
               <form action={logOut}>
                 <button type="submit" className={styles.menuItemDanger}>
+                  <LogoutIcon />
                   Log out
                 </button>
               </form>

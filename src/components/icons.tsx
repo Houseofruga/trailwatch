@@ -6,7 +6,7 @@ type IconProps = { size?: number };
 export function PlusIcon({ size = 14 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path d="M8 3.25v9.5M3.25 8h9.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      <path d="M8 2.75v10.5M2.75 8h10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" />
     </svg>
   );
 }
@@ -28,12 +28,10 @@ export function ChevronLeftIcon({ size = 12 }: IconProps) {
 export function PencilIcon({ size = 13 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M11.2 2.3a1.13 1.13 0 0 1 1.6 0l.9.9a1.13 1.13 0 0 1 0 1.6L5.6 12.9l-3 .5.5-3 8.1-8.1Z"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-      />
+      <g stroke="currentColor" strokeWidth="1.4" strokeLinejoin="miter">
+        <path d="M11.3 2.2 L13.8 4.7 L5 13.5 L2.2 13.8 L2.5 11 Z" />
+        <path d="M9.4 4.1 L11.9 6.6" />
+      </g>
     </svg>
   );
 }
@@ -41,13 +39,24 @@ export function PencilIcon({ size = 13 }: IconProps) {
 export function TrashIcon({ size = 13 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M2.75 4.25h10.5M6.25 4.25V2.75h3.5v1.5M4.25 4.25l.55 8.4a.6.6 0 0 0 .6.6h5.2a.6.6 0 0 0 .6-.6l.55-8.4"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <g stroke="currentColor" strokeWidth="1.4" strokeLinecap="square" strokeLinejoin="miter">
+        <path d="M2.75 4.25 H13.25" />
+        <path d="M6.25 4.25 V2.75 H9.75 V4.25" />
+        <path d="M4.25 4.25 L4.85 13.25 H11.15 L11.75 4.25" />
+      </g>
+    </svg>
+  );
+}
+
+// Door with an arrow leaving — sharp, matching the nav icon style.
+export function LogoutIcon({ size = 14 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <g stroke="currentColor" strokeWidth="1.4" strokeLinecap="square" strokeLinejoin="miter">
+        <path d="M6.5 2.75 H2.75 V13.25 H6.5" />
+        <path d="M9.5 5 L12.5 8 L9.5 11" />
+        <line x1="12.5" y1="8" x2="6" y2="8" />
+      </g>
     </svg>
   );
 }
