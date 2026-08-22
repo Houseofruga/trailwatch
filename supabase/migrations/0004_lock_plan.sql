@@ -1,0 +1,11 @@
+-- Security fix: the "update own profile" policy let an authenticated user
+-- update ANY column of their own users row via a direct API call — including
+-- `plan`, i.e. self-upgrade to Pro without paying (violates "never trust
+-- client-supplied plan/limit values").
+--
+-- No app code updates public.users through the user (authenticated) client:
+-- every legitimate write — plan from the Paddle webhook, digest_enabled from
+-- Settings, last_digest_sent_at from the digest job — goes through the service
+-- role, which bypasses RLS. So authenticated users don't need UPDATE at all.
+-- Drop the policy; the "read own profile" SELECT policy stays intact.
+drop policy if exists "update own profile" on public.users;
