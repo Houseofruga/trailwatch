@@ -26,9 +26,9 @@ export default function LandingPage() {
     <div className={styles.wrap}>
       <header className={styles.header}>
         <Image
-          src="/logo.svg"
-          alt="Trailwatch"
-          width={180}
+          src="/houseofruga-logo.svg"
+          alt="House of Ruga"
+          width={237}
           height={48}
           className={styles.logo}
           priority

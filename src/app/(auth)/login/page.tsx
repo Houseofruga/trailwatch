@@ -12,7 +12,7 @@ export default function LoginPage() {
           <Image
             src="/logo.svg"
             alt="Trailwatch"
-            width={180}
+            width={186}
             height={48}
             className={styles.logo}
             priority
