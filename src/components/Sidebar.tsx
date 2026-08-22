@@ -53,7 +53,7 @@ export function Sidebar({ account }: { account: Account }) {
     <aside className={styles.aside}>
       <div className={styles.brand}>
         <Image
-          src="/logo.svg"
+          src="/logo-branded.svg"
           alt="Trailwatch"
           width={163}
           height={42}
