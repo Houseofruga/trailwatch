@@ -40,6 +40,23 @@ export function ManageBoard({
     return () => clearTimeout(timer);
   }, [toast]);
 
+  // Close the open row menu on an outside click or Escape.
+  useEffect(() => {
+    if (!openMenuPageId) return;
+    function onDown(event: MouseEvent) {
+      if (!(event.target as HTMLElement).closest("[data-page-menu]")) setOpenMenuPageId(null);
+    }
+    function onEsc(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpenMenuPageId(null);
+    }
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onEsc);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onEsc);
+    };
+  }, [openMenuPageId]);
+
   return (
     <div className={styles.list}>
       {competitors.map((c) => {
@@ -107,7 +124,7 @@ export function ManageBoard({
                   ) : (
                     <span className={styles.badgePaused}>Paused</span>
                   )}
-                  <div className={styles.menuWrap}>
+                  <div className={styles.menuWrap} data-page-menu>
                     <button
                       type="button"
                       className={styles.menuBtn}

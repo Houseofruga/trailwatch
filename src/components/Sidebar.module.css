@@ -252,8 +252,8 @@
 .menu {
   position: absolute;
   bottom: calc(100% + 8px);
-  left: 0;
-  right: 0;
+  left: 16px;
+  right: 16px;
   background: var(--surface);
   border: 1px solid var(--border);
   box-shadow: 0 12px 30px rgba(26, 26, 23, 0.14);
