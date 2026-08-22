@@ -11,6 +11,8 @@ export type Account = {
   pageCount: number;
   /** Total pages allowed across the competitors that exist today. */
   pageAllowance: number;
+  /** Whether the weekly digest is on for this account (Settings toggle). */
+  digestEnabled: boolean;
 };
 
 /** Google gives us a full name; email/password signups only give us an address. */
@@ -34,7 +36,7 @@ export async function getAccount(): Promise<Account | null> {
   if (!user) return null;
 
   const [profileResult, competitorsResult, pagesResult] = await Promise.all([
-    supabase.from("users").select("email, plan").eq("id", user.id).single(),
+    supabase.from("users").select("email, plan, digest_enabled").eq("id", user.id).single(),
     supabase.from("competitors").select("id"),
     supabase.from("pages").select("id"),
   ]);
@@ -54,5 +56,6 @@ export async function getAccount(): Promise<Account | null> {
     competitorCount,
     pageCount,
     pageAllowance: LIMITS[plan].pagesPerCompetitor * Math.max(1, competitorCount),
+    digestEnabled: profileResult.data?.digest_enabled ?? true,
   };
 }

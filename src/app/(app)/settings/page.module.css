@@ -1,0 +1,142 @@
+.wrap {
+  padding: 48px 56px 80px 56px;
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.heading {
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0 0 8px 0;
+}
+
+.sub {
+  margin: 0 0 32px 0;
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 22px 24px;
+  margin-bottom: 16px;
+}
+
+.sectionDanger {
+  composes: section;
+  border-color: var(--warn-border);
+}
+
+.sectionTitle {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.sectionDesc {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin: 0 0 16px 0;
+  line-height: 1.55;
+}
+
+.readonly {
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+
+.readonlyNote {
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin-top: 4px;
+}
+
+.rowForm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.input {
+  flex: 1;
+  min-width: 220px;
+  border: 1px solid var(--border-input);
+  border-radius: 0;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  background: #fff;
+  color: var(--ink);
+}
+
+.msg {
+  width: 100%;
+  font-size: 12.5px;
+  margin: 4px 0 0 0;
+}
+
+.err {
+  composes: msg;
+  color: var(--danger);
+}
+
+.ok {
+  composes: msg;
+  color: var(--green-ink, #3d7a00);
+}
+
+/* Toggle switch */
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.toggle {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  border: 1px solid var(--border-input);
+  border-radius: 999px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  background: var(--surface-sunken);
+}
+
+.toggleOn {
+  composes: toggle;
+  background: var(--accent);
+  border-color: var(--accent-hover);
+}
+
+.toggle:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #fff;
+  transition: transform 0.15s ease;
+}
+
+.knobOn {
+  composes: knob;
+  transform: translateX(18px);
+}
+
+.toggleState {
+  font-size: 13px;
+  color: var(--ink-3);
+}

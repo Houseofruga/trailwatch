@@ -267,6 +267,7 @@
   padding: 10px 14px;
   font-size: 13px;
   color: var(--ink);
+  text-decoration: none;
   cursor: pointer;
   background: none;
   border: none;

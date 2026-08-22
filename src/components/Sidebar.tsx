@@ -146,8 +146,9 @@ export function Sidebar({ account }: { account: Account }) {
 
           {menuOpen ? (
             <div className={styles.menu} role="menu">
-              {/* No settings screen exists in the design yet — see the slice-1 plan. */}
-              <span className={styles.menuItemDisabled}>Settings</span>
+              <Link href="/settings" className={styles.menuItem} role="menuitem">
+                Settings
+              </Link>
               <form action={logOut}>
                 <button type="submit" className={styles.menuItemDanger}>
                   Log out

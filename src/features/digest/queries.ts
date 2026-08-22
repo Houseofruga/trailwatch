@@ -12,7 +12,9 @@ export async function collectWeeklyDigests(now: number): Promise<UserDigest[]> {
     .from("users")
     .select(
       "id, email, competitors ( name, pages ( label, url, changes ( summary, is_meaningful, detected_at ) ) )",
-    );
+    )
+    // Respect the Settings pause toggle — paused users get no digest.
+    .eq("digest_enabled", true);
 
   if (error) throw error;
 
