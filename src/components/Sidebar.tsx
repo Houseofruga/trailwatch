@@ -55,7 +55,7 @@ export function Sidebar({ account }: { account: Account }) {
         <Image
           src="/logo-branded.svg"
           alt="Trailwatch"
-          width={163}
+          width={158}
           height={42}
           className={styles.logo}
           priority

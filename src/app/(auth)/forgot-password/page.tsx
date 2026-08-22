@@ -12,7 +12,7 @@ export default function ForgotPasswordPage() {
           <Image
             src="/logo-branded.svg"
             alt="Trailwatch"
-            width={186}
+            width={180}
             height={48}
             className={styles.logo}
             priority
