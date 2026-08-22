@@ -1,11 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-// Google (and any other OAuth provider) sends the user back here with a code
-// to exchange for a session.
+// Google OAuth and password-recovery links both land here with a code to
+// exchange for a session. `next` lets recovery send the user on to
+// /reset-password instead of the dashboard.
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const code = searchParams.get("code");
+  const next = searchParams.get("next");
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=oauth`);
@@ -18,5 +20,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=oauth`);
   }
 
-  return NextResponse.redirect(`${origin}/dashboard`);
+  // Only allow internal relative paths, so `next` can't become an open redirect.
+  const dest = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+  return NextResponse.redirect(`${origin}${dest}`);
 }

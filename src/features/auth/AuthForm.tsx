@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/Button";
 import { logIn, signInWithGoogle, signUp, type AuthState } from "./actions";
 import styles from "@/app/(auth)/login/page.module.css";
@@ -102,8 +103,16 @@ export function AuthForm({ initialMode }: { initialMode: Mode }) {
             autoComplete={mode === "signup" ? "new-password" : "current-password"}
             required
             placeholder="••••••••"
-            className={styles.inputLast}
+            className={mode === "login" ? styles.input : styles.inputLast}
           />
+
+          {mode === "login" ? (
+            <div className={styles.forgotRow}>
+              <Link href="/forgot-password" className={styles.switchCta}>
+                Forgot password?
+              </Link>
+            </div>
+          ) : null}
 
           {message ? <p className={styles.error}>{message}</p> : null}
 

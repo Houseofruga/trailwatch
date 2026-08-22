@@ -86,3 +86,49 @@ export async function logOut() {
   revalidatePath("/", "layout");
   redirect("/");
 }
+
+export type ForgotState = { error: string } | { sent: true } | null;
+
+// Emails a password-reset link. The link points at /auth/callback, which
+// exchanges the recovery code for a session and forwards to /reset-password.
+export async function requestPasswordReset(
+  _prev: ForgotState,
+  formData: FormData,
+): Promise<ForgotState> {
+  const parsed = z
+    .object({ email: z.email("Enter a valid email address.") })
+    .safeParse({ email: formData.get("email") });
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const origin =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (await headers()).get("origin") ??
+    "http://localhost:3000";
+
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${origin}/auth/callback?next=/reset-password`,
+  });
+  // Report failures only for real send errors (e.g. rate limits). We never
+  // reveal whether an address is registered — success looks the same either way.
+  if (error) return { error: "Couldn't send the reset email — try again shortly." };
+  return { sent: true };
+}
+
+// Sets a new password for the user in the (recovery) session established by the
+// callback. Requires that session — an expired/absent link surfaces as an error.
+export async function updatePassword(_prev: AuthState, formData: FormData): Promise<AuthState> {
+  const parsed = z
+    .object({ password: z.string().min(8, "Password must be at least 8 characters.") })
+    .safeParse({ password: formData.get("password") });
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+  if (error) {
+    return { error: "Couldn't update your password — the reset link may have expired. Request a new one." };
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/dashboard");
+}

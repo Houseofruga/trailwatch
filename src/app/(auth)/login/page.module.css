@@ -90,6 +90,12 @@
   margin-bottom: 20px;
 }
 
+.forgotRow {
+  text-align: right;
+  margin: -4px 0 18px 0;
+  font-size: 12.5px;
+}
+
 .error {
   font-size: 13px;
   color: var(--danger);
