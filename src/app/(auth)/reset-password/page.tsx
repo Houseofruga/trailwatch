@@ -10,9 +10,9 @@ export default function ResetPasswordPage() {
       <div className={styles.inner}>
         <Link href="/" className={styles.logoLink}>
           <Image
-            src="/logo.svg"
+            src="/logo-branded.svg"
             alt="Trailwatch"
-            width={217}
+            width={186}
             height={48}
             className={styles.logo}
             priority
