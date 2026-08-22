@@ -51,3 +51,55 @@ export function TrashIcon({ size = 13 }: IconProps) {
     </svg>
   );
 }
+
+// --- Nav icons: sharp, geometric, matching the zero-radius design system ---
+
+export function DashboardIcon({ size = 16 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <g stroke="currentColor" strokeWidth="1.4">
+        <rect x="2.5" y="2.5" width="4.3" height="4.3" />
+        <rect x="9.2" y="2.5" width="4.3" height="4.3" />
+        <rect x="2.5" y="9.2" width="4.3" height="4.3" />
+        <rect x="9.2" y="9.2" width="4.3" height="4.3" />
+      </g>
+    </svg>
+  );
+}
+
+// Concentric squares — a "watch/target" mark, echoing the radar theme.
+export function CompetitorsIcon({ size = 16 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <g stroke="currentColor" strokeWidth="1.4">
+        <rect x="2.5" y="2.5" width="11" height="11" />
+        <rect x="6.25" y="6.25" width="3.5" height="3.5" />
+      </g>
+    </svg>
+  );
+}
+
+export function BillingIcon({ size = 16 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <g stroke="currentColor" strokeWidth="1.4">
+        <rect x="2" y="3.5" width="12" height="9" />
+        <line x1="2" y1="6.5" x2="14" y2="6.5" />
+      </g>
+    </svg>
+  );
+}
+
+// Sliders — sharp square handles on two tracks.
+export function SettingsIcon({ size = 16 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <g stroke="currentColor" strokeWidth="1.4" strokeLinecap="square">
+        <line x1="2.5" y1="5" x2="13.5" y2="5" />
+        <line x1="2.5" y1="11" x2="13.5" y2="11" />
+      </g>
+      <rect x="9" y="3.5" width="3" height="3" fill="currentColor" />
+      <rect x="4" y="9.5" width="3" height="3" fill="currentColor" />
+    </svg>
+  );
+}

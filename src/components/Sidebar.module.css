@@ -48,6 +48,23 @@
   text-decoration: none;
 }
 
+.navLabel {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+
+/* Slightly muted icon so the label stays the primary read. */
+.navLabel svg {
+  flex: 0 0 auto;
+  color: var(--ink-4);
+}
+
+.navItemActive .navLabel svg {
+  color: var(--accent-ink);
+}
+
 /* Wash sweeps left-to-right into a lime bar pinned to the right edge. */
 .navItemActive {
   composes: navItem;

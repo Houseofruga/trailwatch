@@ -8,15 +8,21 @@ import { usePathname } from "next/navigation";
 import { logOut } from "@/features/auth/actions";
 import type { Account } from "@/features/account/queries";
 import { LIMITS, PLAN_LABEL } from "@/features/plan/limits";
+import {
+  DashboardIcon,
+  CompetitorsIcon,
+  BillingIcon,
+  SettingsIcon,
+} from "@/components/icons";
 import styles from "./Sidebar.module.css";
 
 // The digest is email-only (no in-app page — an in-app history is out of scope
 // per SPEC §6), so it isn't a nav destination.
 const NAV = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/competitors", label: "Competitors" },
-  { href: "/billing", label: "Plan & billing" },
-  { href: "/settings", label: "Settings" },
+  { href: "/dashboard", label: "Dashboard", Icon: DashboardIcon },
+  { href: "/competitors", label: "Competitors", Icon: CompetitorsIcon },
+  { href: "/billing", label: "Plan & billing", Icon: BillingIcon },
+  { href: "/settings", label: "Settings", Icon: SettingsIcon },
 ] as const;
 
 function percent(used: number, allowed: number): string {
@@ -64,7 +70,10 @@ export function Sidebar({ account }: { account: Account }) {
               href={item.href}
               className={active ? styles.navItemActive : styles.navItem}
             >
-              <span>{item.label}</span>
+              <span className={styles.navLabel}>
+                <item.Icon />
+                {item.label}
+              </span>
               {active ? <div className={styles.navBar} /> : null}
             </Link>
           );
