@@ -16,6 +16,7 @@ const NAV = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/competitors", label: "Competitors" },
   { href: "/billing", label: "Plan & billing" },
+  { href: "/settings", label: "Settings" },
 ] as const;
 
 function percent(used: number, allowed: number): string {
@@ -146,14 +147,6 @@ export function Sidebar({ account }: { account: Account }) {
 
           {menuOpen ? (
             <div className={styles.menu} role="menu">
-              <Link
-                href="/settings"
-                className={styles.menuItem}
-                role="menuitem"
-                onClick={() => setMenuOpen(false)}
-              >
-                Settings
-              </Link>
               <form action={logOut}>
                 <button type="submit" className={styles.menuItemDanger}>
                   Log out
