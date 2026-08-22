@@ -65,7 +65,12 @@ export async function signInWithGoogle() {
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${origin}/auth/callback` },
+    options: {
+      redirectTo: `${origin}/auth/callback`,
+      // Always show Google's account chooser instead of silently reusing the
+      // one signed-in session — lets people pick a different Google account.
+      queryParams: { prompt: "select_account" },
+    },
   });
 
   if (error || !data.url) {
