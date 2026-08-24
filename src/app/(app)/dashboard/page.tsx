@@ -1,10 +1,14 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { ButtonLink } from "@/components/Button";
 import { PlusIcon } from "@/components/icons";
 import { FlashToast } from "@/components/FlashToast";
 import { getAccount } from "@/features/account/queries";
 import { getCompetitorsWithPages, type CompetitorRow } from "@/features/competitors/queries";
+import { getDemoFeed } from "@/features/demo/demoFeed";
 import { LIMITS } from "@/features/plan/limits";
+import { DemoDashboard } from "./DemoDashboard";
+import { domainOf, latestMeaningful, timeAgo, withinWeek } from "./dashboardFeed";
 import styles from "./page.module.css";
 
 const SUGGESTIONS = [
@@ -12,39 +16,6 @@ const SUGGESTIONS = [
   { n: "02", text: "Their changelog — what they’re shipping" },
   { n: "03", text: "Their homepage — how the positioning moves" },
 ];
-
-function domainOf(url: string): string {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return url;
-  }
-}
-
-const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-
-// "This week" = the trailing 7 days. Digests are derived from changes in this
-// same window (SPEC.md) — no digest table, just the changes rows filtered by
-// detected_at, computed here on the fly.
-function withinWeek(detectedAt: string, now: number): boolean {
-  return now - new Date(detectedAt).getTime() <= WEEK_MS;
-}
-
-function timeAgo(detectedAt: string, now: number): string {
-  const mins = Math.round((now - new Date(detectedAt).getTime()) / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.round(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.round(hrs / 24);
-  return `${days}d ago`;
-}
-
-// The most recent meaningful change on a page, if any — that's the sentence
-// worth showing. Trivial changes stay counted-but-unshown (the low-noise edge).
-function latestMeaningful(page: CompetitorRow["pages"][number]) {
-  return page.changes.find((c) => c.isMeaningful) ?? null;
-}
 
 function quietNote(page: CompetitorRow["pages"][number]): string {
   if (!page.isActive) return "Paused";
@@ -58,6 +29,15 @@ export default async function DashboardPage() {
   // clock here is deterministic for the response (not a client-render impurity).
   // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
+
+  // A user with zero competitors of their own sees a clearly-labeled, display-only
+  // example dashboard instead of an empty feed (SPEC — Seeded Demo Dashboard). It
+  // is never stored, monitored, or counted to limits, and disappears the instant
+  // they add their first real competitor. If no demo data is present, fall through
+  // to the guided empty state below — never a blank screen.
+  if (account && competitors.length === 0 && getDemoFeed(now).length > 0) {
+    return <DemoDashboard now={now} />;
+  }
 
   if (!account || competitors.length === 0) {
     return (
@@ -166,7 +146,7 @@ export default async function DashboardPage() {
           <div>
             <div className={styles.upgradeBannerTitle}>You&rsquo;re over the Free plan limit</div>
             <div className={styles.upgradeBannerBody}>
-              Free tracks {limits.competitors} competitor and {limits.pagesPerCompetitor} pages.
+              Free tracks {limits.competitors} competitors and {limits.pagesPerCompetitor} pages each.
               The extras are read-only until you upgrade.
             </div>
           </div>
@@ -193,27 +173,29 @@ export default async function DashboardPage() {
 
               {c.pages.map((p) => {
                 const change = latestMeaningful(p);
+                if (change) {
+                  return (
+                    <Link key={p.id} href={`/changes/${change.id}`} className={styles.pageRowLink}>
+                      <div className={styles.pageMeta}>
+                        <div className={styles.pageLabel}>{p.label}</div>
+                        {!p.isActive ? <div className={styles.pagePaused}>Paused</div> : null}
+                      </div>
+                      <div className={styles.pageChange}>
+                        <span className={styles.pageSummary}>
+                          {change.summary ?? "Meaningful change detected (summary unavailable)."}
+                        </span>
+                        <div className={styles.pageChangeMeta}>{timeAgo(change.detectedAt, now)}</div>
+                      </div>
+                    </Link>
+                  );
+                }
                 return (
                   <div key={p.id} className={styles.pageRow}>
                     <div className={styles.pageMeta}>
                       <div className={styles.pageLabel}>{p.label}</div>
                       {!p.isActive ? <div className={styles.pagePaused}>Paused</div> : null}
                     </div>
-                    {change ? (
-                      <div className={styles.pageChange}>
-                        <a
-                          className={styles.pageSummary}
-                          href={p.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {change.summary ?? "Meaningful change detected (summary unavailable)."}
-                        </a>
-                        <div className={styles.pageChangeMeta}>{timeAgo(change.detectedAt, now)}</div>
-                      </div>
-                    ) : (
-                      <div className={styles.pageQuiet}>{quietNote(p)}</div>
-                    )}
+                    <div className={styles.pageQuiet}>{quietNote(p)}</div>
                   </div>
                 );
               })}
