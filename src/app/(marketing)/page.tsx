@@ -51,9 +51,10 @@ export default async function RootPage() {
             The competitor tracker built for founders, not enterprises.
           </h1>
           <p className={styles.heroBody}>
-            Add your competitors. Get one plain-English email a week on what actually
-            changed — pricing, features, messaging. No dashboard to babysit, no monitors
-            to configure, no premium tier just to unlock the AI. It just works.
+            Add your competitors and TrailWatch watches their pages for you — then sends
+            one plain-English email a week on what actually changed: pricing, features,
+            messaging. A full dashboard’s there when you want to dig in, but you never have
+            to babysit one. It just works.
           </p>
           <div className={styles.heroCta}>
             <a
@@ -129,10 +130,11 @@ export default async function RootPage() {
             </div>
             <div>
               <div className={styles.stepNum}>03</div>
-              <div className={styles.stepTitle}>One email, every Monday</div>
+              <div className={styles.stepTitle}>One email, every Monday.</div>
               <p className={styles.stepBody}>
-                Grouped by competitor, in plain English. “Northwind moved audit logs into
-                their Pro plan.” Read the whole thing in 30 seconds.
+                Grouped by competitor, in plain English. “Linear raised their Business plan
+                from $14 to $16.” Read it in 30 seconds — or open the dashboard to see
+                every change in full.
               </p>
             </div>
           </div>
