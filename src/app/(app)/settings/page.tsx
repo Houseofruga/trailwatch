@@ -44,7 +44,10 @@ export default async function SettingsPage() {
           {isFree ? "." : ` (${PLAN_PRICE.paid}).`}
         </p>
         {isFree ? (
-          <UpgradeButton email={account.email} userId={user.id} />
+          // Compact nudge, not the full pricing surface — defaults to Annual
+          // (the best-value option) same as the toggle on /billing, where a
+          // user who wants Monthly instead can switch.
+          <UpgradeButton email={account.email} userId={user.id} period="annual" />
         ) : hasSubscription ? (
           <CancelButton />
         ) : (

@@ -39,6 +39,13 @@
   flex-direction: column;
 }
 
+/* Wraps the Monthly/Annual toggle + the Pro card (ProPricingCard renders both)
+   so the toggle sits directly above the card, in the same grid column. */
+.proColumn {
+  display: flex;
+  flex-direction: column;
+}
+
 /* Pro card gets the accent-tinted border to draw the eye. */
 .cardPro {
   border-color: var(--accent-line);

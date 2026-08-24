@@ -4,21 +4,37 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { initializePaddle, type Paddle } from "@paddle/paddle-js";
 import { Button } from "@/components/Button";
+import type { BillingPeriod } from "@/features/plan/limits";
 
-// Opens Paddle's checkout overlay in-app. We stamp `userId` into customData so
-// the webhook can tie the resulting subscription back to this account, and
+// One env var per Pro price — set from the Paddle dashboard, never hardcoded.
+const PRICE_ID_BY_PERIOD: Record<BillingPeriod, string | undefined> = {
+  monthly: process.env.NEXT_PUBLIC_PADDLE_PRICE_PRO_MONTHLY,
+  annual: process.env.NEXT_PUBLIC_PADDLE_PRICE_PRO_ANNUAL,
+};
+
+// Opens Paddle's checkout overlay in-app, for whichever billing period the
+// caller currently has selected. We stamp `userId` into customData so the
+// webhook can tie the resulting subscription back to this account, and
 // prefill the email. The plan flips to paid when the webhook lands — so on
 // checkout.completed we close the overlay and poll the server until this page
 // re-renders as Pro (this component unmounts at that point), rather than making
 // the user close and refresh by hand.
-export function UpgradeButton({ email, userId }: { email: string; userId: string }) {
+export function UpgradeButton({
+  email,
+  userId,
+  period,
+}: {
+  email: string;
+  userId: string;
+  period: BillingPeriod;
+}) {
   const router = useRouter();
   const [paddle, setPaddle] = useState<Paddle>();
   const [finalizing, setFinalizing] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
 
   const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
-  const priceId = process.env.NEXT_PUBLIC_PADDLE_PRICE_ID;
+  const priceId = PRICE_ID_BY_PERIOD[period];
   const environment =
     process.env.NEXT_PUBLIC_PADDLE_ENV === "production" ? "production" : "sandbox";
 

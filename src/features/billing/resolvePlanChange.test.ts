@@ -46,6 +46,11 @@ describe("resolvePlanChange", () => {
   });
 
   it("ignores events we don't act on", () => {
+    // subscription.updated is what Paddle fires the moment a cancellation is
+    // *scheduled* (effective_from: "next_billing_period") — the subscription
+    // stays `active` until the period actually ends. Ignoring it here is what
+    // keeps a scheduled cancellation from revoking access early; only the
+    // later subscription.canceled event (once the period ends) should.
     expect(resolvePlanChange({ event_type: "transaction.completed", data: {} })).toBeNull();
     expect(resolvePlanChange({ event_type: "subscription.updated", data: {} })).toBeNull();
   });

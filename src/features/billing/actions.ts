@@ -3,11 +3,19 @@
 import { revalidatePath } from "next/cache";
 import { Environment, Paddle } from "@paddle/paddle-node-sdk";
 import { createClient } from "@/lib/supabase/server";
+import { formatBillingDate } from "./formatDate";
 
-// Cancels the current user's subscription via Paddle's API. We don't flip the
-// plan here — Paddle fires `subscription.canceled`, and the webhook is the one
-// source of truth that moves the user back to free (same path SPEC §9.6 tests).
-export async function cancelSubscription(): Promise<{ ok: boolean; message: string }> {
+// Cancels the current user's subscription via Paddle's API, effective at the
+// end of the current billing period — not immediately. This matters most for
+// Annual: an immediate cancel would forfeit the rest of a prepaid year with no
+// refund, which we don't do. Paddle keeps the subscription `active` with a
+// `scheduled_change` until the period actually ends, so access (and the
+// user's `plan`) is untouched here. Only when the period ends does Paddle
+// transition the subscription to `canceled` and fire `subscription.canceled`
+// — the webhook is still the one source of truth that moves the user to free.
+export async function cancelSubscription(): Promise<
+  { ok: true; message: string; effectiveAt: string | null } | { ok: false; message: string }
+> {
   const apiKey = process.env.PADDLE_API_KEY;
   if (!apiKey) return { ok: false, message: "Billing isn't configured." };
 
@@ -32,15 +40,25 @@ export async function cancelSubscription(): Promise<{ ok: boolean; message: stri
       : Environment.sandbox;
   const paddle = new Paddle(apiKey, { environment: env });
 
+  let effectiveAt: string | null = null;
   try {
-    await paddle.subscriptions.cancel(subId, { effectiveFrom: "immediately" });
+    const result = await paddle.subscriptions.cancel(subId, {
+      effectiveFrom: "next_billing_period",
+    });
+    effectiveAt = result.scheduledChange?.effectiveAt ?? null;
   } catch (err) {
     console.error("Paddle cancel failed:", err);
     return { ok: false, message: "Couldn't cancel right now — try again shortly." };
   }
 
   revalidatePath("/billing");
-  return { ok: true, message: "Your subscription is cancelling. You're back on Free." };
+  return {
+    ok: true,
+    message: effectiveAt
+      ? `Cancelled. You'll keep Pro until ${formatBillingDate(effectiveAt)}, then move to Free.`
+      : "Cancelled. You'll keep Pro until your current period ends, then move to Free.",
+    effectiveAt,
+  };
 }
 
 // Mints a short-lived Paddle customer-portal session and returns its URL. The

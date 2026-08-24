@@ -1,10 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAccount } from "@/features/account/queries";
-import { getNextChargeDate } from "@/features/billing/queries";
-import { LIMITS, PLAN_PRICE } from "@/features/plan/limits";
-import { UpgradeButton } from "@/features/billing/UpgradeButton";
+import { getSubscriptionBillingInfo } from "@/features/billing/queries";
+import { LIMITS, PLAN_PRICE, PRO_MONTHLY_USD, PRO_ANNUAL_USD, formatProPrice } from "@/features/plan/limits";
+import { ProPricingCard } from "@/features/billing/ProPricingCard";
 import { CancelButton } from "@/features/billing/CancelButton";
 import { ManageBillingButton } from "@/features/billing/ManageBillingButton";
+import { formatBillingDate } from "@/features/billing/formatDate";
 import styles from "./page.module.css";
 
 function planFeatures(comp: number, pages: number): string[] {
@@ -14,14 +15,6 @@ function planFeatures(comp: number, pages: number): string[] {
     "Daily checks, noise filtered",
     "Weekly email digest",
   ];
-}
-
-function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(iso));
 }
 
 export default async function BillingPage() {
@@ -36,9 +29,13 @@ export default async function BillingPage() {
 
   // A paid user normally has a Paddle subscription — but a comp (founder) account
   // is Pro with none. Distinguish them so we don't show Cancel/Invoices for a
-  // subscription that doesn't exist.
+  // subscription that doesn't exist. For a real subscription, ask Paddle for
+  // its actual interval so the price/billed lines reflect monthly vs annual
+  // (we don't store the period ourselves — Paddle is the source of truth).
   let hasSubscription = false;
   let nextCharge: string | null = null;
+  let period: "monthly" | "annual" = "monthly";
+  let cancelsAt: string | null = null;
   if (!isFree) {
     const { data: profile } = await supabase
       .from("users")
@@ -47,9 +44,15 @@ export default async function BillingPage() {
       .single();
     hasSubscription = Boolean(profile?.paddle_subscription_id);
     if (hasSubscription) {
-      nextCharge = await getNextChargeDate(profile!.paddle_subscription_id!);
+      const billingInfo = await getSubscriptionBillingInfo(profile!.paddle_subscription_id!);
+      nextCharge = billingInfo?.nextBilledAt ?? null;
+      period = billingInfo?.period ?? "monthly";
+      cancelsAt = billingInfo?.cancelsAt ?? null;
     }
   }
+
+  const proPrice = formatProPrice(period);
+  const renewalAmount = period === "annual" ? PRO_ANNUAL_USD : PRO_MONTHLY_USD;
 
   return (
     <div className={styles.wrap}>
@@ -57,7 +60,9 @@ export default async function BillingPage() {
       <p className={styles.sub}>
         {isFree
           ? "You’re on Free. Pro is the only paid plan — no tiers, no add-ons."
-          : "You’re on Pro, billed monthly. Cancel any time."}
+          : cancelsAt
+            ? `Your Pro plan is cancelling — you’ll keep access until ${formatBillingDate(cancelsAt)}, then move to Free.`
+            : `You’re on Pro, billed ${period}. Cancel any time.`}
       </p>
 
       <div className={styles.grid}>
@@ -77,39 +82,51 @@ export default async function BillingPage() {
           </ul>
         </div>
 
-        {/* Pro */}
-        <div className={`${styles.card} ${styles.cardPro}`}>
-          <div className={styles.cardHead}>
-            <div className={styles.planName}>Pro</div>
-            {!isFree ? <span className={styles.current}>Current</span> : null}
+        {/* Pro — the toggle + checkout card (not yet subscribed), or a plain
+            summary card (already on Pro: nothing to toggle post-purchase). */}
+        {isFree ? (
+          <div className={styles.proColumn}>
+            <ProPricingCard
+              email={account.email}
+              userId={user.id}
+              features={planFeatures(LIMITS.paid.competitors, LIMITS.paid.pagesPerCompetitor)}
+            />
           </div>
-          <div className={styles.price}>
-            <span className={styles.priceAmount}>$19</span>
-            <span className={styles.pricePer}>/month</span>
-          </div>
-          <ul className={styles.features}>
-            {planFeatures(LIMITS.paid.competitors, LIMITS.paid.pagesPerCompetitor).map((f) => (
-              <li key={f} className={styles.feature}>
-                {f}
-              </li>
-            ))}
-          </ul>
+        ) : (
+          <div className={`${styles.card} ${styles.cardPro}`}>
+            <div className={styles.cardHead}>
+              <div className={styles.planName}>Pro</div>
+              <span className={styles.current}>Current</span>
+            </div>
+            <div className={styles.price}>
+              <span className={styles.priceAmount}>{proPrice.amount}</span>
+              <span className={styles.pricePer}>{proPrice.per}</span>
+            </div>
+            <ul className={styles.features}>
+              {planFeatures(LIMITS.paid.competitors, LIMITS.paid.pagesPerCompetitor).map((f) => (
+                <li key={f} className={styles.feature}>
+                  {f}
+                </li>
+              ))}
+            </ul>
 
-          {isFree ? (
-            <div className={styles.action}>
-              <UpgradeButton email={account.email} userId={user.id} />
-              <div className={styles.checkoutNote}>Secure checkout by Paddle · cancel any time</div>
-            </div>
-          ) : hasSubscription ? (
-            <div className={styles.action}>
-              <CancelButton />
-            </div>
-          ) : (
-            <div className={styles.action}>
-              <div className={styles.compNote}>Complimentary Pro — no billing on this account.</div>
-            </div>
-          )}
-        </div>
+            {hasSubscription && cancelsAt ? (
+              <div className={styles.action}>
+                <div className={styles.compNote}>
+                  Cancels {formatBillingDate(cancelsAt)} — you keep Pro until then.
+                </div>
+              </div>
+            ) : hasSubscription ? (
+              <div className={styles.action}>
+                <CancelButton />
+              </div>
+            ) : (
+              <div className={styles.action}>
+                <div className={styles.compNote}>Complimentary Pro — no billing on this account.</div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {!isFree && hasSubscription ? (
@@ -117,14 +134,18 @@ export default async function BillingPage() {
           <div className={styles.billingLabel}>Billing</div>
           <div className={styles.billingRows}>
             <div className={styles.billingRow}>
-              <span className={styles.billingKey}>Next charge</span>
+              <span className={styles.billingKey}>{cancelsAt ? "Cancels" : "Next charge"}</span>
               <span>
-                {nextCharge ? `${PLAN_PRICE.paid.replace("/mo", "")}.00 on ${formatDate(nextCharge)}` : "—"}
+                {cancelsAt
+                  ? formatBillingDate(cancelsAt)
+                  : nextCharge
+                    ? `$${renewalAmount}.00 on ${formatBillingDate(nextCharge)}`
+                    : "—"}
               </span>
             </div>
             <div className={styles.billingRow}>
               <span className={styles.billingKey}>Billed</span>
-              <span>Monthly, in USD</span>
+              <span>{period === "annual" ? "Annually" : "Monthly"}, in USD</span>
             </div>
             <div className={styles.billingRow}>
               <span className={styles.billingKey}>Invoices</span>
@@ -135,8 +156,9 @@ export default async function BillingPage() {
       ) : null}
 
       <p className={styles.footNote}>
-        One paid plan, no add-ons, no annual lock-in. If you cancel you keep your first competitor
-        and three pages on Free.
+        One paid plan, no add-ons. Cancel any time — you keep Pro through the end of your current
+        billing period; we don&rsquo;t prorate or refund unused time. If you cancel you keep your
+        first competitor and three pages on Free.
       </p>
     </div>
   );
