@@ -133,67 +133,471 @@
   font-size: 15px;
 }
 
-/* ------------------------------------------------ product dashboard */
+/* ------------------------------------ product screenshot (app window) */
 
-.dash {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  max-width: 720px;
+/* The window is a fixed desktop-width capture; on narrow screens the frame
+   scrolls horizontally so it still reads as a real screenshot with the nav. */
+/* The visible window: full section width, fixed 16:10 desktop proportions,
+   content clipped at the fold like a real screen capture. */
+.shotWrap {
   margin-top: 54px;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.1);
+  background: var(--surface);
 }
 
-.dashTop {
+/* Render the app larger than the frame, then scale it down, so the UI reads at
+   a denser real-desktop size. width/height stay in sync with the scale so it
+   fills the frame exactly. Smaller screens scale down further (was too big). */
+.shotScale {
+  --shot-scale: 0.75;
+  width: calc(100% / var(--shot-scale));
+  height: calc(100% / var(--shot-scale));
+  transform: scale(var(--shot-scale));
+  transform-origin: top left;
+}
+
+.shot {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding: 22px 26px;
-  border-bottom: 1px solid var(--border-soft);
+  flex-direction: column;
+  background: var(--surface);
 }
 
-.dashTitle {
-  font-size: 15px;
-  font-weight: 600;
+.shotBar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
 }
 
-.dashCount {
+.shotDots {
+  display: flex;
+  gap: 7px;
+  flex: 0 0 auto;
+}
+
+.shotDot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--border-input);
+}
+
+.shotUrl {
+  flex: 1;
+  text-align: center;
   font-family: var(--font-geist-mono), monospace;
-  font-size: 12px;
+  font-size: 11.5px;
+  color: var(--ink-4);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  max-width: 420px;
+  margin: 0 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appRow {
+  display: flex;
+  align-items: stretch;
+  background: var(--bg);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ---- left nav (mirrors the app Sidebar) ---- */
+.side {
+  width: 226px;
+  flex: 0 0 226px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.sideBrand {
+  padding: 20px 18px 16px 18px;
+}
+
+.sideLogo {
+  width: 128px;
+  height: auto;
+  display: block;
+}
+
+.sideNav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 12px;
+}
+
+.navItem {
+  position: relative;
+  overflow: hidden;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.navItem svg {
+  flex: 0 0 auto;
+  color: var(--ink-4);
+}
+
+.navItemActive {
+  font-weight: 500;
+  background: linear-gradient(
+    90deg,
+    var(--surface-sunken) 0%,
+    var(--surface-sunken) 55%,
+    var(--accent-wash) 84%,
+    var(--accent-line) 100%
+  );
+}
+
+.navItemActive svg {
   color: var(--accent-ink);
 }
 
-.dashRow {
+.navBar {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  right: 0;
+  width: 5px;
+  border-radius: 3px 0 0 3px;
+  background: var(--accent);
+}
+
+.sideFoot {
+  margin-top: auto;
+  padding: 16px;
   display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  padding: 16px 26px;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.usage {
+  border: 1px solid var(--border);
+  padding: 13px 14px;
+  background: var(--surface-alt);
+}
+
+.usageHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.usagePlan {
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.usagePrice {
+  font-size: 11.5px;
+  color: var(--ink-4);
+}
+
+.meters {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.meterRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+
+.meterRowSpaced {
+  margin-top: 2px;
+}
+
+.meterValue {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.track {
+  height: 3px;
+  background: var(--rule);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: var(--accent);
+}
+
+.profile {
+  border-top: 1px solid var(--border);
+  padding-top: 13px;
+}
+
+.profileRow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.profileAvatar {
+  width: 26px;
+  height: 26px;
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.profileText {
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.profileName {
+  font-size: 12px;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profileEmail {
+  font-size: 11px;
+  color: var(--ink-5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- main dashboard area ---- */
+.appMain {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding: 26px 28px 30px 28px;
+}
+
+.appHead {
+  margin-bottom: 20px;
+}
+
+.appHeading {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0 0 6px 0;
+}
+
+.appSub {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.bStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.bStat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+}
+
+.bStatLabelRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.bStatIcon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex: 0 0 auto;
+}
+
+.bStatIconAmber {
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+}
+
+.bStatIconGreen {
+  background: var(--green-wash);
+  color: var(--green-ink);
+}
+
+.bStatIconWarn {
+  background: var(--amber-wash);
+  color: var(--amber-ink);
+}
+
+.bStatLabel {
+  font-size: 11.5px;
+  color: var(--ink-4);
+}
+
+.bStatValue {
+  font-size: 20px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.bList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.bCardHead {
+  padding: 14px 18px 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
   border-bottom: 1px solid var(--border-soft);
 }
 
-.dashTag {
-  flex: 0 0 84px;
+.bCardHeadLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.bAvatar {
+  width: 24px;
+  height: 24px;
+  background: var(--surface-sunken);
+  color: #5d5a53;
   font-size: 11px;
-  letter-spacing: 0.06em;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+/* Competitor logo mark — a solid brand-coloured tile (set inline) with a white
+   glyph, standing in for each company's favicon. */
+.bLogo {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: #fff;
+}
+
+.bName {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+.bDomain {
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+.bMeta {
+  font-size: 11.5px;
+  color: var(--ink-5);
+  white-space: nowrap;
+}
+
+.bRow {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-softer);
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.bRow:last-child {
+  border-bottom: none;
+}
+
+.bRowLabel {
+  flex: 0 0 84px;
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--ink-4);
-  padding-top: 3px;
+  padding-top: 2px;
 }
 
-.dashName {
-  font-size: 14.5px;
-  font-weight: 500;
-  margin-bottom: 3px;
+.bChange {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
-.dashChange {
-  font-size: 14.5px;
+.bSummary {
+  font-size: 13.5px;
   line-height: 1.5;
   color: var(--ink-2);
 }
 
-.dashFoot {
-  padding: 16px 26px;
+.bTime {
+  font-size: 11px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.bQuiet {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  color: var(--ink-faint);
+  padding-top: 1px;
+}
+
+.bMore {
+  margin-top: 14px;
   font-size: 12.5px;
   color: var(--ink-5);
 }
@@ -277,7 +681,6 @@
 .compare {
   background: var(--surface);
   border: 1px solid var(--border);
-  max-width: 760px;
 }
 
 .compareRow {
@@ -297,7 +700,6 @@
 }
 
 .compareCell.tw {
-  background: var(--accent-wash);
   color: var(--ink);
   border-left: 1px solid var(--border-soft);
 }
@@ -310,8 +712,10 @@
   color: var(--ink-4);
 }
 
-.compareHead .compareCell.tw {
-  color: var(--accent-ink);
+.compareLogo {
+  height: 16px;
+  width: auto;
+  display: block;
 }
 
 /* --------------------------------------------------------- pricing */
@@ -329,7 +733,6 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
-  max-width: 760px;
 }
 
 .plan {
@@ -463,6 +866,11 @@
   .planGrid {
     grid-template-columns: 1fr;
   }
+
+  /* keep the app at a desktop-ish logical width as the frame narrows */
+  .shotScale {
+    --shot-scale: 0.6;
+  }
 }
 
 @media (max-width: 560px) {
@@ -485,11 +893,28 @@
     padding-bottom: 60px;
   }
 
-  .dashTop,
-  .dashRow,
-  .dashFoot {
-    padding-left: 20px;
-    padding-right: 20px;
+  /* Like Linear's mobile hero: a tall crop of the desktop app — the left nav
+     and start of the dashboard read clearly at size, and it bleeds off the
+     right screen edge (clipped, no scroll). */
+  .shotWrap {
+    aspect-ratio: auto;
+    height: 392px;
+    width: calc(100% + 22px); /* bleed past the right padding to the screen edge */
+  }
+
+  .shotScale {
+    width: 900px;
+    height: 560px;
+    transform: scale(0.7);
+  }
+
+  /* keep the logo from crowding the Log in / Start free actions on mobile */
+  .headerImg {
+    height: 34px;
+  }
+
+  .headerActions {
+    gap: 14px;
   }
 
   .compareCell {
