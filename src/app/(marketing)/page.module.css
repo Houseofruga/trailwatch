@@ -140,6 +140,7 @@
 /* The visible window: full section width, fixed 16:10 desktop proportions,
    content clipped at the fold like a real screen capture. */
 .shotWrap {
+  position: relative;
   margin-top: 54px;
   width: 100%;
   aspect-ratio: 16 / 10;
@@ -154,6 +155,9 @@
    fills the frame exactly. Smaller screens scale down further (was too big). */
 .shotScale {
   --shot-scale: 0.75;
+  position: absolute; /* out of flow — its oversized box never adds page height (iOS) */
+  top: 0;
+  left: 0;
   width: calc(100% / var(--shot-scale));
   height: calc(100% / var(--shot-scale));
   transform: scale(var(--shot-scale));
