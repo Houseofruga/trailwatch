@@ -11,7 +11,7 @@ import styles from "@/app/(auth)/login/page.module.css";
 const COPY = {
   signup: {
     title: "Create your account",
-    sub: "Free plan, one competitor, no card.",
+    sub: "Free plan, two competitors, no card.",
     cta: "Create account",
     switchText: "Already have an account?",
     switchCta: "Log in",

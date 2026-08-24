@@ -87,7 +87,7 @@ Notes:
 
 | | Free | Paid |
 |---|---|---|
-| Competitors | 1 | 10 |
+| Competitors | 2 | 10 |
 | Pages per competitor | 3 | 10 |
 | Check frequency | daily | daily |
 | Digest | weekly email | weekly email |
@@ -207,7 +207,7 @@ The MVP is done when all of these pass by hand in a test environment:
 3. A whitespace-only or timestamp-only change produces **no** change row (noise filter works).
 4. The weekly digest job emails a user who has changes (grouped, with links) and sends
    **nothing** to a user with none.
-5. A free user is blocked from adding a 2nd competitor; completing Stripe Checkout (test mode)
+5. A free user is blocked from adding a 3rd competitor; completing Stripe Checkout (test mode)
    flips them to paid and lifts the limit immediately.
 6. Cancelling the subscription reverts the user to the free plan and re-applies the limit.
 

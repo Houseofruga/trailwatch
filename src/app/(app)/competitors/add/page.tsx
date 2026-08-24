@@ -58,7 +58,7 @@ export default async function AddCompetitorPage({
           title={`You've used your ${planLabel} competitor${limits.competitors === 1 ? "" : "s"}`}
           body={
             account.plan === "free"
-              ? "Free tracks one competitor with up to three pages. Pro raises that to ten competitors and ten pages each — same daily checks, same weekly digest."
+              ? "Free tracks two competitors with up to three pages each. Pro raises that to ten competitors and ten pages each — same daily checks, same weekly digest."
               : `You're tracking all ${limits.competitors} competitors Pro allows.`
           }
           swapHref="/competitors"

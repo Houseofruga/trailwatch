@@ -55,7 +55,7 @@ export async function getAccount(): Promise<Account | null> {
     plan,
     competitorCount,
     pageCount,
-    pageAllowance: LIMITS[plan].pagesPerCompetitor * Math.max(1, competitorCount),
+    pageAllowance: LIMITS[plan].pagesPerCompetitor * LIMITS[plan].competitors,
     digestEnabled: profileResult.data?.digest_enabled ?? true,
   };
 }
