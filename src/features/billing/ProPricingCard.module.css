@@ -5,11 +5,9 @@
 
 .toggle {
   display: inline-flex;
-  align-self: flex-end;
   background: var(--surface-sunken);
   border: 1px solid var(--border);
   padding: 3px;
-  margin-bottom: 10px;
   gap: 2px;
 }
 
@@ -17,14 +15,15 @@
 .optionActive {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   border: none;
   cursor: pointer;
   font-family: inherit;
-  font-size: 12.5px;
-  padding: 7px 12px;
+  font-size: 12px;
+  padding: 6px 10px;
   background: transparent;
   color: var(--ink-3);
+  white-space: nowrap;
 }
 
 .optionActive {
@@ -50,12 +49,20 @@
   padding: 24px;
   display: flex;
   flex-direction: column;
+  /* Query container so the toggle adapts to the CARD's width, not the viewport
+     — the card can be narrow (two-column desktop) or wide (single-column
+     tablet) at the same viewport width. */
+  container-type: inline-size;
 }
 
 .cardHead {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
+  /* Inline (toggle right of "Pro") when there's room; on a narrow card the
+     toggle wraps to its own line rather than overflowing the card edge. */
+  flex-wrap: wrap;
+  gap: 10px 12px;
   margin-bottom: 4px;
 }
 
@@ -132,4 +139,24 @@
   font-size: 11.5px;
   color: var(--ink-faint);
   text-align: center;
+}
+
+/* When the CARD is too narrow to fit the toggle beside "Pro" even wrapped, make
+   it a full-width segmented control on its own line. The "Best value" badge is
+   dropped here — it's redundant, since Annual is the default and its "2 months
+   free" line shows. Above this width the toggle stays inline, right of "Pro". */
+@container (max-width: 300px) {
+  .toggle {
+    width: 100%;
+  }
+
+  .option,
+  .optionActive {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .bestValue {
+    display: none;
+  }
 }

@@ -85,13 +85,11 @@ export default async function BillingPage() {
         {/* Pro — the toggle + checkout card (not yet subscribed), or a plain
             summary card (already on Pro: nothing to toggle post-purchase). */}
         {isFree ? (
-          <div className={styles.proColumn}>
-            <ProPricingCard
-              email={account.email}
-              userId={user.id}
-              features={planFeatures(LIMITS.paid.competitors, LIMITS.paid.pagesPerCompetitor)}
-            />
-          </div>
+          <ProPricingCard
+            email={account.email}
+            userId={user.id}
+            features={planFeatures(LIMITS.paid.competitors, LIMITS.paid.pagesPerCompetitor)}
+          />
         ) : (
           <div className={`${styles.card} ${styles.cardPro}`}>
             <div className={styles.cardHead}>
