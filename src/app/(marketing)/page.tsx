@@ -93,7 +93,6 @@ export default async function RootPage() {
       {/* ============================================ SECTION 1 · HERO */}
       <section className={`${styles.hero} ${styles.shell}`}>
         <div className={styles.heroInner}>
-          <div className={styles.eyebrow}>TrailWatch — by House of Ruga</div>
           <h1 className={styles.title}>
             The competitor tracker built for founders, not enterprises.
           </h1>

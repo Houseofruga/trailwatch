@@ -94,15 +94,7 @@
 }
 
 .heroInner {
-  max-width: 680px;
-}
-
-.eyebrow {
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-4);
-  margin-bottom: 22px;
+  max-width: 820px;
 }
 
 .title {
@@ -111,6 +103,7 @@
   font-weight: 600;
   letter-spacing: -0.025em;
   margin: 0 0 24px 0;
+  text-wrap: balance;
 }
 
 .heroBody {
