@@ -1,0 +1,144 @@
+.wrap {
+  padding: 48px 56px 90px 56px;
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.crumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.crumbComp {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.crumbDot {
+  color: var(--border);
+}
+.crumbLabel {
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.summary {
+  font-size: 26px;
+  line-height: 1.42;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 0 0 22px 0;
+  text-wrap: pretty;
+  color: var(--ink);
+}
+
+.meta {
+  display: flex;
+  gap: 18px;
+  font-size: 12.5px;
+  color: var(--ink-4);
+  padding-bottom: 26px;
+  border-bottom: 1px solid var(--border);
+}
+.metaLink {
+  color: var(--accent-ink);
+  text-decoration: none;
+}
+.metaLink:hover {
+  text-decoration: underline;
+}
+
+.said {
+  margin-top: 30px;
+}
+.saidLabel {
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-5);
+  margin-bottom: 14px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.beforeBox {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 16px 18px;
+}
+.afterBox {
+  background: var(--surface);
+  border: 1px solid var(--accent-line);
+  padding: 16px 18px;
+}
+.boxHeadBefore {
+  font-size: 11.5px;
+  color: var(--ink-4);
+  margin-bottom: 9px;
+}
+.boxHeadAfter {
+  font-size: 11.5px;
+  color: var(--accent-ink);
+  margin-bottom: 9px;
+}
+.excerpt,
+.excerptAfter {
+  font-family: ui-monospace, "SF Mono", "Geist Mono", Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+.excerpt {
+  color: var(--ink-3);
+}
+.excerptAfter {
+  color: var(--ink);
+}
+
+.note {
+  margin: 16px 0 0 0;
+  font-size: 12.5px;
+  color: var(--ink-5);
+  line-height: 1.6;
+}
+
+.foot {
+  margin-top: 40px;
+  padding-top: 22px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.footBack {
+  font-size: 13.5px;
+  color: var(--ink-3);
+  text-decoration: none;
+}
+.footBack:hover {
+  color: var(--accent-ink);
+}
+.footOpen {
+  font-size: 13.5px;
+  color: var(--accent-ink);
+  text-decoration: none;
+}
+.footOpen:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    padding: 32px 20px 60px 20px;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
