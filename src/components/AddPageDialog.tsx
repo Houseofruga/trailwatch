@@ -26,7 +26,7 @@ function SubmitButton({ canSubmit }: { canSubmit: boolean }) {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending || !canSubmit}>
-      {pending ? "One moment…" : "Add pages"}
+      {pending ? "Capturing…" : "Add pages"}
     </Button>
   );
 }

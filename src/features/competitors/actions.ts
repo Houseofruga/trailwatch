@@ -6,6 +6,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { LIMITS, type Plan } from "@/features/plan/limits";
 import { resolvePlan } from "@/features/plan/comp";
+import { runCheckForPage } from "@/features/checks/runCheck";
 import { competitorName, pageRow } from "./validation";
 import { originOf, sameSite, siteOf } from "./domain";
 
@@ -45,6 +46,50 @@ function findDomainMismatch(establishedUrl: string, rows: { url: string }[]): st
   const mismatch = rows.find((r) => !sameSite(establishedUrl, r.url));
   if (!mismatch) return null;
   return `All pages for one competitor must be on ${domain} — add a separate competitor for other domains.`;
+}
+
+// Instant baseline: right after a page is created, capture its first snapshot
+// so the user sees value immediately instead of waiting for the daily cron.
+// Reuses the F3 check — on a page with no prior snapshot, runCheckForPage stores
+// the baseline and creates NO change row and NO LLM summary. A failed fetch is a
+// soft-fail: the page still exists and the daily cron (or Check now) captures it
+// later, so one unreachable URL never breaks the add.
+type CaptureOutcome = { label: string; captured: boolean };
+
+async function captureBaselines(pages: { id: string; label: string }[]): Promise<CaptureOutcome[]> {
+  const settled = await Promise.allSettled(pages.map((p) => runCheckForPage(p.id)));
+  return pages.map((p, i) => {
+    const r = settled[i];
+    const captured =
+      r.status === "fulfilled" &&
+      (r.value.status === "first-check" ||
+        r.value.status === "unchanged" ||
+        r.value.status === "recorded");
+    return { label: p.label, captured };
+  });
+}
+
+function today(): string {
+  return new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+// Confirmation copy from SPEC-instant-snapshot.md §4.
+function captureFlash(outcomes: CaptureOutcome[]): string {
+  const captured = outcomes.filter((o) => o.captured);
+  const failed = outcomes.filter((o) => !o.captured);
+  const date = today();
+
+  if (failed.length === 0) {
+    return captured.length === 1
+      ? `✓ Captured ${captured[0].label} as of ${date}. We'll alert you the moment it changes.`
+      : `✓ Captured ${captured.length} pages as of ${date}. We'll alert you the moment they change.`;
+  }
+  if (captured.length === 0) {
+    return failed.length === 1
+      ? `Added ${failed[0].label}, but we couldn't reach it yet. We'll keep trying — next check is tonight.`
+      : `Added ${failed.length} pages, but we couldn't reach them yet. We'll keep trying — next check is tonight.`;
+  }
+  return `Captured ${captured.length} of ${outcomes.length} pages as of ${date}. We couldn't reach ${failed.length} yet — we'll retry tonight.`;
 }
 
 function readPageRows(formData: FormData) {
@@ -90,19 +135,17 @@ export async function createCompetitor(_prev: FormState, formData: FormData): Pr
     .single();
   if (competitorError || !competitor) return { error: "Couldn't create the competitor. Try again." };
 
-  const { error: pagesError } = await supabase
+  const { data: newPages, error: pagesError } = await supabase
     .from("pages")
-    .insert(rowsResult.data.map((r) => ({ competitor_id: competitor.id, url: r.url, label: r.label })));
-  if (pagesError) return { error: "Competitor was created, but adding pages failed. Try again from Competitors." };
+    .insert(rowsResult.data.map((r) => ({ competitor_id: competitor.id, url: r.url, label: r.label })))
+    .select("id, label");
+  if (pagesError || !newPages) return { error: "Competitor was created, but adding pages failed. Try again from Competitors." };
+
+  const outcomes = await captureBaselines(newPages);
 
   revalidatePath("/dashboard");
   revalidatePath("/competitors");
-  redirect(
-    flashUrl(
-      "/dashboard",
-      `${nameResult.data} added — ${rowsResult.data.length} page${rowsResult.data.length === 1 ? "" : "s"} tracked`,
-    ),
-  );
+  redirect(flashUrl("/dashboard", captureFlash(outcomes)));
 }
 
 export async function addPages(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -136,19 +179,17 @@ export async function addPages(_prev: FormState, formData: FormData): Promise<Fo
   const domainError = findDomainMismatch(establishedUrl, rowsResult.data);
   if (domainError) return { error: domainError };
 
-  const { error } = await supabase
+  const { data: newPages, error } = await supabase
     .from("pages")
-    .insert(rowsResult.data.map((r) => ({ competitor_id: competitorId, url: r.url, label: r.label })));
-  if (error) return { error: "Couldn't add those pages. Try again." };
+    .insert(rowsResult.data.map((r) => ({ competitor_id: competitorId, url: r.url, label: r.label })))
+    .select("id, label");
+  if (error || !newPages) return { error: "Couldn't add those pages. Try again." };
+
+  const outcomes = await captureBaselines(newPages);
 
   revalidatePath("/dashboard");
   revalidatePath("/competitors");
-  redirect(
-    flashUrl(
-      "/competitors",
-      `${rowsResult.data.length} page${rowsResult.data.length === 1 ? "" : "s"} added to ${competitor.name}`,
-    ),
-  );
+  redirect(flashUrl("/competitors", captureFlash(outcomes)));
 }
 
 export async function togglePageActive(pageId: string, nextActive: boolean) {

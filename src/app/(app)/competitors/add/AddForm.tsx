@@ -27,7 +27,7 @@ function SubmitButton({ label, canSubmit }: { label: string; canSubmit: boolean 
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending || !canSubmit}>
-      {pending ? "One moment…" : label}
+      {pending ? "Capturing…" : label}
     </Button>
   );
 }
