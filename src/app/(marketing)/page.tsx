@@ -155,7 +155,6 @@ export default async function RootPage() {
                   <div className={styles.usage}>
                     <div className={styles.usageHead}>
                       <span className={styles.usagePlan}>Pro plan</span>
-                      <span className={styles.usagePrice}>$19/mo</span>
                     </div>
                     <div className={styles.meters}>
                       <div className={styles.meterRow}>
@@ -435,13 +434,15 @@ export default async function RootPage() {
               <span className={styles.planBadge}>Cancel anytime</span>
             </div>
             <div className={styles.planPrice}>
-              $19<span className={styles.planPer}>/mo</span>
+              $15.83<span className={styles.planPer}>/mo</span>
+              <div className={styles.planPer}>
+                billed annually ($190/yr, 2 months free). Or $19/mo month-to-month.
+              </div>
             </div>
             <div className={styles.planFeatures}>
               <div>10 competitors</div>
-              <div>100 pages</div>
+              <div>40 pages</div>
               <div>Daily checks</div>
-              <div>AI summaries included</div>
             </div>
             <a
               className={`${styles.btn} ${styles.btnPrimary} ${styles.planCta}`}
@@ -452,8 +453,8 @@ export default async function RootPage() {
           </div>
         </div>
         <p className={styles.pricingFoot}>
-          No per-seat fees. No annual lock-in. No “contact sales.” The AI summaries work on
-          the free plan too — not gated behind an upgrade.
+          No per-seat fees. Month-to-month or save with annual — your call. And the AI
+          summaries work on the free plan too, not gated behind an upgrade.
         </p>
       </section>
 
