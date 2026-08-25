@@ -130,7 +130,7 @@ export default async function RootPage() {
               <aside className={styles.side}>
                 <div className={styles.sideBrand}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className={styles.sideLogo} src="/logo-branded.svg" alt="TrailWatch" />
+                  <img className={styles.sideLogo} src="/logo.svg" alt="TrailWatch" />
                 </div>
                 <nav className={styles.sideNav}>
                   <div className={`${styles.navItem} ${styles.navItemActive}`}>

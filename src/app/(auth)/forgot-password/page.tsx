@@ -10,9 +10,9 @@ export default function ForgotPasswordPage() {
       <div className={styles.inner}>
         <Link href="/" className={styles.logoLink}>
           <Image
-            src="/logo-branded.svg"
+            src="/logo.svg"
             alt="Trailwatch"
-            width={180}
+            width={217}
             height={48}
             className={styles.logo}
             priority
