@@ -1,0 +1,85 @@
+/*
+ * Shared site footer. Uses the design tokens in src/styles/tokens.css and the
+ * DM Sans font from the root layout. Muted, small, unobtrusive — no new colors.
+ */
+
+.band {
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+/* Mirrors the marketing .shell container width/padding. */
+.inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 34px 40px;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 28px;
+}
+
+.brandLogo {
+  height: 30px;
+  width: auto;
+  display: block;
+}
+
+.brandTag {
+  margin-top: 12px;
+  font-size: 12.5px;
+  color: var(--ink-5);
+}
+
+.legalHead {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  margin-bottom: 12px;
+}
+
+.legalLinks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.legalLinks a {
+  font-size: 12.5px;
+  color: var(--ink-4);
+}
+
+.legalLinks a:hover {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.copyright {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-softer);
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+
+@media (max-width: 560px) {
+  .inner {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  /* Legal group stacks below the brand line on mobile. */
+  .top {
+    flex-direction: column;
+    gap: 24px;
+  }
+}

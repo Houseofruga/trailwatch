@@ -1,0 +1,90 @@
+/*
+ * Shared layout for the legal document pages (/terms, /privacy, /refunds).
+ * Single readable column, long-form document — not a marketing page. Uses the
+ * shared tokens + DM Sans; no new colors or fonts.
+ */
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+/* Logo masthead, aligned to the reading column. */
+.masthead {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 26px 40px 0 40px;
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+
+.doc {
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 40px 80px 40px;
+}
+
+.title {
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 8px 0 0 0;
+}
+
+.updated {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--ink-4);
+}
+
+/* Clearly flags the body as placeholder to replace before launch. */
+.note {
+  margin: 32px 0 8px 0;
+  padding: 14px 16px;
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-line);
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.section {
+  margin-top: 34px;
+}
+
+.sectionTitle {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 10px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+}
+
+@media (max-width: 560px) {
+  .masthead {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .logo {
+    height: 34px;
+  }
+
+  .doc {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+}

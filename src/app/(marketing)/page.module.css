@@ -835,23 +835,6 @@
   color: var(--ink-4);
 }
 
-/* ---------------------------------------------------------- footer */
-
-.footerBand {
-  border-top: 1px solid var(--border);
-}
-
-.footer {
-  padding-top: 34px;
-  padding-bottom: 34px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 12.5px;
-  color: var(--ink-5);
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
 /* ------------------------------------------------------ responsive */
 
 @media (max-width: 860px) {

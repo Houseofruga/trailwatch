@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { SiteFooter } from "@/components/SiteFooter";
 import styles from "./page.module.css";
 
 // The subdomain root (trailwatch.houseofruga.com) IS the marketing landing.
@@ -483,12 +484,7 @@ export default async function RootPage() {
         </div>
       </section>
 
-      <div className={styles.footerBand}>
-        <footer className={`${styles.footer} ${styles.shell}`}>
-          <span>TrailWatch — by House of Ruga</span>
-          <span>One email a week. That’s the whole product.</span>
-        </footer>
-      </div>
+      <SiteFooter />
     </>
   );
 }
