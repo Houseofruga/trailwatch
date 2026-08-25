@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SiteFooter } from "@/components/SiteFooter";
 import styles from "./page.module.css";
@@ -63,7 +64,11 @@ export default async function RootPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const isAuthed = Boolean(user);
+
+  // src/proxy.ts already redirects signed-in visitors away from the landing;
+  // this is the belt to its braces. Logged-in users never see the marketing
+  // page — only signed-out visitors do.
+  if (user) redirect("/dashboard");
 
   return (
     <>
@@ -71,23 +76,15 @@ export default async function RootPage() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.headerImg} src="/logo.svg" alt="TrailWatch" />
         <div className={styles.headerActions}>
-          {isAuthed ? (
-            <a className={`${styles.btn} ${styles.btnPrimary}`} href="/dashboard">
-              Dashboard →
-            </a>
-          ) : (
-            <>
-              <a className={styles.headerLogin} href="/login">
-                Log in
-              </a>
-              <a
-                className={`${styles.btn} ${styles.btnPrimary}`}
-                href="/login?mode=signup"
-              >
-                Start free
-              </a>
-            </>
-          )}
+          <a className={styles.headerLogin} href="/login">
+            Log in
+          </a>
+          <a
+            className={`${styles.btn} ${styles.btnPrimary}`}
+            href="/login?mode=signup"
+          >
+            Start free
+          </a>
         </div>
       </header>
 

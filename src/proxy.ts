@@ -3,7 +3,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/env";
 
 const APP_PREFIXES = ["/dashboard", "/competitors", "/billing", "/settings"];
-const AUTH_PATHS = ["/login"];
+// Signed-in users have no reason to see these — send them straight to the app.
+// Includes the marketing landing ("/") so a logged-in visit skips it entirely.
+const SIGNED_OUT_ONLY = ["/", "/login"];
 
 /**
  * Next 16 calls this file `proxy` (the old `middleware` name is deprecated).
@@ -50,7 +52,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && AUTH_PATHS.includes(pathname)) {
+  if (user && SIGNED_OUT_ONLY.includes(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
