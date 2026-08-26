@@ -72,6 +72,22 @@ convenient:
   usage (the file still sits in `public/` but is unreferenced).
 - Signed-in users are now redirected off `/` and `/login` to `/dashboard`
   (`src/proxy.ts`); signing out restores the marketing page.
+- Set up the cross-account workflow (see below): this `HANDOFF.md`, a `/handoff`
+  skill, and a SessionStart warning hook. Also gitignored `.vercel/`.
+
+## Switching between Claude accounts
+
+The owner alternates between Claude accounts on this repo. Per-account memory does
+not transfer — **git is the only shared memory.** Rules:
+
+- **Never work from two accounts at once** — switch, don't run in parallel.
+- **Start** each session with `git pull`; read `CLAUDE.md` → `SPEC.md` → this file.
+- **End** each session by running **`/handoff`** (project skill at
+  `.claude/skills/handoff/SKILL.md`) — it refreshes this file and pushes it.
+- A **SessionStart hook** (`.claude/settings.json` →
+  `.claude/hooks/handoff-check.sh`) warns at the start of every session if the
+  working tree is dirty, commits are unpushed, or this file is 3+ commits stale —
+  i.e. if the previous session didn't hand off cleanly. Local-only, never fetches.
 
 ## Environment variables
 
