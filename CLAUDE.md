@@ -1,6 +1,8 @@
 # CLAUDE.md — Competitor Radar
 
-Persistent context for Claude Code. Read `SPEC.md` before starting any feature.
+Persistent context for Claude Code. Read `SPEC.md` before starting any feature,
+and `HANDOFF.md` for the current build state and known deviations (billing is
+Paddle, not Stripe, etc.) before continuing the build in a fresh session.
 
 ## Project
 
