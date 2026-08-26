@@ -29,21 +29,18 @@ Paddle checkout→plan-flip→cancel→revert loop and the digest send/no-send.
 These docs predate some decisions — trust the code, and reconcile the docs when
 convenient:
 
-- **Billing is Paddle, not Stripe.** `SPEC.md` and `CLAUDE.md` still say Stripe.
-  The real implementation is Paddle: webhook at `src/app/api/webhooks/paddle/route.ts`,
-  signature verify in `src/features/billing/verifyPaddleSignature.ts` (unit-tested),
-  plan resolution in `src/features/billing/resolvePlanChange.ts`. Where the docs
-  say "Stripe", read "Paddle".
+- **Billing is Paddle** (docs now reconciled — `SPEC.md` and `CLAUDE.md` say Paddle).
+  Webhook at `src/app/api/webhooks/paddle/route.ts`, signature verify in
+  `src/features/billing/verifyPaddleSignature.ts` (unit-tested), plan resolution in
+  `src/features/billing/resolvePlanChange.ts`.
 - **Summaries are provider-pluggable.** `src/features/summaries/index.ts` picks
   Groq (`GROQ_API_KEY`) if present, else Anthropic (`ANTHROPIC_API_KEY`, model
   `claude-haiku-4-5`). Adding/swapping a provider is one new file + one line here.
 - **Plan limits** (`src/features/plan/limits.ts`): free = 2 competitors × 3 pages
   each (6 total); paid = 10 competitors × 10 pages each (100 total). Pro pricing:
   `$19/mo` monthly or `$190/yr` annual (2 months free), via `PRO_MONTHLY_USD` /
-  `PRO_ANNUAL_USD`.
-  - ⚠️ The landing pricing copy currently says Pro = "40 pages" (owner-directed
-    marketing text), which does **not** match the enforced 100-page limit. Confirm
-    which is intended before launch.
+  `PRO_ANNUAL_USD`. Landing pricing copy now says Pro = "100 pages", matching the
+  enforced 100-page limit (owner-confirmed 2026-08-26).
 
 ## Where things live (organized by domain, per CLAUDE.md)
 
@@ -111,7 +108,8 @@ Paddle: `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `NEXT_PUBLIC_PADDLE_ENV`,
 ## Suggested next steps for whoever picks this up
 
 1. Do a full `SPEC.md` §9 end-to-end pass in a test environment; fix what fails.
-2. Decide the "40 pages vs 100 pages" Pro copy question and make code + landing agree.
-3. Reconcile the Stripe→Paddle wording in `SPEC.md` and `CLAUDE.md`.
-4. Replace the placeholder legal copy and the footer support email
+2. Replace the placeholder legal copy and the footer support email
    (`SUPPORT_EMAIL` in `src/components/SiteFooter.tsx`) before launch.
+
+_Resolved 2026-08-26: Pro copy fixed to 100 pages; Stripe→Paddle wording
+reconciled across `SPEC.md` and `CLAUDE.md`._

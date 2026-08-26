@@ -439,7 +439,7 @@ export default async function RootPage() {
             </div>
             <div className={styles.planFeatures}>
               <div>10 competitors</div>
-              <div>40 pages</div>
+              <div>100 pages</div>
               <div>Daily checks</div>
             </div>
             <a

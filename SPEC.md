@@ -11,7 +11,7 @@
 
 A web app where a user adds a few competitor page URLs, the system checks them daily,
 detects meaningful text changes, summarizes each change in plain English using an LLM,
-and emails the user a weekly digest. Free tier + one paid tier via Stripe.
+and emails the user a weekly digest. Free tier + one paid tier via Paddle.
 
 The single differentiator is **low noise**: trivial changes must be filtered out, and
 each surfaced change must come with a short, readable summary — not a raw diff.
@@ -27,7 +27,7 @@ Recommended (swap any layer for what you're fastest in — but keep it boring an
 - **Scheduled jobs:** Vercel Cron (or Supabase scheduled functions) — a daily check job and a weekly digest job
 - **Change summaries:** Anthropic API, cheapest/fastest model (Claude Haiku tier) to control cost — verify the current model string in the API docs
 - **Email:** Resend (transactional)
-- **Billing:** Stripe (Checkout + webhooks)
+- **Billing:** Paddle (Checkout + webhooks)
 
 Constraint: total infra cost must stay under ~$50/mo at MVP scale. Prefer free tiers.
 
@@ -40,7 +40,7 @@ users            # profile row per auth user
   id (uuid, = auth user id)
   email
   plan               # 'free' | 'paid'
-  stripe_customer_id # nullable
+  paddle_customer_id # nullable
   last_digest_sent_at (timestamp, nullable)
   created_at
 
@@ -151,10 +151,10 @@ A pure function `isMeaningfulChange(oldText, newText) -> { meaningful: bool, rea
 - Show current plan and an Upgrade button.
 - Empty state for a brand-new user that guides them to add their first competitor.
 
-### F8. Billing (Stripe)
-- Upgrade via Stripe Checkout (one paid plan, monthly, USD).
-- Webhook handler updates `users.plan` on `checkout.session.completed` and reverts on
-  cancellation/subscription deletion. Store `stripe_customer_id`.
+### F8. Billing (Paddle)
+- Upgrade via Paddle Checkout (one paid plan, monthly or annual, USD).
+- Webhook handler updates `users.plan` on subscription activation and reverts on
+  cancellation/subscription deletion. Store `paddle_customer_id`.
 - Webhook handler MUST be unit/integration-tested (see §8) — this touches money.
 
 ---
@@ -179,7 +179,7 @@ public API · native mobile app · multiple paid tiers · in-app change history 
 6. **Weekly digest email.** Wire the scheduled job; verify the email for a user with changes and
    the no-send for a user without.
 7. **Daily check on a schedule.** Move the manual trigger to the daily cron.
-8. **Stripe billing.** Checkout + webhook flips plan; limits update live. Test the webhook.
+8. **Paddle billing.** Checkout + webhook flips plan; limits update live. Test the webhook.
 
 Each slice must work end-to-end before starting the next. Prefer the simplest approach; do not
 add abstractions, helper layers, or config that a slice doesn't need yet.
@@ -190,7 +190,7 @@ add abstractions, helper layers, or config that a slice doesn't need yet.
 
 - **`isMeaningfulChange` (F4):** unit tests with fixture pairs — whitespace-only (not meaningful),
   price change (meaningful), added paragraph (meaningful), timestamp-only (not meaningful).
-- **Stripe webhook handler (F8):** given a `checkout.session.completed` event, `plan` becomes
+- **Paddle webhook handler (F8):** given a subscription-activated event, `plan` becomes
   `'paid'`; given a cancellation event, `plan` reverts to `'free'`.
 - Add a pre-commit hook that blocks commits when tests fail.
 - No exhaustive coverage elsewhere for MVP — manual QA covers the rest.
@@ -207,7 +207,7 @@ The MVP is done when all of these pass by hand in a test environment:
 3. A whitespace-only or timestamp-only change produces **no** change row (noise filter works).
 4. The weekly digest job emails a user who has changes (grouped, with links) and sends
    **nothing** to a user with none.
-5. A free user is blocked from adding a 3rd competitor; completing Stripe Checkout (test mode)
+5. A free user is blocked from adding a 3rd competitor; completing Paddle Checkout (sandbox)
    flips them to paid and lifts the limit immediately.
 6. Cancelling the subscription reverts the user to the free plan and re-applies the limit.
 

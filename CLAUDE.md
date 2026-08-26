@@ -1,14 +1,14 @@
 # CLAUDE.md — Competitor Radar
 
 Persistent context for Claude Code. Read `SPEC.md` before starting any feature,
-and `HANDOFF.md` for the current build state and known deviations (billing is
-Paddle, not Stripe, etc.) before continuing the build in a fresh session.
+and `HANDOFF.md` for the current build state and known deviations before
+continuing the build in a fresh session.
 
 ## Project
 
 A bootstrapped, solo SaaS. Users add competitor page URLs; the system checks them daily,
 filters out trivial changes, summarizes meaningful ones with an LLM, and emails a weekly
-digest. Free tier + one paid Stripe tier. The product's whole edge is **low noise** — a
+digest. Free tier + one paid Paddle tier. The product's whole edge is **low noise** — a
 readable digest, never a raw diff.
 
 ## Tech stack
@@ -18,7 +18,7 @@ readable digest, never a raw diff.
 - Vercel Cron (daily check job + weekly digest job)
 - Anthropic API for change summaries (cheapest/fastest model — verify current model string in docs)
 - Resend for transactional email
-- Stripe for billing (Checkout + webhooks)
+- Paddle for billing (Checkout + webhooks)
 
 ## Commands
 
@@ -52,12 +52,12 @@ readable digest, never a raw diff.
 - Never commit secrets or API keys. All keys go in environment variables.
 - Only fetch **public**, non-authenticated pages. Respect robots.txt and use timeouts + a
   descriptive User-Agent. Never store personal data from scraped pages.
-- Verify Stripe webhook signatures. Never trust client-supplied plan/limit values.
+- Verify Paddle webhook signatures. Never trust client-supplied plan/limit values.
 
 ## Testing (only where money or data is at stake)
 
 - Unit-test the noise filter (`isMeaningfulChange`) with fixture pairs.
-- Test the Stripe webhook handler (plan flips to paid on checkout, reverts on cancel).
+- Test the Paddle webhook handler (plan flips to paid on checkout, reverts on cancel).
 - A pre-commit hook must block commits when tests fail.
 - End each feature with the matching end-to-end check from `SPEC.md` §9.
 - Do not chase exhaustive coverage — manual QA covers the rest for the MVP.

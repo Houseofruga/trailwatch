@@ -56,6 +56,14 @@
   color: var(--ink-2);
 }
 
+/* Short standfirst under the title, before the first section. */
+.lead {
+  margin: 24px 0 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
 .section {
   margin-top: 34px;
 }
@@ -67,6 +75,30 @@
   margin: 0 0 10px 0;
   padding-bottom: 10px;
   border-bottom: 1px solid var(--rule);
+}
+
+.para {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  margin: 12px 0 0 0;
+}
+
+.list {
+  margin: 12px 0 0 0;
+  padding-left: 20px;
+}
+
+.list li {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  margin-top: 6px;
+}
+
+.link {
+  color: var(--link);
+  text-decoration: underline;
 }
 
 @media (max-width: 560px) {

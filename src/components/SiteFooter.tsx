@@ -2,7 +2,7 @@ import Link from "next/link";
 import styles from "./SiteFooter.module.css";
 
 // TODO: replace with your real support email before launch.
-const SUPPORT_EMAIL = "support@houseofruga.com";
+const SUPPORT_EMAIL = "trailwatch@houseofruga.com";
 
 /** Shared site footer — brand line, legal links, copyright. Used on the
  *  marketing landing and the legal document pages. */
