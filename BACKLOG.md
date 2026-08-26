@@ -15,6 +15,14 @@ Newest at top. When you pick one up, move the reasoning into a commit, not here.
   - Account deletion already cascades fully (auth.users → users → competitors →
     pages → snapshots + changes) and is immediate, so nothing to do there.
 
+## UX / marketing site
+
+- **Legal pages' contact sections still use bare `mailto:`.** The footer Contact
+  link now copies the address to the clipboard on click (`ContactLink`), but the
+  inline `mailto:` links inside the Terms/Privacy/Refund pages don't — a
+  webmail-only visitor clicking those still gets nothing visible. Low priority;
+  fold them into the same treatment (or a `/contact` page) if we build one.
+
 ## Legal / compliance
 
 - **Annual auto-renewal reminder.** Some jurisdictions (e.g. California ARL, parts

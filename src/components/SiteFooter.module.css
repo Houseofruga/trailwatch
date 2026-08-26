@@ -63,6 +63,18 @@
   text-decoration: none;
 }
 
+.contact {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+/* Transient "Copied …" confirmation next to the Contact link. */
+.contactHint {
+  font-size: 11.5px;
+  color: var(--ink-5);
+}
+
 .copyright {
   margin-top: 30px;
   padding-top: 20px;

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import styles from "./SiteFooter.module.css";
+import { ContactLink } from "./ContactLink";
 
-// TODO: replace with your real support email before launch.
 const SUPPORT_EMAIL = "trailwatch@houseofruga.com";
 
 /** Shared site footer — brand line, legal links, copyright. Used on the
@@ -36,7 +36,7 @@ export function SiteFooter() {
                 <Link href="/refunds">Refund Policy</Link>
               </li>
               <li>
-                <a href={`mailto:${SUPPORT_EMAIL}`}>Contact</a>
+                <ContactLink email={SUPPORT_EMAIL} />
               </li>
             </ul>
           </nav>
