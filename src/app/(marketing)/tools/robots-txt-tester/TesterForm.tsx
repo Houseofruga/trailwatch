@@ -84,6 +84,21 @@ export function TesterForm() {
 
 function Results({ result, onCheckAnother }: { result: ResultData; onCheckAnother: () => void }) {
   const { allowed, matched, robotsFound, robotsText, robotsUrl, testedUrl, userAgent, groupAgent } = result;
+  const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (!modalOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setModalOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden"; // lock background scroll while open
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [modalOpen]);
 
   return (
     <div className={styles.results}>
@@ -114,9 +129,35 @@ function Results({ result, onCheckAnother }: { result: ResultData; onCheckAnothe
       </div>
 
       {robotsFound && (
-        <div className={styles.robotsBlock}>
-          <div className={styles.robotsHead}>{robotsUrl}</div>
-          <pre className={styles.robotsPre}>{robotsText}</pre>
+        <div className={styles.viewRow}>
+          <button type="button" className={styles.viewBtn} onClick={() => setModalOpen(true)}>
+            View robots.txt file
+          </button>
+        </div>
+      )}
+
+      {modalOpen && robotsFound && (
+        <div className={styles.modalOverlay} role="presentation" onClick={() => setModalOpen(false)}>
+          <div
+            className={styles.modalPanel}
+            role="dialog"
+            aria-modal="true"
+            aria-label="robots.txt file"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHead}>
+              <span className={styles.modalTitle}>{robotsUrl}</span>
+              <button
+                type="button"
+                className={styles.modalClose}
+                onClick={() => setModalOpen(false)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <pre className={styles.modalPre}>{robotsText}</pre>
+          </div>
         </div>
       )}
 
