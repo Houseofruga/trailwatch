@@ -113,28 +113,27 @@ function Results({ result, onCheckAnother }: { result: ResultData; onCheckAnothe
       </div>
 
       <div className={styles.reason}>
-        {!robotsFound ? (
-          <>No robots.txt was found at {robotsUrl} — so crawling is allowed by default.</>
-        ) : matched ? (
-          <>
-            Decided by{" "}
-            <code className={styles.rule}>
-              {matched.type === "allow" ? "Allow" : "Disallow"}: {matched.path || "(empty)"}
-            </code>{" "}
-            under <code className={styles.rule}>User-agent: {groupAgent}</code>.
-          </>
-        ) : (
-          <>No rule in the applicable group matches this path — allowed by default.</>
-        )}
-      </div>
-
-      {robotsFound && (
-        <div className={styles.viewRow}>
+        <div className={styles.reasonText}>
+          {!robotsFound ? (
+            <>No robots.txt was found at {robotsUrl} — so crawling is allowed by default.</>
+          ) : matched ? (
+            <>
+              Decided by{" "}
+              <code className={styles.rule}>
+                {matched.type === "allow" ? "Allow" : "Disallow"}: {matched.path || "(empty)"}
+              </code>{" "}
+              under <code className={styles.rule}>User-agent: {groupAgent}</code>.
+            </>
+          ) : (
+            <>No rule in the applicable group matches this path — allowed by default.</>
+          )}
+        </div>
+        {robotsFound && (
           <button type="button" className={styles.viewBtn} onClick={() => setModalOpen(true)}>
             View robots.txt file
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {modalOpen && robotsFound && (
         <div className={styles.modalOverlay} role="presentation" onClick={() => setModalOpen(false)}>
