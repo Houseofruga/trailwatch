@@ -266,6 +266,9 @@
 
 .viewBtn {
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   font-size: 13px;
   font-weight: 500;
   padding: 9px 16px;
@@ -273,6 +276,10 @@
   color: var(--ink);
   border: 1px solid var(--border-input);
   cursor: pointer;
+}
+
+.viewBtn svg {
+  color: var(--ink-3);
 }
 
 .viewBtn:hover {

@@ -8,6 +8,20 @@ import styles from "./page.module.css";
 
 type ResultData = NonNullable<Extract<TesterState, { status: "ok" }>>["result"];
 
+/** Line-style eye icon matching the app's inline SVG icons (16px, currentColor). */
+function EyeIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M1.5 8S3.8 3.5 8 3.5 14.5 8 14.5 8 12.2 12.5 8 12.5 1.5 8 1.5 8Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />
+      <circle cx="8" cy="8" r="1.9" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  );
+}
+
 export function TesterForm() {
   const [state, formAction, pending] = useActionState<TesterState, FormData>(
     testRobotsAction,
@@ -130,6 +144,7 @@ function Results({ result, onCheckAnother }: { result: ResultData; onCheckAnothe
         </div>
         {robotsFound && (
           <button type="button" className={styles.viewBtn} onClick={() => setModalOpen(true)}>
+            <EyeIcon />
             View robots.txt file
           </button>
         )}
