@@ -35,6 +35,9 @@ export function SiteFooter() {
                 <li>
                   <Link href="/tools/sitemap-finder">Sitemap Finder</Link>
                 </li>
+                <li>
+                  <Link href="/tools/robots-txt-tester">Robots.txt Tester</Link>
+                </li>
               </ul>
             </nav>
 
