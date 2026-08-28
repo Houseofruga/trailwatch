@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader";
 import { JsonLd } from "@/components/JsonLd";
 import { FAQ, structuredData } from "./structuredData";
 import styles from "./page.module.css";
@@ -79,21 +80,7 @@ export default async function RootPage() {
   return (
     <>
       <JsonLd data={structuredData()} />
-      <header className={`${styles.header} ${styles.shell}`}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={styles.headerImg} src="/logo.svg" alt="TrailWatch" />
-        <div className={styles.headerActions}>
-          <a className={styles.headerLogin} href="/login">
-            Log in
-          </a>
-          <a
-            className={`${styles.btn} ${styles.btnPrimary}`}
-            href="/login?mode=signup"
-          >
-            Start free
-          </a>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* ============================================ SECTION 1 · HERO */}
       <section className={`${styles.hero} ${styles.shell}`}>

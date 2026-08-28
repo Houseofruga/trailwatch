@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader";
 import { JsonLd } from "@/components/JsonLd";
 import { CheckerForm } from "./CheckerForm";
 import { FAQ, GUIDE } from "./content";
@@ -30,15 +31,7 @@ export default function LastUpdatedToolPage() {
     <>
       <JsonLd data={faqJsonLd()} />
 
-      <header className={`${styles.header} ${styles.shell}`}>
-        <Link href="/" aria-label="TrailWatch home">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className={styles.logo} src="/logo.svg" alt="TrailWatch" />
-        </Link>
-        <Link href="/login?mode=signup" className={styles.headerCta}>
-          Start free
-        </Link>
-      </header>
+      <SiteHeader contentWidth={820} />
 
       <main className={`${styles.main} ${styles.shell}`}>
         <nav className={styles.breadcrumb} aria-label="Breadcrumb">

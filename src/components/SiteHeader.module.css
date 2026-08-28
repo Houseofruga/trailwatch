@@ -1,0 +1,64 @@
+/* Shared top nav. Mirrors the landing header; consistent across all public
+ * pages. Uses the design tokens + DM Sans. */
+
+.inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+  display: block;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.login {
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+
+.login:hover {
+  color: var(--accent-ink);
+  text-decoration: none;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 10px 16px;
+  background: var(--accent);
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.cta:hover {
+  background: var(--accent-hover);
+  text-decoration: none;
+}
+
+@media (max-width: 560px) {
+  .inner {
+    padding: 20px 22px;
+  }
+
+  .logo {
+    height: 34px;
+  }
+
+  .actions {
+    gap: 14px;
+  }
+}
