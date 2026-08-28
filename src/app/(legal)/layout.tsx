@@ -9,7 +9,7 @@ import styles from "./legal.module.css";
 export default function LegalLayout({ children }: { children: ReactNode }) {
   return (
     <div className={styles.page}>
-      <SiteHeader contentWidth={720} />
+      <SiteHeader />
       <main className={styles.doc}>{children}</main>
       <SiteFooter />
     </div>

@@ -31,7 +31,7 @@ export default function LastUpdatedToolPage() {
     <>
       <JsonLd data={faqJsonLd()} />
 
-      <SiteHeader contentWidth={820} />
+      <SiteHeader />
 
       <main className={`${styles.main} ${styles.shell}`}>
         <nav className={styles.breadcrumb} aria-label="Breadcrumb">
