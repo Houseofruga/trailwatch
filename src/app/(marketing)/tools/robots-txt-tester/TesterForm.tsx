@@ -39,23 +39,18 @@ export function TesterForm() {
           <label htmlFor="url" className={styles.fieldLabel}>
             URL to test
           </label>
-          <div className={styles.formRow}>
-            <input
-              ref={inputRef}
-              id="url"
-              type="text"
-              name="url"
-              inputMode="url"
-              autoComplete="off"
-              placeholder="example.com/pricing"
-              className={styles.input}
-              aria-label="URL to test against robots.txt"
-              required
-            />
-            <button type="submit" className={styles.submit} disabled={pending}>
-              {pending ? "Testing…" : "Test URL"}
-            </button>
-          </div>
+          <input
+            ref={inputRef}
+            id="url"
+            type="text"
+            name="url"
+            inputMode="url"
+            autoComplete="off"
+            placeholder="example.com/pricing"
+            className={styles.input}
+            aria-label="URL to test against robots.txt"
+            required
+          />
 
           <label htmlFor="userAgent" className={styles.fieldLabelInline}>
             Test as
@@ -67,6 +62,10 @@ export function TesterForm() {
               </option>
             ))}
           </select>
+
+          <button type="submit" className={styles.submit} disabled={pending}>
+            {pending ? "Testing…" : "Test URL"}
+          </button>
 
           <p className={styles.hint}>
             We fetch the site&rsquo;s robots.txt and apply Google&rsquo;s matching rules.
