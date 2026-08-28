@@ -38,8 +38,13 @@ function headersToRecord(headers: Headers): Record<string, string> {
   return out;
 }
 
-/** Fetch a URL following redirects manually, re-validating each hop. */
-export async function safeFetch(rawUrl: string): Promise<CheckFetch> {
+/** Fetch a URL following redirects manually, re-validating each hop.
+ *  `maxBytes` caps how much of the body is read (default MAX_BYTES). */
+export async function safeFetch(
+  rawUrl: string,
+  options?: { maxBytes?: number },
+): Promise<CheckFetch> {
+  const maxBytes = options?.maxBytes ?? MAX_BYTES;
   const parsed = validateUrlInput(rawUrl);
   if (!parsed.ok) return { ok: false, reason: "invalid-url", message: parsed.reason };
 
@@ -89,21 +94,21 @@ export async function safeFetch(rawUrl: string): Promise<CheckFetch> {
       return { ok: false, reason: "fetch-error", message: `The page returned HTTP ${res.status}.` };
     }
 
-    const html = await readCapped(res);
+    const html = await readCapped(res, maxBytes);
     return { ok: true, finalUrl: current.toString(), headers: headersToRecord(res.headers), html };
   }
 
   return { ok: false, reason: "fetch-error", message: "Too many redirects." };
 }
 
-/** Read a response body up to MAX_BYTES, decoding as UTF-8. */
-async function readCapped(res: Response): Promise<string> {
+/** Read a response body up to `maxBytes`, decoding as UTF-8. */
+async function readCapped(res: Response, maxBytes: number): Promise<string> {
   const reader = res.body?.getReader();
   if (!reader) return res.text();
 
   const chunks: Uint8Array[] = [];
   let total = 0;
-  while (total < MAX_BYTES) {
+  while (total < maxBytes) {
     const { done, value } = await reader.read();
     if (done) break;
     chunks.push(value);

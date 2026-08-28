@@ -32,6 +32,9 @@ export function SiteFooter() {
                     Last Updated Checker
                   </Link>
                 </li>
+                <li>
+                  <Link href="/tools/sitemap-finder">Sitemap Finder</Link>
+                </li>
               </ul>
             </nav>
 
