@@ -1,7 +1,29 @@
 # BACKLOG.md — Competitor Radar / TrailWatch
 
-Post-MVP items intentionally deferred. Not blockers for the §9 definition of done.
-Newest at top. When you pick one up, move the reasoning into a commit, not here.
+Post-MVP items intentionally deferred. Newest at top. When you pick one up, move
+the reasoning into a commit, not here.
+
+## 🚀 PRE-LAUNCH — do NOT launch to real users before clearing these
+
+- **Set up an isolated test/staging environment.** ⚠️ _Remind the owner before
+  launch._ Today `.env.local` points at a **single Supabase project** (Paddle is
+  already sandbox). That means local testing and any pre-launch change can create
+  junk data in — and potentially **email real users from** — what may be the
+  production database. Before launch, stand up:
+  - a **separate Supabase test project** (free tier) — its own URL + keys,
+  - a **test Resend** setup (or a safe test recipient) so digest sends can't hit
+    real users,
+  - keep Paddle on **sandbox** for the test env.
+  This is the prerequisite for the safe workflow the owner wants: test any live-app
+  change in staging first, then promote to production.
+
+- **Run the SPEC §9 live-integration steps in that test env.** The *logic* of all
+  six §9 checks is verified (89 unit tests + a live-LLM pipeline check + code
+  inspection, done 2026-08-28). What still needs a real run, once the test env
+  above exists: (1) UI signup → add competitors to hit the free limit → dashboard;
+  (4) an actual digest **email send** via Resend; (5)+(6) a real Paddle **sandbox
+  checkout → plan flips to paid → cancel → reverts to free**. These need the
+  owner (account creation + entering the test card can't be automated).
 
 ## Data retention
 
