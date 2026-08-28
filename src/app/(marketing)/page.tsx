@@ -2,14 +2,20 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SiteFooter } from "@/components/SiteFooter";
+import { JsonLd } from "@/components/JsonLd";
+import { FAQ, structuredData } from "./structuredData";
 import styles from "./page.module.css";
 
 // The subdomain root (trailwatch.houseofruga.com) IS the marketing landing.
 // Everyone sees it; signed-in visitors get a "Dashboard" link into the app.
 export const metadata: Metadata = {
-  title: "TrailWatch — competitor tracking for founders, one email a week",
+  // Absolute so the root layout's "%s — TrailWatch" template doesn't double up.
+  title: {
+    absolute: "TrailWatch — competitor tracking for founders, one email a week",
+  },
   description:
     "Add your competitors, get one plain-English email a week on what actually changed — pricing, features, messaging. AI summaries on every plan, even free. By House of Ruga.",
+  alternates: { canonical: "/" },
 };
 
 // Inline copies of the app's nav icons so the hero screenshot matches the real
@@ -72,6 +78,7 @@ export default async function RootPage() {
 
   return (
     <>
+      <JsonLd data={structuredData()} />
       <header className={`${styles.header} ${styles.shell}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.headerImg} src="/logo.svg" alt="TrailWatch" />
@@ -456,7 +463,20 @@ export default async function RootPage() {
         </p>
       </section>
 
-      {/* =============================== SECTION 5 · FINAL CTA + TRUST */}
+      {/* ========================================= SECTION 5 · FAQ */}
+      <section className={`${styles.faq} ${styles.shell}`}>
+        <h2 className={`${styles.h2} ${styles.faqHeading}`}>Questions, answered.</h2>
+        <div className={styles.faqList}>
+          {FAQ.map((item) => (
+            <details key={item.q} className={styles.faqItem}>
+              <summary className={styles.faqQ}>{item.q}</summary>
+              <p className={styles.faqA}>{item.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      {/* =============================== SECTION 6 · FINAL CTA + TRUST */}
       <section className={styles.final}>
         <div className={`${styles.finalInner} ${styles.shell}`}>
           <h2 className={`${styles.h2} ${styles.finalHeading}`}>

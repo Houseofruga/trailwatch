@@ -793,6 +793,65 @@
   margin: 28px 0 0 0;
 }
 
+/* ------------------------------------------------------------- faq */
+
+.faq {
+  padding-top: 76px;
+  padding-bottom: 76px;
+}
+
+.faqHeading {
+  margin-bottom: 40px;
+}
+
+.faqList {
+  max-width: 760px;
+  border-top: 1px solid var(--rule);
+}
+
+.faqItem {
+  border-bottom: 1px solid var(--rule);
+}
+
+.faqQ {
+  list-style: none;
+  cursor: pointer;
+  padding: 20px 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* Hide the native disclosure triangle; use a +/− marker instead. */
+.faqQ::-webkit-details-marker {
+  display: none;
+}
+
+.faqQ::after {
+  content: "+";
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--ink-4);
+  line-height: 1;
+}
+
+.faqItem[open] .faqQ::after {
+  content: "−";
+}
+
+.faqA {
+  margin: 0;
+  padding: 0 0 22px 0;
+  max-width: 680px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+
 /* ------------------------------------------------ final cta + trust */
 
 .final {

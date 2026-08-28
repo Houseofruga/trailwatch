@@ -3,9 +3,10 @@ import { BackLink } from "@/components/BackLink";
 import styles from "../legal.module.css";
 
 export const metadata: Metadata = {
-  title: "Refund Policy — TrailWatch",
+  title: "Refund Policy",
   description:
     "TrailWatch's billing, cancellation, and refund terms, by House of Ruga LLP.",
+  alternates: { canonical: "/refunds" },
 };
 
 const CONTACT = "trailwatch@houseofruga.com";

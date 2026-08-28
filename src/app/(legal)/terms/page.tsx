@@ -3,9 +3,10 @@ import { BackLink } from "@/components/BackLink";
 import styles from "../legal.module.css";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — TrailWatch",
+  title: "Terms of Service",
   description:
     "The terms governing your use of TrailWatch, the competitor-tracking service by House of Ruga LLP.",
+  alternates: { canonical: "/terms" },
 };
 
 const CONTACT = "trailwatch@houseofruga.com";

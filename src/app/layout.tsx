@@ -16,10 +16,32 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
 });
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://trailwatch.houseofruga.com";
+
+const DESCRIPTION =
+  "We watch your competitors' pricing, homepage and changelog, and email you one plain-English digest a week explaining what actually changed. AI summaries on every plan, even free.";
+
 export const metadata: Metadata = {
-  title: "Trailwatch",
-  description:
-    "We watch your competitors' pricing, homepage and changelog, and email you one digest a week explaining what actually changed.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "TrailWatch — competitor tracking for founders, one email a week",
+    template: "%s — TrailWatch",
+  },
+  description: DESCRIPTION,
+  applicationName: "TrailWatch",
+  openGraph: {
+    type: "website",
+    siteName: "TrailWatch",
+    url: SITE_URL,
+    title: "TrailWatch — competitor tracking for founders, one email a week",
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TrailWatch — competitor tracking for founders, one email a week",
+    description: DESCRIPTION,
+  },
 };
 
 export default function RootLayout({

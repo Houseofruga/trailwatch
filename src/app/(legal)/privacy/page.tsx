@@ -3,9 +3,10 @@ import { BackLink } from "@/components/BackLink";
 import styles from "../legal.module.css";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — TrailWatch",
+  title: "Privacy Policy",
   description:
     "How TrailWatch, by House of Ruga LLP, collects, uses, and protects your data.",
+  alternates: { canonical: "/privacy" },
 };
 
 const CONTACT = "trailwatch@houseofruga.com";
