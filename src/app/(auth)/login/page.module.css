@@ -43,6 +43,28 @@
   margin: 0 0 24px 0;
 }
 
+/* Signup-only reassurance that this really is the free, no-card path. */
+.planNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--accent-ink);
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-line);
+  padding: 10px 12px;
+  margin: 0 0 22px 0;
+}
+
+.planNote strong {
+  font-weight: 600;
+}
+
+.planTick {
+  font-weight: 700;
+}
+
 .googleMark {
   font-family: var(--font-dm-sans), sans-serif;
   font-weight: 600;

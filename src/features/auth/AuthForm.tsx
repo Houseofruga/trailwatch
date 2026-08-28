@@ -91,7 +91,18 @@ export function AuthForm({ initialMode }: { initialMode: Mode }) {
     <>
       <div className={styles.card}>
         <h1 className={styles.title}>{copy.title}</h1>
-        <p className={styles.sub}>{copy.sub}</p>
+        {mode === "signup" ? (
+          <div className={styles.planNote}>
+            <span className={styles.planTick} aria-hidden="true">
+              ✓
+            </span>
+            <span>
+              Starting on the <strong>Free plan</strong> — no card required, upgrade anytime.
+            </span>
+          </div>
+        ) : (
+          <p className={styles.sub}>{copy.sub}</p>
+        )}
 
         <form action={signInWithGoogle}>
           <GoogleButton />
