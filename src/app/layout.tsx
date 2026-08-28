@@ -42,6 +42,9 @@ export const metadata: Metadata = {
     title: "TrailWatch — competitor tracking for founders, one email a week",
     description: DESCRIPTION,
   },
+  verification: {
+    google: "AtMEWsREx52dkO3rXqharn960xJR8WI0tHggQFeCnls",
+  },
 };
 
 export default function RootLayout({
