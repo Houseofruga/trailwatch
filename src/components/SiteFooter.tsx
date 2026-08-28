@@ -23,23 +23,36 @@ export function SiteFooter() {
             <div className={styles.brandTag}>Competitor tracking for founders.</div>
           </div>
 
-          <nav className={styles.legal} aria-label="Legal">
-            <div className={styles.legalHead}>Legal</div>
-            <ul className={styles.legalLinks}>
-              <li>
-                <Link href="/terms">Terms of Service</Link>
-              </li>
-              <li>
-                <Link href="/privacy">Privacy Policy</Link>
-              </li>
-              <li>
-                <Link href="/refunds">Refund Policy</Link>
-              </li>
-              <li>
-                <ContactLink email={SUPPORT_EMAIL} />
-              </li>
-            </ul>
-          </nav>
+          <div className={styles.cols}>
+            <nav className={styles.legal} aria-label="Tools">
+              <div className={styles.legalHead}>Tools</div>
+              <ul className={styles.legalLinks}>
+                <li>
+                  <Link href="/tools/when-was-a-website-last-updated">
+                    Last Updated Checker
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+
+            <nav className={styles.legal} aria-label="Legal">
+              <div className={styles.legalHead}>Legal</div>
+              <ul className={styles.legalLinks}>
+                <li>
+                  <Link href="/terms">Terms of Service</Link>
+                </li>
+                <li>
+                  <Link href="/privacy">Privacy Policy</Link>
+                </li>
+                <li>
+                  <Link href="/refunds">Refund Policy</Link>
+                </li>
+                <li>
+                  <ContactLink email={SUPPORT_EMAIL} />
+                </li>
+              </ul>
+            </nav>
+          </div>
         </div>
 
         <div className={styles.copyright}>
