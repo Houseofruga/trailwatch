@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SiteFooter } from "@/components/SiteFooter";
 import { JsonLd } from "@/components/JsonLd";
 import { HeroScene } from "./HeroScene";
+import { StepsScroller } from "./StepsScroller";
 import { FAQ, structuredData } from "./structuredData";
 import styles from "./page.module.css";
 
@@ -311,38 +312,7 @@ export default async function RootPage() {
       </HeroScene>
 
       {/* ================================== SECTION 2 · HOW IT WORKS */}
-      <section className={styles.howBand}>
-        <div className={`${styles.how} ${styles.shell}`}>
-          <h2 className={styles.h2}>Set it once. Then forget it.</h2>
-          <div className={styles.howGrid}>
-            <div>
-              <div className={styles.stepNum}>01</div>
-              <div className={styles.stepTitle}>Add your competitors</div>
-              <p className={styles.stepBody}>
-                Paste their pricing, homepage, or changelog URLs — you’ll see a snapshot
-                captured on the spot.
-              </p>
-            </div>
-            <div>
-              <div className={styles.stepNum}>02</div>
-              <div className={styles.stepTitle}>It runs itself</div>
-              <p className={styles.stepBody}>
-                Daily checks, trivial edits filtered out. Nothing to configure — no
-                frequencies to set, no alert rules to tune, no dashboard to check.
-              </p>
-            </div>
-            <div>
-              <div className={styles.stepNum}>03</div>
-              <div className={styles.stepTitle}>One email, every Monday.</div>
-              <p className={styles.stepBody}>
-                Grouped by competitor, in plain English. “Linear raised their Business plan
-                from $14 to $16.” Read it in 30 seconds — or open the dashboard to see
-                every change in full.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <StepsScroller />
 
       {/* ================================== SECTION 3 · WHY TRAILWATCH */}
       <section className={`${styles.why} ${styles.shell}`}>

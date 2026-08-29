@@ -1,0 +1,148 @@
+/*
+ * Pinned "how it works" scroller. A tall .scene pins a viewport-height .stage;
+ * scroll progress (set in StepsScroller.tsx) picks the active step — a white
+ * card on the left with the matching panel crossfaded in on the right.
+ */
+
+.scene {
+  position: relative;
+  height: 280vh; /* scroll runway: ~one band per step */
+  background: var(--bg);
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.shell {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+.h2 {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0 0 52px 0;
+  color: var(--ink);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 72px;
+  align-items: center;
+}
+
+/* -------------------------------------------------------------- steps */
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.step {
+  padding: 26px 30px;
+  background: transparent;
+  opacity: 0.38;
+  transition: opacity 0.28s ease, background-color 0.28s ease;
+}
+
+.stepActive {
+  opacity: 1;
+  background: var(--surface);
+}
+
+.stepNum {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.stepBody {
+  margin: 0;
+  max-width: 430px;
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+/* -------------------------------------------------------------- media */
+
+.media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+}
+
+.panel {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background-size: cover;
+  background-position: center;
+  transition: opacity 0.4s ease;
+}
+
+.panelActive {
+  opacity: 1;
+}
+
+/* Placeholder fills — replace each with a real screenshot via background-image. */
+.panel0 {
+  background-color: #5f625f;
+}
+.panel1 {
+  background-color: #c39a9a;
+}
+.panel2 {
+  background-color: #3f8f3f;
+}
+
+/* --------------------------------------------- unpinned fallback
+   Reduced motion or narrow viewports: no pinning, show every step and panel
+   stacked so nothing depends on scroll. */
+@media (prefers-reduced-motion: reduce), (max-width: 860px) {
+  .scene {
+    height: auto;
+  }
+  .stage {
+    position: static;
+    height: auto;
+    display: block;
+    padding: 64px 0;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .step {
+    opacity: 1;
+    padding: 0;
+    background: transparent;
+  }
+  .step + .step {
+    margin-top: 4px;
+  }
+  .media {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    aspect-ratio: auto;
+  }
+  .panel {
+    position: static;
+    opacity: 1;
+    aspect-ratio: 3 / 2;
+  }
+}
