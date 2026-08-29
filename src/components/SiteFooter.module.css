@@ -8,6 +8,23 @@
   background: var(--bg);
 }
 
+/* Decorative hills, full-bleed and flush to the bottom edge. */
+.hills {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* On narrow screens the wide strip would shrink to a sliver — crop-fit it to a
+   taller band instead (cover zooms in, clipping the sides). */
+@media (max-width: 768px) {
+  .hills {
+    height: 92px;
+  }
+}
+
 /* Mirrors the marketing .shell container width/padding. */
 .inner {
   max-width: 1080px;

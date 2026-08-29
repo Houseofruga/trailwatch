@@ -65,6 +65,10 @@ export function SiteFooter() {
           © 2026 House of Ruga. All rights reserved.
         </div>
       </div>
+
+      {/* Full-bleed hills strip, flush to the bottom on every device. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img className={styles.hills} src="/FooterHiils.webp" alt="" aria-hidden="true" />
     </footer>
   );
 }
