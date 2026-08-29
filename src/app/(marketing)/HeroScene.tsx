@@ -16,7 +16,6 @@ const clamp = (n: number, min = 0, max = 1) => Math.max(min, Math.min(max, n));
 export function HeroScene({ hero, children }: { hero: ReactNode; children: ReactNode }) {
   const sceneRef = useRef<HTMLDivElement>(null);
   const skyRef = useRef<HTMLDivElement>(null);
-  const scrimRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const productRef = useRef<HTMLDivElement>(null);
   const hillRef = useRef<HTMLImageElement>(null);
@@ -29,9 +28,14 @@ export function HeroScene({ hero, children }: { hero: ReactNode; children: React
       const inv = 1 - p;
       const fade = String(clamp(1 - p * 2.2));
       // Sky is zoomed in at the top and zooms out to full-bleed on scroll.
-      if (skyRef.current) skyRef.current.style.transform = `scale(${1 + inv * 0.28})`;
-      // The readability veil behind the copy fades out with the copy.
-      if (scrimRef.current) scrimRef.current.style.opacity = fade;
+      // (fullBG keeps clear blue on the left so the copy stays readable.)
+      // At the hero, scale up and slide the sky right so the deep-blue left of
+      // the image sits behind the copy (the clouds frame the product on the
+      // right). All of it eases back to centered full-bleed as it zooms out.
+      if (skyRef.current) {
+        const dx = inv * window.innerWidth * 0.26;
+        skyRef.current.style.transform = `translate3d(${dx}px, ${inv * 48}px, 0) scale(${1 + inv * 1.25})`;
+      }
       if (heroRef.current) {
         heroRef.current.style.opacity = fade;
         heroRef.current.style.transform = `translate(0, -50%) translate3d(0, ${-p * 26}px, 0)`;
@@ -86,7 +90,6 @@ export function HeroScene({ hero, children }: { hero: ReactNode; children: React
     <div ref={sceneRef} className={styles.scene}>
       <div className={styles.stage}>
         <div ref={skyRef} className={styles.sky} aria-hidden="true" />
-        <div ref={scrimRef} className={styles.textScrim} aria-hidden="true" />
         <div className={styles.header}>
           <SiteHeader onDark />
         </div>

@@ -29,21 +29,6 @@
   will-change: transform;
 }
 
-/* Soft dark-blue veil (the sky's own tone) behind the copy, so the white text
-   stays readable over the clouds. Left-weighted, fades toward the product. */
-.textScrim {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(
-    100deg,
-    rgba(16, 38, 68, 0.62) 0%,
-    rgba(16, 38, 68, 0.32) 30%,
-    rgba(16, 38, 68, 0) 52%
-  );
-}
-
 /* Top bar, above the zooming sky/product layers. */
 .header {
   position: relative;
@@ -55,7 +40,7 @@
   position: absolute;
   top: 50%;
   left: max(48px, calc((100vw - 1240px) / 2));
-  width: min(540px, calc(50vw - 90px));
+  width: min(470px, calc(46vw - 120px));
   z-index: 3;
   color: #ffffff;
   will-change: transform, opacity;
