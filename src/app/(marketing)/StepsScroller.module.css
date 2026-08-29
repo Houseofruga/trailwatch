@@ -38,7 +38,7 @@
   display: grid;
   grid-template-columns: 1fr 1.15fr;
   gap: 72px;
-  align-items: center;
+  align-items: stretch;
 }
 
 /* -------------------------------------------------------------- steps */
@@ -82,7 +82,7 @@
 .media {
   position: relative;
   width: 100%;
-  aspect-ratio: 3 / 2;
+  height: 100%; /* fill the row height (matches the steps column) */
 }
 
 .panel {
