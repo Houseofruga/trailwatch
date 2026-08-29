@@ -1,23 +1,20 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { SiteHeader } from "@/components/SiteHeader";
 import styles from "./HeroScene.module.css";
 
 const clamp = (n: number, min = 0, max = 1) => Math.max(min, Math.min(max, n));
 
 /**
- * The hero and the product-in-landscape are one continuous pinned scene. As the
- * user scrolls the runway, `p` goes 0 → 1 and drives every layer:
- *  - hero copy fades out and lifts,
- *  - the product slides from right to center,
- *  - the sky fades in,
- *  - the hill grows from the bottom and fades in.
+ * Pinned full-sky hero. The sky (fullBG.webp) fills the stage. Hero state
+ * (p = 0): header over the sky, white copy + CTA on the left, and the product
+ * window on the right bleeding off the edges. On scroll (p → 1) the copy and
+ * CTA fade out and the product slides to the center of the screen.
  * `hero` is the copy block; `children` is the product mock.
  */
 export function HeroScene({ hero, children }: { hero: ReactNode; children: ReactNode }) {
   const sceneRef = useRef<HTMLDivElement>(null);
-  const skyRef = useRef<HTMLDivElement>(null);
-  const wiggleRef = useRef<HTMLImageElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const productRef = useRef<HTMLDivElement>(null);
   const hillRef = useRef<HTMLImageElement>(null);
@@ -27,31 +24,23 @@ export function HeroScene({ hero, children }: { hero: ReactNode; children: React
     if (!scene) return;
 
     const apply = (p: number) => {
-      const rightPx = window.innerWidth * 0.42;
-
-      if (skyRef.current) skyRef.current.style.opacity = String(clamp(p * 1.4));
-      if (wiggleRef.current) {
-        wiggleRef.current.style.opacity = String(clamp(1 - p * 2.2));
-        wiggleRef.current.style.transform = `translate(-50%, ${-p * 40}px)`;
-      }
+      const inv = 1 - p;
       if (heroRef.current) {
-        heroRef.current.style.opacity = String(clamp(1 - p * 1.9));
-        heroRef.current.style.transform = `translate3d(0, ${-p * 48}px, 0)`;
+        heroRef.current.style.opacity = String(clamp(1 - p * 2.2));
+        heroRef.current.style.transform = `translate(0, -50%) translate3d(0, ${-p * 26}px, 0)`;
       }
       if (productRef.current) {
-        const x = (1 - p) * rightPx;
-        const scale = 0.82 + p * 0.18;
-        productRef.current.style.transform = `translate(-50%, 0) translate3d(${x}px, 0, 0) scale(${scale})`;
+        // Hero: left edge sits on the screen center (translateX 0 from left:50%).
+        // Scroll: translateX → -50% brings it to the middle of the screen.
+        const y = inv * window.innerHeight * 0.12;
+        productRef.current.style.transform = `translate(${-p * 50}%, -50%) translate3d(0, ${y}px, 0)`;
       }
-      if (hillRef.current) {
-        hillRef.current.style.opacity = String(clamp(p * 1.6));
-        hillRef.current.style.transform = `scale(${1 + p * 0.14})`;
-      }
+      // Foreground hill grows from the bottom to nestle the product.
+      if (hillRef.current) hillRef.current.style.transform = `scale(${1 + p * 0.13})`;
     };
 
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      apply(1); // show the resolved landscape state, no motion
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      apply(1);
       return;
     }
 
@@ -79,19 +68,16 @@ export function HeroScene({ hero, children }: { hero: ReactNode; children: React
   return (
     <div ref={sceneRef} className={styles.scene}>
       <div className={styles.stage}>
-        <div ref={skyRef} className={styles.sky} aria-hidden="true" />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img ref={wiggleRef} className={styles.wiggle} src="/wiggle.svg" alt="" aria-hidden="true" />
+        <div className={styles.sky} aria-hidden="true" />
+        <SiteHeader onDark />
+        <div ref={heroRef} className={styles.heroText}>
+          {hero}
+        </div>
+        <div ref={productRef} className={styles.product}>
+          {children}
+        </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img ref={hillRef} className={styles.hill} src="/HillFG.webp" alt="" aria-hidden="true" />
-        <div className={styles.stageInner}>
-          <div ref={heroRef} className={styles.heroText}>
-            {hero}
-          </div>
-          <div ref={productRef} className={styles.product}>
-            {children}
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader";
 import { JsonLd } from "@/components/JsonLd";
 import { HeroScene } from "./HeroScene";
 import { FAQ, structuredData } from "./structuredData";
@@ -81,9 +80,8 @@ export default async function RootPage() {
   return (
     <>
       <JsonLd data={structuredData()} />
-      <SiteHeader />
 
-      {/* ===== SECTION 1 · HERO SCENE (pinned: hero copy → product in landscape) */}
+      {/* ===== SECTION 1 · HERO SCENE (full-sky; copy fades, product centers) */}
       <HeroScene
         hero={
           <>

@@ -1,13 +1,13 @@
 /*
- * Pinned hero → landscape scene. A tall .scene contains a sticky .stage that
- * holds for one viewport while the product slides from right to center, the sky
- * and hill fade/grow in, and the hero copy fades out. All motion is driven by a
- * single scroll-progress value set in HeroScene.tsx.
+ * Pinned full-sky hero (desktop). A tall .scene holds a sticky .stage for one
+ * viewport. The sky fills it; the header sits over the sky, white copy + CTA on
+ * the left, product window on the right. On scroll the copy fades and the
+ * product slides to center.
  */
 
 .scene {
   position: relative;
-  height: calc(100vh + 720px); /* the extra height is the scroll "runway" */
+  height: calc(100vh + 720px); /* scroll runway for the transition */
 }
 
 .stage {
@@ -15,22 +15,52 @@
   top: 0;
   height: 100vh;
   overflow: hidden;
-  background: var(--bg); /* cream base for the hero phase */
 }
 
-/* Full-bleed sky, fades in as you scroll. */
+/* Full-bleed sky. */
 .sky {
   position: absolute;
   inset: 0;
   z-index: 0;
-  opacity: 0;
-  background-image: url("/HillBG.webp");
+  background-image: url("/fullBG.webp");
   background-size: cover;
-  background-position: center bottom;
-  will-change: opacity;
+  background-position: center center;
 }
 
-/* Full-bleed foreground hill, grows from the bottom and fades in. */
+/* Left: white headline, body, CTA — vertically centered, optically left. */
+.heroText {
+  position: absolute;
+  top: 50%;
+  left: max(48px, calc((100vw - 1240px) / 2));
+  width: min(540px, calc(50vw - 90px));
+  z-index: 3;
+  color: #ffffff;
+  will-change: transform, opacity;
+}
+
+.heroText h1 {
+  color: #ffffff;
+  text-shadow: 0 2px 24px rgba(10, 20, 40, 0.28);
+}
+
+.heroText p {
+  color: rgba(255, 255, 255, 0.94);
+  text-shadow: 0 1px 14px rgba(10, 20, 40, 0.3);
+}
+
+/* Product window — centered base; slid to the bottom-right in the hero, back
+   to center on scroll. */
+.product {
+  position: absolute;
+  top: 50%;
+  left: 50%; /* left edge on the screen center in the hero */
+  transform: translate(0, -50%);
+  width: min(1080px, 62%);
+  z-index: 2;
+  will-change: transform;
+}
+
+/* Foreground hill, in front of the product, grows from the bottom on scroll. */
 .hill {
   position: absolute;
   left: 0;
@@ -38,57 +68,7 @@
   width: 100%;
   height: auto;
   z-index: 4;
-  opacity: 0;
   pointer-events: none;
   transform-origin: bottom center;
-  will-change: transform, opacity;
-}
-
-/* Shell-width layer that positions the copy and the product. */
-.stageInner {
-  position: relative;
-  max-width: 1080px;
-  height: 100%;
-  margin: 0 auto;
-  padding: 0 40px;
-}
-
-.heroText {
-  position: absolute;
-  top: 25vh;
-  left: 40px;
-  right: 40px;
-  max-width: 700px;
-  z-index: 3;
-  will-change: transform, opacity;
-}
-
-.wiggle {
-  position: absolute;
-  top: 3vh;
-  left: 46%;
-  transform: translate(-50%, 0);
-  width: min(760px, 58%);
-  height: auto;
-  z-index: 3;
-  pointer-events: none;
-  will-change: transform, opacity;
-}
-
-.product {
-  position: absolute;
-  top: 35vh;
-  left: 50%;
-  width: min(1000px, 94%);
-  z-index: 2;
   will-change: transform;
-}
-
-@media (max-width: 860px) {
-  .heroText {
-    top: 12vh;
-  }
-  .product {
-    top: 44vh;
-  }
 }

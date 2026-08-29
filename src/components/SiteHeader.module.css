@@ -32,6 +32,15 @@
   text-decoration: none;
 }
 
+/* Over a dark/photographic hero: white nav text and logo. */
+.onDark .login {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.onDark .login:hover {
+  color: #ffffff;
+}
+
 .cta {
   display: inline-flex;
   align-items: center;
