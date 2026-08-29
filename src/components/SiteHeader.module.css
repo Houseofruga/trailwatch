@@ -41,6 +41,10 @@
   color: #ffffff;
 }
 
+.onDark .logo {
+  filter: brightness(0) invert(1);
+}
+
 .cta {
   display: inline-flex;
   align-items: center;

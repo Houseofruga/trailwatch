@@ -15,6 +15,7 @@ const clamp = (n: number, min = 0, max = 1) => Math.max(min, Math.min(max, n));
  */
 export function HeroScene({ hero, children }: { hero: ReactNode; children: ReactNode }) {
   const sceneRef = useRef<HTMLDivElement>(null);
+  const skyRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const productRef = useRef<HTMLDivElement>(null);
   const hillRef = useRef<HTMLImageElement>(null);
@@ -25,18 +26,23 @@ export function HeroScene({ hero, children }: { hero: ReactNode; children: React
 
     const apply = (p: number) => {
       const inv = 1 - p;
+      // Sky is zoomed in at the top and zooms out to full-bleed on scroll.
+      if (skyRef.current) skyRef.current.style.transform = `scale(${1 + inv * 0.28})`;
       if (heroRef.current) {
         heroRef.current.style.opacity = String(clamp(1 - p * 2.2));
         heroRef.current.style.transform = `translate(0, -50%) translate3d(0, ${-p * 26}px, 0)`;
       }
       if (productRef.current) {
-        // Hero: left edge sits on the screen center (translateX 0 from left:50%).
-        // Scroll: translateX → -50% brings it to the middle of the screen.
+        // Hero: left edge on center, zoomed in. Scroll: slides to center + zooms out.
         const y = inv * window.innerHeight * 0.12;
-        productRef.current.style.transform = `translate(${-p * 50}%, -50%) translate3d(0, ${y}px, 0)`;
+        const zoom = 1 + inv * 0.2;
+        productRef.current.style.transform = `translate(${-p * 50}%, -50%) translate3d(0, ${y}px, 0) scale(${zoom})`;
       }
-      // Foreground hill grows from the bottom to nestle the product.
-      if (hillRef.current) hillRef.current.style.transform = `scale(${1 + p * 0.13})`;
+      // Hill is mostly below the fold while zoomed in, and rises + grows in as
+      // the scene zooms out on scroll.
+      if (hillRef.current) {
+        hillRef.current.style.transform = `translate3d(0, ${inv * 72}%, 0) scale(${1 + p * 0.1})`;
+      }
     };
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -68,8 +74,10 @@ export function HeroScene({ hero, children }: { hero: ReactNode; children: React
   return (
     <div ref={sceneRef} className={styles.scene}>
       <div className={styles.stage}>
-        <div className={styles.sky} aria-hidden="true" />
-        <SiteHeader onDark />
+        <div ref={skyRef} className={styles.sky} aria-hidden="true" />
+        <div className={styles.header}>
+          <SiteHeader onDark />
+        </div>
         <div ref={heroRef} className={styles.heroText}>
           {hero}
         </div>
