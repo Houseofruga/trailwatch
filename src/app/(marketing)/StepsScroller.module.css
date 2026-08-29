@@ -109,10 +109,9 @@
   background-color: #3f8f3f;
 }
 
-/* --------------------------------------------- unpinned fallback
-   Reduced motion or narrow viewports: no pinning, show every step and panel
-   stacked so nothing depends on scroll. */
-@media (prefers-reduced-motion: reduce), (max-width: 860px) {
+/* --------------------------------------------- reduced-motion fallback
+   No pinning — show every step and panel stacked so nothing depends on scroll. */
+@media (prefers-reduced-motion: reduce) {
   .scene {
     height: auto;
   }
@@ -138,11 +137,55 @@
     display: flex;
     flex-direction: column;
     gap: 18px;
+    height: auto;
     aspect-ratio: auto;
   }
   .panel {
     position: static;
     opacity: 1;
+    aspect-ratio: 3 / 2;
+  }
+}
+
+/* --------------------------------------------- mobile
+   Keep the pinned scroller, but show one group at a time — the active number +
+   text with its image below it — swapping per scroll. */
+@media (max-width: 860px) and (prefers-reduced-motion: no-preference) {
+  .stage {
+    align-items: flex-start;
+  }
+  .shell {
+    padding: 76px 22px 0;
+  }
+  .h2 {
+    font-size: 25px;
+    margin-bottom: 30px;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 26px;
+    align-items: start;
+  }
+
+  /* Only the active step's number + text is shown. */
+  .step {
+    display: none;
+    padding: 0;
+    opacity: 1;
+    background: transparent;
+  }
+  .stepActive {
+    display: block;
+    background: transparent;
+  }
+  .stepBody {
+    max-width: none;
+    font-size: 16px;
+  }
+
+  /* Image sits below the text; panels still crossfade in place. */
+  .media {
+    height: auto;
     aspect-ratio: 3 / 2;
   }
 }
