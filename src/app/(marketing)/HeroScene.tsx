@@ -16,6 +16,7 @@ const clamp = (n: number, min = 0, max = 1) => Math.max(min, Math.min(max, n));
 export function HeroScene({ hero, children }: { hero: ReactNode; children: ReactNode }) {
   const sceneRef = useRef<HTMLDivElement>(null);
   const skyRef = useRef<HTMLDivElement>(null);
+  const scrimRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const productRef = useRef<HTMLDivElement>(null);
   const hillRef = useRef<HTMLImageElement>(null);
@@ -26,17 +27,27 @@ export function HeroScene({ hero, children }: { hero: ReactNode; children: React
 
     const apply = (p: number) => {
       const inv = 1 - p;
+      const fade = String(clamp(1 - p * 2.2));
       // Sky is zoomed in at the top and zooms out to full-bleed on scroll.
       if (skyRef.current) skyRef.current.style.transform = `scale(${1 + inv * 0.28})`;
+      // The readability veil behind the copy fades out with the copy.
+      if (scrimRef.current) scrimRef.current.style.opacity = fade;
       if (heroRef.current) {
-        heroRef.current.style.opacity = String(clamp(1 - p * 2.2));
+        heroRef.current.style.opacity = fade;
         heroRef.current.style.transform = `translate(0, -50%) translate3d(0, ${-p * 26}px, 0)`;
       }
       if (productRef.current) {
-        // Hero: left edge on center, zoomed in. Scroll: slides to center + zooms out.
+        // Hero: left edge on the screen center. Scroll: slides to center AND
+        // grows (bigger, not smaller).
+        const W = Math.min(1080, window.innerWidth * 0.62);
+        const s0 = 1.2;
+        const s1 = 1.35;
+        const scale = s0 + p * (s1 - s0);
+        const centerAtP0 = window.innerWidth / 2 + (W * s0) / 2; // left edge on center
+        const targetCenter = centerAtP0 + p * (window.innerWidth / 2 - centerAtP0);
+        const tx = targetCenter - (window.innerWidth / 2 + W / 2);
         const y = inv * window.innerHeight * 0.12;
-        const zoom = 1 + inv * 0.2;
-        productRef.current.style.transform = `translate(${-p * 50}%, -50%) translate3d(0, ${y}px, 0) scale(${zoom})`;
+        productRef.current.style.transform = `translate(${tx}px, -50%) translate3d(0, ${y}px, 0) scale(${scale})`;
       }
       // Hill is mostly below the fold while zoomed in, and rises + grows in as
       // the scene zooms out on scroll.
@@ -75,6 +86,7 @@ export function HeroScene({ hero, children }: { hero: ReactNode; children: React
     <div ref={sceneRef} className={styles.scene}>
       <div className={styles.stage}>
         <div ref={skyRef} className={styles.sky} aria-hidden="true" />
+        <div ref={scrimRef} className={styles.textScrim} aria-hidden="true" />
         <div className={styles.header}>
           <SiteHeader onDark />
         </div>
