@@ -315,7 +315,13 @@ export default async function RootPage() {
       <StepsScroller />
 
       {/* ================================== SECTION 3 · WHY TRAILWATCH */}
-      <section className={`${styles.why} ${styles.shell}`}>
+      <section className={styles.why}>
+        {/* Decorative floating cliff + cloud, bleeding off the right edge. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className={styles.whyCliff} src="/cliff.webp" alt="" aria-hidden="true" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className={styles.whyClouds} src="/clouds.webp" alt="" aria-hidden="true" />
+        <div className={styles.shell}>
         <h2 className={`${styles.h2} ${styles.whyHeading}`}>
           The big tools weren’t built for you.
         </h2>
@@ -362,6 +368,7 @@ export default async function RootPage() {
               Flat price, sign up in a minute
             </div>
           </div>
+        </div>
         </div>
       </section>
 
