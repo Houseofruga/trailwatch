@@ -81,3 +81,48 @@
   transform-origin: bottom center;
   will-change: transform;
 }
+
+/* ---------------------------------------------------------- mobile
+ * No pinning, no zoom. The three layers sit static and stacked — sky as the
+ * background, white copy, then the product window bleeding off the right — and
+ * only the hill moves (a slow right-to-left drift, driven in JS). */
+@media (max-width: 860px) {
+  .scene {
+    height: auto;
+  }
+
+  .stage {
+    position: relative; /* positioning context so overflow:hidden clips the hill */
+    height: auto;
+  }
+
+  .sky {
+    /* Bring a cloud into the lower hero (behind the CTA/product) while the copy
+       stays on deep blue. */
+    background-position: 35% 22%;
+  }
+
+  .heroText {
+    position: relative; /* above the sky */
+    top: auto;
+    left: auto;
+    width: auto;
+    padding: 40px 22px 0;
+  }
+
+  .product {
+    position: relative; /* above the sky, below the hill */
+    top: auto;
+    left: auto;
+    transform: none;
+    width: auto;
+    padding: 0 0 0 22px; /* left gutter only — bleeds to the right screen edge */
+    margin-top: 26px;
+  }
+
+  /* Wider than the viewport so it can slide sideways without exposing an edge. */
+  .hill {
+    width: 150%;
+    left: -25%;
+  }
+}

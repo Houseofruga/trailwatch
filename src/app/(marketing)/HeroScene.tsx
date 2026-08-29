@@ -62,14 +62,42 @@ export function HeroScene({ hero, children }: { hero: ReactNode; children: React
       }
     };
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      apply(1);
-      return;
-    }
+    const mobileMQ = window.matchMedia("(max-width: 860px)");
+    const reduceMQ = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    // Drop any desktop inline transforms so the static mobile CSS layout wins.
+    const clearDesktop = () => {
+      if (skyRef.current) skyRef.current.style.transform = "";
+      if (heroRef.current) {
+        heroRef.current.style.transform = "";
+        heroRef.current.style.opacity = "";
+      }
+      if (productRef.current) productRef.current.style.transform = "";
+    };
 
     let raf = 0;
     const update = () => {
       raf = 0;
+
+      // Mobile: layers stay put; only the hill drifts right → left on scroll.
+      if (mobileMQ.matches) {
+        clearDesktop();
+        if (hillRef.current) {
+          if (reduceMQ.matches) {
+            hillRef.current.style.transform = "scaleX(-1)";
+          } else {
+            const p = clamp(-scene.getBoundingClientRect().top / window.innerHeight);
+            const tx = (0.5 - p) * window.innerWidth * 0.24;
+            hillRef.current.style.transform = `translate3d(${tx}px, 0, 0) scaleX(-1)`;
+          }
+        }
+        return;
+      }
+
+      if (reduceMQ.matches) {
+        apply(1);
+        return;
+      }
       const runway = scene.offsetHeight - window.innerHeight;
       const scrolled = -scene.getBoundingClientRect().top;
       apply(clamp(runway > 0 ? scrolled / runway : 0));
@@ -81,9 +109,11 @@ export function HeroScene({ hero, children }: { hero: ReactNode; children: React
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
+    mobileMQ.addEventListener("change", onScroll);
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      mobileMQ.removeEventListener("change", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
   }, []);

@@ -447,25 +447,30 @@ export default async function RootPage() {
       {/* =============================== SECTION 6 · FINAL CTA + TRUST */}
       <section className={styles.final}>
         <div className={`${styles.finalInner} ${styles.shell}`}>
-          <h2 className={`${styles.h2} ${styles.finalHeading}`}>
-            Built by founders, not a faceless enterprise.
-          </h2>
-          <p className={styles.finalBody}>
-            TrailWatch is made by House of Ruga — a small, bootstrapped studio. That means
-            honest pricing, no growth-hack dark patterns, and you can actually reach the
-            people who built it.
-          </p>
-          <div className={styles.finalCta}>
-            <a
-              className={`${styles.btn} ${styles.btnPrimary}`}
-              href="/login?mode=signup"
-            >
-              Start free — no card required
-            </a>
+          <div className={styles.finalText}>
+            <h2 className={`${styles.h2} ${styles.finalHeading}`}>
+              Built by founders, not a faceless enterprise.
+            </h2>
+            <p className={styles.finalBody}>
+              TrailWatch is made by House of Ruga — a small, bootstrapped studio. That means
+              honest pricing, no growth-hack dark patterns, and you can actually reach the
+              people who built it.
+            </p>
+            <div className={styles.finalCta}>
+              <a
+                className={`${styles.btn} ${styles.btnPrimary}`}
+                href="/login?mode=signup"
+              >
+                Start free — no card required
+              </a>
+            </div>
+            <div className={styles.finalQuiet}>
+              Also a great fit for small marketing teams, PMs, and agencies.
+            </div>
           </div>
-          <div className={styles.finalQuiet}>
-            Also a great fit for small marketing teams, PMs, and agencies.
-          </div>
+          {/* Founder portrait — drop the image in via background-image on
+              .finalPortrait (or swap this for an <img>) once it's ready. */}
+          <div className={styles.finalPortrait} aria-hidden="true" />
         </div>
       </section>
 

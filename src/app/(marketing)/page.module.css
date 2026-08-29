@@ -880,6 +880,20 @@
 .finalInner {
   padding-top: 84px;
   padding-bottom: 84px;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 380px);
+  gap: 64px;
+  align-items: center;
+}
+
+/* Square founder portrait. Replace the placeholder fill with the image via
+   background-image (background-size: cover keeps it square-cropped). */
+.finalPortrait {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-color: var(--surface-sunken);
+  background-size: cover;
+  background-position: center;
 }
 
 .finalHeading {
@@ -924,6 +938,15 @@
     grid-template-columns: 1fr;
   }
 
+  .finalInner {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .finalPortrait {
+    max-width: 380px;
+  }
+
   /* keep the app at a desktop-ish logical width as the frame narrows */
   .shotScale {
     --shot-scale: 0.6;
@@ -950,13 +973,17 @@
     padding-bottom: 60px;
   }
 
-  /* Like Linear's mobile hero: a tall crop of the desktop app — the left nav
-     and start of the dashboard read clearly at size, and it bleeds off the
-     right screen edge (clipped, no scroll). */
+  .heroBody {
+    font-size: 16px;
+  }
+
+  /* Mobile hero: a tall crop of the desktop app — the left nav and start of the
+     dashboard read clearly at size, clipped on the right (no scroll). Sits
+     inside the hero's side gutters (right padding, no edge bleed). */
   .shotWrap {
     aspect-ratio: auto;
     height: 392px;
-    width: calc(100% + 22px); /* bleed past the right padding to the screen edge */
+    width: 100%;
   }
 
   .shotScale {
