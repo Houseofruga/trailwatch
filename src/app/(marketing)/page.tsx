@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { JsonLd } from "@/components/JsonLd";
+import { HeroScene } from "./HeroScene";
 import { FAQ, structuredData } from "./structuredData";
 import styles from "./page.module.css";
 
@@ -82,28 +83,30 @@ export default async function RootPage() {
       <JsonLd data={structuredData()} />
       <SiteHeader />
 
-      {/* ============================================ SECTION 1 · HERO */}
-      <section className={`${styles.hero} ${styles.shell}`}>
-        <div className={styles.heroInner}>
-          <h1 className={styles.title}>
-            The competitor tracker built for founders, not enterprises.
-          </h1>
-          <p className={styles.heroBody}>
-            Add your competitors and TrailWatch watches their pages for you — then sends
-            one plain-English email a week on what actually changed: pricing, features,
-            messaging. A full dashboard’s there when you want to dig in, but you never have
-            to babysit one. It just works.
-          </p>
-          <div className={styles.heroCta}>
-            <a
-              className={`${styles.btn} ${styles.btnPrimary}`}
-              href="/login?mode=signup"
-            >
-              Start free — no card required
-            </a>
-          </div>
-        </div>
-
+      {/* ===== SECTION 1 · HERO SCENE (pinned: hero copy → product in landscape) */}
+      <HeroScene
+        hero={
+          <>
+            <h1 className={styles.title}>
+              The competitor tracker built for founders, not enterprises.
+            </h1>
+            <p className={styles.heroBody}>
+              Add your competitors and TrailWatch watches their pages for you — then sends
+              one plain-English email a week on what actually changed: pricing, features,
+              messaging. A full dashboard’s there when you want to dig in, but you never have
+              to babysit one. It just works.
+            </p>
+            <div className={styles.heroCta}>
+              <a
+                className={`${styles.btn} ${styles.btnPrimary}`}
+                href="/login?mode=signup"
+              >
+                Start free — no card required
+              </a>
+            </div>
+          </>
+        }
+      >
         {/* Product screenshot — a Pro account's dashboard, with the real left nav */}
         <div className={styles.shotWrap}>
           <div className={styles.shotScale}>
@@ -307,7 +310,7 @@ export default async function RootPage() {
           </div>
           </div>
         </div>
-      </section>
+      </HeroScene>
 
       {/* ================================== SECTION 2 · HOW IT WORKS */}
       <section className={styles.howBand}>
