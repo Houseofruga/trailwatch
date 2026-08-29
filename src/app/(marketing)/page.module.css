@@ -805,12 +805,30 @@
 }
 
 .faqList {
-  max-width: 760px;
+  display: flex;
+  align-items: flex-start;
+  gap: 56px;
+}
+
+/* Each column carries its own top rule and stacks independently, so an open
+   answer only pushes the items below it in the same column. */
+.faqCol {
+  flex: 1 1 0;
+  min-width: 0;
   border-top: 1px solid var(--rule);
 }
 
 .faqItem {
   border-bottom: 1px solid var(--rule);
+}
+
+@media (max-width: 720px) {
+  .faqList {
+    display: block;
+  }
+  .faqCol + .faqCol {
+    border-top: none;
+  }
 }
 
 .faqQ {

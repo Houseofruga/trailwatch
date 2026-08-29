@@ -425,11 +425,21 @@ export default async function RootPage() {
       <section className={`${styles.faq} ${styles.shell}`}>
         <h2 className={`${styles.h2} ${styles.faqHeading}`}>Questions, answered.</h2>
         <div className={styles.faqList}>
-          {FAQ.map((item) => (
-            <details key={item.q} className={styles.faqItem}>
-              <summary className={styles.faqQ}>{item.q}</summary>
-              <p className={styles.faqA}>{item.a}</p>
-            </details>
+          {/* Two independent columns so opening one item never stretches the
+              other. First half left, second half right — stacks in order on
+              narrow screens. */}
+          {[
+            FAQ.slice(0, Math.ceil(FAQ.length / 2)),
+            FAQ.slice(Math.ceil(FAQ.length / 2)),
+          ].map((col, i) => (
+            <div key={i} className={styles.faqCol}>
+              {col.map((item) => (
+                <details key={item.q} className={styles.faqItem}>
+                  <summary className={styles.faqQ}>{item.q}</summary>
+                  <p className={styles.faqA}>{item.a}</p>
+                </details>
+              ))}
+            </div>
           ))}
         </div>
       </section>
