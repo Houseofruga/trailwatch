@@ -56,7 +56,9 @@ export function HeroScene({ hero, children }: { hero: ReactNode; children: React
       // Hill is mostly below the fold while zoomed in, and rises + grows in as
       // the scene zooms out on scroll.
       if (hillRef.current) {
-        hillRef.current.style.transform = `translate3d(0, ${inv * 72}%, 0) scale(${1 + p * 0.1})`;
+        // Flipped horizontally, and sat a bit lower so it clears the bottom of
+        // the product window in the landscape (scrolled) state.
+        hillRef.current.style.transform = `translate3d(0, ${10 + inv * 64}%, 0) scaleX(-1) scale(${1 + p * 0.1})`;
       }
     };
 
