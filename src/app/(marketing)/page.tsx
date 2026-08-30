@@ -319,7 +319,7 @@ export default async function RootPage() {
       <CloudScene>
       {/* ================================== SECTION 3 · WHY TRAILWATCH */}
       <section className={styles.why}>
-        <div className={styles.shell}>
+        <div className={styles.shellWide}>
         <h2 className={`${styles.h2} ${styles.whyHeading}`}>
           The big tools weren’t built for you.
         </h2>
@@ -371,7 +371,7 @@ export default async function RootPage() {
       </section>
 
       {/* ===================================== SECTION 4 · PRICING */}
-      <section className={`${styles.pricing} ${styles.shell}`}>
+      <section className={`${styles.pricing} ${styles.shellWide}`}>
         <h2 className={`${styles.h2} ${styles.pricingHeading}`}>
           Honest pricing. The AI’s never behind a paywall.
         </h2>
@@ -428,7 +428,7 @@ export default async function RootPage() {
       </CloudScene>
 
       {/* ========================================= SECTION 5 · FAQ */}
-      <section className={`${styles.faq} ${styles.shell}`}>
+      <section className={`${styles.faq} ${styles.shellWide}`}>
         <h2 className={`${styles.h2} ${styles.faqHeading}`}>Questions, answered.</h2>
         <div className={styles.faqList}>
           {/* Two independent columns so opening one item never stretches the
@@ -452,7 +452,7 @@ export default async function RootPage() {
 
       {/* =============================== SECTION 6 · FINAL CTA + TRUST */}
       <section className={styles.final}>
-        <div className={`${styles.finalInner} ${styles.shell}`}>
+        <div className={`${styles.finalInner} ${styles.shellWide}`}>
           <div className={styles.finalText}>
             <h2 className={`${styles.h2} ${styles.finalHeading}`}>
               Built by founders, not a faceless enterprise.
