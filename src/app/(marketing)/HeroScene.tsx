@@ -58,7 +58,7 @@ export function HeroScene({ hero, children }: { hero: ReactNode; children: React
       if (hillRef.current) {
         // Flipped horizontally, and sat a bit lower so it clears the bottom of
         // the product window in the landscape (scrolled) state.
-        hillRef.current.style.transform = `translate3d(0, ${26 + inv * 52}%, 0) scaleX(-1) scale(${1 + p * 0.1})`;
+        hillRef.current.style.transform = `translate3d(0, ${17 + inv * 60}%, 0) scaleX(-1) scale(${1 + p * 0.1})`;
       }
     };
 
