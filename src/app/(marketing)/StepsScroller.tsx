@@ -76,15 +76,51 @@ export function StepsScroller() {
             </div>
             <div className={styles.media}>
               {STEPS.map((s, i) => (
-                // Placeholder panels — drop a screenshot in via background-image
-                // on .panel0 / .panel1 / .panel2 to replace the flat colors.
+                // Panel 0 is a built mockup; 1 & 2 are still flat-color placeholders.
                 <div
                   key={s.num}
-                  className={`${styles.panel} ${styles[`panel${i}`]} ${
+                  className={`${styles.panel} ${i === 0 ? "" : styles[`panel${i}`]} ${
                     i === active ? styles.panelActive : ""
                   }`}
                   aria-hidden="true"
-                />
+                >
+                  {i === 0 && (
+                    <div className={styles.frame}>
+                      <div className={styles.addCard}>
+                        <div className={styles.addTitle}>Add a competitor</div>
+                        <div className={styles.urlField}>
+                          <span className={styles.urlText}>linear.app/pricing</span>
+                        </div>
+                        <div className={styles.snap}>
+                          <div className={styles.snapShot}>
+                            <div className={styles.snapNav}>
+                              <span className={styles.snapNavDot} />
+                              <span className={styles.snapNavBar} />
+                            </div>
+                            <div className={styles.snapCols}>
+                              <div className={styles.snapCol}>
+                                <span className={styles.snapPrice} />
+                                <span className={styles.snapLine} />
+                                <span className={styles.snapLine} />
+                                <span className={styles.snapLineShort} />
+                              </div>
+                              <div className={styles.snapCol}>
+                                <span className={styles.snapPrice} />
+                                <span className={styles.snapLine} />
+                                <span className={styles.snapLine} />
+                                <span className={styles.snapLineShort} />
+                              </div>
+                            </div>
+                          </div>
+                          <div className={styles.snapFoot}>
+                            <span className={styles.snapBadge}>✓ Snapshot captured</span>
+                            <span className={styles.snapMeta}>Linear · Pricing</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>
