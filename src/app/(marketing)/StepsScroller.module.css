@@ -452,6 +452,14 @@
   font-weight: 600;
 }
 
+.mailCta {
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent-ink);
+}
+
 /* --------------------------------------------- reduced-motion fallback
    No pinning — show every step and panel stacked so nothing depends on scroll. */
 @media (prefers-reduced-motion: reduce) {
