@@ -6,6 +6,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { HeroScene } from "./HeroScene";
 import { StepsScroller } from "./StepsScroller";
 import { CloudScene } from "./CloudScene";
+import { FounderReveal } from "./FounderReveal";
 import { FAQ, structuredData } from "./structuredData";
 import styles from "./page.module.css";
 
@@ -474,9 +475,8 @@ export default async function RootPage() {
               Also a great fit for small marketing teams, PMs, and agencies.
             </div>
           </div>
-          {/* Founder portrait — drop the image in via background-image on
-              .finalPortrait (or swap this for an <img>) once it's ready. */}
-          <div className={styles.finalPortrait} aria-hidden="true" />
+          {/* Founder portrait — Ghibli/original before-after reveal slider. */}
+          <FounderReveal />
         </div>
       </section>
 
