@@ -70,9 +70,11 @@ export function CloudScene({ children }: { children: ReactNode }) {
       cliff.style.opacity = String(clamp(1 - p * 2.4));
 
       // Cloud: drift down under the pricing section, sliding to the horizontal
-      // center as it goes, and zoom in.
+      // center as it goes, and zoom in to 80% of the screen width.
       const centerTx = width / 2 - (cloud.offsetLeft + cloud.offsetWidth / 2);
-      cloud.style.transform = `translate3d(${p * centerTx}px, ${p * 540}px, 0) scale(${1 + p * 0.95})`;
+      const targetScale = (width * 0.8) / cloud.offsetWidth;
+      const scale = 1 + p * (targetScale - 1);
+      cloud.style.transform = `translate3d(${p * centerTx}px, ${p * 540}px, 0) scale(${scale})`;
       cloud.style.opacity = "1";
     };
 
