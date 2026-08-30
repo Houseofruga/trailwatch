@@ -201,7 +201,20 @@ export function StepsScroller() {
                           <span className={styles.mailChangeCount}>· 7 changes</span>
                         </div>
                         <div className={styles.mailSenderRow}>
-                          <span className={styles.mailAvatar}>T</span>
+                          <span className={styles.mailAvatar} aria-hidden="true">
+                            <svg
+                              className={styles.mailAvatarMark}
+                              viewBox="-5 97 699 577"
+                              fill="none"
+                            >
+                              <path
+                                d="M550.681 638.5C321.681 685.5 99.9061 421.1 283.506 341.5C513.006 242 986.392 443 328.006 443C-300.994 443 195.181 87 509.181 130.5"
+                                stroke="currentColor"
+                                strokeWidth="50"
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                          </span>
                           <div className={styles.mailSenderText}>
                             <div className={styles.mailSender}>TrailWatch</div>
                             <div className={styles.mailAddr}>
