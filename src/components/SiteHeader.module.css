@@ -2,9 +2,9 @@
  * pages. Uses the design tokens + DM Sans. */
 
 .inner {
-  max-width: 1080px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 24px 40px;
+  padding: 24px 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
