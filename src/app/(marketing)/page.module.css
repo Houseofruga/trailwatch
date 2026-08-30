@@ -673,7 +673,7 @@
    Non-interactive; hidden on small screens. */
 .whyClouds {
   position: absolute;
-  top: 210px;
+  top: 60px;
   right: -80px;
   width: 640px;
   height: auto;
