@@ -52,22 +52,11 @@
 .step {
   padding: 26px 30px;
   background: transparent;
-  cursor: pointer;
   transition: background-color 0.28s ease;
-}
-
-.step:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.step:not(.stepActive):hover {
-  background: var(--surface-alt);
 }
 
 .stepActive {
   background: var(--surface);
-  cursor: default;
 }
 
 .stepNum {
@@ -129,18 +118,15 @@
 
 .frameBlue {
   background-color: #e6eef5;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.44)),
-    url("/step-1-bg.webp");
+  background-image: url("/step-1-bg.webp");
 }
 .frameWarm {
   background-color: #eef3ee;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.46)),
-    url("/step-2-bg.webp");
+  background-image: url("/step-2-bg.webp");
 }
 .frameGreen {
   background-color: #f2ecdf;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.4)),
-    url("/step-3-bg.webp");
+  background-image: url("/step-3-bg.webp");
 }
 
 .card {
