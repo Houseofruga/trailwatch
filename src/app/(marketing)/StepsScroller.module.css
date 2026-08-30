@@ -98,15 +98,7 @@
   opacity: 1;
 }
 
-/* Placeholder fills for the not-yet-built panels. */
-.panel1 {
-  background-color: #c39a9a;
-}
-.panel2 {
-  background-color: #3f8f3f;
-}
-
-/* -------------------------------------------------- panel 01: add a competitor */
+/* -------------------------------------------------- panel mockups (shared) */
 .frame {
   width: 100%;
   height: 100%;
@@ -114,10 +106,20 @@
   align-items: center;
   justify-content: center;
   padding: 26px;
-  background: linear-gradient(160deg, #eef3f8, #e2ebf2);
 }
 
-.addCard {
+/* Per-step background tints so the crossfade still reads as a scene change. */
+.frameBlue {
+  background: linear-gradient(160deg, #eef3f8, #e2ebf2);
+}
+.frameWarm {
+  background: linear-gradient(160deg, #f6efee, #eee2e1);
+}
+.frameGreen {
+  background: linear-gradient(160deg, #edf4ec, #e1eee0);
+}
+
+.card {
   width: 100%;
   max-width: 340px;
   background: var(--surface);
@@ -129,10 +131,31 @@
   gap: 14px;
 }
 
-.addTitle {
+.cardTitle {
   font-size: 14px;
   font-weight: 600;
   color: var(--ink);
+}
+
+.cardHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cardHost {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 11px;
+  color: var(--ink-4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardFoot {
+  font-size: 11.5px;
+  color: var(--ink-4);
 }
 
 .urlField {
@@ -240,6 +263,116 @@
 .snapMeta {
   font-size: 11.5px;
   color: var(--ink-4);
+}
+
+/* ---------------------------------------- panel 02: daily check / noise filter */
+.diffRows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.diffRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 11px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border-softer);
+  font-size: 12.5px;
+}
+
+.diffTrivial {
+  color: var(--ink-4);
+  text-decoration: line-through;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diffText {
+  color: var(--ink);
+}
+
+.diffText b {
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.diffKept {
+  background: var(--accent-wash);
+  border: none;
+  border-left: 3px solid var(--accent);
+}
+
+.tagMuted,
+.tagAccent {
+  flex-shrink: 0;
+  font-size: 10.5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.tagMuted {
+  color: var(--ink-5);
+  background: var(--surface-sunken);
+}
+
+.tagAccent {
+  color: var(--accent-ink);
+  font-weight: 600;
+  background: var(--surface);
+}
+
+/* ---------------------------------------- panel 03: the weekly email */
+.mailHead {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.mailSubject {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.mailMeta {
+  font-size: 11.5px;
+  color: var(--ink-4);
+}
+
+.mailBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mailGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mailComp {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink-2);
+}
+
+.mailItem {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ink-3);
+}
+
+.mailItem b {
+  color: var(--accent-ink);
+  font-weight: 600;
 }
 
 /* --------------------------------------------- reduced-motion fallback

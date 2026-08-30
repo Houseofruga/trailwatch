@@ -76,18 +76,15 @@ export function StepsScroller() {
             </div>
             <div className={styles.media}>
               {STEPS.map((s, i) => (
-                // Panel 0 is a built mockup; 1 & 2 are still flat-color placeholders.
                 <div
                   key={s.num}
-                  className={`${styles.panel} ${i === 0 ? "" : styles[`panel${i}`]} ${
-                    i === active ? styles.panelActive : ""
-                  }`}
+                  className={`${styles.panel} ${i === active ? styles.panelActive : ""}`}
                   aria-hidden="true"
                 >
                   {i === 0 && (
-                    <div className={styles.frame}>
-                      <div className={styles.addCard}>
-                        <div className={styles.addTitle}>Add a competitor</div>
+                    <div className={`${styles.frame} ${styles.frameBlue}`}>
+                      <div className={styles.card}>
+                        <div className={styles.cardTitle}>Add a competitor</div>
                         <div className={styles.urlField}>
                           <span className={styles.urlText}>linear.app/pricing</span>
                         </div>
@@ -117,6 +114,64 @@ export function StepsScroller() {
                             <span className={styles.snapMeta}>Linear · Pricing</span>
                           </div>
                         </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {i === 1 && (
+                    <div className={`${styles.frame} ${styles.frameWarm}`}>
+                      <div className={styles.card}>
+                        <div className={styles.cardHead}>
+                          <span className={styles.cardTitle}>Daily check</span>
+                          <span className={styles.cardHost}>linear.app/pricing</span>
+                        </div>
+                        <div className={styles.diffRows}>
+                          <div className={styles.diffRow}>
+                            <span className={styles.diffTrivial}>Footer year 2025 → 2026</span>
+                            <span className={styles.tagMuted}>filtered</span>
+                          </div>
+                          <div className={styles.diffRow}>
+                            <span className={styles.diffTrivial}>Cookie notice reworded</span>
+                            <span className={styles.tagMuted}>filtered</span>
+                          </div>
+                          <div className={`${styles.diffRow} ${styles.diffKept}`}>
+                            <span className={styles.diffText}>
+                              Business plan <b>$14 → $16</b>
+                            </span>
+                            <span className={styles.tagAccent}>flagged</span>
+                          </div>
+                        </div>
+                        <div className={styles.cardFoot}>47 trivial edits filtered this week</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {i === 2 && (
+                    <div className={`${styles.frame} ${styles.frameGreen}`}>
+                      <div className={styles.card}>
+                        <div className={styles.mailHead}>
+                          <span className={styles.mailSubject}>Your competitors this week</span>
+                          <span className={styles.mailMeta}>Monday · 7 changes</span>
+                        </div>
+                        <div className={styles.mailBody}>
+                          <div className={styles.mailGroup}>
+                            <div className={styles.mailComp}>Northwind</div>
+                            <div className={styles.mailItem}>
+                              Renamed the Starter tier to “Basic”
+                            </div>
+                          </div>
+                          <div className={styles.mailGroup}>
+                            <div className={styles.mailComp}>Linear</div>
+                            <div className={styles.mailItem}>
+                              Business plan raised <b>$14 → $16</b>
+                            </div>
+                          </div>
+                          <div className={styles.mailGroup}>
+                            <div className={styles.mailComp}>Meridian</div>
+                            <div className={styles.mailItem}>Shipped SSO and a public API</div>
+                          </div>
+                        </div>
+                        <div className={styles.cardFoot}>Read in 30 seconds</div>
                       </div>
                     </div>
                   )}
