@@ -13,7 +13,6 @@ import styles from "./page.module.css";
 export function FounderReveal() {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState(90);
-  const [showHint, setShowHint] = useState(true);
   const interacted = useRef(false);
   const raf = useRef(0);
 
@@ -28,7 +27,6 @@ export function FounderReveal() {
     interacted.current = true;
     if (raf.current) cancelAnimationFrame(raf.current);
     raf.current = 0;
-    setShowHint(false);
   }, []);
 
   // One-time "peek" nudge when the slider first scrolls into view.
@@ -128,12 +126,6 @@ export function FounderReveal() {
       />
       <div className={styles.revealHandle} style={{ left: `${pos}%` }}>
         <span className={styles.revealGrip} />
-      </div>
-      <div
-        className={`${styles.revealHint} ${showHint ? "" : styles.revealHintHidden}`}
-        aria-hidden="true"
-      >
-        ⇄ Drag to compare
       </div>
     </div>
   );
