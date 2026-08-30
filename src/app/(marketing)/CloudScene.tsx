@@ -16,6 +16,12 @@ const clamp = (n: number, a = 0, b = 1) => Math.max(a, Math.min(b, n));
 export function CloudScene({ children }: { children: ReactNode }) {
   const sceneRef = useRef<HTMLDivElement>(null);
   const cloudRef = useRef<HTMLImageElement>(null);
+  const whiteRef = useRef<HTMLDivElement>(null);
+
+  // Dense core of one cloud in clouds.webp (fractions of the image), so the zoom
+  // grows from an opaque cloud body — not the transparent gap between the two.
+  const CORE_X = 0.7;
+  const CORE_Y = 0.42;
 
   useEffect(() => {
     const scene = sceneRef.current;
@@ -39,10 +45,13 @@ export function CloudScene({ children }: { children: ReactNode }) {
       const cloud = cloudRef.current;
       if (!cloud) return;
 
+      const white = whiteRef.current;
+
       if (!active()) {
         cloud.style.transform = "";
         cloud.style.opacity = "";
         cloud.style.zIndex = "";
+        if (white) white.style.opacity = "0";
         clearPricing();
         return;
       }
@@ -62,29 +71,41 @@ export function CloudScene({ children }: { children: ReactNode }) {
         cloud.style.transform = `translate3d(${-away * cloudIn}px, 0, 0) scale(1)`;
         cloud.style.opacity = String(ease);
         cloud.style.zIndex = ""; // behind the why copy (CSS z-index)
+        cloud.style.transformOrigin = "";
+        if (white) white.style.opacity = "0";
         clearPricing(); // pricing is fully visible until the fly-through begins
         return;
       }
 
-      // EXIT — fly through the cloud into the pricing section.
+      // EXIT — fly through one cloud into the pricing section.
       const runway = scene.offsetHeight - vh;
       const p = clamp(runway > 0 ? -rectTop / runway : 0);
 
-      // Cloud: rush toward the viewport center and scale up until it engulfs the
-      // frame, then fade out ("passing through the lens").
-      const restCenterX = cloud.offsetLeft + cloud.offsetWidth / 2;
-      const restCenterY = cloud.offsetTop + cloud.offsetHeight / 2;
-      const tx = (width / 2 - restCenterX) * p;
-      const ty = (vh / 2 + -rectTop - restCenterY) * p; // toward viewport center
+      // Cloud: bring one dense cloud CORE (not the image center, which is the
+      // transparent gap) to the viewport center and scale it up until that cloud
+      // engulfs the frame, then fade out ("passing through the lens").
+      const coreX = cloud.offsetLeft + cloud.offsetWidth * CORE_X;
+      const coreY = cloud.offsetTop + cloud.offsetHeight * CORE_Y;
+      const tx = (width / 2 - coreX) * p;
+      const ty = (vh / 2 - rectTop - coreY) * p; // toward viewport center
       const scale = 1 + p * 8;
-      const fade = clamp((0.95 - p) / (0.95 - 0.55)); // 1 until ~0.55, → 0 by ~0.95
+      const fade = clamp((0.95 - p) / (0.95 - 0.7)); // 1 through the peak, → 0 by ~0.95
       cloud.style.zIndex = "5"; // above the pricing section during the fly-through
+      cloud.style.transformOrigin = `${CORE_X * 100}% ${CORE_Y * 100}%`;
       cloud.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`;
       cloud.style.opacity = String(fade);
 
-      // Pricing: materialises as the cloud dissolves.
+      // Whiteout: guarantees full coverage at the peak even through the cloud's
+      // soft edges — fades in as it engulfs, out as pricing appears.
+      if (white) {
+        const wIn = clamp((p - 0.45) / (0.6 - 0.45));
+        const wOut = clamp((p - 0.65) / (0.9 - 0.65));
+        white.style.opacity = String(clamp(wIn - wOut));
+      }
+
+      // Pricing: materialises as the whiteout/cloud dissolve.
       if (pricing) {
-        const rise = clamp((p - 0.45) / (0.9 - 0.45)); // 0 until ~0.45, → 1 by ~0.9
+        const rise = clamp((p - 0.6) / (0.92 - 0.6)); // 0 until ~0.6, → 1 by ~0.92
         pricing.style.opacity = String(rise);
         pricing.style.transform = `scale(${1.03 - rise * 0.03})`;
       }
@@ -108,6 +129,7 @@ export function CloudScene({ children }: { children: ReactNode }) {
     <div ref={sceneRef} className={styles.cloudScene}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img ref={cloudRef} className={styles.whyClouds} src="/clouds.webp" alt="" aria-hidden="true" />
+      <div ref={whiteRef} className={styles.flyWhite} aria-hidden="true" />
       {children}
     </div>
   );

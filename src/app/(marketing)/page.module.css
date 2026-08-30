@@ -684,6 +684,17 @@
   will-change: transform, opacity;
 }
 
+/* Full-viewport whiteout that guarantees the cloud fully covers the screen at
+   the peak of the fly-through (JS drives opacity). Between pricing and cloud. */
+.flyWhite {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  background: #f4f7fa;
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Positioned so it can be revealed by the cloud fly-through (JS controls
    opacity/transform on scroll). */
 .pricing {
