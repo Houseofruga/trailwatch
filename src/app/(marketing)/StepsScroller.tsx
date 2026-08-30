@@ -203,11 +203,10 @@ export function StepsScroller() {
                         <div className={styles.mailSenderRow}>
                           <span className={styles.mailAvatar}>T</span>
                           <div className={styles.mailSenderText}>
-                            <div>
-                              <b>TrailWatch</b>{" "}
-                              <span className={styles.mailAddr}>weekly@trailwatch.app</span>
+                            <div className={styles.mailSender}>TrailWatch</div>
+                            <div className={styles.mailAddr}>
+                              weekly@trailwatch.houseofruga.com
                             </div>
-                            <div className={styles.mailTo}>to me</div>
                           </div>
                           <div className={styles.mailRight}>
                             <span className={styles.mailTime}>9:02 AM</span>
