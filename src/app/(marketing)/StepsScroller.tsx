@@ -233,7 +233,7 @@ export function StepsScroller() {
                             <div className={styles.mailItem}>Shipped SSO and a public API</div>
                           </div>
                         </div>
-                        <div className={styles.mailCta}>Open dashboard →</div>
+                        <div className={styles.mailCta}>Open dashboard</div>
                       </div>
                     </div>
                   )}
