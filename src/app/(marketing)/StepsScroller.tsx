@@ -149,9 +149,72 @@ export function StepsScroller() {
                   {i === 2 && (
                     <div className={`${styles.frame} ${styles.frameGreen}`}>
                       <div className={styles.card}>
-                        <div className={styles.mailHead}>
-                          <span className={styles.mailSubject}>Your competitors this week</span>
-                          <span className={styles.mailMeta}>Monday · 7 changes</span>
+                        <div className={styles.mailToolbar} aria-hidden="true">
+                          {/* back */}
+                          <svg viewBox="0 0 24 24" className={styles.mailTool}>
+                            <path
+                              d="M15 18l-6-6 6-6"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          <span className={styles.mailToolSpacer} />
+                          {/* archive */}
+                          <svg viewBox="0 0 24 24" className={styles.mailTool}>
+                            <path
+                              d="M3 6h18v3H3zM5 9v10h14V9M9 13h6"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          {/* trash */}
+                          <svg viewBox="0 0 24 24" className={styles.mailTool}>
+                            <path
+                              d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          {/* reply */}
+                          <svg viewBox="0 0 24 24" className={styles.mailTool}>
+                            <path
+                              d="M9 8L4 12l5 4M4 12h9a6 6 0 016 6"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </div>
+                        <div className={styles.mailSubjectRow}>
+                          Your competitors this week
+                          <span className={styles.mailChangeCount}>· 7 changes</span>
+                        </div>
+                        <div className={styles.mailSenderRow}>
+                          <span className={styles.mailAvatar}>T</span>
+                          <div className={styles.mailSenderText}>
+                            <div>
+                              <b>TrailWatch</b>{" "}
+                              <span className={styles.mailAddr}>weekly@trailwatch.app</span>
+                            </div>
+                            <div className={styles.mailTo}>to me</div>
+                          </div>
+                          <div className={styles.mailRight}>
+                            <span className={styles.mailTime}>9:02 AM</span>
+                            <span className={styles.mailStar} aria-hidden="true">
+                              ☆
+                            </span>
+                          </div>
                         </div>
                         <div className={styles.mailBody}>
                           <div className={styles.mailGroup}>

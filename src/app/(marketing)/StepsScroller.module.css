@@ -325,24 +325,96 @@
   background: var(--surface);
 }
 
-/* ---------------------------------------- panel 03: the weekly email */
-.mailHead {
+/* ---------------------------------------- panel 03: the weekly email
+   A Gmail-flavoured opened-email view (no Google logo/wordmark). */
+.mailToolbar {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
+  align-items: center;
+  gap: 16px;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--border-soft);
+  color: var(--ink-4);
 }
 
-.mailSubject {
+.mailTool {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.mailToolSpacer {
+  flex: 1;
+}
+
+.mailSubjectRow {
   font-size: 14px;
   font-weight: 600;
   color: var(--ink);
 }
 
-.mailMeta {
+.mailChangeCount {
+  font-weight: 400;
   font-size: 11.5px;
   color: var(--ink-4);
+}
+
+.mailSenderRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.mailAvatar {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mailSenderText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.mailAddr {
+  font-size: 11px;
+  color: var(--ink-4);
+}
+
+.mailTo {
+  font-size: 11px;
+  color: var(--ink-5);
+}
+
+.mailRight {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.mailTime {
+  font-size: 11px;
+  color: var(--ink-4);
+}
+
+.mailStar {
+  font-size: 14px;
+  color: var(--ink-hint);
 }
 
 .mailBody {
