@@ -656,21 +656,55 @@
 /* ----------------------------------------------------------- why */
 
 .why {
-  position: relative;
-  z-index: 2; /* keep the copy + table above the cliff/cloud decorations */
   padding-top: 76px;
   padding-bottom: 76px;
 }
 
-/* Spans the why + pricing sections so the cloud can travel from one into the
-   other on scroll. Clips the right-edge bleed (no h-scroll). */
+/* ---- Pinned cloud fly-through (why → pricing) ---------------------------- */
+
+/* Tall scene = scroll runway. No overflow here (would break the sticky stage);
+   the stage clips the cloud instead. */
 .cloudScene {
   position: relative;
+  height: calc(100vh + 800px);
+}
+
+.cloudStage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
   overflow: hidden;
 }
 
-/* Floating cloud, anchored to the right edge and bleeding off it.
-   Non-interactive; hidden on small screens. */
+/* Overlaid full-viewport layers holding the why / pricing content, top-aligned
+   like the original sections. */
+.cloudLayer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 64px;
+  z-index: 1; /* the held why layer */
+}
+
+/* Pricing sits above the why layer and is opaque, so it fully covers the held
+   why once revealed (JS drives opacity 0 → 1). */
+.cloudLayerPrice {
+  z-index: 2;
+  background: var(--bg);
+}
+
+/* Zero the sections' own vertical padding inside the pinned layers (the layer
+   provides the top offset); restored in the mobile fallback below. */
+.cloudLayer .why,
+.cloudLayer .pricing {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* Floating cloud over the (transparent) why layer; zooms through on the pinned
+   exit. Behind the why content at rest (z0), lifted to z5 in JS during the fly. */
 .whyClouds {
   position: absolute;
   top: 60px;
@@ -680,32 +714,43 @@
   pointer-events: none;
   user-select: none;
   transform-origin: 50% 50%;
-  z-index: 1; /* behind the why copy at rest; lifted above pricing in JS on exit */
+  z-index: 0;
   will-change: transform, opacity;
 }
 
-/* Full-viewport whiteout that guarantees the cloud fully covers the screen at
-   the peak of the fly-through (JS drives opacity). Between pricing and cloud. */
+/* Whiteout that guarantees full coverage at the peak of the fly-through. */
 .flyWhite {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  z-index: 4;
+  z-index: 3;
   background: #f4f7fa;
   opacity: 0;
   pointer-events: none;
 }
 
-/* Positioned so it can be revealed by the cloud fly-through (JS controls
-   opacity/transform on scroll). */
-.pricing {
-  position: relative;
-  z-index: 2;
-  transform-origin: 50% 30%;
-}
-
-@media (max-width: 1040px) {
-  .whyCliff,
-  .whyClouds {
+/* Mobile / reduced-motion: no pinning — stack why then pricing in normal flow. */
+@media (max-width: 1040px), (prefers-reduced-motion: reduce) {
+  .cloudScene {
+    height: auto;
+  }
+  .cloudStage {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+  .cloudLayer {
+    position: static;
+    display: block;
+    padding-top: 0;
+    background: transparent;
+  }
+  .cloudLayer .why,
+  .cloudLayer .pricing {
+    padding-top: 76px;
+    padding-bottom: 76px;
+  }
+  .whyClouds,
+  .flyWhite {
     display: none;
   }
 }
@@ -776,7 +821,7 @@
 /* --------------------------------------------------------- pricing */
 
 .pricing {
-  padding-top: 340px; /* extra top space = runway for the cloud fly-through */
+  padding-top: 76px;
   padding-bottom: 76px;
 }
 

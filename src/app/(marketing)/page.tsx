@@ -316,9 +316,11 @@ export default async function RootPage() {
       {/* ================================== SECTION 2 · HOW IT WORKS */}
       <StepsScroller />
 
-      {/* Cliff + cloud decorations that animate across these two sections. */}
-      <CloudScene>
-      {/* ================================== SECTION 3 · WHY TRAILWATCH */}
+      {/* Pinned cloud fly-through: the why section holds while the cloud zooms
+          through and reveals the pricing section in its place. */}
+      <CloudScene
+        why={
+      /* ================================== SECTION 3 · WHY TRAILWATCH */
       <section className={styles.why}>
         <div className={styles.shellWide}>
         <h2 className={`${styles.h2} ${styles.whyHeading}`}>
@@ -370,8 +372,9 @@ export default async function RootPage() {
         </div>
         </div>
       </section>
-
-      {/* ===================================== SECTION 4 · PRICING */}
+        }
+        pricing={
+      /* ===================================== SECTION 4 · PRICING */
       <section className={`${styles.pricing} ${styles.shellWide}`}>
         <h2 className={`${styles.h2} ${styles.pricingHeading}`}>
           Honest pricing. The AI’s never behind a paywall.
@@ -426,7 +429,8 @@ export default async function RootPage() {
           summaries work on the free plan too, not gated behind an upgrade.
         </p>
       </section>
-      </CloudScene>
+        }
+      />
 
       {/* ========================================= SECTION 5 · FAQ */}
       <section className={`${styles.faq} ${styles.shellWide}`}>
