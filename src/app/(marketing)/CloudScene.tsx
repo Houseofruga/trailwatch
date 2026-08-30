@@ -35,11 +35,35 @@ export function CloudScene({ children }: { children: ReactNode }) {
         cliff.style.transform = "";
         cliff.style.opacity = "";
         cloud.style.transform = "";
+        cloud.style.opacity = "";
         return;
       }
 
-      const runway = scene.offsetHeight - window.innerHeight;
-      const p = clamp(runway > 0 ? -scene.getBoundingClientRect().top / runway : 0);
+      const vh = window.innerHeight;
+      const rectTop = scene.getBoundingClientRect().top;
+      const width = scene.clientWidth;
+
+      if (rectTop > 0) {
+        // ENTRANCE — as the section scrolls up into view: the cliff flies in
+        // from off the right edge, the cloud drifts in from the left (under the
+        // text) fading 0 → 1. Both settle at their rest positions.
+        const inP = clamp((vh - rectTop) / (vh * 0.75));
+        const ease = 1 - (1 - inP) * (1 - inP); // ease-out
+        const away = 1 - ease; // 1 = fully off/away, 0 = at rest
+
+        const cliffOff = width - cliff.offsetLeft + 40; // clears the right edge
+        cliff.style.transform = `translate3d(${away * cliffOff}px, 0, 0)`;
+        cliff.style.opacity = "1";
+
+        const cloudIn = width * 0.5; // starts under the text on the left
+        cloud.style.transform = `translate3d(${-away * cloudIn}px, 0, 0) scale(1)`;
+        cloud.style.opacity = String(ease);
+        return;
+      }
+
+      // EXIT — scrolling on toward pricing.
+      const runway = scene.offsetHeight - vh;
+      const p = clamp(runway > 0 ? -rectTop / runway : 0);
 
       // Cliff: slide right and fade out early.
       cliff.style.transform = `translate3d(${p * 320}px, 0, 0)`;
@@ -47,8 +71,9 @@ export function CloudScene({ children }: { children: ReactNode }) {
 
       // Cloud: drift down under the pricing section, sliding to the horizontal
       // center as it goes, and zoom in.
-      const centerTx = scene.clientWidth / 2 - (cloud.offsetLeft + cloud.offsetWidth / 2);
+      const centerTx = width / 2 - (cloud.offsetLeft + cloud.offsetWidth / 2);
       cloud.style.transform = `translate3d(${p * centerTx}px, ${p * 540}px, 0) scale(${1 + p * 0.95})`;
+      cloud.style.opacity = "1";
     };
 
     const onScroll = () => {
