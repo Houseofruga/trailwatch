@@ -108,15 +108,30 @@
   padding: 26px;
 }
 
-/* Per-step background tints so the crossfade still reads as a scene change. */
+/* Ghibli "times of day" backgrounds, softened by a light wash so the product
+   card stays legible. Fallback tint shows if an image is missing. */
+.frameBlue,
+.frameWarm,
+.frameGreen {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 .frameBlue {
-  background: linear-gradient(160deg, #eef3f8, #e2ebf2);
+  background-color: #e6eef5;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.44)),
+    url("/step-1-bg.webp");
 }
 .frameWarm {
-  background: linear-gradient(160deg, #f6efee, #eee2e1);
+  background-color: #eef3ee;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.46)),
+    url("/step-2-bg.webp");
 }
 .frameGreen {
-  background: linear-gradient(160deg, #edf4ec, #e1eee0);
+  background-color: #f2ecdf;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.4)),
+    url("/step-3-bg.webp");
 }
 
 .card {
