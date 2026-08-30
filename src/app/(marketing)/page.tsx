@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { JsonLd } from "@/components/JsonLd";
 import { HeroScene } from "./HeroScene";
 import { StepsScroller } from "./StepsScroller";
+import { CloudScene } from "./CloudScene";
 import { FAQ, structuredData } from "./structuredData";
 import styles from "./page.module.css";
 
@@ -314,13 +315,10 @@ export default async function RootPage() {
       {/* ================================== SECTION 2 · HOW IT WORKS */}
       <StepsScroller />
 
+      {/* Cliff + cloud decorations that animate across these two sections. */}
+      <CloudScene>
       {/* ================================== SECTION 3 · WHY TRAILWATCH */}
       <section className={styles.why}>
-        {/* Decorative floating cliff + cloud, bleeding off the right edge. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={styles.whyCliff} src="/cliff.webp" alt="" aria-hidden="true" />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={styles.whyClouds} src="/clouds.webp" alt="" aria-hidden="true" />
         <div className={styles.shell}>
         <h2 className={`${styles.h2} ${styles.whyHeading}`}>
           The big tools weren’t built for you.
@@ -427,6 +425,7 @@ export default async function RootPage() {
           summaries work on the free plan too, not gated behind an upgrade.
         </p>
       </section>
+      </CloudScene>
 
       {/* ========================================= SECTION 5 · FAQ */}
       <section className={`${styles.faq} ${styles.shell}`}>

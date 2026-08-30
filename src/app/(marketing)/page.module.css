@@ -649,9 +649,16 @@
 
 .why {
   position: relative;
-  overflow: hidden; /* clip the right-edge decorations, no h-scroll */
+  z-index: 2; /* keep the copy + table above the cliff/cloud decorations */
   padding-top: 76px;
   padding-bottom: 76px;
+}
+
+/* Spans the why + pricing sections so the cloud can travel from one into the
+   other on scroll. Clips the right-edge bleed (no h-scroll). */
+.cloudScene {
+  position: relative;
+  overflow: hidden;
 }
 
 /* Floating cliff + cloud decorations, anchored to the right edge and bleeding
@@ -661,24 +668,32 @@
   position: absolute;
   pointer-events: none;
   user-select: none;
-  z-index: 1;
+  will-change: transform;
 }
 
+/* Behind the cloud, so the cloud covers its cut-off bottom edge. */
 .whyCliff {
   top: 16px;
   right: -30px;
   width: 340px;
   height: auto;
-  z-index: 1;
+  z-index: 0;
 }
 
-/* Larger, and layered in front of the cliff so it hides the cliff's cut-off
-   bottom edge. */
+/* In front of the why content + cliff, but behind the pricing cards (z-index 2)
+   so it reads as passing under the pricing section. */
 .whyClouds {
   top: 210px;
   right: -80px;
   width: 640px;
   height: auto;
+  transform-origin: 65% 40%;
+  z-index: 1;
+}
+
+/* Lift the pricing section above the drifting cloud. */
+.pricing {
+  position: relative;
   z-index: 2;
 }
 
