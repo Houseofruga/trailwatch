@@ -476,7 +476,15 @@ export default async function RootPage() {
             </div>
           </div>
           {/* Founder portrait — Ghibli/original before-after reveal slider. */}
-          <FounderReveal />
+          <figure className={styles.finalPortrait}>
+            <FounderReveal />
+            <figcaption className={styles.portraitCaption}>
+              <span className={styles.portraitName}>Chandan Dongre</span>
+              <span className={styles.portraitRole}>
+                Indie founder, TrailWatch — by House of Ruga
+              </span>
+            </figcaption>
+          </figure>
         </div>
       </section>
 
