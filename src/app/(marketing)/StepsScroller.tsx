@@ -57,6 +57,17 @@ export function StepsScroller() {
     };
   }, []);
 
+  // Clicking a step scrolls to its band; the scroll handler then activates it.
+  const goToStep = (i: number) => {
+    const scene = sceneRef.current;
+    if (!scene) return;
+    const runway = scene.offsetHeight - window.innerHeight;
+    if (runway <= 0) return; // unpinned (reduced motion) — nothing to scroll
+    const p = (i + 0.5) / STEPS.length;
+    const top = window.scrollY + scene.getBoundingClientRect().top + p * runway;
+    window.scrollTo({ top, behavior: "smooth" });
+  };
+
   return (
     <div ref={sceneRef} className={styles.scene}>
       <div className={styles.stage}>
@@ -68,6 +79,16 @@ export function StepsScroller() {
                 <div
                   key={s.num}
                   className={`${styles.step} ${i === active ? styles.stepActive : ""}`}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={i === active}
+                  onClick={() => goToStep(i)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      goToStep(i);
+                    }
+                  }}
                 >
                   <div className={styles.stepNum}>{s.num}</div>
                   <p className={styles.stepBody}>{s.body}</p>
