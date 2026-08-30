@@ -45,8 +45,10 @@ export function CloudScene({ children }: { children: ReactNode }) {
       cliff.style.transform = `translate3d(${p * 320}px, 0, 0)`;
       cliff.style.opacity = String(clamp(1 - p * 2.4));
 
-      // Cloud: drift down under the pricing section and zoom in.
-      cloud.style.transform = `translate3d(0, ${p * 540}px, 0) scale(${1 + p * 0.95})`;
+      // Cloud: drift down under the pricing section, sliding to the horizontal
+      // center as it goes, and zoom in.
+      const centerTx = scene.clientWidth / 2 - (cloud.offsetLeft + cloud.offsetWidth / 2);
+      cloud.style.transform = `translate3d(${p * centerTx}px, ${p * 540}px, 0) scale(${1 + p * 0.95})`;
     };
 
     const onScroll = () => {
