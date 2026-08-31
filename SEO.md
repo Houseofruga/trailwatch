@@ -35,9 +35,9 @@ for authority purposes — it builds SEO from scratch, separate from
 
 Highest ROI. A week of tool-building is wasted if nothing is indexed.
 
-- [ ] **Google Search Console + Bing Webmaster** — verify the subdomain, submit
-      the sitemap. Free, ~20 min, and the only way to see impressions/queries.
-      **(Owner action — needs account access. Still to do.)**
+- [x] **Google Search Console + Bing Webmaster** — subdomain verified, sitemap
+      submitted (2026-08-31). Bing was set up via "Import from Google Search
+      Console." Check impressions/queries in a week+.
 - [x] **`src/app/sitemap.ts`** — native sitemap: landing + legal. Add `/tools/*`
       and `/compare/*` here as those pages ship.
 - [x] **`src/app/robots.ts`** — allows marketing/legal; disallows the authed app,
@@ -52,8 +52,31 @@ Highest ROI. A week of tool-building is wasted if nothing is indexed.
       via `src/components/JsonLd.tsx`), backed by a visible FAQ section.
 - [x] **`BreadcrumbList` JSON-LD** on every `/tools/*` page — shared helper
       `src/components/breadcrumbJsonLd.ts`, injected alongside each tool's FAQPage.
+- [x] **Favicon** — `src/app/icon.svg` (blue square + lime swoosh) so Next.js emits
+      a site icon (browser tabs + Google mobile results). Was missing before.
 - [ ] **Core Web Vitals pass** — Vercel is already fast; still worth a confirm
-      pass on the landing (no layout shift / oversized images).
+      pass on the landing. Live audit (2026-08-31) measured LCP ≈ 3.0s
+      ("needs improvement") from the hero webp — confirm via PageSpeed Insights,
+      then preload/prioritize the hero LCP image to pull it under 2.5s.
+
+### AI crawler / GEO policy — decided 2026-08-31 (owner)
+
+**We ALLOW AI crawlers** (GPTBot, ClaudeBot, Google-Extended, PerplexityBot, etc.)
+so TrailWatch can be cited in AI answers (GEO). Rationale: the site is public
+marketing we *want* discovered; the authed app/API is separately protected (auth +
+`robots.ts` disallows), so there's no sensitive exposure.
+
+Where this is configured (NOT in the repo — **Cloudflare dashboard**,
+`houseofruga.com` zone → **AI Crawl Control**):
+- **Managed robots.txt: OFF** — was injecting a `# Cloudflare Managed content`
+  block with `Content-Signal: ai-train=no` and `Disallow: /` for the AI bots.
+  Turning it off is what actually opened AI crawling (compliant bots obey robots.txt).
+- **Security → Block AI bots scope: "Do not block (allow crawlers)."**
+
+⚠️ If Cloudflare ever re-enables managed robots.txt (a default/UI change), the AI
+disallows will reappear in the live `robots.txt` — this is intentional-OFF, don't
+be surprised. Verify anytime by fetching `/robots.txt`: it should contain only our
+`robots.ts` rules + `Sitemap:` (no `Content-Signal`, no AI-bot `Disallow`).
 
 ---
 
