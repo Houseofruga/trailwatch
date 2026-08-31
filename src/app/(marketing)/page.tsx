@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     absolute: "TrailWatch — competitor tracking for founders, one email a week",
   },
   description:
-    "Add your competitors, get one plain-English email a week on what actually changed — pricing, features, messaging. AI summaries on every plan, even free. By House of Ruga.",
+    "Add your competitors, get one plain-English email a week on what actually changed — pricing, features, messaging. AI summaries on every plan, even free.",
   alternates: { canonical: "/" },
 };
 
@@ -465,9 +465,8 @@ export default async function RootPage() {
               Built by one indie founder, not a faceless enterprise.
             </h2>
             <p className={styles.finalBody}>
-              TrailWatch is built and run by a single indie founder — the founder of House of
-              Ruga. That means honest pricing, no growth-hack dark patterns, and you can
-              actually reach the person who built it.
+              TrailWatch is built and run by a single indie founder. That means honest pricing,
+              no growth-hack dark patterns, and you can actually reach the person who built it.
             </p>
             <div className={styles.finalCta}>
               <a
@@ -487,7 +486,7 @@ export default async function RootPage() {
             <figcaption className={styles.portraitCaption}>
               <span className={styles.portraitName}>Chandan Dongre</span>
               <span className={styles.portraitRole}>
-                Indie founder — House of Ruga &amp; TrailWatch
+                Indie founder, TrailWatch
               </span>
             </figcaption>
           </figure>
