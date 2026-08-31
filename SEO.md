@@ -115,6 +115,9 @@ out-convert the tools per visitor.
 - Launch on Product Hunt, BetaList, indie communities (Indie Hackers, relevant
   subreddits), and SaaS/tool directories.
 - Each free tool is a linkable asset — pitch them, not just the homepage.
+- **Full execution plan: see `DISTRIBUTION.md`** — the phased directories /
+  launch / community / outreach playbook, with a pre-flight checklist (Search
+  Console + the pre-launch `BACKLOG.md` blockers) and measurement.
 
 ---
 
