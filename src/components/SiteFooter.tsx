@@ -28,6 +28,9 @@ export function SiteFooter() {
               <div className={styles.legalHead}>Tools</div>
               <ul className={styles.legalLinks}>
                 <li>
+                  <Link href="/tools/competitor-teardown">Competitor Teardown</Link>
+                </li>
+                <li>
                   <Link href="/tools/when-was-a-website-last-updated">
                     Last Updated Checker
                   </Link>

@@ -4,15 +4,15 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbJsonLd } from "@/components/breadcrumbJsonLd";
-import { TesterForm } from "./TesterForm";
+import { TeardownForm } from "./TeardownForm";
 import { FAQ, GUIDE } from "./content";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "Free Robots.txt Tester & Validator",
+  title: "Free AI Competitor Analysis Tool",
   description:
-    "Test whether any URL is allowed or blocked by a site's robots.txt for Googlebot, Bingbot, GPTBot and more. Applies Google's Allow/Disallow and wildcard rules. Free, no signup.",
-  alternates: { canonical: "/tools/robots-txt-tester" },
+    "Paste a competitor's URL and get an instant AI teardown of their positioning, pricing tiers, and what to watch. Free, no signup — from TrailWatch.",
+  alternates: { canonical: "/tools/competitor-teardown" },
 };
 
 function faqJsonLd() {
@@ -27,14 +27,14 @@ function faqJsonLd() {
   };
 }
 
-export default function RobotsTesterPage() {
+export default function CompetitorTeardownPage() {
   return (
     <>
       <JsonLd data={faqJsonLd()} />
       <JsonLd
         data={breadcrumbJsonLd([
           { name: "Home", path: "/" },
-          { name: "Robots.txt Tester", path: "/tools/robots-txt-tester" },
+          { name: "Competitor Teardown", path: "/tools/competitor-teardown" },
         ])}
       />
 
@@ -50,24 +50,23 @@ export default function RobotsTesterPage() {
           <span className={styles.sep} aria-hidden="true">
             ›
           </span>
-          <span className={styles.current}>Robots.txt Tester</span>
+          <span className={styles.current}>Competitor Teardown</span>
         </nav>
 
         <div className={styles.hero}>
           <div className={styles.eyebrow}>Free tool</div>
-          <h1 className={styles.h1}>Robots.txt Tester</h1>
+          <h1 className={styles.h1}>AI Competitor Teardown</h1>
           <p className={styles.lead}>
-            Check whether a URL is allowed or blocked by a site&rsquo;s robots.txt. Paste a
-            URL, pick a crawler, and we&rsquo;ll apply Google&rsquo;s matching rules —
-            Allow/Disallow precedence and the <code>*</code> and <code>$</code> wildcards —
-            and show you the exact rule responsible.
+            Paste a competitor&rsquo;s URL and get an instant, plain-English read on their
+            positioning, pricing tiers, and what&rsquo;s worth watching. No signup — a taste of
+            what TrailWatch does every week.
           </p>
         </div>
 
-        <TesterForm />
+        <TeardownForm />
 
         <section className={styles.guide}>
-          <h2 className={styles.h2}>How robots.txt rules work</h2>
+          <h2 className={styles.h2}>How to read a competitor teardown</h2>
           {GUIDE.map((item) => (
             <div key={item.heading} className={styles.guideItem}>
               <h3 className={styles.guideHeading}>{item.heading}</h3>
@@ -89,13 +88,13 @@ export default function RobotsTesterPage() {
         </section>
 
         <section className={styles.cta}>
-          <h2 className={styles.ctaHeading}>Track competitor pages, not just their rules</h2>
+          <h2 className={styles.ctaHeading}>Track competitors, don&rsquo;t just tear them down once</h2>
           <p className={styles.ctaBody}>
             TrailWatch watches competitor pricing, homepage, and changelog pages for you —
             daily — and emails one plain-English digest a week on what actually changed. AI
             summaries on every plan, even free.
           </p>
-          <Link href="/login?mode=signup" className={styles.ctaButton}>
+          <Link href="/login?mode=signup&src=teardown" className={styles.ctaButton}>
             Start free — no card required
           </Link>
         </section>

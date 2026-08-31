@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbJsonLd } from "@/components/breadcrumbJsonLd";
 import { CheckerForm } from "./CheckerForm";
 import { FAQ, GUIDE } from "./content";
 import styles from "./page.module.css";
@@ -30,6 +31,12 @@ export default function LastUpdatedToolPage() {
   return (
     <>
       <JsonLd data={faqJsonLd()} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Last Updated Checker", path: "/tools/when-was-a-website-last-updated" },
+        ])}
+      />
 
       <SiteHeader />
 
