@@ -789,10 +789,10 @@
   margin: 0 0 44px 0;
   background: linear-gradient(
     90deg,
-    var(--surface-sunken) 0%,
-    var(--surface-sunken) 55%,
-    var(--accent-wash) 84%,
-    var(--accent-line) 100%
+    var(--accent-line) 0%,
+    var(--accent-wash) 16%,
+    var(--surface-sunken) 45%,
+    var(--surface-sunken) 100%
   );
 }
 
@@ -801,9 +801,9 @@
   position: absolute;
   top: 8px;
   bottom: 8px;
-  right: 0;
+  left: 0;
   width: 5px;
-  border-radius: 3px 0 0 3px;
+  border-radius: 0 3px 3px 0;
   background: var(--accent);
 }
 
