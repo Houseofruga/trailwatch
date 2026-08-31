@@ -52,7 +52,7 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
         if (white) white.style.opacity = "0";
         if (price) {
           price.style.opacity = "";
-          price.style.backgroundPosition = "";
+          price.style.backgroundSize = "";
         }
         return;
       }
@@ -72,7 +72,7 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
         if (white) white.style.opacity = "0";
         if (price) {
           price.style.opacity = "0"; // pricing hidden until the fly-through
-          price.style.backgroundPosition = ""; // sky centred until the hold
+          price.style.backgroundSize = ""; // sky at rest (cover) until the hold
         }
         return;
       }
@@ -120,14 +120,15 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
 
       // Pricing layer: materialises over the held why section as the cloud passes,
       // then — once the reveal is done and the stage just holds — the sky slowly
-      // pans left (background shifts toward its right edge, sliding the far-right
-      // summit into view) across the remaining pinned runway.
+      // zooms in (from centre) across the remaining pinned runway. `auto 100%`
+      // equals the resting `cover` (the sky is height-driven), so h=0 matches the
+      // CSS with no jump, and h→1 scales it up.
       if (price) {
         const rise = clamp((p - 0.72) / (0.96 - 0.72));
         price.style.opacity = String(rise);
         const holdPx = Math.max(0, scene.offsetHeight - vh - REVEAL_PX);
         const h = holdPx > 0 ? clamp((-rectTop - REVEAL_PX) / holdPx) : 0;
-        price.style.backgroundPosition = `${50 + h * 50}% center`;
+        price.style.backgroundSize = `auto ${100 + h * 40}%`;
       }
     };
 
