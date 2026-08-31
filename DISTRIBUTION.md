@@ -30,6 +30,21 @@ CTA attribution already wired: `?src=teardown`, `?src=compare-visualping`,
 `?src=compare-crayon`, `?src=compare-kompyte`. For **external** links, add UTMs
 too (e.g. `?utm_source=producthunt&utm_medium=launch`) so referrers show cleanly.
 
+## Cost — the whole plan runs at $0
+
+Every item below is tagged:
+
+- **[Free]** — no cost to list/post. Do all of these.
+- **[Freemium]** — free tier works; a paid option only *accelerates* (skip the
+  paid part unless there's a clear reason).
+- **[Paid — skip]** — gates the basic listing behind a fee. Low-authority,
+  low-traffic; not worth it at this stage.
+
+Rule of thumb: **if a directory charges just to be listed, skip it.** The
+compounding wins (AlternativeTo, Product Hunt, real community traction) are all
+free — they cost time, not money. Directory pricing shifts often, so confirm each
+one's current terms when you get there.
+
 ## Pre-flight — do BEFORE driving real traffic
 
 - [ ] **Verify the subdomain in Google Search Console + Bing Webmaster** and
@@ -46,37 +61,50 @@ too (e.g. `?utm_source=producthunt&utm_medium=launch`) so referrers show cleanly
 
 These are durable backlinks + steady discovery. Start here — no timing needed.
 
-- [ ] **AlternativeTo** — list TrailWatch as an alternative to **Visualping,
-      Crayon, and Kompyte**. Directly reinforces the three compare pages; high
-      relevance. (Highest priority — do first.)
-- [ ] **SaaSHub** — same "alternative to" angle + a product listing.
-- [ ] **Product directories:** SaaSAdviser, SaaSworthy, Uneed, SaaSHub, Toolify /
-      relevant AI-tool directories (the teardown tool qualifies), StackShare.
-- [ ] **G2 / Capterra** — create the product listing (slow, but authoritative and
-      a source of "alternative" traffic). Optional at solo stage; low effort to at
-      least claim.
-- [ ] **Indie/maker directories:** Indie Hackers **Products**, Startup Stash,
-      Land-book / SaaS landing galleries (the landing is polished — worth it).
-- [ ] **Free-tool directories** for the `/tools/*` pages specifically (there are
-      "free SEO tools" and "free tools" roundups that accept submissions).
+- [ ] **[Free] AlternativeTo** — list TrailWatch as an alternative to
+      **Visualping, Crayon, and Kompyte**. Directly reinforces the three compare
+      pages; high relevance. (Highest priority — do first.)
+- [ ] **[Free] SaaSHub** — same "alternative to" angle + a product listing (paid
+      promotion exists; skip it).
+- [ ] **[Free] StackShare** — product/tool listing.
+- [ ] **[Free] G2 / Capterra** — create/claim the basic listing (authoritative +
+      a source of "alternative" traffic). Free to list; they only charge vendors
+      for premium profiles/ads you don't need.
+- [ ] **[Free] Indie Hackers Products** — free product listing.
+- [ ] **[Freemium] Landing galleries** (Land-book, SaaS landing galleries) — some
+      accept free submissions, some charge for featured; the landing is polished
+      enough to submit to the free ones.
+- [ ] **[Freemium] AI-tool directories** (Toolify, There's An AI For That, etc.)
+      — the teardown tool qualifies; most list free, some charge to be *featured*
+      (skip featured). Only worth the free slots.
+- [ ] **[Free] Free-tool directories** for the `/tools/*` pages — "free SEO tools"
+      / "free tools" roundups that accept submissions.
+- [ ] **[Paid — skip] Generic "submit your startup" directories** that charge a
+      one-time listing fee ($10–$50+). Low-authority; not worth it now.
 
 ## Phase 2 — Launch moments (concentrated spikes)
 
 Do these once the pre-flight blockers are clear (real signups will arrive).
 
-- [ ] **BetaList** — pre/early-launch audience; submit ahead of Product Hunt.
-- [ ] **Product Hunt** — the big one. Lead with the **AI Competitor Teardown**
-      (interactive, demoable) as the hook, product second. Prep: a maker comment,
-      the founder story (indie founder — matches the landing), a GIF of the tool.
-      Pick a Tue–Thu. Line up a few genuine early supporters beforehand.
-- [ ] **Hacker News — Show HN** — only if there's a genuinely interesting angle
-      (the low-noise filter, or the teardown). HN is allergic to marketing; post
-      plainly, be present in comments.
-- [ ] **Peerlist / DevHunt / Uneed launch slots** — secondary launch surfaces.
+- [ ] **[Freemium] BetaList** — pre/early-launch audience; submit ahead of
+      Product Hunt. Free submission works but the queue is slow; they charge to
+      *expedite* (optional — skip unless you want to time it to PH).
+- [ ] **[Free] Product Hunt** — the big one, and free to launch. Lead with the
+      **AI Competitor Teardown** (interactive, demoable) as the hook, product
+      second. Prep: a maker comment, the founder story (indie founder — matches
+      the landing), a GIF of the tool. Pick a Tue–Thu. Line up a few genuine early
+      supporters beforehand. (Their paid "Ship" product is separate and
+      unnecessary.)
+- [ ] **[Free] Hacker News — Show HN** — only if there's a genuinely interesting
+      angle (the low-noise filter, or the teardown). HN is allergic to marketing;
+      post plainly, be present in comments.
+- [ ] **[Freemium] Peerlist / DevHunt / Uneed launch slots** — secondary launch
+      surfaces; free to launch, optional paid "featured" slots (skip).
 
 ## Phase 3 — Community distribution (pitch the tool, be a human)
 
-Give value first; the tool is the value. One-line "I built X" drops get removed.
+All **[Free]**. Give value first; the tool is the value. One-line "I built X"
+drops get removed.
 
 - [ ] **Indie Hackers** — a post on the build/positioning (low-noise angle,
       founder-first), linking the teardown tool as the useful artifact.
@@ -91,15 +119,15 @@ Give value first; the tool is the value. One-line "I built X" drops get removed.
 
 ## Phase 4 — Ongoing outreach & link-building
 
-- [ ] **"Alternative to" link opportunities** — find existing listicles ("best
-      Visualping alternatives", "competitor monitoring tools") and ask to be
-      added; your compare pages are the honest supporting content.
-- [ ] **Guest posts / mentions** on indie/SaaS/PMM blogs and newsletters — pitch
-      the founder-first competitor-tracking angle, link a tool.
-- [ ] **HARO / Featured / Terkel** (journalist-request services) — answer
-      competitor-analysis / competitive-intelligence queries for high-authority
-      backlinks.
-- [ ] **Podcast/newsletter swaps** with other bootstrapped founders.
+- [ ] **[Free] "Alternative to" link opportunities** — find existing listicles
+      ("best Visualping alternatives", "competitor monitoring tools") and ask to
+      be added; your compare pages are the honest supporting content.
+- [ ] **[Free] Guest posts / mentions** on indie/SaaS/PMM blogs and newsletters —
+      pitch the founder-first competitor-tracking angle, link a tool.
+- [ ] **[Freemium] Featured / Connectively / Terkel** (journalist-request
+      services; HARO itself shut down) — free tiers exist and push paid plans; the
+      free tier is fine to try for high-authority backlinks.
+- [ ] **[Free] Podcast/newsletter swaps** with other bootstrapped founders.
 
 ## Backlink tactics specific to what's built
 
