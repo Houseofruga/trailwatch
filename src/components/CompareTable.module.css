@@ -1,0 +1,45 @@
+/*
+ * Comparison table for the /compare/* pages. Visual language lifted from the
+ * landing's inline compare table (src/app/(marketing)/page.module.css): two
+ * columns, competitor muted on the left, TrailWatch inked on the right.
+ */
+
+.compare {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.row + .row {
+  border-top: 1px solid var(--border-soft);
+}
+
+.cell {
+  padding: 16px 22px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
+
+.cell.tw {
+  color: var(--ink);
+  border-left: 1px solid var(--border-soft);
+}
+
+.head .cell {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink-4);
+}
+
+.logo {
+  height: 24px;
+  width: auto;
+  display: block;
+}

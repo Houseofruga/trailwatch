@@ -44,6 +44,17 @@ export function SiteFooter() {
               </ul>
             </nav>
 
+            <nav className={styles.legal} aria-label="Compare">
+              <div className={styles.legalHead}>Compare</div>
+              <ul className={styles.legalLinks}>
+                <li>
+                  <Link href="/compare/visualping-alternative">
+                    Visualping alternative
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+
             <nav className={styles.legal} aria-label="Legal">
               <div className={styles.legalHead}>Legal</div>
               <ul className={styles.legalLinks}>

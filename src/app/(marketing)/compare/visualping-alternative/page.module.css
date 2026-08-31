@@ -1,0 +1,211 @@
+/*
+ * Visualping-alternative comparison page. Shares the marketing/tool layout
+ * language (tokens + DM Sans; cream/ink, lime accent, no radius). The compare
+ * table itself is styled by CompareTable.module.css.
+ */
+
+.shell {
+  max-width: 820px;
+  margin: 0 auto;
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+.main {
+  padding-bottom: 72px;
+}
+
+/* --------------------------------------------------- breadcrumb + hero */
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+  font-size: 13px;
+  color: var(--ink-4);
+}
+
+.breadcrumb a {
+  color: var(--ink-4);
+}
+
+.breadcrumb a:hover {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.sep {
+  color: var(--ink-hint);
+}
+
+.current {
+  color: var(--ink-2);
+}
+
+.hero {
+  text-align: left;
+  margin: 28px 0 36px 0;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+}
+
+.h1 {
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 14px 0 0 0;
+}
+
+.lead {
+  margin: 18px 0 0 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 640px;
+}
+
+.h2 {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 16px 0;
+}
+
+/* ---------------------------------------------- reviewed note + prose */
+
+.reviewed {
+  margin: 14px 0 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-4);
+}
+
+.prose {
+  margin-top: 48px;
+}
+
+.proseBody {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--ink-2);
+  max-width: 680px;
+}
+
+/* ------------------------------------------------------------- faq */
+
+.faq {
+  margin-top: 64px;
+}
+
+.faqList {
+  border-top: 1px solid var(--rule);
+}
+
+.faqItem {
+  border-bottom: 1px solid var(--rule);
+}
+
+.faqQ {
+  list-style: none;
+  cursor: pointer;
+  padding: 18px 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.faqQ::-webkit-details-marker {
+  display: none;
+}
+
+.faqQ::after {
+  content: "+";
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--ink-4);
+  line-height: 1;
+}
+
+.faqItem[open] .faqQ::after {
+  content: "−";
+}
+
+.faqA {
+  margin: 0;
+  padding: 0 0 20px 0;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  max-width: 640px;
+}
+
+/* ------------------------------------------------------------- cta */
+
+.cta {
+  margin-top: 64px;
+  padding: 36px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.ctaHeading {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.ctaBody {
+  margin: 12px auto 0 auto;
+  max-width: 520px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.ctaButton {
+  display: inline-block;
+  margin-top: 22px;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 12px 24px;
+  background: var(--accent);
+  color: var(--ink);
+  border: 1px solid var(--accent);
+}
+
+.ctaButton:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  text-decoration: none;
+}
+
+/* --------------------------------------------------------- responsive */
+
+@media (max-width: 560px) {
+  .shell {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .h1 {
+    font-size: 30px;
+  }
+
+  .cta {
+    padding: 28px 22px;
+  }
+}
