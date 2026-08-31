@@ -91,7 +91,7 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
       // back to centre) instead of tracking a dead-straight diagonal. The sine
       // is 0 at both ends, so the rest spot (p=0) and centred peak (p=1) are
       // unchanged — only the trajectory between them curves.
-      const DIP = 140;
+      const DIP = 220;
       const arc = Math.sin(p * Math.PI) * DIP;
       const tx = (width / 2 - coreX) * p;
       const ty = (vh / 2 - coreY) * p + arc; // stage is pinned, so stage coords = viewport
