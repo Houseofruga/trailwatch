@@ -208,6 +208,8 @@ your one-shot first impression.
 tagline, description, maker first-comment, topics, gallery + a **GIF of the
 teardown tool**); directory blurbs (one-line / ~50 / ~100 words); AlternativeTo
 copy for each of the three compare pages; Reddit + IH value-post drafts.
+→ **Drafted in `LAUNCH-COPY.md`** (edit freely). Still owner-supplied: the actual
+gallery images / teardown GIF.
 
 ## Stage 1 — Get launch-ready · the gate before any promotion
 
