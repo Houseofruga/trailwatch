@@ -87,8 +87,14 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
       // that cloud engulfs the frame, then fade out ("through the lens").
       const coreX = cloud.offsetLeft + cloud.offsetWidth * CORE_X;
       const coreY = cloud.offsetTop + cloud.offsetHeight * CORE_Y;
+      // Bow the path downward mid-flight so the core arcs (dips down, then rises
+      // back to centre) instead of tracking a dead-straight diagonal. The sine
+      // is 0 at both ends, so the rest spot (p=0) and centred peak (p=1) are
+      // unchanged — only the trajectory between them curves.
+      const DIP = 140;
+      const arc = Math.sin(p * Math.PI) * DIP;
       const tx = (width / 2 - coreX) * p;
-      const ty = (vh / 2 - coreY) * p; // stage is pinned, so stage coords = viewport
+      const ty = (vh / 2 - coreY) * p + arc; // stage is pinned, so stage coords = viewport
       const scale = 1 + p * 18; // grow ~2x further before fading out
       const fade = clamp((0.98 - p) / (0.98 - 0.82)); // hold opacity, then fade late
       cloud.style.zIndex = "5";
