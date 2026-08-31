@@ -663,10 +663,12 @@
 /* ---- Pinned cloud fly-through (why → pricing) ---------------------------- */
 
 /* Tall scene = scroll runway. No overflow here (would break the sticky stage);
-   the stage clips the cloud instead. */
+   the stage clips the cloud instead. The reveal plays over the first 800px
+   (see REVEAL_PX in CloudScene.tsx); the extra 50vh holds the revealed pricing
+   pinned for another half-screen of scroll before it unpins into the FAQ. */
 .cloudScene {
   position: relative;
-  height: calc(100vh + 800px);
+  height: calc(150vh + 800px);
 }
 
 .cloudStage {

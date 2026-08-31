@@ -72,8 +72,12 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
       }
 
       // EXIT — the stage is pinned; fly one cloud through into the pricing layer.
-      const runway = scene.offsetHeight - vh;
-      const p = clamp(runway > 0 ? -rectTop / runway : 0);
+      // The reveal plays over a fixed 800px of scroll (kept in sync with the
+      // scene's "800px" in the CSS). Past that, p clamps to 1 and everything
+      // holds at its final state while the extra pinned runway scrolls by — so
+      // the revealed pricing lingers before the stage unpins into the FAQ.
+      const REVEAL_PX = 800;
+      const p = clamp(-rectTop / REVEAL_PX);
 
       // Cloud: bring one dense core to the viewport center and scale it up until
       // that cloud engulfs the frame, then fade out ("through the lens").
