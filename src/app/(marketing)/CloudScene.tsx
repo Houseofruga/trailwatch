@@ -59,14 +59,10 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
       const width = scene.clientWidth;
 
       if (rectTop > 0) {
-        // ENTRANCE / REST — before the scene pins: the cloud drifts in from the
-        // left and settles at its right-edge rest position over the why section.
-        const inP = clamp((vh - rectTop) / (vh * 0.75));
-        const ease = 1 - (1 - inP) * (1 - inP); // ease-out
-        const away = 1 - ease;
-
-        cloud.style.transform = `translate3d(${-away * width * 0.5}px, 0, 0) scale(1)`;
-        cloud.style.opacity = String(ease);
+        // REST — before the scene pins: no entrance animation. The cloud simply
+        // sits at its rest position over the why section (full opacity, no drift).
+        cloud.style.transform = "translate3d(0, 0, 0) scale(1)";
+        cloud.style.opacity = "1";
         cloud.style.zIndex = "";
         cloud.style.transformOrigin = "";
         if (why) why.style.opacity = "1";
