@@ -775,15 +775,36 @@
   margin: 0 0 32px 0;
 }
 
+/* Styled like the product's active nav item: a soft neutral→accent wash with a
+   5px accent bar on the right edge (::after), instead of a bright highlight box. */
 .callout {
-  background: var(--accent-wash);
-  border-left: 3px solid var(--accent);
-  padding: 20px 24px;
-  font-size: 17px;
+  position: relative;
+  overflow: hidden;
+  padding: 13px 18px;
+  font-size: 14px;
+  font-weight: 500;
   line-height: 1.5;
   color: var(--ink);
   max-width: 660px;
   margin: 0 0 44px 0;
+  background: linear-gradient(
+    90deg,
+    var(--surface-sunken) 0%,
+    var(--surface-sunken) 55%,
+    var(--accent-wash) 84%,
+    var(--accent-line) 100%
+  );
+}
+
+.callout::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  right: 0;
+  width: 5px;
+  border-radius: 3px 0 0 3px;
+  background: var(--accent);
 }
 
 .compare {
