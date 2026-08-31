@@ -375,7 +375,8 @@ export default async function RootPage() {
         }
         pricing={
       /* ===================================== SECTION 4 · PRICING */
-      <section className={`${styles.pricing} ${styles.shellWide}`}>
+      <section className={styles.pricing}>
+        <div className={styles.shellWide}>
         <h2 className={`${styles.h2} ${styles.pricingHeading}`}>
           Honest pricing. The AI’s never behind a paywall.
         </h2>
@@ -428,6 +429,7 @@ export default async function RootPage() {
           No per-seat fees. Month-to-month or save with annual — your call. And the AI
           summaries work on the free plan too, not gated behind an upgrade.
         </p>
+        </div>
       </section>
         }
       />

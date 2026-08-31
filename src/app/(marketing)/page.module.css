@@ -683,16 +683,16 @@
   inset: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  padding-top: 64px;
+  justify-content: center; /* centre content in the viewport, like the Steps stage */
   z-index: 1; /* the held why layer */
 }
 
 /* Pricing sits above the why layer and is opaque, so it fully covers the held
-   why once revealed (JS drives opacity 0 → 1). */
+   why once revealed (JS drives opacity 0 → 1). The sky fills the whole pinned
+   stage. Placeholder blue — real sky image goes here later. */
 .cloudLayerPrice {
   z-index: 2;
-  background: var(--bg);
+  background: #bcdcf2; /* placeholder — real sky image goes here */
 }
 
 /* Zero the sections' own vertical padding inside the pinned layers (the layer
@@ -823,6 +823,7 @@
 .pricing {
   padding-top: 76px;
   padding-bottom: 76px;
+  background: #bcdcf2; /* placeholder sky — real sky image goes here later */
 }
 
 .pricingHeading {

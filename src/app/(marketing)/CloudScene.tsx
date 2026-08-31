@@ -81,8 +81,8 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
       const coreY = cloud.offsetTop + cloud.offsetHeight * CORE_Y;
       const tx = (width / 2 - coreX) * p;
       const ty = (vh / 2 - coreY) * p; // stage is pinned, so stage coords = viewport
-      const scale = 1 + p * 8;
-      const fade = clamp((0.95 - p) / (0.95 - 0.7));
+      const scale = 1 + p * 18; // grow ~2x further before fading out
+      const fade = clamp((0.98 - p) / (0.98 - 0.82)); // hold opacity, then fade late
       cloud.style.zIndex = "5";
       cloud.style.transformOrigin = `${CORE_X * 100}% ${CORE_Y * 100}%`;
       cloud.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`;
@@ -90,14 +90,14 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
 
       // Whiteout: guarantees full coverage at the peak through the cloud's edges.
       if (white) {
-        const wIn = clamp((p - 0.45) / (0.6 - 0.45));
-        const wOut = clamp((p - 0.65) / (0.9 - 0.65));
+        const wIn = clamp((p - 0.55) / (0.72 - 0.55));
+        const wOut = clamp((p - 0.82) / (0.96 - 0.82));
         white.style.opacity = String(clamp(wIn - wOut));
       }
 
       // Pricing layer: materialises over the held why section as the cloud passes.
       if (price) {
-        const rise = clamp((p - 0.6) / (0.92 - 0.6));
+        const rise = clamp((p - 0.72) / (0.96 - 0.72));
         price.style.opacity = String(rise);
       }
     };
