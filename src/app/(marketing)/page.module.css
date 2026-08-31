@@ -694,7 +694,7 @@
    stage. Placeholder blue — real sky image goes here later. */
 .cloudLayerPrice {
   z-index: 2;
-  background: #bcdcf2; /* placeholder — real sky image goes here */
+  background: #bcdcf2 url("/cloudreveal.webp") center / cover no-repeat;
 }
 
 /* Zero the sections' own vertical padding inside the pinned layers (the layer
@@ -825,7 +825,7 @@
 .pricing {
   padding-top: 76px;
   padding-bottom: 76px;
-  background: #bcdcf2; /* placeholder sky — real sky image goes here later */
+  background: #bcdcf2 url("/cloudreveal.webp") center / cover no-repeat;
 }
 
 .pricingHeading {
