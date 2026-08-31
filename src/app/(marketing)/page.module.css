@@ -751,6 +751,12 @@
     padding-top: 76px;
     padding-bottom: 76px;
   }
+  /* Layer is transparent here, so the sky rides on the pricing section itself.
+     Scoped under .cloudLayer so it outranks the base `.pricing` background that
+     is defined later in the file. */
+  .cloudLayer .pricing {
+    background: #bcdcf2 url("/cloudreveal.webp") center / cover no-repeat;
+  }
   .whyClouds,
   .flyWhite {
     display: none;
@@ -825,7 +831,11 @@
 .pricing {
   padding-top: 76px;
   padding-bottom: 76px;
-  background: #bcdcf2 url("/cloudreveal.webp") center / cover no-repeat;
+  /* On desktop the pinned .cloudLayerPrice provides the full-bleed sky, so the
+     section itself stays transparent (a second background here would paint an
+     offset crop and seam). The mobile fallback below re-adds the sky, since the
+     layer goes transparent there. */
+  background: transparent;
 }
 
 .pricingHeading {
