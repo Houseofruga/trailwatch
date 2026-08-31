@@ -54,10 +54,12 @@ Highest ROI. A week of tool-building is wasted if nothing is indexed.
       `src/components/breadcrumbJsonLd.ts`, injected alongside each tool's FAQPage.
 - [x] **Favicon** — `src/app/icon.svg` (blue square + lime swoosh) so Next.js emits
       a site icon (browser tabs + Google mobile results). Was missing before.
-- [ ] **Core Web Vitals pass** — Vercel is already fast; still worth a confirm
-      pass on the landing. Live audit (2026-08-31) measured LCP ≈ 3.0s
-      ("needs improvement") from the hero webp — confirm via PageSpeed Insights,
-      then preload/prioritize the hero LCP image to pull it under 2.5s.
+- [x] **LCP fix** (2026-08-31) — the hero images loaded late (sky is a CSS
+      background; the hill `<img>` had default priority). Added a high-priority
+      `<link rel="preload">` for `/fullBG.webp` in `page.tsx` and
+      `fetchPriority="high"` on the hill `<img>` in `HeroScene.tsx`. Both now start
+      ~210ms; dev LCP dropped ~984ms → ~360ms. **Confirm on production via
+      PageSpeed Insights** (dev numbers are optimistic).
 
 ### AI crawler / GEO policy — decided 2026-08-31 (owner)
 

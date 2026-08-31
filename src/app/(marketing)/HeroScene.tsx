@@ -132,7 +132,14 @@ export function HeroScene({ hero, children }: { hero: ReactNode; children: React
           {children}
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img ref={hillRef} className={styles.hill} src="/HillFG.webp" alt="" aria-hidden="true" />
+        <img
+          ref={hillRef}
+          className={styles.hill}
+          src="/HillFG.webp"
+          alt=""
+          aria-hidden="true"
+          fetchPriority="high"
+        />
       </div>
     </div>
   );

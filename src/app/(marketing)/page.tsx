@@ -83,6 +83,10 @@ export default async function RootPage() {
   return (
     <>
       <JsonLd data={structuredData()} />
+      {/* LCP: the hero sky is a CSS background (HeroScene .sky → /fullBG.webp),
+          which the browser discovers late. Preload it at high priority so it
+          fetches immediately and paints sooner. */}
+      <link rel="preload" as="image" href="/fullBG.webp" fetchPriority="high" />
 
       {/* ===== SECTION 1 · HERO SCENE (full-sky; copy fades, product centers) */}
       <HeroScene
