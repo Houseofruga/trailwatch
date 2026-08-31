@@ -17,7 +17,7 @@ import styles from "../compare.module.css";
 export const metadata: Metadata = {
   title: "Kompyte Alternative for Founders",
   description:
-    "Looking for a Kompyte alternative without the enterprise platform? TrailWatch tracks your competitors and emails one plain-English digest a week — self-serve, flat pricing, AI on every plan.",
+    "A Kompyte alternative built for founders — TrailWatch tracks competitors and emails one plain-English digest a week. Self-serve, AI on every plan.",
   alternates: { canonical: "/compare/kompyte-alternative" },
 };
 

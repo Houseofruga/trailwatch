@@ -17,7 +17,7 @@ import styles from "../compare.module.css";
 export const metadata: Metadata = {
   title: "Visualping Alternative for Founders",
   description:
-    "Looking for a Visualping alternative? TrailWatch tracks your competitors and emails one plain-English digest a week — AI summaries on every plan, flat pricing, no dashboard to babysit.",
+    "A Visualping alternative built for founders — TrailWatch tracks competitors and emails one plain-English digest a week. AI on every plan, flat pricing.",
   alternates: { canonical: "/compare/visualping-alternative" },
 };
 

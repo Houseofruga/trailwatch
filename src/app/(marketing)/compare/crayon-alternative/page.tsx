@@ -17,7 +17,7 @@ import styles from "../compare.module.css";
 export const metadata: Metadata = {
   title: "Crayon Alternative for Founders",
   description:
-    "Looking for a Crayon alternative without the enterprise platform? TrailWatch tracks your competitors and emails one plain-English digest a week — self-serve, flat pricing, AI on every plan.",
+    "A Crayon alternative without the enterprise platform — TrailWatch tracks competitors and emails one plain-English digest a week. Self-serve, flat pricing.",
   alternates: { canonical: "/compare/crayon-alternative" },
 };
 
