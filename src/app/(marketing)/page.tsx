@@ -462,12 +462,12 @@ export default async function RootPage() {
         <div className={`${styles.finalInner} ${styles.shellWide}`}>
           <div className={styles.finalText}>
             <h2 className={`${styles.h2} ${styles.finalHeading}`}>
-              Built by founders, not a faceless enterprise.
+              Built by one indie founder, not a faceless enterprise.
             </h2>
             <p className={styles.finalBody}>
-              TrailWatch is made by House of Ruga — a small, bootstrapped studio. That means
-              honest pricing, no growth-hack dark patterns, and you can actually reach the
-              people who built it.
+              TrailWatch is built and run by a single indie founder — the founder of House of
+              Ruga. That means honest pricing, no growth-hack dark patterns, and you can
+              actually reach the person who built it.
             </p>
             <div className={styles.finalCta}>
               <a
@@ -487,7 +487,7 @@ export default async function RootPage() {
             <figcaption className={styles.portraitCaption}>
               <span className={styles.portraitName}>Chandan Dongre</span>
               <span className={styles.portraitRole}>
-                Indie founder, TrailWatch — by House of Ruga
+                Indie founder — House of Ruga &amp; TrailWatch
               </span>
             </figcaption>
           </figure>
