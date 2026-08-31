@@ -61,8 +61,11 @@ convenient:
   ("Set it once" 3-step pinned scroller with built product-UI mockups), `CloudScene`
   (pins why→pricing and flies a cloud through to reveal pricing), `FounderReveal`
   (before/after Ghibli image slider). All scroll effects are desktop-only (≥1041px, no
-  reduced-motion); each has a static/stacked fallback. Also `tools/` (sitemap-finder,
-  robots-txt-tester, when-was-a-website-last-updated) — small public utility pages.
+  reduced-motion); each has a static/stacked fallback. Also `tools/` — free public
+  SEO/marketing tools: `competitor-teardown` (the flagship — AI competitor analysis),
+  `sitemap-finder`, `robots-txt-tester`, `when-was-a-website-last-updated`. All follow
+  one pattern (page.tsx + content.ts + actions.ts + Form + css; server action → a
+  `src/features/<name>` module; FAQPage + BreadcrumbList JSON-LD; SiteFooter Tools nav).
 - `src/app/(auth)/` — `login`, `forgot-password`, `reset-password`.
 - `src/app/(app)/` — authed shell: `dashboard`, `competitors`, `billing`, `settings`,
   `changes/[id]`. Guarded by `src/proxy.ts` + a belt-and-braces check in the layout.
@@ -76,8 +79,22 @@ convenient:
 
 ## Recent work (all pushed to `main`)
 
-The last several sessions were a large **marketing-landing visual overhaul** (no
-product/back-end logic changed — the §7 slices and their tests are untouched):
+**Marketing lane 1 — AI Competitor Teardown tool (2026-08-31).** Shipped
+`/tools/competitor-teardown`, the flagship linkable asset from `SEO.md` Layer 2:
+paste a competitor URL → instant plain-English teardown (positioning, pricing
+tiers, "what to watch") → "get this weekly → start free" CTA (`?src=teardown`).
+New `src/features/competitorTeardown/` reuses `safeFetch` (SSRF) + cheerio and a
+Groq→Anthropic→null provider seam mirroring `summaries`; unit-tested prompt parse
++ HTML→text. Guardrails: public pages only, ~4/min IP limit, page/text caps.
+Verified end-to-end in-browser (real teardown of linear.app, SSRF error path,
+JSON-LD, sitemap, mobile). Also folded in two `SEO.md` items: shared
+`BreadcrumbList` JSON-LD (`src/components/breadcrumbJsonLd.ts`, on all four tools)
+and `?src=teardown` CTA attribution. `SEO.md` updated to mark these done. The
+owner's remaining marketing lanes (compare pages, blog, off-site playbook) are the
+sequenced follow-ons — see below.
+
+Before that, the last several sessions were a large **marketing-landing visual
+overhaul** (no product/back-end logic changed — the §7 slices and tests untouched):
 
 - **Hero** (`HeroScene`): full-sky background (`fullBG.webp`); pinned scene where copy
   fades and the product screenshot centers; foreground hill (`HillFG.webp`, flipped,
@@ -139,7 +156,7 @@ Paddle: `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `NEXT_PUBLIC_PADDLE_ENV`,
 
 - `npm run dev` / `npm run test` / `npm run lint` / `npm run typecheck`.
 - A pre-commit hook runs the tests and blocks the commit if they fail (currently
-  104 passing).
+  116 passing).
 - TypeScript strict; validate all external input. Keep functions small and pure,
   simplest approach, stay in scope (`SPEC.md` §6 is off-limits).
 
@@ -153,6 +170,21 @@ Paddle: `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `NEXT_PUBLIC_PADDLE_ENV`,
 4. Landing is visually polished but has **no automated coverage** (scroll animations are
    verified by hand in-browser). Manual QA on real desktop + mobile before launch;
    the scroll effects are gated to ≥1041px and fall back to static/stacked below that.
+
+### Marketing / SEO (owner is actively working these — see `SEO.md`)
+
+The owner wants to keep pushing marketing + backlink generation. Lane 1 (AI
+Competitor Teardown tool) is done. Remaining lanes, in the owner's chosen order —
+each gets its own plan when picked up:
+1. **`/compare/*` pages** — 2–3 honest alternative pages (Visualping alternative,
+   vs Crayon, Kompyte alternative). Cheap static pages; add to `sitemap.ts`.
+2. **Blog / content engine** — MDX under `(marketing)/blog/` + first SEO articles;
+   add to sitemap; per-post OG image.
+3. **Off-site distribution playbook** — non-code doc (directories, Product Hunt,
+   Indie Hackers, subreddits, outreach targets) pitching each free tool as the
+   linkable asset.
+Owner still-to-do from `SEO.md` Layer 1: verify the subdomain in Google Search
+Console + Bing (needs account access).
 
 _Resolved 2026-08-26: Pro copy fixed to 100 pages; Stripe→Paddle wording
 reconciled across `SPEC.md` and `CLAUDE.md`._

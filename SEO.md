@@ -5,7 +5,7 @@ executed in later sessions. Nothing here is built yet. Build order and honest
 caveats are at the bottom. Keep `SPEC.md` §6 (out of scope) in mind — free tools
 are marketing surfaces, not new product scope creep.
 
-_Last updated: 2026-08-28._
+_Last updated: 2026-08-31._
 
 ## Goal
 
@@ -49,8 +49,9 @@ Highest ROI. A week of tool-building is wasted if nothing is indexed.
       (1200×630), applied site-wide by the file convention.
 - [x] **JSON-LD structured data** — `Organization` + `SoftwareApplication` +
       `FAQPage` on the landing (`src/app/(marketing)/structuredData.ts`, rendered
-      via `src/components/JsonLd.tsx`), backed by a visible FAQ section. Add
-      `BreadcrumbList` once `/tools/*` exists.
+      via `src/components/JsonLd.tsx`), backed by a visible FAQ section.
+- [x] **`BreadcrumbList` JSON-LD** on every `/tools/*` page — shared helper
+      `src/components/breadcrumbJsonLd.ts`, injected alongside each tool's FAQPage.
 - [ ] **Core Web Vitals pass** — Vercel is already fast; still worth a confirm
       pass on the landing (no layout shift / oversized images).
 
@@ -63,17 +64,20 @@ value, (c) reuses code we already have (page fetch + diff/normalize in
 `src/features/checks`, LLM summaries in `src/features/summaries`, email via
 Resend). Ranked best-first.
 
-### Tool 1 — AI Competitor Teardown  ⭐ build first
+### Tool 1 — AI Competitor Teardown  ✅ SHIPPED (2026-08-31)
 
-- **Route:** `/tools/competitor-teardown`
+- **Route:** `/tools/competitor-teardown` — live, in the sitemap + footer Tools nav.
 - **What:** paste a competitor URL → fetch a couple of their public pages →
   return an instant plain-English summary of positioning, pricing tiers, and a
-  "what to watch" list. End with a CTA: "Want this every Monday? → start free."
+  "what to watch" list. CTA: "Want this every Monday? → start free"
+  (`?src=teardown` for attribution).
 - **Targets:** "competitor analysis tool", "free competitor analysis" (high vol).
-- **Build cost:** Medium — reuses the fetch + LLM summarizer; new prompt + a
-  results page. No login required (better for ranking + dwell time).
-- **Guardrails:** public pages only, respect robots.txt, timeouts, descriptive
-  User-Agent, rate-limit to control LLM cost (it's an unauthenticated endpoint).
+- **How it's built:** `src/features/competitorTeardown/` — SSRF-safe extract
+  (reuses `safeFetch` + cheerio) → `getTeardownProvider()` seam (Groq → Anthropic
+  → null), mirroring `src/features/summaries`. Unit-tested prompt parsing +
+  HTML→text. No login.
+- **Guardrails (in place):** public pages only via the SSRF guard, timeouts,
+  `TrailwatchBot/1.0` UA, per-IP ~4/min rate limit, page + text caps for LLM cost.
 
 ### Tool 2 — Watch a page for changes (no signup)
 
