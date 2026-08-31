@@ -154,10 +154,100 @@ drops get removed.
 - Volume isn't the goal — a handful of relevant, real links + steady community
   presence beats 50 directory drops.
 
-## Suggested order
+---
 
-1. Pre-flight (Search Console; and the BACKLOG blockers before any real-signup push).
-2. Phase 1 evergreen listings — AlternativeTo (×3) first, then the directories.
-3. Phase 3 low-key community value posts (start trickling traffic + feedback).
-4. Phase 2 launch (BetaList → Product Hunt) once staging + §9 are done.
-5. Phase 4 outreach as an ongoing habit.
+# Step-by-step runbook (start here)
+
+The phases above are the catalog; this is the ordered, do-this-then-that plan,
+tuned to where TrailWatch actually is.
+
+**Two facts set the order:**
+- The app is **deployed but not launch-tested** — the pre-launch blockers below
+  aren't done. So we do zero-risk work now (indexing, accounts, copy) and **gate
+  the Product Hunt push behind launch-readiness**. Don't drive strangers at an
+  untested signup/billing flow.
+- **Brand email for every submission: `houseofrugaofficial@gmail.com`** (receives
+  verification mail reliably). You have a Google account; you do **not** yet have
+  Product Hunt / Reddit / X accounts, so those get created and aged first.
+
+Each step is tagged **(you)** / **(Claude)** / **(both)**.
+
+## Stage 0 — This week · zero signup risk · do in parallel
+
+**0.1 Google Search Console + Bing (you; ~20 min).**
+Sign in at search.google.com/search-console → add a **URL-prefix** property
+`https://trailwatch.houseofruga.com` → verify with **"HTML tag"**. The site
+already ships a Google verification token (`src/app/layout.tsx` →
+`verification.google`); if your property is under the same Google account that
+made that token, it verifies instantly. If Search Console shows a *different*
+token, paste it to Claude to swap in and redeploy, then click Verify. Then
+**Sitemaps → submit `sitemap.xml`**. Repeat on **Bing Webmaster Tools** via
+"Import from Google Search Console." Zero risk; indexing takes weeks, so start now.
+
+**0.2 Create + age the brand accounts (you).** All under the gmail:
+- **Product Hunt** — sign up, complete the profile (logo avatar, bio, link), then
+  follow makers / upvote for a couple of weeks (PH de-ranks brand-new accounts at
+  launch).
+- **Reddit** — create it, but **don't self-promote yet**; spend 2–3 weeks
+  commenting genuinely in r/SaaS, r/Entrepreneur to earn karma.
+- **X/Twitter** — `@trailwatch` (or personal) for build-in-public.
+- **Indie Hackers** — account + a draft Products listing.
+
+**0.3 De-risk the product yourself (you; free; critical).** On production: sign up
+with a throwaway email → add 2 competitors → hit the free limit → open the
+dashboard → receive a digest if you can trigger one. Note anything broken. Protects
+your one-shot first impression.
+
+**0.4 Prep all copy (Claude drafts, you approve).** PH kit (name, ≤60-char
+tagline, description, maker first-comment, topics, gallery + a **GIF of the
+teardown tool**); directory blurbs (one-line / ~50 / ~100 words); AlternativeTo
+copy for each of the three compare pages; Reddit + IH value-post drafts.
+
+## Stage 1 — Get launch-ready · the gate before any promotion
+
+Do **not** start Stage 2+ until these pass — a launch spike into a broken flow
+wastes the launch and the backlinks.
+- **1.1 Isolated test/staging env (mostly Claude; from `BACKLOG.md`)** — separate
+  Supabase test project, test Resend, Paddle stays sandbox.
+- **1.2 Run SPEC §9 live in it (both)** — signup → limits → dashboard; a real
+  digest send; a real Paddle sandbox checkout → paid → cancel → revert (you enter
+  the test card).
+- **1.3 Resend subdomain sending (both)** — DKIM/SPF/MX/DMARC on Cloudflare for
+  `weekly@trailwatch.houseofruga.com` so digests deliver. → then **launch-ready**.
+
+## Stage 2 — Evergreen listings · after launch-ready · all free
+Email = the gmail; paste the prepped blurbs; skip anything that charges to list.
+1. **AlternativeTo ×3 (you)** — TrailWatch page + list it as an alternative to
+   Visualping, Crayon, Kompyte; link the matching `/compare/*` page in each.
+2. **SaaSHub (you)** — product + the same three "alternative to" entries.
+3. **G2 + Capterra (you)** — claim the basic free listing.
+4. **StackShare + Indie Hackers Products (you)**.
+5. **Free-tool directories (you)** — submit `/tools/*`, teardown first.
+
+## Stage 3 — Community warm-up · after launch-ready · all free
+1. **Indie Hackers (you)** — a genuine build/positioning post, link the teardown.
+2. **Reddit (you)** — with karma now, a "how I track competitors" value post; tool
+   link in context.
+3. **X / LinkedIn build-in-public (you)** — post a live teardown of a known product.
+
+## Stage 4 — Product Hunt launch · the big moment · free
+Only after Stages 1–3, with a few genuine supporters lined up.
+1. Schedule **Tue–Thu, 12:01 AM PT**.
+2. Launch **TrailWatch (the product)** with the **teardown tool as the interactive
+   hook** — first gallery image "try it now, paste a URL," the GIF, maker
+   first-comment = the indie-founder story. Product is the headline; the tool is
+   the demo.
+3. Be present all day on comments; use a UTM'd link.
+4. Cross-post to X, Indie Hackers, and your Stage-3 communities.
+
+## Stage 5 — Ongoing · free · habitual
+"Best Visualping alternatives" listicle outreach; guest posts; Featured/
+Connectively free tier; podcast/newsletter swaps. **Measure:** Search Console
+weekly (month 1) then monthly; watch the `?src=` attribution to double down on what
+converts.
+
+## Who does what
+- **Claude:** drafts all copy, does the Stage-1 dev work (test env, §9 dev parts,
+  Resend/Cloudflare records), swaps the Search Console token, builds more assets.
+- **You:** create accounts, verify Search Console, submit/post, enter the Paddle
+  sandbox card, click publish.
