@@ -16,6 +16,7 @@ const clamp = (n: number, a = 0, b = 1) => Math.max(a, Math.min(b, n));
  */
 export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNode }) {
   const sceneRef = useRef<HTMLDivElement>(null);
+  const whyRef = useRef<HTMLDivElement>(null);
   const cloudRef = useRef<HTMLImageElement>(null);
   const whiteRef = useRef<HTMLDivElement>(null);
   const priceRef = useRef<HTMLDivElement>(null);
@@ -36,6 +37,7 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
     let raf = 0;
     const apply = () => {
       raf = 0;
+      const why = whyRef.current;
       const cloud = cloudRef.current;
       const white = whiteRef.current;
       const price = priceRef.current;
@@ -46,6 +48,7 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
         cloud.style.opacity = "";
         cloud.style.zIndex = "";
         cloud.style.transformOrigin = "";
+        if (why) why.style.opacity = "";
         if (white) white.style.opacity = "0";
         if (price) price.style.opacity = "";
         return;
@@ -66,6 +69,7 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
         cloud.style.opacity = String(ease);
         cloud.style.zIndex = "";
         cloud.style.transformOrigin = "";
+        if (why) why.style.opacity = "1";
         if (white) white.style.opacity = "0";
         if (price) price.style.opacity = "0"; // pricing hidden until the fly-through
         return;
@@ -91,6 +95,13 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
       cloud.style.transformOrigin = `${CORE_X * 100}% ${CORE_Y * 100}%`;
       cloud.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${scale})`;
       cloud.style.opacity = String(fade);
+
+      // Why layer: hide it while the whiteout still fully covers the frame (peak
+      // ~0.72–0.82), so once the cloud/whiteout start fading and pricing rises,
+      // the old "big tools" section can never peek through behind them.
+      if (why) {
+        why.style.opacity = String(clamp(1 - (p - 0.72) / (0.8 - 0.72)));
+      }
 
       // Whiteout: guarantees full coverage at the peak through the cloud's edges.
       if (white) {
@@ -123,7 +134,7 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
   return (
     <div ref={sceneRef} className={styles.cloudScene}>
       <div className={styles.cloudStage}>
-        <div className={styles.cloudLayer}>{why}</div>
+        <div ref={whyRef} className={styles.cloudLayer}>{why}</div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img ref={cloudRef} className={styles.whyClouds} src="/clouds.webp" alt="" aria-hidden="true" />
         <div ref={whiteRef} className={styles.flyWhite} aria-hidden="true" />
