@@ -52,6 +52,12 @@ export function SiteFooter() {
                     Visualping alternative
                   </Link>
                 </li>
+                <li>
+                  <Link href="/compare/crayon-alternative">Crayon alternative</Link>
+                </li>
+                <li>
+                  <Link href="/compare/kompyte-alternative">Kompyte alternative</Link>
+                </li>
               </ul>
             </nav>
 

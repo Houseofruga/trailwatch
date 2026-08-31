@@ -17,6 +17,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/tools/sitemap-finder", priority: 0.8 },
     { path: "/tools/robots-txt-tester", priority: 0.8 },
     { path: "/compare/visualping-alternative", priority: 0.7 },
+    { path: "/compare/crayon-alternative", priority: 0.7 },
+    { path: "/compare/kompyte-alternative", priority: 0.7 },
     { path: "/terms", priority: 0.3 },
     { path: "/privacy", priority: 0.3 },
     { path: "/refunds", priority: 0.3 },
