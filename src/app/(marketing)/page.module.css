@@ -1048,6 +1048,19 @@
   color: var(--ink-4);
 }
 
+.portraitSocial {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 8px;
+  color: var(--ink-4);
+  width: fit-content;
+  transition: color 0.15s ease;
+}
+
+.portraitSocial:hover {
+  color: var(--ink);
+}
+
 /* Square founder portrait — a before/after reveal slider (Ghibli over photo). */
 .reveal {
   position: relative;
