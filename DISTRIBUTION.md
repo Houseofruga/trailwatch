@@ -188,8 +188,14 @@ token, paste it to Claude to swap in and redeploy, then click Verify. Then
 - **Product Hunt** — sign up, complete the profile (logo avatar, bio, link), then
   follow makers / upvote for a couple of weeks (PH de-ranks brand-new accounts at
   launch).
-- **Reddit** — create it, but **don't self-promote yet**; spend 2–3 weeks
-  commenting genuinely in r/SaaS, r/Entrepreneur to earn karma.
+- **Reddit** — **use your existing personal account** (the 9-month-old one; its
+  age clears most subs' account-age gates — don't make a new one, and don't use a
+  brand "u/trailwatch" account: Reddit rewards a real founder, not a faceless
+  brand). Email doesn't matter here; identity does. It has ~1 karma, so **ramp
+  naturally** (a long-dormant account that wakes up and drops links looks spammy):
+  spend 2–3 weeks leaving genuine, helpful comments in r/SaaS, r/Entrepreneur,
+  r/indiehackers, r/SideProject to reach ~50–100 combined karma. Add an avatar +
+  one-line bio so the profile isn't empty. **No self-promo yet.**
 - **X/Twitter** — `@trailwatch` (or personal) for build-in-public.
 - **Indie Hackers** — account + a draft Products listing.
 
@@ -226,8 +232,9 @@ Email = the gmail; paste the prepped blurbs; skip anything that charges to list.
 
 ## Stage 3 — Community warm-up · after launch-ready · all free
 1. **Indie Hackers (you)** — a genuine build/positioning post, link the teardown.
-2. **Reddit (you)** — with karma now, a "how I track competitors" value post; tool
-   link in context.
+2. **Reddit (you)** — with ~50–100 karma now, start in the **weekly promo threads**
+   (Feedback Friday etc. — allowed at lower karma, lower risk) before any top-level
+   post; then a "how I track competitors" value post, tool link in context.
 3. **X / LinkedIn build-in-public (you)** — post a live teardown of a known product.
 
 ## Stage 4 — Product Hunt launch · the big moment · free
