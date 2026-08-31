@@ -50,7 +50,10 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
         cloud.style.transformOrigin = "";
         if (why) why.style.opacity = "";
         if (white) white.style.opacity = "0";
-        if (price) price.style.opacity = "";
+        if (price) {
+          price.style.opacity = "";
+          price.style.backgroundPosition = "";
+        }
         return;
       }
 
@@ -67,7 +70,10 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
         cloud.style.transformOrigin = "";
         if (why) why.style.opacity = "1";
         if (white) white.style.opacity = "0";
-        if (price) price.style.opacity = "0"; // pricing hidden until the fly-through
+        if (price) {
+          price.style.opacity = "0"; // pricing hidden until the fly-through
+          price.style.backgroundPosition = ""; // sky centred until the hold
+        }
         return;
       }
 
@@ -112,10 +118,16 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
         white.style.opacity = String(clamp(wIn - wOut));
       }
 
-      // Pricing layer: materialises over the held why section as the cloud passes.
+      // Pricing layer: materialises over the held why section as the cloud passes,
+      // then — once the reveal is done and the stage just holds — the sky slowly
+      // pans left (background shifts toward its right edge, sliding the far-right
+      // summit into view) across the remaining pinned runway.
       if (price) {
         const rise = clamp((p - 0.72) / (0.96 - 0.72));
         price.style.opacity = String(rise);
+        const holdPx = Math.max(0, scene.offsetHeight - vh - REVEAL_PX);
+        const h = holdPx > 0 ? clamp((-rectTop - REVEAL_PX) / holdPx) : 0;
+        price.style.backgroundPosition = `${50 + h * 50}% center`;
       }
     };
 
