@@ -44,9 +44,36 @@
 /* -------------------------------------------------------------- steps */
 
 .steps {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 22px;
+  padding-left: 30px; /* left gutter for the scroll-progress rail */
+}
+
+/* Vertical scroll-progress rail (desktop) — track + accent fill (JS sets scaleY). */
+.rail {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: var(--rule);
+  overflow: hidden;
+}
+
+.railFill {
+  position: absolute;
+  inset: 0;
+  transform: scaleY(0);
+  transform-origin: top center;
+  background: var(--accent);
+  will-change: transform;
+}
+
+/* Horizontal scroll-progress bar (mobile only) — hidden on desktop. */
+.railH {
+  display: none;
 }
 
 .step {
@@ -479,6 +506,14 @@
   .scene {
     height: auto;
   }
+  /* Unpinned/stacked — no scroll to track, so no progress indicator. */
+  .rail,
+  .railH {
+    display: none;
+  }
+  .steps {
+    padding-left: 0;
+  }
   .stage {
     position: static;
     height: auto;
@@ -525,7 +560,28 @@
   }
   .h2 {
     font-size: 25px;
-    margin-bottom: 30px;
+    margin-bottom: 18px;
+  }
+  /* Vertical rail doesn't fit the one-step mobile layout — use a horizontal bar. */
+  .rail {
+    display: none;
+  }
+  .steps {
+    padding-left: 0;
+  }
+  .railH {
+    display: block;
+    height: 3px;
+    margin: 0 0 26px 0;
+    background: var(--rule);
+    overflow: hidden;
+  }
+  .railHFill {
+    height: 100%;
+    transform: scaleX(0);
+    transform-origin: left center;
+    background: var(--accent);
+    will-change: transform;
   }
   .grid {
     flex: 1;

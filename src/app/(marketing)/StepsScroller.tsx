@@ -27,6 +27,8 @@ const STEPS = [
 
 export function StepsScroller() {
   const sceneRef = useRef<HTMLDivElement>(null);
+  const fillRef = useRef<HTMLDivElement>(null); // vertical rail (desktop)
+  const hFillRef = useRef<HTMLDivElement>(null); // horizontal bar (mobile)
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -39,6 +41,9 @@ export function StepsScroller() {
       const runway = scene.offsetHeight - window.innerHeight;
       const scrolled = -scene.getBoundingClientRect().top;
       const p = Math.max(0, Math.min(1, runway > 0 ? scrolled / runway : 0));
+      // Continuous progress drives the rail fill (imperatively — no re-render).
+      if (fillRef.current) fillRef.current.style.transform = `scaleY(${p})`;
+      if (hFillRef.current) hFillRef.current.style.transform = `scaleX(${p})`;
       // Split the runway into equal bands, one per step.
       const idx = Math.min(STEPS.length - 1, Math.floor(p * STEPS.length));
       setActive(idx);
@@ -62,8 +67,17 @@ export function StepsScroller() {
       <div className={styles.stage}>
         <div className={styles.shell}>
           <h2 className={styles.h2}>Set it once. Then forget it.</h2>
+          {/* Mobile scroll-progress bar (the vertical rail below doesn't fit the
+              one-step-at-a-time mobile layout). */}
+          <div className={styles.railH} aria-hidden="true">
+            <div ref={hFillRef} className={styles.railHFill} />
+          </div>
           <div className={styles.grid}>
             <div className={styles.steps}>
+              {/* Desktop scroll-progress rail — fills as you scroll the pinned steps. */}
+              <div className={styles.rail} aria-hidden="true">
+                <div ref={fillRef} className={styles.railFill} />
+              </div>
               {STEPS.map((s, i) => (
                 <div
                   key={s.num}
