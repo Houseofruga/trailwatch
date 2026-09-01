@@ -50,8 +50,10 @@
 }
 
 /* Per-step scroll-progress rail (desktop) — sits in the step's left padding and
-   fills across that step's scroll band (JS sets scaleY). */
+   fills across that step's scroll band (JS sets scaleY). Shown only on the active
+   step, so exactly one rail (the one currently scrolling) is ever visible. */
 .stepRail {
+  display: none;
   position: absolute;
   left: 0;
   top: 0;
@@ -59,6 +61,10 @@
   width: 3px;
   background: var(--rule);
   overflow: hidden;
+}
+
+.stepActive .stepRail {
+  display: block;
 }
 
 .stepRailFill {
@@ -507,7 +513,7 @@
     height: auto;
   }
   /* Unpinned/stacked — no scroll to track, so no progress indicator. */
-  .stepRail,
+  .stepActive .stepRail,
   .railH {
     display: none;
   }
@@ -560,7 +566,7 @@
     margin-bottom: 18px;
   }
   /* Per-step rails don't fit the one-step mobile layout — use a horizontal bar. */
-  .stepRail {
+  .stepActive .stepRail {
     display: none;
   }
   .railH {
