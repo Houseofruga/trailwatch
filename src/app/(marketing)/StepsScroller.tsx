@@ -27,7 +27,7 @@ const STEPS = [
 
 export function StepsScroller() {
   const sceneRef = useRef<HTMLDivElement>(null);
-  const fillRef = useRef<HTMLDivElement>(null); // vertical rail (desktop)
+  const fillRefs = useRef<(HTMLSpanElement | null)[]>([]); // per-step rails (desktop)
   const hFillRef = useRef<HTMLDivElement>(null); // horizontal bar (mobile)
   const [active, setActive] = useState(0);
 
@@ -41,10 +41,15 @@ export function StepsScroller() {
       const runway = scene.offsetHeight - window.innerHeight;
       const scrolled = -scene.getBoundingClientRect().top;
       const p = Math.max(0, Math.min(1, runway > 0 ? scrolled / runway : 0));
-      // Continuous progress drives the rail fill (imperatively — no re-render).
-      if (fillRef.current) fillRef.current.style.transform = `scaleY(${p})`;
+      // Split the runway into equal bands, one per step. Each step's own rail
+      // fills across its band (past = full, active = filling, upcoming = empty).
+      // Imperative — no re-render on scroll.
+      for (let i = 0; i < STEPS.length; i++) {
+        const local = Math.max(0, Math.min(1, (p - i / STEPS.length) * STEPS.length));
+        const el = fillRefs.current[i];
+        if (el) el.style.transform = `scaleY(${local})`;
+      }
       if (hFillRef.current) hFillRef.current.style.transform = `scaleX(${p})`;
-      // Split the runway into equal bands, one per step.
       const idx = Math.min(STEPS.length - 1, Math.floor(p * STEPS.length));
       setActive(idx);
     };
@@ -74,15 +79,20 @@ export function StepsScroller() {
           </div>
           <div className={styles.grid}>
             <div className={styles.steps}>
-              {/* Desktop scroll-progress rail — fills as you scroll the pinned steps. */}
-              <div className={styles.rail} aria-hidden="true">
-                <div ref={fillRef} className={styles.railFill} />
-              </div>
               {STEPS.map((s, i) => (
                 <div
                   key={s.num}
                   className={`${styles.step} ${i === active ? styles.stepActive : ""}`}
                 >
+                  {/* Per-step scroll-progress rail — fills across this step's band. */}
+                  <span className={styles.stepRail} aria-hidden="true">
+                    <span
+                      ref={(el) => {
+                        fillRefs.current[i] = el;
+                      }}
+                      className={styles.stepRailFill}
+                    />
+                  </span>
                   <div className={styles.stepNum}>{s.num}</div>
                   <p className={styles.stepBody}>{s.body}</p>
                 </div>

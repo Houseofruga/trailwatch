@@ -44,25 +44,24 @@
 /* -------------------------------------------------------------- steps */
 
 .steps {
-  position: relative;
   display: flex;
   flex-direction: column;
   gap: 22px;
-  padding-left: 30px; /* left gutter for the scroll-progress rail */
 }
 
-/* Vertical scroll-progress rail (desktop) — track + accent fill (JS sets scaleY). */
-.rail {
+/* Per-step scroll-progress rail (desktop) — sits in the step's left padding and
+   fills across that step's scroll band (JS sets scaleY). */
+.stepRail {
   position: absolute;
   left: 0;
-  top: 6px;
-  bottom: 6px;
+  top: 0;
+  bottom: 0;
   width: 3px;
   background: var(--rule);
   overflow: hidden;
 }
 
-.railFill {
+.stepRailFill {
   position: absolute;
   inset: 0;
   transform: scaleY(0);
@@ -77,6 +76,7 @@
 }
 
 .step {
+  position: relative; /* anchors the per-step progress rail in the left padding */
   padding: 26px 30px;
   background: transparent;
   transition: background-color 0.28s ease;
@@ -507,12 +507,9 @@
     height: auto;
   }
   /* Unpinned/stacked — no scroll to track, so no progress indicator. */
-  .rail,
+  .stepRail,
   .railH {
     display: none;
-  }
-  .steps {
-    padding-left: 0;
   }
   .stage {
     position: static;
@@ -562,12 +559,9 @@
     font-size: 25px;
     margin-bottom: 18px;
   }
-  /* Vertical rail doesn't fit the one-step mobile layout — use a horizontal bar. */
-  .rail {
+  /* Per-step rails don't fit the one-step mobile layout — use a horizontal bar. */
+  .stepRail {
     display: none;
-  }
-  .steps {
-    padding-left: 0;
   }
   .railH {
     display: block;
