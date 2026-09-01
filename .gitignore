@@ -14,5 +14,8 @@ build/
 next-env.d.ts
 coverage/
 
+# graphify knowledge-graph output (local tooling, not shared)
+graphify-out/
+
 # vercel (local project linkage — not shared)
 .vercel/
