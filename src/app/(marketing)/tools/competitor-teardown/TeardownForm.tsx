@@ -7,7 +7,7 @@ import styles from "./page.module.css";
 
 type ResultData = NonNullable<Extract<TeardownState, { status: "ok" }>>["result"];
 
-export function TeardownForm() {
+export function TeardownForm({ signupSrc = "teardown" }: { signupSrc?: string } = {}) {
   const [state, formAction, pending] = useActionState<TeardownState, FormData>(
     teardownAction,
     null,
@@ -28,6 +28,7 @@ export function TeardownForm() {
         <Results
           result={(state as { result: ResultData }).result}
           onCheckAnother={() => setStartOver(true)}
+          signupSrc={signupSrc}
         />
       ) : (
         <form
@@ -72,7 +73,15 @@ export function TeardownForm() {
   );
 }
 
-function Results({ result, onCheckAnother }: { result: ResultData; onCheckAnother: () => void }) {
+function Results({
+  result,
+  onCheckAnother,
+  signupSrc,
+}: {
+  result: ResultData;
+  onCheckAnother: () => void;
+  signupSrc: string;
+}) {
   const { url, title, positioning, pricingTiers, whatToWatch, provider } = result;
 
   return (
@@ -131,7 +140,7 @@ function Results({ result, onCheckAnother }: { result: ResultData; onCheckAnothe
           what actually changed. Free plan, no card required.
         </p>
         <div className={styles.convertActions}>
-          <Link href="/login?mode=signup&src=teardown" className={styles.btnPrimary}>
+          <Link href={`/login?mode=signup&src=${signupSrc}`} className={styles.btnPrimary}>
             Start free — no card required
           </Link>
           <button type="button" onClick={onCheckAnother} className={styles.btnSecondary}>

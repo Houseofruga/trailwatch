@@ -1,0 +1,94 @@
+/* Static split hero for the "try it" landing (/try). Headline + trust on the
+   left, the live AI-teardown tool card on the right. Deliberately NOT pinned/
+   scroll-animated (unlike HeroScene) so typing in the tool is never disrupted.
+   PROVISIONAL styling — to be restyled to the owner's reference image; only this
+   file + the hero copy change then, nothing structural. */
+
+.hero {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.heroInner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 72px 32px 88px;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 56px;
+  align-items: start;
+}
+
+.heroCopy {
+  max-width: 560px;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-line);
+  padding: 5px 11px;
+  border-radius: 999px;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: clamp(2.1rem, 4.2vw, 3.1rem);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 18px;
+}
+
+.title .accent {
+  color: var(--accent);
+}
+
+.body {
+  font-size: 1.075rem;
+  line-height: 1.6;
+  color: var(--ink-hint);
+  margin: 0 0 24px;
+}
+
+.trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 0.9rem;
+  color: var(--ink-faint);
+}
+
+.trustItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.trustTick {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* The tool column. TeardownForm brings its own card styling; this just gives it
+   room and a subtle framing on wide screens. */
+.heroTool {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .heroInner {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding: 48px 22px 64px;
+  }
+  .heroCopy {
+    max-width: none;
+  }
+}
