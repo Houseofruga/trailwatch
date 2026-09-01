@@ -42,7 +42,7 @@ convenient:
   pages ("House of Ruga LLP"), the `SiteFooter` copyright ("© 2026 House of Ruga"), the SEO
   `Organization` publisher in `structuredData.ts` (machine-only; TrailWatch is the
   `SoftwareApplication` published by it — do NOT rename the org to TrailWatch), and the
-  working domain/email/user-agent (`trailwatch.houseofruga.com`, `trailwatch@houseofruga.com`).
+  working domain/email/user-agent (`gettrailwatch.com`, `trailwatch@houseofruga.com`).
   Do not reintroduce "House of Ruga" into hero/landing/app prose. One domain today; future
   products go on their own subdomains under the same org.
 - **Plan limits** (`src/features/plan/limits.ts`): free = 2 competitors × 3 pages
@@ -102,7 +102,7 @@ overhaul** (no product/back-end logic changed — the §7 slices and tests untou
 - **"Set it once" steps** (`StepsScroller`): pinned 3-step scroller; the right panel is
   three built product-UI mockups (add-competitor, daily-check/noise-filter, and a
   Gmail-flavored weekly email) over Ghibli times-of-day backgrounds
-  (`step-1/2/3-bg.webp`). Email sender shows `weekly@trailwatch.houseofruga.com`, CTA
+  (`step-1/2/3-bg.webp`). Email sender shows `weekly@gettrailwatch.com`, CTA
   "Open dashboard", avatar uses the TrailWatch mark.
 - **why→pricing cloud fly-through** (`CloudScene`): pins the "big tools" (why) section,
   zooms one cloud of `clouds.webp` through "the lens" (curved downward-arc path, whiteout
@@ -165,7 +165,7 @@ Paddle: `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `NEXT_PUBLIC_PADDLE_ENV`,
 1. Do a full `SPEC.md` §9 end-to-end pass in a test environment; fix what fails.
 2. Replace the placeholder legal copy before launch (footer support email is
    `trailwatch@houseofruga.com` — confirm it's live).
-3. Set up Resend subdomain sending for `weekly@trailwatch.houseofruga.com` (DKIM/SPF/MX/
+3. Set up Resend subdomain sending for `weekly@gettrailwatch.com` (DKIM/SPF/MX/
    DMARC on Cloudflare) so the digest sends from the subdomain shown in the landing mockup.
 4. Landing is visually polished but has **no automated coverage** (scroll animations are
    verified by hand in-browser). Manual QA on real desktop + mobile before launch;

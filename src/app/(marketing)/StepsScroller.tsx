@@ -218,7 +218,7 @@ export function StepsScroller() {
                           <div className={styles.mailSenderText}>
                             <div className={styles.mailSender}>TrailWatch</div>
                             <div className={styles.mailAddr}>
-                              weekly@trailwatch.houseofruga.com
+                              weekly@gettrailwatch.com
                             </div>
                           </div>
                           <div className={styles.mailRight}>

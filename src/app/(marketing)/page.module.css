@@ -1,6 +1,6 @@
 /*
- * TrailWatch marketing landing — served at the subdomain root
- * (trailwatch.houseofruga.com). Uses the shared design tokens in
+ * TrailWatch marketing landing — served at the root domain
+ * (gettrailwatch.com). Uses the shared design tokens in
  * src/styles/tokens.css and the DM Sans / Geist Mono font variables from the
  * root layout. No new colors or fonts.
  */

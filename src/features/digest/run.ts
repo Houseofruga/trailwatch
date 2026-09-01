@@ -13,7 +13,7 @@ export type DigestRunResult = {
 // limit — must not stop the rest, so each send is isolated. last_digest_sent_at
 // is stamped only on a successful send, so a failed one can be retried next run.
 export async function runWeeklyDigest(now: number = Date.now()): Promise<DigestRunResult> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://trailwatch.houseofruga.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gettrailwatch.com";
   const digests = await collectWeeklyDigests(now);
   const mailer = getMailer();
   const service = createServiceClient();

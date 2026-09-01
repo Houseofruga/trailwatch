@@ -1,6 +1,6 @@
 import { isPathAllowed } from "./robots";
 
-const USER_AGENT = "TrailwatchBot/1.0 (+https://trailwatch.houseofruga.com)";
+const USER_AGENT = "TrailwatchBot/1.0 (+https://gettrailwatch.com)";
 const TIMEOUT_MS = 10_000;
 
 export type FetchResult =

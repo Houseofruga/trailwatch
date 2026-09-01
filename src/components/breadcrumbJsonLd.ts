@@ -3,7 +3,7 @@
 // SEO.md flagged adding this once /tools/* shipped.
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://trailwatch.houseofruga.com";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://gettrailwatch.com";
 
 /**
  * @param items ordered crumbs; `path` is site-relative (e.g. "/tools/sitemap-finder").

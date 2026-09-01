@@ -9,7 +9,7 @@ _Last updated: 2026-08-31._
 
 ## Goal
 
-Get qualified, low-cost traffic to `trailwatch.houseofruga.com` and convert it to
+Get qualified, low-cost traffic to `gettrailwatch.com` and convert it to
 free signups (which then upgrade). The product's edge — low-noise, plain-English
 competitor change summaries — should be visible in every marketing surface.
 

@@ -12,7 +12,7 @@ import styles from "./page.module.css";
 
 const FOUNDER_X_URL = "https://x.com/thatguydongre";
 
-// The subdomain root (trailwatch.houseofruga.com) IS the marketing landing.
+// The root domain (gettrailwatch.com) IS the marketing landing.
 // Everyone sees it; signed-in visitors get a "Dashboard" link into the app.
 export const metadata: Metadata = {
   // Absolute so the root layout's "%s — TrailWatch" template doesn't double up.
@@ -124,7 +124,7 @@ export default async function RootPage() {
                 <span className={styles.shotDot} />
                 <span className={styles.shotDot} />
               </div>
-              <div className={styles.shotUrl}>trailwatch.houseofruga.com/dashboard</div>
+              <div className={styles.shotUrl}>gettrailwatch.com/dashboard</div>
             </div>
 
             <div className={styles.appRow}>

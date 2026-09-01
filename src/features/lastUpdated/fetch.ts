@@ -6,7 +6,7 @@ import { lookup } from "node:dns/promises";
 import * as cheerio from "cheerio";
 import { isPrivateIp, validateUrlInput } from "./ssrf";
 
-const USER_AGENT = "TrailwatchBot/1.0 (+https://trailwatch.houseofruga.com)";
+const USER_AGENT = "TrailwatchBot/1.0 (+https://gettrailwatch.com)";
 const TIMEOUT_MS = 10_000;
 const MAX_REDIRECTS = 3;
 const MAX_BYTES = 2_000_000; // ~2 MB cap on the HTML we read

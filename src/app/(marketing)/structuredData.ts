@@ -3,7 +3,7 @@
 // page (a requirement for FAQ rich results).
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://trailwatch.houseofruga.com";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://gettrailwatch.com";
 
 export const FAQ: Array<{ q: string; a: string }> = [
   {

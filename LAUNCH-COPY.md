@@ -14,8 +14,8 @@ to the product; keep it that way.
 - **Pro:** **$19/mo** or **$190/yr** (2 months free) — 10 competitors, 100 pages,
   daily checks. AI on every plan, even free.
 - By **Chandan Dongre**, solo indie founder (House of Ruga).
-- Site: `https://trailwatch.houseofruga.com` · Free tool (no signup):
-  `https://trailwatch.houseofruga.com/tools/competitor-teardown`
+- Site: `https://gettrailwatch.com` · Free tool (no signup):
+  `https://gettrailwatch.com/tools/competitor-teardown`
 
 ---
 
@@ -85,7 +85,7 @@ to the product; keep it that way.
 >
 > You can try it in 10 seconds without signing up — the free AI Competitor Teardown
 > lets you paste any competitor's URL and get an instant read on their positioning
-> and pricing: https://trailwatch.houseofruga.com/tools/competitor-teardown
+> and pricing: https://gettrailwatch.com/tools/competitor-teardown
 >
 > I'd genuinely love your feedback — especially where the summaries miss or
 > over-explain. I'm here all day.
@@ -99,7 +99,7 @@ to the product; keep it that way.
 5. A one-line "built by one indie founder" trust panel.
 
 **Link:** use a UTM'd URL, e.g.
-`https://trailwatch.houseofruga.com/?utm_source=producthunt&utm_medium=launch`
+`https://gettrailwatch.com/?utm_source=producthunt&utm_medium=launch`
 
 ---
 
@@ -169,7 +169,7 @@ homepage link, and the teardown-tool link where a "free tool" field exists.
 >
 > If it's useful, there's a free tool that shows the idea in 10 seconds — paste any
 > competitor's URL and it gives you a teardown of their positioning and pricing:
-> https://trailwatch.houseofruga.com/tools/competitor-teardown
+> https://gettrailwatch.com/tools/competitor-teardown
 >
 > Happy to answer anything about the build (Next.js + Supabase, the noise filter
 > was the fiddly part), and I'd love feedback on where the summaries are too terse
@@ -192,7 +192,7 @@ promo/feedback thread; keep ~90% of your activity non-promotional.**
 >
 > You can try the idea without signing up — paste a competitor URL into the free
 > teardown tool and it reads back their positioning + pricing:
-> https://trailwatch.houseofruga.com/tools/competitor-teardown
+> https://gettrailwatch.com/tools/competitor-teardown
 >
 > Would love blunt feedback, especially on the summaries.
 

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://trailwatch.houseofruga.com";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://gettrailwatch.com";
 
 /**
  * Let crawlers index the marketing + legal surfaces; keep the authed app, auth

@@ -176,7 +176,7 @@ Each step is tagged **(you)** / **(Claude)** / **(both)**.
 
 **0.1 Google Search Console + Bing (you; ~20 min).**
 Sign in at search.google.com/search-console → add a **URL-prefix** property
-`https://trailwatch.houseofruga.com` → verify with **"HTML tag"**. The site
+`https://gettrailwatch.com` → verify with **"HTML tag"**. The site
 already ships a Google verification token (`src/app/layout.tsx` →
 `verification.google`); if your property is under the same Google account that
 made that token, it verifies instantly. If Search Console shows a *different*
@@ -221,7 +221,7 @@ wastes the launch and the backlinks.
   digest send; a real Paddle sandbox checkout → paid → cancel → revert (you enter
   the test card).
 - **1.3 Resend subdomain sending (both)** — DKIM/SPF/MX/DMARC on Cloudflare for
-  `weekly@trailwatch.houseofruga.com` so digests deliver. → then **launch-ready**.
+  `weekly@gettrailwatch.com` so digests deliver. → then **launch-ready**.
 
 ## Stage 2 — Evergreen listings · after launch-ready · all free
 Email = the gmail; paste the prepped blurbs; skip anything that charges to list.

@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://trailwatch.houseofruga.com";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://gettrailwatch.com";
 
 const DESCRIPTION =
   "We watch your competitors' pricing, homepage and changelog, and email you one plain-English digest a week explaining what actually changed. AI summaries on every plan, even free.";
