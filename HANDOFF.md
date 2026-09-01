@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-08-31._
+_Last updated: 2026-09-01._
 
 ## Product in one line
 
@@ -43,8 +43,16 @@ convenient:
   `Organization` publisher in `structuredData.ts` (machine-only; TrailWatch is the
   `SoftwareApplication` published by it — do NOT rename the org to TrailWatch), and the
   working domain/email/user-agent (`gettrailwatch.com`, `trailwatch@houseofruga.com`).
-  Do not reintroduce "House of Ruga" into hero/landing/app prose. One domain today; future
-  products go on their own subdomains under the same org.
+  Do not reintroduce "House of Ruga" into hero/landing/app prose.
+- **Domain: the app now lives at its OWN root domain `gettrailwatch.com`** (migrated
+  2026-09-01 from the old subdomain `trailwatch.houseofruga.com`). House of Ruga is just
+  the operating company / portfolio — NOT a product-brand umbrella, and there is NO
+  plan for product-per-subdomain (that earlier note is retired). The old subdomain
+  **301-redirects** (path+query preserved) to the new domain via a Cloudflare Redirect
+  Rule on the houseofruga.com zone. Same Supabase/Vercel/Cloudflare-fronts-Vercel stack;
+  registrar is now Cloudflare. `NEXT_PUBLIC_SITE_URL=https://gettrailwatch.com` (Vercel)
+  drives all canonicals/OG/sitemap/robots. Contact email stays `trailwatch@houseofruga.com`;
+  sending is `weekly@gettrailwatch.com` (`EMAIL_FROM`).
 - **Plan limits** (`src/features/plan/limits.ts`): free = 2 competitors × 3 pages
   each (6 total); paid = 10 competitors × 10 pages each (100 total). Pro pricing:
   `$19/mo` monthly or `$190/yr` annual (2 months free), via `PRO_MONTHLY_USD` /
@@ -66,7 +74,10 @@ convenient:
   `sitemap-finder`, `robots-txt-tester`, `when-was-a-website-last-updated`. All follow
   one pattern (page.tsx + content.ts + actions.ts + Form + css; server action → a
   `src/features/<name>` module; FAQPage + BreadcrumbList JSON-LD; SiteFooter Tools nav).
-- `src/app/(auth)/` — `login`, `forgot-password`, `reset-password`.
+- `src/app/(auth)/` — `login`, `forgot-password`, `reset-password`. Email links land at
+  `src/app/auth/confirm/route.ts` (token_hash `verifyOtp` — cross-device safe);
+  `src/app/auth/callback/route.ts` handles Google OAuth (PKCE code). Auth actions in
+  `src/features/auth/actions.ts` are env-driven off `NEXT_PUBLIC_SITE_URL`.
 - `src/app/(app)/` — authed shell: `dashboard`, `competitors`, `billing`, `settings`,
   `changes/[id]`. Guarded by `src/proxy.ts` + a belt-and-braces check in the layout.
 - `src/app/(legal)/` — `terms`, `privacy`, `refunds` (placeholder content, real routes).
@@ -78,6 +89,29 @@ convenient:
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
 ## Recent work (all pushed to `main`)
+
+**Domain migration → `gettrailwatch.com` + auth/email hardening (2026-09-01).**
+- **Migrated** the app from the subdomain to `gettrailwatch.com`: one env var
+  (`NEXT_PUBLIC_SITE_URL`) + all product-URL references renamed in code/docs; old
+  subdomain 301-redirects. Verified live (canonical/OG/sitemap/robots on new domain,
+  301 path+query preserved, AI-crawlers allowed on the new Cloudflare zone).
+- **Email is now real:** Resend sending domain `gettrailwatch.com` verified (SPF+DKIM
+  +DMARC all live); **Supabase custom SMTP → Resend** (so auth emails aren't rate-limited
+  / generic); **"Confirm email" enabled** in Supabase.
+- **Auth email links fixed for cross-device** (`src/app/auth/confirm/route.ts`): recovery
+  + signup-confirmation emails now use Supabase's `token_hash` + `verifyOtp` flow instead
+  of the PKCE code flow, so a link requested on a laptop and opened on a phone works. The
+  Supabase **email templates** were repointed to
+  `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery|email&next=…`.
+  `/auth/callback` still handles Google OAuth (genuine PKCE). Login page now shows a
+  proper "link invalid/expired" message (`?error=link`) vs the Google one.
+- Google OAuth consent screen + authorized domains updated to `gettrailwatch.com`
+  (kept the `*.supabase.co` authorized domain — required for the callback).
+- **Marketing (earlier this session):** the three `/compare/*` pages
+  (Visualping/Crayon/Kompyte) + shared `CompareTable`; `DISTRIBUTION.md` (phased,
+  cost-tagged off-site playbook + step-by-step runbook) and `LAUNCH-COPY.md` (PH kit,
+  AlternativeTo, Reddit/IH, X copy); a real **favicon** (`src/app/icon.svg`); an **LCP**
+  fix (preload hero images); and the founder **X link** on the landing.
 
 **Marketing lane 1 — AI Competitor Teardown tool (2026-08-31).** Shipped
 `/tools/competitor-teardown`, the flagship linkable asset from `SEO.md` Layer 2:
@@ -152,6 +186,12 @@ Paddle: `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `NEXT_PUBLIC_PADDLE_ENV`,
 `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN`, `NEXT_PUBLIC_PADDLE_PRICE_PRO_MONTHLY`,
 `NEXT_PUBLIC_PADDLE_PRICE_PRO_ANNUAL`.
 
+Post-migration values (Vercel Production): `NEXT_PUBLIC_SITE_URL=https://gettrailwatch.com`,
+`EMAIL_FROM=TrailWatch <weekly@gettrailwatch.com>`. Auth email is sent via **Supabase
+custom SMTP → Resend** (`smtp.resend.com:465`, user `resend`, password = a Resend API key)
+— configured in the Supabase dashboard, not env. Supabase **Site URL** = the new domain,
+and the recovery/confirm email templates point at `/auth/confirm` (token_hash flow).
+
 ## Commands & conventions
 
 - `npm run dev` / `npm run test` / `npm run lint` / `npm run typecheck`.
@@ -162,14 +202,28 @@ Paddle: `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `NEXT_PUBLIC_PADDLE_ENV`,
 
 ## Suggested next steps for whoever picks this up
 
-1. Do a full `SPEC.md` §9 end-to-end pass in a test environment; fix what fails.
-2. Replace the placeholder legal copy before launch (footer support email is
-   `trailwatch@houseofruga.com` — confirm it's live).
-3. Set up Resend subdomain sending for `weekly@gettrailwatch.com` (DKIM/SPF/MX/
-   DMARC on Cloudflare) so the digest sends from the subdomain shown in the landing mockup.
-4. Landing is visually polished but has **no automated coverage** (scroll animations are
-   verified by hand in-browser). Manual QA on real desktop + mobile before launch;
-   the scroll effects are gated to ≥1041px and fall back to static/stacked below that.
+**Domain-migration loose ends (owner, mostly done):**
+1. **Finish Search Console / Bing on the new domain** — the `gettrailwatch.com` Domain
+   property is verified (DNS TXT); submit the sitemap on both, then run GSC **Change of
+   Address** from the old `trailwatch.houseofruga.com` property → new domain.
+2. Update the **X profile Website** field to `gettrailwatch.com`.
+3. Auth was verified working end-to-end (reset cross-device, signup confirmation, Google
+   OAuth on the new domain). Digest **email send** to real users still wants a live test
+   (part of §9 below).
+
+**Pre-launch (unchanged, still the gate):**
+4. Do a full `SPEC.md` §9 end-to-end pass in a test environment (`BACKLOG.md`) — the real
+   Paddle sandbox checkout→flip→cancel loop and a real digest send. Auth email is now real
+   (Supabase SMTP → Resend), so the signup/reset legs are effectively covered.
+5. Replace the placeholder legal copy before launch (`(legal)` pages now have real drafts —
+   needs a lawyer pass, not drafting).
+6. Landing has **no automated coverage** for the scroll animations — manual QA on real
+   desktop + mobile (effects gated ≥1041px, static/stacked fallback below).
+
+**Marketing (owner's active track — see `DISTRIBUTION.md` + `LAUNCH-COPY.md`):**
+7. Lanes done: teardown tool, 3 compare pages, distribution playbook + copy kit. Remaining
+   lanes: `/compare/*` #4+ (optional), a blog, and executing the off-site playbook
+   (AlternativeTo ×3 first). GEO: AI crawlers are allowed on the new zone.
 
 ### Marketing / SEO (owner is actively working these — see `SEO.md`)
 
