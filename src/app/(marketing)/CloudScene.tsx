@@ -20,6 +20,7 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
   const cloudRef = useRef<HTMLImageElement>(null);
   const whiteRef = useRef<HTMLDivElement>(null);
   const priceRef = useRef<HTMLDivElement>(null);
+  const priceContentRef = useRef<HTMLDivElement>(null); // pricing content only (scaled)
 
   // Dense core of one cloud in clouds.webp (fractions of the image), so the zoom
   // grows from an opaque cloud body — not the transparent gap between the two.
@@ -41,6 +42,7 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
       const cloud = cloudRef.current;
       const white = whiteRef.current;
       const price = priceRef.current;
+      const content = priceContentRef.current;
       if (!cloud) return;
 
       if (!active()) {
@@ -54,6 +56,7 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
           price.style.opacity = "";
           price.style.backgroundSize = "";
         }
+        if (content) content.style.transform = "";
         return;
       }
 
@@ -74,6 +77,7 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
           price.style.opacity = "0"; // pricing hidden until the fly-through
           price.style.backgroundSize = ""; // sky at rest (cover) until the hold
         }
+        if (content) content.style.transform = "scale(0.9)"; // zoomed-out start (invisible at opacity 0)
         return;
       }
 
@@ -129,6 +133,15 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
         const holdPx = Math.max(0, scene.offsetHeight - vh - REVEAL_PX);
         const h = holdPx > 0 ? clamp((-rectTop - REVEAL_PX) / holdPx) : 0;
         price.style.backgroundSize = `auto ${100 + h * 40}%`;
+
+        // Content: a short zoom-in that rides the reveal only — the heading + plan
+        // grid grow from slightly zoomed-out to their regular size and settle just
+        // as the reveal completes (rise=1 at p≈0.96), well before the sky's longer
+        // backgroundSize zoom above finishes. Eased so it decelerates into place.
+        if (content) {
+          const e = 1 - Math.pow(1 - rise, 3); // easeOutCubic
+          content.style.transform = `scale(${0.9 + e * 0.1})`;
+        }
       }
     };
 
@@ -154,7 +167,9 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
         <img ref={cloudRef} className={styles.whyClouds} src="/clouds.webp" alt="" aria-hidden="true" />
         <div ref={whiteRef} className={styles.flyWhite} aria-hidden="true" />
         <div ref={priceRef} className={`${styles.cloudLayer} ${styles.cloudLayerPrice}`}>
-          {pricing}
+          <div ref={priceContentRef} className={styles.priceContent}>
+            {pricing}
+          </div>
         </div>
       </div>
     </div>

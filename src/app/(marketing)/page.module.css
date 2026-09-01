@@ -697,6 +697,14 @@
   background: #bcdcf2 url("/cloudreveal.webp") center / cover no-repeat;
 }
 
+/* Wrapper around the pricing content only (not the layer's sky background), so JS
+   can zoom the content in as the reveal lands without touching the sky's own,
+   longer backgroundSize zoom. Centre origin keeps the centred content in place. */
+.priceContent {
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+
 /* Zero the sections' own vertical padding inside the pinned layers (the layer
    provides the top offset); restored in the mobile fallback below. */
 .cloudLayer .why,
