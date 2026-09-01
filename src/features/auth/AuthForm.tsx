@@ -78,10 +78,14 @@ export function AuthForm({ initialMode }: { initialMode: Mode }) {
   const action = mode === "signup" ? signUp : logIn;
   const [state, formAction] = useActionState<AuthState, FormData>(action, null);
 
-  const oauthFailed = searchParams.get("error");
-  const message =
-    state?.error ??
-    (oauthFailed ? "Google sign-in didn't complete. Try again." : null);
+  const errorCode = searchParams.get("error");
+  const errorMessage =
+    errorCode === "link"
+      ? "That link is invalid or has expired. Request a new one."
+      : errorCode
+        ? "Google sign-in didn't complete. Try again."
+        : null;
+  const message = state?.error ?? errorMessage;
 
   function switchMode() {
     router.replace(mode === "signup" ? "/login" : "/login?mode=signup");
