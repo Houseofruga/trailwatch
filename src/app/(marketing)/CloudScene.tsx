@@ -134,12 +134,18 @@ export function CloudScene({ why, pricing }: { why: ReactNode; pricing: ReactNod
         const h = holdPx > 0 ? clamp((-rectTop - REVEAL_PX) / holdPx) : 0;
         price.style.backgroundSize = `auto ${100 + h * 40}%`;
 
-        // Content: a short zoom-in that rides the reveal only — the heading + plan
-        // grid grow from slightly zoomed-out to their regular size and settle just
-        // as the reveal completes (rise=1 at p≈0.96), well before the sky's longer
-        // backgroundSize zoom above finishes. Eased so it decelerates into place.
+        // Content: the heading + plan grid grow from slightly zoomed-out to regular
+        // size. It starts as pricing appears (~p 0.72) and keeps growing PAST the
+        // cloud's full fade (~p 0.98), settling around 60% into the hold — so the
+        // zoom is still visibly moving after the cloud is gone, yet still finishes
+        // sooner than the sky's full-length zoom above. Driven off raw pinned scroll
+        // (`-rectTop`), not `p`/`rise` (which clamp at the reveal band's end), so it
+        // can continue through the hold. Eased so it decelerates into place.
         if (content) {
-          const e = 1 - Math.pow(1 - rise, 3); // easeOutCubic
+          const czStart = 0.72 * REVEAL_PX; // begins where pricing starts to appear
+          const czEnd = REVEAL_PX + holdPx * 0.6; // settles ~60% through the hold
+          const cz = clamp((-rectTop - czStart) / (czEnd - czStart));
+          const e = 1 - Math.pow(1 - cz, 2); // easeOutQuad — gentle, still moving late
           content.style.transform = `scale(${0.9 + e * 0.1})`;
         }
       }
