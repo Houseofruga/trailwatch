@@ -4,13 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { initializePaddle, type Paddle } from "@paddle/paddle-js";
 import { Button } from "@/components/Button";
+import { ProPricingCard } from "@/features/billing/ProPricingCard";
 import { seedCompetitors, currentPlan } from "@/features/competitors/actions";
-import {
-  LIMITS,
-  formatProPrice,
-  PRO_ANNUAL_USD,
-  type BillingPeriod,
-} from "@/features/plan/limits";
+import { LIMITS, type BillingPeriod } from "@/features/plan/limits";
 import styles from "./welcome.module.css";
 
 const KEY = "tw_pending_competitors";
@@ -55,7 +51,6 @@ export function OnboardingPlanStep({
   onContinueFree: () => void;
 }) {
   const router = useRouter();
-  const [period, setPeriod] = useState<BillingPeriod>("annual");
   const [paddle, setPaddle] = useState<Paddle>();
   const [finalizing, setFinalizing] = useState(false);
   const [slow, setSlow] = useState(false);
@@ -63,9 +58,6 @@ export function OnboardingPlanStep({
   const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
   const environment =
     process.env.NEXT_PUBLIC_PADDLE_ENV === "production" ? "production" : "sandbox";
-  const priceId = PRICE_ID_BY_PERIOD[period];
-  const price = formatProPrice(period);
-  const configured = Boolean(token && priceId);
 
   useEffect(() => {
     if (!token) return;
@@ -130,7 +122,10 @@ export function OnboardingPlanStep({
     };
   }, [finalizing, paddle, allRows, router]);
 
-  function openCheckout() {
+  // Opens Paddle checkout for the period the shared ProPricingCard currently
+  // has selected (its toggle owns that state).
+  function openCheckout(period: BillingPeriod) {
+    const priceId = PRICE_ID_BY_PERIOD[period];
     if (!paddle || !priceId) return;
     paddle.Checkout.open({
       items: [{ priceId, quantity: 1 }],
@@ -187,58 +182,27 @@ export function OnboardingPlanStep({
           </div>
         </div>
 
-        {/* Pro */}
-        <div className={`${styles.planCard} ${styles.planCardPro}`}>
-          <div className={styles.planHeadRow}>
-            <div className={styles.planName}>Pro</div>
-            <div className={styles.toggle} role="group" aria-label="Billing period">
-              <button
+        {/* Pro — the shared in-product card, so onboarding and Plan & billing
+            can't drift. We only swap in our own checkout button (it seeds the
+            competitors after payment). */}
+        <ProPricingCard
+          email={email}
+          userId={userId}
+          features={features("paid")}
+          renderButton={(period) => {
+            const configured = Boolean(token && PRICE_ID_BY_PERIOD[period]);
+            return (
+              <Button
                 type="button"
-                className={period === "monthly" ? styles.toggleActive : styles.toggleOpt}
-                aria-pressed={period === "monthly"}
-                onClick={() => setPeriod("monthly")}
+                full
+                onClick={() => openCheckout(period)}
+                disabled={!configured || !paddle || busy}
               >
-                Monthly
-              </button>
-              <button
-                type="button"
-                className={period === "annual" ? styles.toggleActive : styles.toggleOpt}
-                aria-pressed={period === "annual"}
-                onClick={() => setPeriod("annual")}
-              >
-                Annual
-                <span className={styles.bestValue}>Best value</span>
-              </button>
-            </div>
-          </div>
-          <div className={styles.priceBlock}>
-            <div className={styles.planPrice}>
-              <span className={styles.priceAmount}>{price.amount}</span>
-              <span className={styles.planPer}>{price.per}</span>
-            </div>
-            {period === "annual" && (
-              <div className={styles.savings}>
-                ${PRO_ANNUAL_USD} billed annually · <span className={styles.badge}>2 months free</span>
-              </div>
-            )}
-          </div>
-          <ul className={styles.planFeatures}>
-            {features("paid").map((f) => (
-              <li key={f}>{f}</li>
-            ))}
-          </ul>
-          <div className={styles.action}>
-            <Button
-              type="button"
-              full
-              onClick={openCheckout}
-              disabled={!configured || !paddle || busy}
-            >
-              {configured ? "Upgrade to Pro" : "Upgrade unavailable"}
-            </Button>
-            <div className={styles.checkoutNote}>Secure checkout by Paddle · cancel any time</div>
-          </div>
-        </div>
+                {configured ? "Upgrade to Pro" : "Upgrade unavailable"}
+              </Button>
+            );
+          }}
+        />
       </div>
     </div>
   );

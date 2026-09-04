@@ -235,15 +235,17 @@
   padding: 40px 0 12px;
 }
 
-/* The two plan cards mirror the in-product Plan & billing UI 1:1 — the shared
-   system in billing/page.module.css (.card/.cardHead/.planName/.price/.features)
-   and features/billing/ProPricingCard.module.css (toggle + Best value badge +
-   square feature bullets). Keep these in sync with those files. */
+/* The Pro card is the shared <ProPricingCard> (features/billing/ProPricingCard),
+   so it can't drift from Plan & billing. These styles are just the Free card +
+   the grid wrapper; they mirror the Free card in billing/page.module.css
+   (.card/.planName/.price/.features). */
 .planGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-top: 22px;
+  /* Match the shared Pro card's inner column widths regardless of card height. */
+  align-items: start;
 }
 
 .planCard {
@@ -252,13 +254,6 @@
   padding: 24px;
   display: flex;
   flex-direction: column;
-}
-
-.planCardPro {
-  border-color: var(--accent-line);
-  /* Query container so the toggle badge adapts to the card width, not the
-     viewport (matches ProPricingCard). */
-  container-type: inline-size;
 }
 
 .planHeadRow {
@@ -282,29 +277,6 @@
 .planPrice {
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-size: 26px;
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-
-.priceAmount {
-  font-weight: 500;
-}
-
-.planPer {
-  font-size: 14px;
-  color: var(--ink-faint);
-}
-
-.savings {
-  margin-top: 8px;
-  font-size: 12px;
-  color: var(--ink-4);
-}
-
-.badge {
-  color: var(--accent-ink);
-  font-weight: 500;
 }
 
 .planFeatures {
@@ -316,7 +288,6 @@
   gap: 10px;
   font-size: 13.5px;
   color: var(--ink-2);
-  flex: 1;
 }
 
 .planFeatures li {
@@ -335,64 +306,8 @@
   border: 1.5px solid var(--accent-hover);
 }
 
-/* Monthly/Annual toggle — mirrors ProPricingCard (surface-sunken track, white
-   active pill with a soft shadow, "Best value" badge on Annual). */
-.toggle {
-  display: inline-flex;
-  margin-left: auto;
-  background: var(--surface-sunken);
-  border: 1px solid var(--border);
-  padding: 3px;
-  gap: 2px;
-}
-
-.toggleOpt,
-.toggleActive {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 12px;
-  padding: 6px 8px;
-  background: transparent;
-  color: var(--ink-3);
-  white-space: nowrap;
-}
-
-.toggleActive {
-  background: var(--surface);
-  color: var(--ink);
-  font-weight: 500;
-  box-shadow: 0 1px 2px rgba(26, 26, 23, 0.08);
-}
-
-.bestValue {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  color: var(--accent-ink);
-  background: var(--accent-wash);
-  padding: 2px 5px;
-}
-
 .action {
   margin-top: 24px;
-}
-
-.checkoutNote {
-  margin-top: 10px;
-  font-size: 11.5px;
-  color: var(--ink-faint);
-  text-align: center;
-}
-
-@container (max-width: 210px) {
-  .bestValue {
-    display: none;
-  }
 }
 
 @media (max-width: 640px) {
