@@ -56,8 +56,9 @@ export default async function TryPage() {
             </p>
             <div className={styles.heroCta}>
               <Link href="/login?mode=signup" className={styles.heroCtaBtn}>
-                Start free — no card required
+                Start free
               </Link>
+              <span className={styles.heroCtaNote}>No card required</span>
             </div>
           </div>
 
