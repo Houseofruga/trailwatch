@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ButtonLink } from "@/components/Button";
 import { BackLink } from "@/components/BackLink";
+import { UpgradeButton } from "@/features/billing/UpgradeButton";
+import { createClient } from "@/lib/supabase/server";
 import { getAccount } from "@/features/account/queries";
 import { getCompetitorsWithPages } from "@/features/competitors/queries";
 import { LIMITS, PLAN_LABEL } from "@/features/plan/limits";
@@ -15,7 +16,11 @@ export default async function AddCompetitorPage({
 }) {
   const { for: competitorId } = await searchParams;
   const account = await getAccount();
-  if (!account) redirect("/login");
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!account || !user) redirect("/login");
 
   const limits = LIMITS[account.plan];
   const planLabel = PLAN_LABEL[account.plan];
@@ -40,6 +45,8 @@ export default async function AddCompetitorPage({
           swapHref="/competitors"
           swapLabel="Or manage its existing pages →"
           showUpsell={account.plan === "free"}
+          email={account.email}
+          userId={user.id}
         />
       </div>
     );
@@ -64,6 +71,8 @@ export default async function AddCompetitorPage({
           swapHref="/competitors"
           swapLabel="Or swap out an existing competitor →"
           showUpsell={account.plan === "free"}
+          email={account.email}
+          userId={user.id}
         />
       ) : (
         <AddForm
@@ -82,12 +91,16 @@ function BlockedUpsell({
   swapHref,
   swapLabel,
   showUpsell,
+  email,
+  userId,
 }: {
   title: string;
   body: string;
   swapHref: string;
   swapLabel: string;
   showUpsell: boolean;
+  email: string;
+  userId: string;
 }) {
   return (
     <div>
@@ -109,9 +122,10 @@ function BlockedUpsell({
             <div>Weekly email digest</div>
             <div>Cancel any time</div>
           </div>
-          <ButtonLink href="/billing" className={styles.upsellCta}>
-            Upgrade to Pro
-          </ButtonLink>
+          {/* Opens the Paddle checkout overlay right here (matching the $19/mo
+              shown); on success it polls until the account flips to Pro and this
+              page re-renders unblocked — no detour through /billing. */}
+          <UpgradeButton email={email} userId={userId} period="monthly" />
         </div>
       ) : null}
 
