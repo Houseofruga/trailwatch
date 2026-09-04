@@ -394,3 +394,28 @@ a.pageRowLink:hover {
   color: var(--ink-4);
   margin: 0;
 }
+
+/* ------------------------------------------------------------------ mobile */
+@media (max-width: 640px) {
+  .wrap,
+  .empty {
+    padding: 24px 18px 56px;
+  }
+  .head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin: 18px 0 24px;
+  }
+  .metaRow {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .heading {
+    font-size: 24px;
+  }
+}

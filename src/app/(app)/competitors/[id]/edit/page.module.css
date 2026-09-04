@@ -195,3 +195,9 @@
   font-size: 13px;
   color: var(--danger);
 }
+
+@media (max-width: 640px) {
+  .wrap {
+    padding: 24px 18px 56px;
+  }
+}

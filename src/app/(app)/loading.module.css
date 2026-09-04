@@ -44,3 +44,12 @@
   flex-direction: column;
   gap: 16px;
 }
+
+@media (max-width: 640px) {
+  .wrap {
+    padding: 24px 18px 56px;
+  }
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}

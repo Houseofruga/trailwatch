@@ -248,3 +248,9 @@
   max-width: 440px;
   line-height: 1.6;
 }
+
+@media (max-width: 640px) {
+  .wrap {
+    padding: 24px 18px 56px;
+  }
+}

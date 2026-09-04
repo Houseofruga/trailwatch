@@ -34,6 +34,9 @@ function percent(used: number, allowed: number): string {
 export function Sidebar({ account }: { account: Account }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  // Mobile only: the sidebar is a slide-in drawer behind a hamburger. On desktop
+  // the drawer state is inert (CSS keeps the aside in the normal column flow).
+  const [navOpen, setNavOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
   // Click-away, so the menu doesn't strand itself open.
@@ -46,12 +49,43 @@ export function Sidebar({ account }: { account: Account }) {
     return () => document.removeEventListener("mousedown", onPointerDown);
   }, [menuOpen]);
 
+  // Close the mobile drawer whenever the route changes (a nav tap navigates).
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNavOpen(false);
+  }, [pathname]);
+
   const limits = LIMITS[account.plan];
   const isFree = account.plan === "free";
 
   return (
-    <aside className={styles.aside}>
-      <div className={styles.brand}>
+    <>
+      {/* Mobile top bar — hidden on desktop via CSS. Holds the logo + the
+          hamburger that opens the drawer. */}
+      <div className={styles.topbar}>
+        <button
+          type="button"
+          className={styles.hamburger}
+          onClick={() => setNavOpen(true)}
+          aria-label="Open menu"
+          aria-expanded={navOpen}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
+        </button>
+        <Image src="/logo.svg" alt="Trailwatch" width={132} height={29} className={styles.topbarLogo} priority />
+      </div>
+
+      {/* Scrim behind the open drawer (mobile only). */}
+      <div
+        className={navOpen ? styles.overlayOpen : styles.overlay}
+        onClick={() => setNavOpen(false)}
+        aria-hidden="true"
+      />
+
+      <aside className={navOpen ? styles.asideOpen : styles.aside}>
+        <div className={styles.brand}>
         <Image
           src="/logo.svg"
           alt="Trailwatch"
@@ -167,6 +201,7 @@ export function Sidebar({ account }: { account: Account }) {
           ) : null}
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

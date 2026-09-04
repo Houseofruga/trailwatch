@@ -302,3 +302,9 @@
 .menuItemDanger:hover {
   background: var(--danger-wash);
 }
+
+@media (max-width: 640px) {
+  .wrap {
+    padding: 24px 18px 56px;
+  }
+}
