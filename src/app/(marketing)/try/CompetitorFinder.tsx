@@ -70,25 +70,33 @@ export function CompetitorFinder() {
         <p className={styles.finderHint}>
           {pending
             ? "Reading your site and finding who to watch — a few seconds."
-            : "We’ll suggest competitors to track — edit them before you start."}
+            : "We’ll suggest competitors to track — you can edit them before you start."}
         </p>
       </form>
 
-      {showEditor && (
-        <div className={styles.finderResult}>
-          <div className={styles.finderResultHead}>
-            <span className={styles.finderResultTitle}>
-              {errored ? "Add your competitors" : "Suggested — edit before you start"}
-            </span>
-            {!errored && list.length > 0 && (
-              <span className={styles.finderBadge}>AI-suggested</span>
-            )}
+      {/* Fixed-height zone so the card doesn't resize between the idle placeholder,
+          the pending state, and the results. */}
+      <div className={styles.resultZone}>
+        {!showEditor ? (
+          <div className={styles.emptyState}>
+            {pending
+              ? "Finding competitors…"
+              : "Your competitors will appear here — suggested from your company, and yours to edit."}
           </div>
+        ) : (
+          <div className={styles.finderResult}>
+            <div className={styles.finderResultHead}>
+              <span className={styles.finderResultTitle}>
+                {errored
+                  ? "Add the competitors you want to watch"
+                  : "Suggested competitors — remove any, or add your own"}
+              </span>
+            </div>
 
-          {errored && <p className={styles.finderError}>{state.message}</p>}
+            {errored && <p className={styles.finderError}>{state.message}</p>}
 
-          {list.length > 0 ? (
-            <ul className={styles.compList}>
+            {list.length > 0 ? (
+              <ul className={styles.compList}>
               {list.map((c, i) => (
                 <li key={`${c.name}-${i}`} className={styles.compRow}>
                   <div className={styles.compMain}>
@@ -135,13 +143,14 @@ export function CompetitorFinder() {
             </button>
           </div>
 
-          <Link href={SIGNUP_HREF} className={styles.finderCta}>
-            {list.length > 0
-              ? `Start free — watch ${list.length} competitor${list.length > 1 ? "s" : ""}`
-              : "Start free — no card required"}
-          </Link>
-        </div>
-      )}
+            <Link href={SIGNUP_HREF} className={styles.finderCta}>
+              {list.length > 0
+                ? `Start free — watch ${list.length} competitor${list.length > 1 ? "s" : ""}`
+                : "Start free — no card required"}
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

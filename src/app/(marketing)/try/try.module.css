@@ -1,40 +1,57 @@
-/* Static split hero for the "try it" landing (/try): headline + a sample weekly
-   email on the left (the payoff), the "find your competitors" tool on the right.
-   Deliberately NOT pinned/scroll-animated (unlike HeroScene) so typing in the
-   tool is never disrupted. PROVISIONAL styling — to be restyled to the owner's
-   reference image; only this file + the hero copy change then. */
+/* Static "try it" hero (/try): the homepage sky background, white copy on the
+   left, and the "find your competitors" tool on the right where the product mock
+   sits on `/`. Deliberately NOT pinned/scroll-animated so the tool stays put and
+   usable. Square corners throughout — the design system has no rounded corners
+   (see src/styles/tokens.css). */
 
 .hero {
-  background: var(--bg);
-  border-bottom: 1px solid var(--border-soft);
+  position: relative;
+  overflow: hidden;
+  min-height: 620px;
+}
+
+/* Full-bleed sky, same image as the homepage hero (static — no zoom). */
+.sky {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: url("/fullBG.webp") center center / cover no-repeat;
+}
+
+.header {
+  position: relative;
+  z-index: 10;
+}
+
+/* Foreground hill for parity with the homepage — decorative, behind the content
+   (above the sky) so it never covers the tool. */
+.hill {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: auto;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+  transform: scaleX(-1);
 }
 
 .heroInner {
+  position: relative;
+  z-index: 3;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 64px 32px 80px;
+  padding: 40px 32px 96px;
   display: grid;
   grid-template-columns: 1fr 0.92fr;
   gap: 56px;
-  align-items: start;
+  align-items: center;
 }
 
+/* Left copy — white on the sky, with the homepage's text-shadow treatment. */
 .heroCopy {
-  max-width: 560px;
-}
-
-.eyebrow {
-  display: inline-block;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--accent-ink);
-  background: var(--accent-wash);
-  border: 1px solid var(--accent-line);
-  padding: 5px 11px;
-  border-radius: 999px;
-  margin-bottom: 20px;
+  max-width: 520px;
 }
 
 .title {
@@ -42,82 +59,20 @@
   line-height: 1.08;
   letter-spacing: -0.02em;
   font-weight: 700;
-  color: var(--ink);
+  color: #ffffff;
+  text-shadow: 0 2px 24px rgba(10, 20, 40, 0.28);
   margin: 0 0 18px;
 }
 
 .body {
   font-size: 1.05rem;
   line-height: 1.6;
-  color: var(--ink-hint);
-  margin: 0 0 28px;
-}
-
-/* --- Sample weekly email (payoff preview) --- */
-.preview {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px 20px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  max-width: 460px;
-}
-
-.previewHead {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--rule);
-  margin-bottom: 12px;
-}
-
-.previewFrom {
-  font-weight: 700;
-  color: var(--ink);
-  font-size: 0.95rem;
-}
-
-.previewSubj {
-  color: var(--ink-faint);
-  font-size: 0.85rem;
-}
-
-.previewList {
-  list-style: none;
+  color: rgba(255, 255, 255, 0.94);
+  text-shadow: 0 1px 14px rgba(10, 20, 40, 0.3);
   margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
 
-.previewItem {
-  display: flex;
-  gap: 10px;
-  align-items: baseline;
-  font-size: 0.92rem;
-}
-
-.previewComp {
-  flex: 0 0 82px;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.previewLine {
-  color: var(--ink-hint);
-}
-
-.previewFoot {
-  margin-top: 14px;
-  padding-top: 10px;
-  border-top: 1px solid var(--rule);
-  font-size: 0.82rem;
-  color: var(--ink-faint);
-}
-
-/* --- The finder tool card --- */
+/* --- The finder tool card (square, opaque white over the sky) --- */
 .heroTool {
   width: 100%;
 }
@@ -125,14 +80,13 @@
 .finder {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
   padding: 22px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 30px rgba(10, 20, 40, 0.16);
 }
 
 .finderLabel {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--ink);
   margin-bottom: 8px;
@@ -149,27 +103,32 @@
   padding: 11px 13px;
   font-size: 0.95rem;
   border: 1px solid var(--border-input);
-  border-radius: 9px;
-  background: var(--bg);
+  background: var(--surface);
   color: var(--ink);
 }
 
-.finderInput:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-wash);
+.finderInput::placeholder {
+  color: var(--ink-4);
+}
+
+.finderInput:hover {
+  border-color: var(--border-input-hover);
 }
 
 .finderSubmit {
   flex: 0 0 auto;
-  padding: 11px 16px;
+  padding: 11px 18px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--accent-ink);
+  color: var(--ink);
   background: var(--accent);
   border: 1px solid var(--accent);
-  border-radius: 9px;
   cursor: pointer;
+}
+
+.finderSubmit:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
 .finderSubmit:disabled {
@@ -179,44 +138,50 @@
 
 .finderHint {
   margin: 10px 2px 0;
-  font-size: 0.82rem;
-  color: var(--ink-faint);
+  font-size: 0.85rem;
+  color: var(--ink-3);
 }
 
-/* --- Results / editable list --- */
-.finderResult {
+/* --- Reserved zone: keeps the card the same height across idle / pending /
+   results so it never jumps. --- */
+.resultZone {
   margin-top: 18px;
   padding-top: 18px;
   border-top: 1px solid var(--rule);
+  /* Sized to fit a typical 3–4 competitor result so the card barely changes
+     height between the idle placeholder and populated states (owner ask). */
+  min-height: 430px;
 }
 
-.finderResultHead {
+.emptyState {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  text-align: center;
+  min-height: 394px;
+  padding: 20px;
+  border: 1px dashed var(--border-input);
+  background: var(--surface-alt);
+  color: var(--ink-3);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+/* --- Results / editable list --- */
+.finderResultHead {
   margin-bottom: 12px;
 }
 
 .finderResultTitle {
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: var(--ink-hint);
-}
-
-.finderBadge {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--accent-ink);
-  background: var(--accent-wash);
-  border: 1px solid var(--accent-line);
-  padding: 3px 8px;
-  border-radius: 999px;
+  color: var(--ink-2);
 }
 
 .finderError {
   margin: 0 0 12px;
-  font-size: 0.88rem;
-  color: var(--ink-hint);
+  font-size: 0.9rem;
+  color: var(--ink-2);
 }
 
 .compList {
@@ -235,8 +200,7 @@
   gap: 10px;
   padding: 10px 12px;
   border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg);
+  background: var(--surface-alt);
 }
 
 .compMain {
@@ -254,26 +218,25 @@
 }
 
 .compUrl {
-  font-size: 0.8rem;
-  color: var(--ink-faint);
+  font-size: 0.82rem;
+  color: var(--ink-3);
 }
 
 .compWhy {
   flex-basis: 100%;
-  font-size: 0.85rem;
-  color: var(--ink-hint);
+  font-size: 0.86rem;
+  color: var(--ink-2);
 }
 
 .compRemove {
   flex: 0 0 auto;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   line-height: 1;
   font-size: 1.1rem;
-  color: var(--ink-faint);
-  background: transparent;
+  color: var(--ink-2);
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 6px;
   cursor: pointer;
 }
 
@@ -284,8 +247,8 @@
 
 .compEmpty {
   margin: 0 0 12px;
-  font-size: 0.88rem;
-  color: var(--ink-faint);
+  font-size: 0.9rem;
+  color: var(--ink-3);
 }
 
 .addRow {
@@ -300,27 +263,27 @@
   padding: 9px 12px;
   font-size: 0.9rem;
   border: 1px solid var(--border-input);
-  border-radius: 8px;
-  background: var(--bg);
+  background: var(--surface);
   color: var(--ink);
 }
 
-.addInput:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-wash);
+.addInput::placeholder {
+  color: var(--ink-4);
 }
 
 .addBtn {
   flex: 0 0 auto;
-  padding: 9px 14px;
+  padding: 9px 16px;
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--ink);
-  background: var(--surface-alt, var(--bg));
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border-input);
   cursor: pointer;
+}
+
+.addBtn:hover {
+  border-color: var(--border-input-hover);
 }
 
 .finderCta {
@@ -329,26 +292,27 @@
   padding: 12px 16px;
   font-size: 0.98rem;
   font-weight: 600;
-  color: var(--accent-ink);
+  color: var(--ink);
   background: var(--accent);
-  border-radius: 10px;
   text-decoration: none;
 }
 
 .finderCta:hover {
-  background: var(--accent-hover, var(--accent));
+  background: var(--accent-hover);
+  color: var(--ink);
+  text-decoration: none;
 }
 
 @media (max-width: 900px) {
+  .hero {
+    min-height: 0;
+  }
   .heroInner {
     grid-template-columns: 1fr;
-    gap: 32px;
-    padding: 44px 20px 60px;
+    gap: 28px;
+    padding: 28px 20px 72px;
   }
   .heroCopy {
-    max-width: none;
-  }
-  .preview {
     max-width: none;
   }
 }
