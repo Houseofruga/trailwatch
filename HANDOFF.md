@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-04._
+_Last updated: 2026-09-05._
 
 ## Product in one line
 
@@ -58,6 +58,13 @@ convenient:
   `$19/mo` monthly or `$190/yr` annual (2 months free), via `PRO_MONTHLY_USD` /
   `PRO_ANNUAL_USD`. Landing pricing copy now says Pro = "100 pages", matching the
   enforced 100-page limit (owner-confirmed 2026-08-26).
+- **Prices exclude tax (2026-09-05).** The shown $190/yr and $19/mo are the pre-tax base;
+  Paddle (Merchant of Record) adds the buyer's local tax **on top** at checkout (India GST
+  18% → $224.20 / $22.42; VAT/sales tax elsewhere). This is a **Paddle dashboard** setting
+  (both Pro prices have `tax_mode: external`), NOT in code — don't look for it in the repo.
+  The app reflects it with "Plus applicable taxes — calculated at checkout" on the checkout
+  surfaces only (`ProPricingCard` + the add-competitor upsell); the marketing landing has no
+  tax line. If the Paddle prices ever revert to inclusive, that copy would be wrong.
 
 ## Where things live (organized by domain, per CLAUDE.md)
 
@@ -68,12 +75,17 @@ convenient:
   `normalizeUrl` are the pure, unit-tested functions. `competitors/actions.ts` also
   exports `seedCompetitors` (onboarding pre-seed) + a shared `insertCompetitorWithPages`
   helper reused by `createCompetitor`.
-- `src/app/(marketing)/` — landing at the subdomain root `/`. `page.tsx` composes four
-  scroll-driven client components: `HeroScene` (pinned full-sky hero), `StepsScroller`
-  ("Set it once" 3-step pinned scroller with built product-UI mockups), `CloudScene`
-  (pins why→pricing and flies a cloud through to reveal pricing), `FounderReveal`
-  (before/after Ghibli image slider). All scroll effects are desktop-only (≥1041px, no
-  reduced-motion); each has a static/stacked fallback. Also `tools/` — free public
+- `src/app/(marketing)/` — **`/` is the finder homepage** (the "Find your competitors"
+  hero: `CompetitorFinder.tsx` + `actions.ts` + `home.module.css`); it is indexed
+  (canonical `/`) and carries the site JSON-LD. The old **animated landing lives at `/1`**
+  (`1/page.tsx`, `noindex`, signed-in→`/dashboard`) — it composes the four scroll-driven
+  client components: `HeroScene` (pinned full-sky hero), `StepsScroller` ("Set it once"
+  3-step pinned scroller with built product-UI mockups), `CloudScene` (pins why→pricing and
+  flies a cloud through to reveal pricing), `FounderReveal` (before/after Ghibli image
+  slider). All scroll effects are desktop-only (≥1041px, no reduced-motion); each has a
+  static/stacked fallback. `MarketingSections.tsx` (below-hero content) is shared by both
+  `/` and `/1` so pricing/FAQ can't drift. **`/try` is gone (404)** — its content became `/`.
+  `page.module.css` is the shared marketing stylesheet. Also `tools/` — free public
   SEO/marketing tools: `competitor-teardown` (the flagship — AI competitor analysis),
   `sitemap-finder`, `robots-txt-tester`, `when-was-a-website-last-updated`. All follow
   one pattern (page.tsx + content.ts + actions.ts + Form + css; server action → a
@@ -85,12 +97,16 @@ convenient:
 - `src/app/(app)/` — authed shell: `dashboard`, `competitors`, `billing`, `settings`,
   `changes/[id]`. Guarded by `src/proxy.ts` + a belt-and-braces check in the layout.
 - `src/app/(onboarding)/` — authed but **chrome-free** (no sidebar): its own
-  `layout.tsx` (logo top-center, content centered, profile + Log out bottom-center).
-  Holds `welcome/` — the post-signup onboarding. It now runs for **every** new
-  signup (see the onboarding rework in Recent work), and is a **two-step** flow:
-  `WelcomeOnboarding.tsx` (watchlist) → `OnboardingPlanStep.tsx` (in-flow Free/Pro
-  plans with Paddle checkout). `/welcome` is in `proxy.ts` `APP_PREFIXES` and the
-  page self-guards (redirects to `/dashboard` if the account already has competitors).
+  `layout.tsx` — a top bar mirroring the public `SiteHeader` (**logo top-left, profile +
+  Log out top-right**, 1280/48 container), content centered below. Holds `welcome/` — the
+  post-signup onboarding. **New signups land here directly** (auth redirects to `/welcome`,
+  not `/dashboard` — see Recent work); it's a **two-step** flow: `WelcomeOnboarding.tsx`
+  (watchlist) → `OnboardingPlanStep.tsx` (in-flow Free/Pro; the Pro card is the **shared
+  `ProPricingCard`** from `features/billing`, so it can't drift from billing). `/welcome`
+  is in `proxy.ts` `APP_PREFIXES` and self-guards (→`/dashboard` if the account already has
+  competitors), so it's safe as the universal post-signup landing. NB: `.plansWrap`/`.wrap`
+  need `width:100%` because `layout.tsx`'s `.main` is a flex column (an auto-margined child
+  otherwise collapses to content width and ignores `max-width`).
 - `src/app/(legal)/` — `terms`, `privacy`, `refunds` (placeholder content, real routes).
 - `src/app/api/cron/` — `check` (daily) and `digest` (weekly), Bearer-guarded by
   `CRON_SECRET`. Schedules in `vercel.json`: check `0 7 * * *`, digest `0 8 * * 1`.
@@ -100,6 +116,39 @@ convenient:
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
 ## Recent work (all pushed to `main`)
+
+**Homepage swap, onboarding polish, upsell + tax model (2026-09-05, all in production
+on `gettrailwatch.com`).**
+- **Routing swap:** the finder page is now the homepage `/` (indexed, JSON-LD); the
+  animated landing moved to **`/1`** (`noindex`, canonical `/1`, signed-in→`/dashboard`);
+  **`/try` removed (404)** — no links pointed at it. Shared bits (`MarketingSections`,
+  `HeroScene`, `CloudScene`, `structuredData`, `page.module.css`) stayed at the group root;
+  `/try`'s files moved to root (`CompetitorFinder`, `actions.ts`, `try.module.css`→`home.module.css`).
+- **New signups land on `/welcome` directly** (`features/auth/actions.ts`): password
+  `signUp`→`/welcome` (+ confirmation email `next=/welcome`), Google OAuth carries
+  `next=/welcome` for signup / `/dashboard` for login (hidden field read by
+  `signInWithGoogle`). `/welcome` is idempotent so it's safe universally; returning
+  password logins still →`/dashboard`. `PendingSeedRedirect` stays as a safety net.
+- **Onboarding UI:** the Choose-your-plan cards now match Plan & billing 1:1 by **reusing
+  `ProPricingCard`** (square accent bullets, surface-sunken toggle w/ "Best value" badge);
+  header rebuilt as logo-left/profile-right; **width bug fixed** (`.plansWrap`/`.wrap`
+  `width:100%` — flex-column `.main` was collapsing them, so the earlier max-width bumps had
+  no visible effect).
+- **Add-competitor upsell** (free user at the limit): the "Upgrade to Pro" block no longer
+  links to `/billing` — it renders the **shared `ProPricingCard`** and opens the **Paddle
+  overlay in place** (Monthly/Annual toggle, annual default); on success it polls until the
+  account flips to Pro and the page re-renders unblocked. Applies to competitor-limit AND
+  page-limit upsells.
+- **Competitors page empty state:** 0-competitor `ManageBoard` was a blank area; now a
+  line-art page-under-magnifier SVG + "No competitors yet" + Add CTA. (Dashboard 0-state
+  already had the demo dashboard / guided empty state — unchanged.)
+- **Tax model — prices now EXCLUDE tax:** app shows "Plus applicable taxes — calculated at
+  checkout" under the Pro price on the checkout surfaces (`ProPricingCard` + upsell;
+  marketing landing left alone). And the **Paddle prices were flipped to tax-exclusive**
+  (`tax_mode: external`, a dashboard change, not code) so GST is added **on top** of the
+  $190/$19 base. Verified via Paddle's pricing-preview API for an India address:
+  annual **$190 + $34.20 GST = $224.20**, monthly **$19 + $3.42 = $22.42**. See Deviations.
+- `CLAUDE.md` gained the auto-generated `nextjs-agent-rules` block (written by `next dev`).
 
 **`/try` interactive landing + competitor pre-seeding (2026-09-04).** A promotable,
 `noindex` (canonical→`/`) landing variant for the Product Hunt launch. Same content
@@ -274,18 +323,20 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
    OAuth on the new domain). Digest **email send** to real users still wants a live test
    (part of §9 below).
 
-**`/try` + onboarding (owner's active track):**
-0. **Verify the reworked onboarding on production with a real login** (merged in PR #2;
-   couldn't be driven from the preview — it's behind auth):
-   - `/try` path: pick 3–4 → Start free → sign up → forced to `/welcome` → pick which 2
-     (or Upgrade → in-flow plans step) → "Continue free"/"Start watching" → dashboard
-     shows real competitors with baselines, demo gone.
-   - Plain "Start free" path: sign up with no pre-picks → forced to `/welcome` with
-     **blank rows** → fill in → seeds correctly. Confirm no "Skip" exists and that
-     leaving mid-flow returns you to `/welcome`.
-   Then decide whether `/try` graduates to `/` (currently `noindex`, absent from
-   `sitemap.ts`). Post-upgrade return to `/welcome` relies on the dashboard redirect
-   (no special Paddle return wiring).
+**Onboarding + checkout (owner's active track):**
+0. **Verify end-to-end on production with a real login** (all behind auth — couldn't be
+   driven from the preview; only static/compiled + Paddle-API checks were possible):
+   - Homepage `/` finder path: pick 3–4 → Start free → sign up → land **directly** on
+     `/welcome` → pick which 2 (or Upgrade → in-flow plans step) → dashboard shows real
+     competitors with baselines, demo gone.
+   - Plain "Start free" path: sign up with no pre-picks → `/welcome` with **blank rows** →
+     seeds correctly. Google + email-confirm signups also land on `/welcome`.
+   - Free user at the 2-competitor limit → **Add competitor** → the upsell shows the shared
+     Pro card with the **Monthly/Annual toggle** and opens the Paddle overlay in place.
+   - **Checkout tax:** confirm the Paddle overlay now shows tax **added on top** ($224.20
+     annual / $22.42 monthly for India), not baked into $190/$19.
+   NB: the `/try` graduation question is **resolved** — the finder IS `/` now (indexed),
+   animated landing is `/1` (noindex).
 
 **Pre-launch (unchanged, still the gate):**
 4. Do a full `SPEC.md` §9 end-to-end pass in a test environment (`BACKLOG.md`) — the real
