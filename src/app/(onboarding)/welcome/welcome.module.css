@@ -34,6 +34,73 @@
   margin: 0 0 14px;
 }
 
+/* ------------------------------------------------ Step 1 · domain (suggest) */
+.domainForm {
+  margin: 8px 0 0;
+}
+
+.domainLabel {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-4);
+  margin-bottom: 8px;
+}
+
+.domainRow {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.domainInput {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border-input);
+  border-radius: 0;
+  padding: 11px 13px;
+  font-size: 14px;
+  font-family: var(--font-geist-mono), monospace;
+  background: #fff;
+  color: var(--ink);
+}
+
+.domainInput:focus {
+  outline: none;
+  border-color: var(--border-input-hover);
+}
+
+.domainHint {
+  font-size: 12.5px;
+  color: var(--ink-4);
+  margin: 10px 0 0;
+}
+
+/* Understated escape hatch — the flow is domain-first, but a provider outage or
+   a niche company shouldn't trap anyone. */
+.manualLink {
+  display: inline-block;
+  margin-top: 22px;
+  font-size: 13px;
+  color: var(--ink-4);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.manualLink:hover {
+  color: var(--accent-ink);
+}
+
+@media (max-width: 560px) {
+  .domainRow {
+    flex-direction: column;
+  }
+}
+
 /* Column headers over the watchlist rows — mirrors the in-product add-competitor
    form. The leading spacer aligns with the row checkbox. */
 .colLabels {

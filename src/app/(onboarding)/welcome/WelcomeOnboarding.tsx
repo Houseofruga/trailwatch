@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { findCompetitorsAction, type FinderState } from "@/app/(marketing)/actions";
 import { Button } from "@/components/Button";
 import { PlusIcon } from "@/components/icons";
+import type { FinderResult } from "@/features/competitorFinder/types";
 import { seedCompetitors } from "@/features/competitors/actions";
 import { normalizeUrl } from "@/features/competitors/url";
 import { LIMITS, PLAN_LABEL, type Plan } from "@/features/plan/limits";
@@ -11,6 +13,7 @@ import { OnboardingPlanStep } from "./OnboardingPlanStep";
 import styles from "./welcome.module.css";
 
 type Row = { name: string; url: string; selected: boolean };
+type Step = "domain" | "watchlist" | "plan";
 const KEY = "tw_pending_competitors";
 // Set once the visitor has been through onboarding (finished or skipped), so the
 // dashboard's redirect gate doesn't send them back here on every empty-dashboard
@@ -38,12 +41,26 @@ export function WelcomeOnboarding({
 }) {
   const router = useRouter();
   const [rows, setRows] = useState<Row[] | null>(null); // null = still loading
-  const [step, setStep] = useState<"watchlist" | "plan">("watchlist");
+  const [step, setStep] = useState<Step>("watchlist");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // True when they reached the watchlist through the domain step (no homepage
+  // picks) — lets them jump back and try a different domain.
+  const [cameFromDomain, setCameFromDomain] = useState(false);
   const pagesPerCompetitor = LIMITS[plan].pagesPerCompetitor;
 
-  // Load the picks stashed on the homepage (/). Nothing to do without them.
+  // The domain step's "find my competitors" lookup — same server action the
+  // homepage finder uses, so onboarding and the marketing hero can't drift.
+  const [finderState, finderAction, finding] = useActionState<FinderState, FormData>(
+    findCompetitorsAction,
+    null,
+  );
+
+  // Load the picks stashed on the homepage (/). Two ways in:
+  //   • They used the homepage finder → picks are here; confirm them (watchlist).
+  //   • Plain "Start free" / a bare signup → no picks. We DON'T drop them into
+  //     blank URL rows; we ask for their domain first (domain step) and suggest
+  //     competitors, which they then edit or accept.
   useEffect(() => {
     let parsed: unknown = null;
     try {
@@ -54,10 +71,10 @@ export function WelcomeOnboarding({
     // localStorage is only readable client-side, so this must run in an effect
     // (a client component still SSRs, where a lazy initializer would throw).
     if (!Array.isArray(parsed) || parsed.length === 0) {
-      // Plain "Start free" — nothing was pre-picked on the homepage. Start onboarding with
-      // blank rows the visitor fills in, rather than skipping setup entirely.
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setRows(Array.from({ length: limit }, () => ({ name: "", url: "", selected: true })));
+      setRows([]);
+      setStep("domain");
+      setCameFromDomain(true);
       return;
     }
     setRows(
@@ -71,7 +88,78 @@ export function WelcomeOnboarding({
     );
   }, [router, limit]);
 
+  // When a domain lookup lands, seed the editable watchlist from its suggestions
+  // and advance. Guarded on result identity (setting state during render is the
+  // React-sanctioned reset-on-input-change pattern; mirrors the homepage finder).
+  const [seededFrom, setSeededFrom] = useState<FinderResult | null>(null);
+  if (finderState?.status === "ok" && finderState.result !== seededFrom) {
+    setSeededFrom(finderState.result);
+    const suggested = finderState.result.competitors.map((c, i) => ({
+      name: c.name.trim(),
+      url: normalizeUrl(c.url),
+      selected: i < limit,
+    }));
+    setRows(
+      suggested.length > 0 ? suggested : [{ name: "", url: "", selected: true }],
+    );
+    setStep("watchlist");
+  }
+
   if (rows === null) return null;
+
+  // Step 1 · Domain. Ask what they run, then suggest who to watch. On any
+  // failure (no provider, niche company) we still let them through to the
+  // editable watchlist so they can add competitors by hand — never a dead end.
+  if (step === "domain") {
+    function skipToManual() {
+      setRows([{ name: "", url: "", selected: true }]);
+      setStep("watchlist");
+    }
+    return (
+      <div className={styles.wrap}>
+        <h1 className={styles.title}>What do you want to keep an eye on?</h1>
+        <p className={styles.sub}>
+          Tell us your website and we’ll suggest the competitors worth watching. You can
+          edit the list — or add your own — before anything starts.
+        </p>
+
+        <form action={finderAction} className={styles.domainForm}>
+          <label htmlFor="company" className={styles.domainLabel}>
+            Your company (name or website)
+          </label>
+          <div className={styles.domainRow}>
+            <input
+              id="company"
+              name="company"
+              type="text"
+              className={styles.domainInput}
+              placeholder="yourcompany.com"
+              autoComplete="off"
+              inputMode="url"
+              aria-label="Your company name or website"
+              required
+            />
+            <Button type="submit" disabled={finding}>
+              {finding ? "Finding…" : "Find competitors"}
+            </Button>
+          </div>
+          <p className={styles.domainHint}>
+            {finding
+              ? "Reading your site and finding who to watch — a few seconds."
+              : "We suggest competitors from your site — you choose which to track."}
+          </p>
+        </form>
+
+        {finderState?.status === "error" && (
+          <p className={styles.error}>{finderState.message}</p>
+        )}
+
+        <button type="button" className={styles.manualLink} onClick={skipToManual}>
+          I’ll add competitors myself
+        </button>
+      </div>
+    );
+  }
 
   const total = rows.length;
   const overLimit = total > limit;
@@ -149,6 +237,16 @@ export function WelcomeOnboarding({
 
   return (
     <div className={styles.wrap}>
+      {cameFromDomain && (
+        <button
+          type="button"
+          className={styles.manualLink}
+          onClick={() => setStep("domain")}
+          style={{ marginTop: 0, marginBottom: 18 }}
+        >
+          ← Search a different domain
+        </button>
+      )}
       <h1 className={styles.title}>Set up your watchlist</h1>
       <p className={styles.sub}>
         We start by watching each competitor’s <strong>homepage</strong> and email you a
