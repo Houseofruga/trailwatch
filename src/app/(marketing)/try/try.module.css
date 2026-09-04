@@ -1,8 +1,8 @@
-/* Static split hero for the "try it" landing (/try). Headline + trust on the
-   left, the live AI-teardown tool card on the right. Deliberately NOT pinned/
-   scroll-animated (unlike HeroScene) so typing in the tool is never disrupted.
-   PROVISIONAL styling — to be restyled to the owner's reference image; only this
-   file + the hero copy change then, nothing structural. */
+/* Static split hero for the "try it" landing (/try): headline + a sample weekly
+   email on the left (the payoff), the "find your competitors" tool on the right.
+   Deliberately NOT pinned/scroll-animated (unlike HeroScene) so typing in the
+   tool is never disrupted. PROVISIONAL styling — to be restyled to the owner's
+   reference image; only this file + the hero copy change then. */
 
 .hero {
   background: var(--bg);
@@ -12,9 +12,9 @@
 .heroInner {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 72px 32px 88px;
+  padding: 64px 32px 80px;
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
+  grid-template-columns: 1fr 0.92fr;
   gap: 56px;
   align-items: start;
 }
@@ -38,57 +38,317 @@
 }
 
 .title {
-  font-size: clamp(2.1rem, 4.2vw, 3.1rem);
-  line-height: 1.06;
+  font-size: clamp(2rem, 3.8vw, 2.9rem);
+  line-height: 1.08;
   letter-spacing: -0.02em;
   font-weight: 700;
   color: var(--ink);
   margin: 0 0 18px;
 }
 
-.title .accent {
-  color: var(--accent);
-}
-
 .body {
-  font-size: 1.075rem;
+  font-size: 1.05rem;
   line-height: 1.6;
   color: var(--ink-hint);
-  margin: 0 0 24px;
+  margin: 0 0 28px;
 }
 
-.trust {
+/* --- Sample weekly email (payoff preview) --- */
+.preview {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  max-width: 460px;
+}
+
+.previewHead {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px 18px;
-  font-size: 0.9rem;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 12px;
+}
+
+.previewFrom {
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.previewSubj {
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+}
+
+.previewList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.previewItem {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 0.92rem;
+}
+
+.previewComp {
+  flex: 0 0 82px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.previewLine {
+  color: var(--ink-hint);
+}
+
+.previewFoot {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+  font-size: 0.82rem;
   color: var(--ink-faint);
 }
 
-.trustItem {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.trustTick {
-  color: var(--accent);
-  font-weight: 700;
-}
-
-/* The tool column. TeardownForm brings its own card styling; this just gives it
-   room and a subtle framing on wide screens. */
+/* --- The finder tool card --- */
 .heroTool {
   width: 100%;
+}
+
+.finder {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+}
+
+.finderLabel {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.finderRow {
+  display: flex;
+  gap: 8px;
+}
+
+.finderInput {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 13px;
+  font-size: 0.95rem;
+  border: 1px solid var(--border-input);
+  border-radius: 9px;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.finderInput:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-wash);
+}
+
+.finderSubmit {
+  flex: 0 0 auto;
+  padding: 11px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 9px;
+  cursor: pointer;
+}
+
+.finderSubmit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.finderHint {
+  margin: 10px 2px 0;
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+}
+
+/* --- Results / editable list --- */
+.finderResult {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+}
+
+.finderResultHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.finderResultTitle {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-hint);
+}
+
+.finderBadge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-line);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.finderError {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  color: var(--ink-hint);
+}
+
+.compList {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+.compMain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  min-width: 0;
+}
+
+.compName {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+
+.compUrl {
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+
+.compWhy {
+  flex-basis: 100%;
+  font-size: 0.85rem;
+  color: var(--ink-hint);
+}
+
+.compRemove {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  font-size: 1.1rem;
+  color: var(--ink-faint);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.compRemove:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.compEmpty {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  color: var(--ink-faint);
+}
+
+.addRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.addInput {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 12px;
+  font-size: 0.9rem;
+  border: 1px solid var(--border-input);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.addInput:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-wash);
+}
+
+.addBtn {
+  flex: 0 0 auto;
+  padding: 9px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--surface-alt, var(--bg));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.finderCta {
+  display: block;
+  text-align: center;
+  padding: 12px 16px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-radius: 10px;
+  text-decoration: none;
+}
+
+.finderCta:hover {
+  background: var(--accent-hover, var(--accent));
 }
 
 @media (max-width: 900px) {
   .heroInner {
     grid-template-columns: 1fr;
-    gap: 36px;
-    padding: 48px 22px 64px;
+    gap: 32px;
+    padding: 44px 20px 60px;
   }
   .heroCopy {
+    max-width: none;
+  }
+  .preview {
     max-width: none;
   }
 }

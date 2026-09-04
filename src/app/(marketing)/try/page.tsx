@@ -2,23 +2,32 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SiteHeader } from "@/components/SiteHeader";
-import { TeardownForm } from "../tools/competitor-teardown/TeardownForm";
+import { CompetitorFinder } from "./CompetitorFinder";
 import { MarketingSections } from "../MarketingSections";
 import styles from "./try.module.css";
 
-// "Try it" landing variant: same content as `/`, but the hero lets a visitor run
-// a real AI competitor teardown with no signup, then converts. Kept out of the
-// index (canonical → `/`) while its role — campaign page vs future homepage — is
-// undecided; that's also why it's absent from src/app/sitemap.ts (an allowlist).
+// "Try it" landing variant: same content as `/`, but the hero lets a visitor
+// find competitors to watch with no signup — the product's own onboarding — then
+// converts. Kept out of the index (canonical → `/`) while its role (campaign page
+// vs future homepage) is undecided; that's also why it's absent from
+// src/app/sitemap.ts (an allowlist).
 export const metadata: Metadata = {
   title: {
-    absolute: "Tear down any competitor — free, no signup | TrailWatch",
+    absolute: "TrailWatch — competitor tracking for founders, one email a week",
   },
   description:
-    "Paste a competitor's URL and get an instant AI teardown — positioning, pricing, what to watch. Then let TrailWatch email you what changes, every week.",
+    "Find your competitors and let TrailWatch watch their pages — one plain-English email a week on what actually changed. Free plan, no card.",
   robots: { index: false, follow: true },
   alternates: { canonical: "/" },
 };
+
+// Real, curated changes (mirrors src/features/demo/demoFeed.ts) — the "your Monday
+// email" preview. Honest examples of the actual weekly digest.
+const SAMPLE_DIGEST = [
+  { comp: "Linear", line: "Business plan raised $14 → $16 / user" },
+  { comp: "Northwind", line: "Renamed the Starter tier to “Basic”" },
+  { comp: "Meridian", line: "Shipped SSO and a public API" },
+];
 
 export default async function TryPage() {
   const supabase = await createClient();
@@ -33,34 +42,41 @@ export default async function TryPage() {
     <>
       <SiteHeader />
 
-      {/* ===== HERO · interactive teardown (static split, no scroll animation) */}
+      {/* ===== HERO · find-your-competitors (static split, no scroll animation) */}
       <section className={styles.hero}>
         <div className={styles.heroInner}>
           <div className={styles.heroCopy}>
-            <span className={styles.eyebrow}>Free · no signup</span>
+            <span className={styles.eyebrow}>Free · no signup to try</span>
             <h1 className={styles.title}>
-              Tear down any competitor in <span className={styles.accent}>10 seconds.</span>
+              The competitor tracker built for founders, not enterprises.
             </h1>
             <p className={styles.body}>
-              Paste a competitor’s URL — TrailWatch reads their public homepage and pricing
-              and hands you an AI teardown: positioning, pricing tiers, and what to watch.
-              Then it can email you what changes, every week.
+              Add your competitors and TrailWatch watches their pages for you — then sends
+              one plain-English email a week on what actually changed: pricing, features,
+              messaging. A full dashboard’s there when you want to dig in, but you never have
+              to babysit one. It just works.
             </p>
-            <div className={styles.trust}>
-              <span className={styles.trustItem}>
-                <span className={styles.trustTick}>✓</span> No card required
-              </span>
-              <span className={styles.trustItem}>
-                <span className={styles.trustTick}>✓</span> Public pages only
-              </span>
-              <span className={styles.trustItem}>
-                <span className={styles.trustTick}>✓</span> AI on every plan
-              </span>
+
+            {/* Payoff preview: what lands in your inbox */}
+            <div className={styles.preview} aria-hidden="true">
+              <div className={styles.previewHead}>
+                <span className={styles.previewFrom}>TrailWatch</span>
+                <span className={styles.previewSubj}>Your competitors this week · 3 changes</span>
+              </div>
+              <ul className={styles.previewList}>
+                {SAMPLE_DIGEST.map((d) => (
+                  <li key={d.comp} className={styles.previewItem}>
+                    <span className={styles.previewComp}>{d.comp}</span>
+                    <span className={styles.previewLine}>{d.line}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className={styles.previewFoot}>+ 47 trivial edits filtered</div>
             </div>
           </div>
 
           <div className={styles.heroTool}>
-            <TeardownForm signupSrc="hero-try" />
+            <CompetitorFinder />
           </div>
         </div>
       </section>
