@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getAccount } from "@/features/account/queries";
 import { getSubscriptionBillingInfo } from "@/features/billing/queries";
@@ -18,12 +17,7 @@ function planFeatures(comp: number, pages: number): string[] {
   ];
 }
 
-export default async function BillingPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ from?: string }>;
-}) {
-  const { from } = await searchParams;
+export default async function BillingPage() {
   const account = await getAccount();
   const supabase = await createClient();
   const {
@@ -62,11 +56,6 @@ export default async function BillingPage({
 
   return (
     <div className={styles.wrap}>
-      {from === "welcome" ? (
-        <Link href="/welcome" className={styles.backLink}>
-          ← Back to setup
-        </Link>
-      ) : null}
       <h1 className={styles.heading}>Plan &amp; billing</h1>
       <p className={styles.sub}>
         {isFree
