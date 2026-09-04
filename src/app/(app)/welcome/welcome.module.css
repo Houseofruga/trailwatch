@@ -22,6 +22,17 @@
   margin: 0 0 28px;
 }
 
+.limitNote {
+  font-size: 0.9rem;
+  color: var(--ink-2);
+  margin: 0 0 14px;
+}
+
+.upgradeLink {
+  color: var(--link);
+  font-weight: 600;
+}
+
 .list {
   display: flex;
   flex-direction: column;
@@ -30,11 +41,38 @@
 
 .row {
   display: flex;
-  align-items: stretch;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
   padding: 12px;
   border: 1px solid var(--border);
   background: var(--surface);
+}
+
+/* Unchecked = won't be watched on the free plan. Muted but fully editable. */
+.rowUnselected {
+  background: var(--surface-alt);
+}
+
+.rowUnselected .name,
+.rowUnselected .url {
+  color: var(--ink-2);
+}
+
+.check {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.check input:disabled {
+  cursor: not-allowed;
 }
 
 .fields {
@@ -84,43 +122,6 @@
   border-color: var(--danger);
 }
 
-/* Beyond-plan-limit picks */
-.locked {
-  margin-top: 18px;
-  padding-top: 18px;
-  border-top: 1px solid var(--rule);
-}
-
-.lockedNote {
-  font-size: 0.9rem;
-  color: var(--ink-2);
-  margin-bottom: 10px;
-}
-
-.upgrade {
-  color: var(--link);
-  font-weight: 600;
-}
-
-.rowLocked {
-  background: var(--surface-alt);
-  opacity: 0.75;
-}
-
-.lockedName {
-  flex: 0 0 34%;
-  align-self: center;
-  font-weight: 600;
-  color: var(--ink-2);
-  font-size: 0.92rem;
-}
-
-.lockedUrl {
-  align-self: center;
-  color: var(--ink-3);
-  font-size: 0.85rem;
-}
-
 .error {
   margin: 16px 0 0;
   font-size: 0.9rem;
@@ -130,26 +131,57 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 14px;
   margin-top: 28px;
 }
 
-.start {
+/* Primary — accent. Used on both the Upgrade link and the Start/Continue button. */
+.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 12px 20px;
   font-size: 0.98rem;
   font-weight: 600;
   color: var(--ink);
   background: var(--accent);
   border: 1px solid var(--accent);
+  text-decoration: none;
   cursor: pointer;
 }
 
-.start:hover:not(:disabled) {
+.primary:hover:not(:disabled) {
   background: var(--accent-hover);
   border-color: var(--accent-hover);
+  color: var(--ink);
+  text-decoration: none;
 }
 
-.start:disabled {
+.primary:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* Secondary — outline. The "continue free" path when over the plan limit. */
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border-input);
+  cursor: pointer;
+}
+
+.secondary:hover:not(:disabled) {
+  border-color: var(--border-input-hover);
+}
+
+.secondary:disabled {
   opacity: 0.55;
   cursor: default;
 }

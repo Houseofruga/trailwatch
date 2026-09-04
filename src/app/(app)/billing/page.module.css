@@ -5,6 +5,16 @@
   margin: 0 auto;
 }
 
+/* Shown only when arriving from the /welcome onboarding, so the upgrade detour
+   has a way back. */
+.backLink {
+  display: inline-block;
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--link);
+}
+
 .heading {
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-size: 30px;
