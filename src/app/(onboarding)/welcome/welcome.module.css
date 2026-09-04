@@ -2,6 +2,9 @@
    create them. Square corners, design-system tokens (matches the app). */
 
 .wrap {
+  /* width:100% so it fills up to max-width inside the flex-column .main (see
+     the note on .plansWrap). */
+  width: 100%;
   max-width: 640px;
   margin: 0 auto;
   padding: 48px 24px 80px;
@@ -193,6 +196,11 @@
 
 /* ---------------------------------------------------------- Step 2 · plans */
 .plansWrap {
+  /* width:100% is required because the onboarding layout's .main is a flex
+     column: a flex item with `margin:0 auto` otherwise shrinks to its content
+     width and never reaches max-width. With an explicit 100% it fills up to
+     900px and the auto margins center it. */
+  width: 100%;
   max-width: 900px;
   margin: 0 auto;
   padding: 40px 24px 60px;
