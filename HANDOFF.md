@@ -86,8 +86,11 @@ convenient:
   `changes/[id]`. Guarded by `src/proxy.ts` + a belt-and-braces check in the layout.
 - `src/app/(onboarding)/` — authed but **chrome-free** (no sidebar): its own
   `layout.tsx` (logo top-center, content centered, profile + Log out bottom-center).
-  Holds `welcome/` — the post-signup pre-seed confirm screen. `/welcome` is in
-  `proxy.ts` `APP_PREFIXES` and the page self-guards.
+  Holds `welcome/` — the post-signup onboarding. It now runs for **every** new
+  signup (see the onboarding rework in Recent work), and is a **two-step** flow:
+  `WelcomeOnboarding.tsx` (watchlist) → `OnboardingPlanStep.tsx` (in-flow Free/Pro
+  plans with Paddle checkout). `/welcome` is in `proxy.ts` `APP_PREFIXES` and the
+  page self-guards (redirects to `/dashboard` if the account already has competitors).
 - `src/app/(legal)/` — `terms`, `privacy`, `refunds` (placeholder content, real routes).
 - `src/app/api/cron/` — `check` (daily) and `digest` (weekly), Bearer-guarded by
   `CRON_SECRET`. Schedules in `vercel.json`: check `0 7 * * *`, digest `0 8 * * 1`.
@@ -96,7 +99,7 @@ convenient:
   accent `--accent: #9ff50a`, blue links, DM Sans + Geist Mono, zero border-radius).
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
-## Recent work (all pushed to `main`)
+## Recent work (pushed; onboarding rework is in PR #2, not yet on `main`)
 
 **`/try` interactive landing + competitor pre-seeding (2026-09-04).** A promotable,
 `noindex` (canonical→`/`) landing variant for the Product Hunt launch. Same content
@@ -112,16 +115,35 @@ shared by both so pricing/FAQ can't drift) — only the hero differs.
   hero was replaced (the standalone teardown tool at `/tools/competitor-teardown`
   stays). It first went in as a teardown hero, then swapped to the finder per owner.
 - **Pre-seeding:** the finder CTA stashes the chosen `{name,url}` list in
-  `localStorage` (`tw_pending_competitors`) → signup. On the dashboard's 0-competitor
-  state, `PendingSeedRedirect` sends new accounts to **`/welcome`**. That onboarding
-  (now in the **chrome-free `(onboarding)` group**) prefills each competitor with its
-  homepage page, lets the user **pick which N** via checkboxes capped at the free
-  limit, and creates them via `seedCompetitors` (re-caps server-side, skips invalid).
-  Over-limit CTAs: **primary "Upgrade to watch all N"** → `/billing?from=welcome`
-  (which shows a **"← Back to setup"** link), **secondary "Continue free with N"**;
-  "Skip for now" clears and exits. **Authed E2E of the seed/limit flow still needs a
-  real login to verify** — the unauthed parts (localStorage carry, `/welcome` guard,
-  billing back link) were verified in-browser.
+  `localStorage` (`tw_pending_competitors`) → signup. That onboarding (in the
+  **chrome-free `(onboarding)` group**) prefills each competitor with its homepage
+  page, lets the user **pick which N** via checkboxes capped at the free limit, and
+  creates them via `seedCompetitors` (re-caps server-side, skips invalid; each seeded
+  competitor gets exactly one page labeled `"Homepage"`). Over-limit / upgrade opens
+  an **in-flow plans step** (`OnboardingPlanStep.tsx`, Free/Pro + Paddle checkout —
+  a6e0256), not the billing page; the old `/billing?from=welcome` "Back to setup"
+  link was removed (47526cd).
+
+**Onboarding rework — runs for every signup + in-product UI (2026-09-04, PR #2 /
+branch `onboarding-ui-parity`, NOT yet merged to `main`).**
+- **Every signup now onboards, not just `/try` pre-picks.** `PendingSeedRedirect`
+  (dashboard 0-competitor state) sends **any** not-yet-onboarded user to `/welcome`,
+  tracked by a `tw_onboarded` localStorage flag (set on successful setup) so it can't
+  loop. Plain "Start free" signups (no `tw_pending_competitors`) get **blank watchlist
+  rows** to fill in instead of bouncing to the dashboard.
+- **Onboarding is now mandatory:** the "Skip for now" CTA was removed. A user who
+  leaves mid-flow is re-routed to `/welcome` next empty-dashboard visit; Log out is
+  the escape hatch.
+- **UI parity:** both steps rebuilt on the shared `Button`/`PlusIcon` and mirror the
+  add-competitor form styling (mono URL field, `Competitor / Homepage URL` column
+  headers, bordered actions); bespoke button/input CSS deleted from
+  `welcome.module.css`.
+- **Homepage default** is spelled out: an intro note ("we watch each competitor's
+  homepage; add up to N pages per competitor once you're in", N from the plan limit)
+  + the column headers. Seed logic unchanged (still one Homepage page each).
+- **Still needs authed E2E verification** (couldn't drive `/welcome` from the preview
+  — it's behind auth): a fresh account should be forced through `/welcome`, blank-row
+  and pre-pick paths both seed correctly, and no "Skip" is present.
 
 **Landing motion polish (2026-09-04, no back-end change).** A per-step scroll-progress
 rail on the pinned `StepsScroller` ("Set it once") that shows only on the active step;
@@ -252,13 +274,19 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
    OAuth on the new domain). Digest **email send** to real users still wants a live test
    (part of §9 below).
 
-**`/try` + pre-seeding (owner's active track):**
-0. **Verify the authed pre-seed flow end-to-end with a real login** (couldn't be driven
-   from the preview): `/try` → pick 3–4 → Start free → sign up → land on `/welcome`
-   (chrome-free) → pick which 2 (or Upgrade) → "Continue free" → dashboard shows the
-   real competitors with baselines captured, demo gone. Then decide whether `/try`
-   graduates to `/` (currently `noindex`, absent from `sitemap.ts`). Post-upgrade return
-   to `/welcome` relies on the dashboard redirect (no special Paddle return wiring).
+**`/try` + onboarding (owner's active track):**
+0. **Merge PR #2 (`onboarding-ui-parity`)** — the onboarding rework (runs for every
+   signup, in-product UI, no Skip, Homepage note). Then **verify the authed flow
+   end-to-end with a real login** (couldn't be driven from the preview):
+   - `/try` path: pick 3–4 → Start free → sign up → forced to `/welcome` → pick which 2
+     (or Upgrade → in-flow plans step) → "Continue free"/"Start watching" → dashboard
+     shows real competitors with baselines, demo gone.
+   - Plain "Start free" path: sign up with no pre-picks → forced to `/welcome` with
+     **blank rows** → fill in → seeds correctly. Confirm no "Skip" exists and that
+     leaving mid-flow returns you to `/welcome`.
+   Then decide whether `/try` graduates to `/` (currently `noindex`, absent from
+   `sitemap.ts`). Post-upgrade return to `/welcome` relies on the dashboard redirect
+   (no special Paddle return wiring).
 
 **Pre-launch (unchanged, still the gate):**
 4. Do a full `SPEC.md` §9 end-to-end pass in a test environment (`BACKLOG.md`) — the real
