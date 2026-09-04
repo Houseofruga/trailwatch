@@ -85,3 +85,26 @@
   gap: 10px;
   justify-content: flex-end;
 }
+
+/* Mobile: present as a bottom sheet rather than a centered modal. */
+@media (max-width: 560px) {
+  .overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .card {
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
+    padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+    animation: sheet-up 0.22s ease;
+  }
+  @keyframes sheet-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+}

@@ -34,9 +34,8 @@ function percent(used: number, allowed: number): string {
 export function Sidebar({ account }: { account: Account }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  // Mobile only: the sidebar is a slide-in drawer behind a hamburger. On desktop
-  // the drawer state is inert (CSS keeps the aside in the normal column flow).
-  const [navOpen, setNavOpen] = useState(false);
+  // Mobile only: the account sheet raised from the top-bar avatar.
+  const [accountOpen, setAccountOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
   // Click-away, so the menu doesn't strand itself open.
@@ -49,10 +48,10 @@ export function Sidebar({ account }: { account: Account }) {
     return () => document.removeEventListener("mousedown", onPointerDown);
   }, [menuOpen]);
 
-  // Close the mobile drawer whenever the route changes (a nav tap navigates).
+  // Close the mobile account sheet whenever the route changes.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setNavOpen(false);
+    setAccountOpen(false);
   }, [pathname]);
 
   const limits = LIMITS[account.plan];
@@ -60,31 +59,74 @@ export function Sidebar({ account }: { account: Account }) {
 
   return (
     <>
-      {/* Mobile top bar — hidden on desktop via CSS. Holds the logo + the
-          hamburger that opens the drawer. */}
+      {/* ---- Mobile top bar: logo + account avatar (hidden on desktop) ---- */}
       <div className={styles.topbar}>
+        <Image src="/logo.svg" alt="Trailwatch" width={132} height={29} className={styles.topbarLogo} priority />
         <button
           type="button"
-          className={styles.hamburger}
-          onClick={() => setNavOpen(true)}
-          aria-label="Open menu"
-          aria-expanded={navOpen}
+          className={styles.topbarAvatar}
+          onClick={() => setAccountOpen(true)}
+          aria-label="Account"
+          aria-haspopup="dialog"
         >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-          </svg>
+          {account.initials}
         </button>
-        <Image src="/logo.svg" alt="Trailwatch" width={132} height={29} className={styles.topbarLogo} priority />
       </div>
 
-      {/* Scrim behind the open drawer (mobile only). */}
-      <div
-        className={navOpen ? styles.overlayOpen : styles.overlay}
-        onClick={() => setNavOpen(false)}
-        aria-hidden="true"
-      />
+      {/* ---- Mobile bottom tab bar: primary navigation (hidden on desktop) ---- */}
+      <nav className={styles.tabbar} aria-label="Primary">
+        {NAV.map((item) => {
+          const active = pathname.startsWith(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={active ? styles.tabActive : styles.tab}
+              aria-current={active ? "page" : undefined}
+            >
+              <item.Icon />
+              <span className={styles.tabLabel}>{item.label === "Plan & billing" ? "Billing" : item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
 
-      <aside className={navOpen ? styles.asideOpen : styles.aside}>
+      {/* ---- Mobile account sheet (raised from the top-bar avatar) ---- */}
+      {accountOpen ? (
+        <>
+          <div className={styles.sheetOverlay} onClick={() => setAccountOpen(false)} aria-hidden="true" />
+          <div className={styles.sheet} role="dialog" aria-label="Account">
+            <div className={styles.sheetHandle} />
+            <div className={styles.sheetProfile}>
+              <div className={styles.avatar}>{account.initials}</div>
+              <div className={styles.profileText}>
+                <div className={styles.profileName}>{account.displayName}</div>
+                <div className={styles.profileEmail}>{account.email}</div>
+              </div>
+            </div>
+            <div className={styles.sheetMeta}>
+              <span>{PLAN_LABEL[account.plan]} plan</span>
+              <span className={styles.meterValue}>
+                {account.competitorCount}/{limits.competitors} competitors · {account.pageCount}/{account.pageAllowance} pages
+              </span>
+            </div>
+            {isFree ? (
+              <ButtonLink href="/billing" full className={styles.sheetUpgrade}>
+                Upgrade to Pro
+              </ButtonLink>
+            ) : null}
+            <form action={logOut}>
+              <button type="submit" className={styles.sheetLogout}>
+                <LogoutIcon />
+                Log out
+              </button>
+            </form>
+          </div>
+        </>
+      ) : null}
+
+      {/* ---- Desktop sidebar (hidden on mobile) ---- */}
+      <aside className={styles.aside}>
         <div className={styles.brand}>
         <Image
           src="/logo.svg"

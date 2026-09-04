@@ -52,3 +52,39 @@
   opacity: 0.6;
   cursor: default;
 }
+
+/* Mobile: present as a bottom sheet rather than a centered modal. */
+@media (max-width: 560px) {
+  .overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .card {
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
+    padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+    animation: sheet-up 0.22s ease;
+  }
+  @keyframes sheet-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+}
+
+@media (max-width: 560px) {
+  .actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+  /* Both the danger button and the secondary <Button> go full-width. */
+  .actions button {
+    width: 100%;
+    padding: 13px;
+    font-size: 14px;
+  }
+}

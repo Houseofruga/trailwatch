@@ -11,10 +11,12 @@
   flex-direction: column;
 }
 
-/* Below the drawer breakpoint the sidebar is off-canvas and a fixed 56px top
-   bar takes its place — pad the content down so it isn't hidden underneath. */
+/* Below this breakpoint the sidebar is replaced by a fixed 56px top bar and a
+   fixed bottom tab bar — pad the content clear of both (plus safe-area insets
+   on notched phones). */
 @media (max-width: 860px) {
   .main {
-    padding-top: 56px;
+    padding-top: calc(56px + env(safe-area-inset-top));
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
   }
 }

@@ -110,3 +110,13 @@ input[list]::-webkit-calendar-picker-indicator {
 button {
   border-radius: 0;
 }
+
+/* Mobile: iOS zooms the page when a focused input's font is < 16px. Force 16px
+   on touch-width viewports so tapping a field never triggers that zoom. */
+@media (max-width: 860px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
