@@ -1,0 +1,177 @@
+/* Post-signup onboarding — confirm the /try picks, resolve the plan limit, then
+   create them. Square corners, design-system tokens (matches the app). */
+
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+
+.sub {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--ink-2);
+  margin: 0 0 28px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.fields {
+  display: flex;
+  flex: 1;
+  gap: 10px;
+  min-width: 0;
+}
+
+.name,
+.url {
+  padding: 9px 11px;
+  font-size: 0.92rem;
+  border: 1px solid var(--border-input);
+  background: var(--surface);
+  color: var(--ink);
+  min-width: 0;
+}
+
+.name {
+  flex: 0 0 34%;
+}
+
+.url {
+  flex: 1;
+}
+
+.name:focus,
+.url:focus {
+  outline: 2px solid var(--accent-focus);
+  outline-offset: 0;
+}
+
+.remove {
+  flex: 0 0 auto;
+  width: 34px;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: var(--ink-2);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.remove:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* Beyond-plan-limit picks */
+.locked {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+}
+
+.lockedNote {
+  font-size: 0.9rem;
+  color: var(--ink-2);
+  margin-bottom: 10px;
+}
+
+.upgrade {
+  color: var(--link);
+  font-weight: 600;
+}
+
+.rowLocked {
+  background: var(--surface-alt);
+  opacity: 0.75;
+}
+
+.lockedName {
+  flex: 0 0 34%;
+  align-self: center;
+  font-weight: 600;
+  color: var(--ink-2);
+  font-size: 0.92rem;
+}
+
+.lockedUrl {
+  align-self: center;
+  color: var(--ink-3);
+  font-size: 0.85rem;
+}
+
+.error {
+  margin: 16px 0 0;
+  font-size: 0.9rem;
+  color: var(--danger);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.start {
+  padding: 12px 20px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  cursor: pointer;
+}
+
+.start:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.start:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.skip {
+  font-size: 0.92rem;
+  color: var(--ink-3);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.skip:hover {
+  color: var(--ink);
+}
+
+@media (max-width: 560px) {
+  .fields {
+    flex-direction: column;
+  }
+  .name {
+    flex-basis: auto;
+  }
+}

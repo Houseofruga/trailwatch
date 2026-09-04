@@ -8,6 +8,7 @@ import { getCompetitorsWithPages, type CompetitorRow } from "@/features/competit
 import { getDemoFeed } from "@/features/demo/demoFeed";
 import { LIMITS } from "@/features/plan/limits";
 import { DemoDashboard } from "./DemoDashboard";
+import { PendingSeedRedirect } from "./PendingSeedRedirect";
 import { domainOf, latestMeaningful, timeAgo, withinWeek } from "./dashboardFeed";
 import styles from "./page.module.css";
 
@@ -36,12 +37,18 @@ export default async function DashboardPage() {
   // they add their first real competitor. If no demo data is present, fall through
   // to the guided empty state below — never a blank screen.
   if (account && competitors.length === 0 && getDemoFeed(now).length > 0) {
-    return <DemoDashboard now={now} />;
+    return (
+      <>
+        <PendingSeedRedirect />
+        <DemoDashboard now={now} />
+      </>
+    );
   }
 
   if (!account || competitors.length === 0) {
     return (
       <div className={styles.empty}>
+        <PendingSeedRedirect />
         <div className={styles.mark}>
           <div className={styles.markDot} />
         </div>

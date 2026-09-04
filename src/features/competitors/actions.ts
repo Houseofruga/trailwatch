@@ -8,6 +8,7 @@ import { LIMITS, type Plan } from "@/features/plan/limits";
 import { resolvePlan } from "@/features/plan/comp";
 import { runCheckForPage } from "@/features/checks/runCheck";
 import { competitorName, pageRow } from "./validation";
+import { normalizeUrl } from "./url";
 import { originOf, sameSite, siteOf } from "./domain";
 
 export type FormState = { error: string } | null;
@@ -69,6 +70,36 @@ async function captureBaselines(pages: { id: string; label: string }[]): Promise
   });
 }
 
+// Insert one competitor + its pages and capture baselines. The shared core of
+// createCompetitor, reused by seedCompetitors (onboarding pre-seed). Caller does
+// all limit/validation checks and any redirect.
+async function insertCompetitorWithPages(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  name: string,
+  rows: { url: string; label: string }[],
+): Promise<{ ok: true; outcomes: CaptureOutcome[] } | { ok: false; error: string }> {
+  const { data: competitor, error: competitorError } = await supabase
+    .from("competitors")
+    .insert({ name, user_id: userId })
+    .select("id")
+    .single();
+  if (competitorError || !competitor) {
+    return { ok: false, error: "Couldn't create the competitor. Try again." };
+  }
+
+  const { data: newPages, error: pagesError } = await supabase
+    .from("pages")
+    .insert(rows.map((r) => ({ competitor_id: competitor.id, url: r.url, label: r.label })))
+    .select("id, label");
+  if (pagesError || !newPages) {
+    return { ok: false, error: "Competitor was created, but adding pages failed. Try again from Competitors." };
+  }
+
+  const outcomes = await captureBaselines(newPages);
+  return { ok: true, outcomes };
+}
+
 function today(): string {
   return new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
@@ -128,24 +159,51 @@ export async function createCompetitor(_prev: FormState, formData: FormData): Pr
   const domainError = findDomainMismatch(rowsResult.data[0].url, rowsResult.data);
   if (domainError) return { error: domainError };
 
-  const { data: competitor, error: competitorError } = await supabase
-    .from("competitors")
-    .insert({ name: nameResult.data, user_id: userId })
-    .select("id")
-    .single();
-  if (competitorError || !competitor) return { error: "Couldn't create the competitor. Try again." };
-
-  const { data: newPages, error: pagesError } = await supabase
-    .from("pages")
-    .insert(rowsResult.data.map((r) => ({ competitor_id: competitor.id, url: r.url, label: r.label })))
-    .select("id, label");
-  if (pagesError || !newPages) return { error: "Competitor was created, but adding pages failed. Try again from Competitors." };
-
-  const outcomes = await captureBaselines(newPages);
+  const result = await insertCompetitorWithPages(supabase, userId, nameResult.data, rowsResult.data);
+  if (!result.ok) return { error: result.error };
 
   revalidatePath("/dashboard");
   revalidatePath("/competitors");
-  redirect(flashUrl("/dashboard", captureFlash(outcomes)));
+  redirect(flashUrl("/dashboard", captureFlash(result.outcomes)));
+}
+
+// --------------------------------------------------------------- pre-seed (onboarding)
+export type SeedCompetitorInput = { name: string; url: string };
+
+/**
+ * Onboarding pre-seed: create the competitors the visitor picked on /try, each
+ * with its homepage as the first watched page. Re-checks the plan limit
+ * server-side and caps to the remaining slots — never trusts the client's count.
+ * Invalid rows (bad/blank URL, empty name) are skipped rather than failing the
+ * whole batch. Returns how many were created; the client redirects.
+ */
+export async function seedCompetitors(
+  items: SeedCompetitorInput[],
+): Promise<{ error: string } | { created: number; requested: number }> {
+  const supabase = await createClient();
+  const { userId, plan, competitorCount } = await loadPlanAndUsage(supabase);
+  const limits = LIMITS[plan];
+  const remaining = Math.max(0, limits.competitors - competitorCount);
+  if (remaining === 0) {
+    return {
+      error: `You're already tracking all ${limits.competitors} competitors on ${plan === "free" ? "Free" : "Pro"}.`,
+    };
+  }
+
+  const toCreate = items.slice(0, remaining);
+  let created = 0;
+  for (const item of toCreate) {
+    const nameResult = competitorName.safeParse(item.name);
+    if (!nameResult.success) continue;
+    const rowResult = pageRow.safeParse({ url: normalizeUrl(item.url), label: "Homepage" });
+    if (!rowResult.success) continue;
+    const res = await insertCompetitorWithPages(supabase, userId, nameResult.data, [rowResult.data]);
+    if (res.ok) created++;
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/competitors");
+  return { created, requested: items.length };
 }
 
 export async function addPages(_prev: FormState, formData: FormData): Promise<FormState> {

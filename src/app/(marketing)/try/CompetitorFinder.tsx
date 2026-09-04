@@ -55,6 +55,21 @@ export function CompetitorFinder() {
     setList((l) => [...l, { name: v, url: isUrl ? v : "", why: "" }]);
     setAddValue("");
   }
+  // Stash the chosen competitors so the new account can be pre-seeded after
+  // signup (read on /welcome). localStorage survives the same-browser signup /
+  // email-confirm / OAuth round-trip.
+  function persistPending() {
+    try {
+      if (list.length > 0) {
+        const payload = list.map(({ name, url }) => ({ name, url }));
+        localStorage.setItem("tw_pending_competitors", JSON.stringify(payload));
+      } else {
+        localStorage.removeItem("tw_pending_competitors");
+      }
+    } catch {
+      /* private mode / storage disabled — pre-seed just won't happen */
+    }
+  }
 
   return (
     <div className={styles.finder}>
@@ -161,7 +176,7 @@ export function CompetitorFinder() {
             </button>
           </div>
 
-            <Link href={SIGNUP_HREF} className={styles.finderCta}>
+            <Link href={SIGNUP_HREF} onClick={persistPending} className={styles.finderCta}>
               {list.length > 0
                 ? `Start free — watch ${list.length} competitor${list.length > 1 ? "s" : ""}`
                 : "Start free — no card required"}
