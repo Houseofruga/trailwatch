@@ -2,14 +2,28 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/Button";
+import { PlusIcon } from "@/components/icons";
 import { seedCompetitors } from "@/features/competitors/actions";
 import { normalizeUrl } from "@/features/competitors/url";
-import { PLAN_LABEL, type Plan } from "@/features/plan/limits";
+import { LIMITS, PLAN_LABEL, type Plan } from "@/features/plan/limits";
 import { OnboardingPlanStep } from "./OnboardingPlanStep";
 import styles from "./welcome.module.css";
 
 type Row = { name: string; url: string; selected: boolean };
 const KEY = "tw_pending_competitors";
+// Set once the visitor has been through onboarding (finished or skipped), so the
+// dashboard's redirect gate doesn't send them back here on every empty-dashboard
+// visit. See PendingSeedRedirect.
+const ONBOARDED_KEY = "tw_onboarded";
+
+function markOnboarded() {
+  try {
+    localStorage.setItem(ONBOARDED_KEY, "1");
+  } catch {
+    /* storage disabled — worst case they see onboarding again */
+  }
+}
 
 export function WelcomeOnboarding({
   plan,
@@ -27,6 +41,7 @@ export function WelcomeOnboarding({
   const [step, setStep] = useState<"watchlist" | "plan">("watchlist");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const pagesPerCompetitor = LIMITS[plan].pagesPerCompetitor;
 
   // Load the picks stashed on /try. Nothing to do without them.
   useEffect(() => {
@@ -36,13 +51,15 @@ export function WelcomeOnboarding({
     } catch {
       parsed = null;
     }
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      router.replace("/dashboard");
-      return;
-    }
     // localStorage is only readable client-side, so this must run in an effect
     // (a client component still SSRs, where a lazy initializer would throw).
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      // Plain "Start free" — nothing was pre-picked on /try. Start onboarding with
+      // blank rows the visitor fills in, rather than skipping setup entirely.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRows(Array.from({ length: limit }, () => ({ name: "", url: "", selected: true })));
+      return;
+    }
     setRows(
       parsed
         .filter((p): p is { name?: unknown; url?: unknown } => !!p && typeof p === "object")
@@ -83,15 +100,14 @@ export function WelcomeOnboarding({
   function remove(i: number) {
     setRows((r) => (r ? r.filter((_, idx) => idx !== i) : r));
   }
-  function skip() {
-    try {
-      localStorage.removeItem(KEY);
-    } catch {
-      /* ignore */
-    }
-    router.push("/dashboard");
+  function addRow() {
+    setRows((r) => {
+      if (!r) return r;
+      // New rows start selected unless that would exceed the free cap.
+      const selected = plan !== "free" || r.filter((x) => x.selected).length < limit;
+      return [...r, { name: "", url: "", selected }];
+    });
   }
-
   async function start() {
     if (!rows) return;
     setBusy(true);
@@ -110,6 +126,7 @@ export function WelcomeOnboarding({
     } catch {
       /* ignore */
     }
+    markOnboarded();
     const msg =
       res.created === 1
         ? "Added 1 competitor — we captured a baseline and will email you what changes."
@@ -134,8 +151,9 @@ export function WelcomeOnboarding({
     <div className={styles.wrap}>
       <h1 className={styles.title}>Set up your watchlist</h1>
       <p className={styles.sub}>
-        We’ll watch each competitor’s homepage and email you a plain-English digest when
-        something changes. You can add more pages anytime.
+        We start by watching each competitor’s <strong>homepage</strong> and email you a
+        plain-English digest when something changes. You can add up to {pagesPerCompetitor}{" "}
+        pages per competitor once you’re in.
       </p>
 
       {overLimit && (
@@ -151,6 +169,12 @@ export function WelcomeOnboarding({
           to watch all {total}.
         </p>
       )}
+
+      <div className={styles.colLabels}>
+        <div className={styles.colLabelName}>Competitor</div>
+        <div className={styles.colLabelUrl}>Homepage URL</div>
+        <div className={styles.colLabelSpacer} />
+      </div>
 
       <div className={styles.list}>
         {rows.map((row, i) => {
@@ -192,52 +216,44 @@ export function WelcomeOnboarding({
                 onClick={() => remove(i)}
                 aria-label={`Remove ${row.name || "competitor"}`}
               >
-                ×
+                Remove
               </button>
             </div>
           );
         })}
       </div>
 
+      <button type="button" className={styles.addRow} onClick={addRow} disabled={busy}>
+        <PlusIcon size={12} />
+        Add another competitor
+      </button>
+
       {error && <p className={styles.error}>{error}</p>}
 
       <div className={styles.actions}>
         {overLimit ? (
           <>
-            <button
-              type="button"
-              className={styles.primary}
-              onClick={() => setStep("plan")}
-              disabled={busy}
-            >
+            <Button type="button" onClick={() => setStep("plan")} disabled={busy}>
               Upgrade to watch all {total} competitors
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className={styles.secondary}
+              variant="secondary"
               onClick={start}
               disabled={!canSeed || busy}
             >
               {busy
                 ? "Setting up…"
                 : `Continue free with ${selectedCount} competitor${selectedCount !== 1 ? "s" : ""}`}
-            </button>
+            </Button>
           </>
         ) : (
-          <button
-            type="button"
-            className={styles.primary}
-            onClick={start}
-            disabled={!canSeed || busy}
-          >
+          <Button type="button" onClick={start} disabled={!canSeed || busy}>
             {busy
               ? "Setting up…"
               : `Start watching ${selectedCount} competitor${selectedCount !== 1 ? "s" : ""}`}
-          </button>
+          </Button>
         )}
-        <button type="button" className={styles.skip} onClick={skip} disabled={busy}>
-          Skip for now
-        </button>
       </div>
     </div>
   );

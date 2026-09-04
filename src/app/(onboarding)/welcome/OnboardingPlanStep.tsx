@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { initializePaddle, type Paddle } from "@paddle/paddle-js";
+import { Button } from "@/components/Button";
 import { seedCompetitors, currentPlan } from "@/features/competitors/actions";
 import {
   LIMITS,
@@ -175,14 +176,9 @@ export function OnboardingPlanStep({
               <li key={f}>{f}</li>
             ))}
           </ul>
-          <button
-            type="button"
-            className={styles.secondary}
-            onClick={onContinueFree}
-            disabled={busy}
-          >
+          <Button type="button" variant="secondary" full onClick={onContinueFree} disabled={busy}>
             {busy ? "Setting up…" : "Continue with Free plan"}
-          </button>
+          </Button>
         </div>
 
         {/* Pro */}
@@ -220,14 +216,14 @@ export function OnboardingPlanStep({
               <li key={f}>{f}</li>
             ))}
           </ul>
-          <button
+          <Button
             type="button"
-            className={styles.primary}
+            full
             onClick={openCheckout}
             disabled={!configured || !paddle || busy}
           >
             {configured ? "Upgrade to Pro" : "Upgrade unavailable"}
-          </button>
+          </Button>
           <div className={styles.checkoutNote}>Secure checkout by Paddle · cancel any time</div>
         </div>
       </div>
