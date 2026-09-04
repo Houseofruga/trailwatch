@@ -69,6 +69,7 @@ export function ProPricingCard({
             ${PRO_ANNUAL_USD} billed annually &middot; <span className={styles.badge}>2 months free</span>
           </div>
         ) : null}
+        <div className={styles.taxNote}>Plus applicable taxes &mdash; calculated at checkout</div>
       </div>
 
       <ul className={styles.features}>

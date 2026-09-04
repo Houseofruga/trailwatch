@@ -119,6 +119,7 @@ function BlockedUpsell({
           <div className={styles.upsellSavings}>
             ${PRO_ANNUAL_USD} billed annually · 2 months free
           </div>
+          <div className={styles.upsellTax}>Plus applicable taxes — calculated at checkout</div>
           <div className={styles.upsellFeatures}>
             <div>10 competitors, 10 pages each</div>
             <div>Daily checks with noise filtering</div>

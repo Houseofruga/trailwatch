@@ -106,6 +106,12 @@
   font-weight: 500;
 }
 
+.taxNote {
+  margin-top: 6px;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
 .features {
   list-style: none;
   margin: 0;
