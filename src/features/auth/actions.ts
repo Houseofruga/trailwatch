@@ -27,7 +27,16 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp(parsed.data);
+  const origin =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (await headers()).get("origin") ??
+    "http://localhost:3000";
+  const { data, error } = await supabase.auth.signUp({
+    ...parsed.data,
+    // If email confirmation is on, the link lands on onboarding (not the
+    // dashboard) so a fresh account goes straight into setup.
+    options: { emailRedirectTo: `${origin}/auth/confirm?next=/welcome` },
+  });
 
   if (error) return { error: error.message };
 
@@ -38,7 +47,9 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   }
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  // New account → onboarding. /welcome pre-seeds any competitors the visitor
+  // picked on the homepage and bounces to /dashboard if they already have some.
+  redirect("/welcome");
 }
 
 export async function logIn(_prev: AuthState, formData: FormData): Promise<AuthState> {
@@ -56,17 +67,26 @@ export async function logIn(_prev: AuthState, formData: FormData): Promise<AuthS
   redirect("/dashboard");
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(formData: FormData) {
   const supabase = await createClient();
   const origin =
     process.env.NEXT_PUBLIC_SITE_URL ??
     (await headers()).get("origin") ??
     "http://localhost:3000";
 
+  // Where to land after the OAuth round-trip: signups go to onboarding, logins
+  // to the dashboard. /welcome bounces to /dashboard if the account already has
+  // competitors, so it's safe even for a returning user.
+  const nextRaw = formData.get("next");
+  const next =
+    typeof nextRaw === "string" && nextRaw.startsWith("/") && !nextRaw.startsWith("//")
+      ? nextRaw
+      : "/dashboard";
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
       // Always show Google's account chooser instead of silently reusing the
       // one signed-in session — lets people pick a different Google account.
       queryParams: { prompt: "select_account" },

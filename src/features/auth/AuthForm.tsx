@@ -109,6 +109,8 @@ export function AuthForm({ initialMode }: { initialMode: Mode }) {
         )}
 
         <form action={signInWithGoogle}>
+          {/* Signups land on onboarding; logins on the dashboard. */}
+          <input type="hidden" name="next" value={mode === "signup" ? "/welcome" : "/dashboard"} />
           <GoogleButton />
         </form>
 
