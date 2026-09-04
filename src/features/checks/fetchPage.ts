@@ -1,7 +1,15 @@
 import { isPathAllowed } from "./robots";
+import { safeFetch } from "@/features/lastUpdated/fetch";
+
+// The check engine fetches user-supplied URLs on a schedule, server-side, and
+// stores the response so it can be shown back in change excerpts. That makes it
+// an SSRF + data-exfiltration target, so every fetch here goes through the same
+// hardened `safeFetch` the public tools use: it resolves DNS and refuses private
+// / internal hosts, re-validates every redirect hop, and caps the body size.
+// (safeFetch lives under features/lastUpdated for now — the shared network layer.)
 
 const USER_AGENT = "TrailwatchBot/1.0 (+https://gettrailwatch.com)";
-const TIMEOUT_MS = 10_000;
+const ROBOTS_MAX_BYTES = 512_000;
 
 export type FetchResult =
   | { ok: true; html: string }
@@ -9,44 +17,35 @@ export type FetchResult =
   | { ok: false; reason: "fetch-error"; message: string };
 
 async function checkRobots(origin: string, pathname: string): Promise<boolean> {
-  try {
-    const res = await fetch(`${origin}/robots.txt`, {
-      headers: { "User-Agent": USER_AGENT },
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
-    // No robots.txt (404, or any non-200) is the common case — treat as allowed.
-    if (!res.ok) return true;
-    return isPathAllowed(await res.text(), USER_AGENT, pathname);
-  } catch {
-    // robots.txt itself failing to load (timeout, DNS, ...) shouldn't block
-    // the real fetch — most sites don't serve one at all.
-    return true;
-  }
+  const res = await safeFetch(`${origin}/robots.txt`, { maxBytes: ROBOTS_MAX_BYTES });
+  // No reachable robots.txt (404, private/blocked host, network error) is the
+  // common case → treat as allowed. An internal host is still refused when we
+  // fetch the page itself below, so this can't be used to reach one.
+  if (!res.ok) return true;
+  return isPathAllowed(res.html, USER_AGENT, pathname);
 }
 
 export async function fetchPageIfAllowed(pageUrl: string): Promise<FetchResult> {
-  const url = new URL(pageUrl);
+  let origin: string;
+  let pathname: string;
+  try {
+    const url = new URL(pageUrl);
+    origin = url.origin;
+    pathname = url.pathname;
+  } catch {
+    return { ok: false, reason: "fetch-error", message: "Invalid URL" };
+  }
 
-  const allowed = await checkRobots(url.origin, url.pathname);
-  if (!allowed) {
+  if (!(await checkRobots(origin, pathname))) {
     return { ok: false, reason: "robots", message: "Disallowed by robots.txt" };
   }
 
-  try {
-    const res = await fetch(url.toString(), {
-      headers: { "User-Agent": USER_AGENT },
-      redirect: "follow",
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
-    if (!res.ok) {
-      return { ok: false, reason: "fetch-error", message: `HTTP ${res.status}` };
-    }
-    return { ok: true, html: await res.text() };
-  } catch (err) {
-    return {
-      ok: false,
-      reason: "fetch-error",
-      message: err instanceof Error ? err.message : "Unknown fetch error",
-    };
+  const res = await safeFetch(pageUrl);
+  if (!res.ok) {
+    // reason "blocked" = private/internal host caught by the SSRF guard; "invalid-url"
+    // / "fetch-error" = unreachable or bad. Either way it's a soft fetch-error so the
+    // daily batch keeps going and this page simply doesn't capture this run.
+    return { ok: false, reason: "fetch-error", message: res.message };
   }
+  return { ok: true, html: res.html };
 }
