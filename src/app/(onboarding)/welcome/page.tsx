@@ -9,7 +9,7 @@ import { WelcomeOnboarding } from "./WelcomeOnboarding";
 export const metadata: Metadata = { title: "Set up your watchlist" };
 
 // Post-signup onboarding: confirm and create the competitors the visitor picked
-// on /try (carried in localStorage). Only for fresh accounts — anyone who already
+// on the homepage / (carried in localStorage). Only for fresh accounts — anyone who already
 // has competitors is sent to the dashboard.
 export default async function WelcomePage() {
   const supabase = await createClient();

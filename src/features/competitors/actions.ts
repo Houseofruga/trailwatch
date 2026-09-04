@@ -182,7 +182,7 @@ export async function createCompetitor(_prev: FormState, formData: FormData): Pr
 export type SeedCompetitorInput = { name: string; url: string };
 
 /**
- * Onboarding pre-seed: create the competitors the visitor picked on /try, each
+ * Onboarding pre-seed: create the competitors the visitor picked on the homepage (/), each
  * with its homepage as the first watched page. Re-checks the plan limit
  * server-side and caps to the remaining slots — never trusts the client's count.
  * Invalid rows (bad/blank URL, empty name) are skipped rather than failing the

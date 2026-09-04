@@ -1,4 +1,4 @@
-// Types for the "Find your competitors" hero tool (/try). Given a company name
+// Types for the "Find your competitors" hero tool (homepage /). Given a company name
 // or URL, a provider (Groq or Anthropic — same seam as competitorTeardown and
 // summaries) suggests a few direct competitors to watch. Display-only, editable
 // by the visitor; never authoritative (LLM guesses can be wrong for niche cos).

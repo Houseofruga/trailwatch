@@ -10,9 +10,9 @@ const FOUNDER_X_URL = "https://x.com/thatguydongre";
 /**
  * Everything on the marketing landing BELOW the hero: how-it-works, the cloud
  * fly-through (why + pricing), FAQ, the final CTA + founder reveal, and footer.
- * Shared verbatim by the root landing (`/`, animated hero) and the "try it"
- * variant (`/try`, teardown hero) so the two pages can never drift on pricing,
- * copy, or FAQ — only their heroes differ.
+ * Shared verbatim by the homepage (`/`, finder hero) and the animated landing
+ * variant (`/1`) so the two pages can never drift on pricing, copy, or FAQ —
+ * only their heroes differ.
  */
 export function MarketingSections() {
   return (

@@ -5,7 +5,7 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/env";
 const APP_PREFIXES = ["/dashboard", "/competitors", "/billing", "/settings", "/welcome"];
 // Signed-in users have no reason to see these — send them straight to the app.
 // Includes the marketing landing ("/") so a logged-in visit skips it entirely.
-const SIGNED_OUT_ONLY = ["/", "/login"];
+const SIGNED_OUT_ONLY = ["/", "/1", "/login"];
 
 /**
  * Next 16 calls this file `proxy` (the old `middleware` name is deprecated).

@@ -43,7 +43,7 @@ export function WelcomeOnboarding({
   const [error, setError] = useState<string | null>(null);
   const pagesPerCompetitor = LIMITS[plan].pagesPerCompetitor;
 
-  // Load the picks stashed on /try. Nothing to do without them.
+  // Load the picks stashed on the homepage (/). Nothing to do without them.
   useEffect(() => {
     let parsed: unknown = null;
     try {
@@ -54,7 +54,7 @@ export function WelcomeOnboarding({
     // localStorage is only readable client-side, so this must run in an effect
     // (a client component still SSRs, where a lazy initializer would throw).
     if (!Array.isArray(parsed) || parsed.length === 0) {
-      // Plain "Start free" — nothing was pre-picked on /try. Start onboarding with
+      // Plain "Start free" — nothing was pre-picked on the homepage. Start onboarding with
       // blank rows the visitor fills in, rather than skipping setup entirely.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setRows(Array.from({ length: limit }, () => ({ name: "", url: "", selected: true })));

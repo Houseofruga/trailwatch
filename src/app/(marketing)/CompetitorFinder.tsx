@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import Link from "next/link";
 import { findCompetitorsAction, type FinderState } from "./actions";
 import type { Competitor, FinderResult } from "@/features/competitorFinder/types";
-import styles from "./try.module.css";
+import styles from "./home.module.css";
 
 const SIGNUP_HREF = "/login?mode=signup&src=hero-finder";
 
