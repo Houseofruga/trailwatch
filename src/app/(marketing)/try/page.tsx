@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -53,6 +54,11 @@ export default async function TryPage() {
               messaging. A full dashboard’s there when you want to dig in, but you never have
               to babysit one. It just works.
             </p>
+            <div className={styles.heroCta}>
+              <Link href="/login?mode=signup" className={styles.heroCtaBtn}>
+                Start free — no card required
+              </Link>
+            </div>
           </div>
 
           <div className={styles.heroTool}>

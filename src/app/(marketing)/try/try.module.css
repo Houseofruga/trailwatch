@@ -75,6 +75,27 @@
   margin: 0;
 }
 
+/* Primary "Start free" CTA under the copy — mirrors the homepage hero. */
+.heroCta {
+  margin-top: 26px;
+}
+
+.heroCtaBtn {
+  display: inline-block;
+  padding: 12px 22px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--accent);
+  text-decoration: none;
+}
+
+.heroCtaBtn:hover {
+  background: var(--accent-hover);
+  color: var(--ink);
+  text-decoration: none;
+}
+
 /* --- The finder tool card (square, opaque white over the sky) --- */
 .heroTool {
   width: 100%;
