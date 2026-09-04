@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { LIMITS, type Plan } from "@/features/plan/limits";
 import { resolvePlan } from "@/features/plan/comp";
@@ -27,7 +28,10 @@ function deriveInitials(displayName: string): string {
   return displayName.slice(0, 2).toUpperCase();
 }
 
-export async function getAccount(): Promise<Account | null> {
+// Deduped per request with React `cache()`: the app layout and the page it
+// renders both call getAccount, and this collapses that to a single auth
+// round-trip + query batch instead of running the whole thing twice.
+export const getAccount = cache(async function getAccount(): Promise<Account | null> {
   const supabase = await createClient();
 
   const {
@@ -58,4 +62,4 @@ export async function getAccount(): Promise<Account | null> {
     pageAllowance: LIMITS[plan].pagesPerCompetitor * LIMITS[plan].competitors,
     digestEnabled: profileResult.data?.digest_enabled ?? true,
   };
-}
+});
