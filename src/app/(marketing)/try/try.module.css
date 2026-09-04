@@ -10,29 +10,15 @@
   min-height: 620px;
 }
 
-/* Full-bleed sky, same image as the homepage hero (static — no zoom). Positioned
-   to the right so the image's clear deep-blue left sits behind the copy (the
-   homepage does this by translating the sky; a static hero sets the position). */
+/* Full-bleed sky, same image as the homepage hero. Zoomed into the image's clear
+   deep-blue upper-left (anchored top-left) so the copy sits on blue — no dark
+   scrim. The green hills are cropped out; the foreground .hill supplies the green
+   at the bottom. */
 .sky {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: url("/fullBG.webp") 78% center / cover no-repeat;
-}
-
-/* Left-anchored scrim so the white copy stays legible over the sky at any
-   viewport, even where a cloud drifts behind it. Fades to transparent by the
-   time it reaches the finder card. */
-.sky::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    100deg,
-    rgba(10, 20, 40, 0.5) 0%,
-    rgba(10, 20, 40, 0.32) 34%,
-    rgba(10, 20, 40, 0) 58%
-  );
+  background: url("/fullBG.webp") left top / 200% auto no-repeat;
 }
 
 .header {
@@ -323,6 +309,13 @@
 @media (max-width: 900px) {
   .hero {
     min-height: 0;
+  }
+  /* The desktop "200% auto" zoom ties the image height to width, which is too
+     short to cover the tall stacked mobile layout — use cover so the sky fills
+     the whole hero; top-anchored keeps the copy on the blue upper band. */
+  .sky {
+    background-size: cover;
+    background-position: left top;
   }
   .heroInner {
     grid-template-columns: 1fr;
