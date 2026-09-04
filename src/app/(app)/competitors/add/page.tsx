@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BackLink } from "@/components/BackLink";
-import { UpgradeButton } from "@/features/billing/UpgradeButton";
+import { ProPricingCard } from "@/features/billing/ProPricingCard";
 import { createClient } from "@/lib/supabase/server";
 import { getAccount } from "@/features/account/queries";
 import { getCompetitorsWithPages } from "@/features/competitors/queries";
-import { LIMITS, PLAN_LABEL, PRO_ANNUAL_USD, formatProPrice } from "@/features/plan/limits";
+import { LIMITS, PLAN_LABEL } from "@/features/plan/limits";
 import { AddForm } from "./AddForm";
 import styles from "./page.module.css";
 
@@ -108,28 +108,21 @@ function BlockedUpsell({
       <p className={styles.blockBody}>{body}</p>
 
       {showUpsell ? (
-        <div className={styles.upsell}>
-          <div className={styles.upsellHead}>
-            <div className={styles.upsellName}>Pro</div>
-            <div className={styles.upsellPrice}>
-              <span style={{ fontWeight: 500 }}>{formatProPrice("annual").amount}</span>
-              <span className={styles.upsellPricePer}>{formatProPrice("annual").per}</span>
-            </div>
-          </div>
-          <div className={styles.upsellSavings}>
-            ${PRO_ANNUAL_USD} billed annually · 2 months free
-          </div>
-          <div className={styles.upsellTax}>Plus applicable taxes — calculated at checkout</div>
-          <div className={styles.upsellFeatures}>
-            <div>10 competitors, 10 pages each</div>
-            <div>Daily checks with noise filtering</div>
-            <div>Weekly email digest</div>
-            <div>Cancel any time</div>
-          </div>
-          {/* Opens the Paddle checkout overlay right here (annual — the default
-              we push everywhere); on success it polls until the account flips to
-              Pro and this page re-renders unblocked — no detour through /billing. */}
-          <UpgradeButton email={email} userId={userId} period="annual" />
+        // The shared Pro card — Monthly/Annual toggle, price, savings, tax note,
+        // and the Paddle overlay (opens in place; on success it polls until the
+        // account flips to Pro and this page re-renders unblocked — no detour
+        // through /billing). Same card as billing + onboarding, so it can't drift.
+        <div className={styles.upsellCard}>
+          <ProPricingCard
+            email={email}
+            userId={userId}
+            features={[
+              `${LIMITS.paid.competitors} competitors`,
+              `${LIMITS.paid.pagesPerCompetitor} pages per competitor`,
+              "Daily checks, noise filtered",
+              "Weekly email digest",
+            ]}
+          />
         </div>
       ) : null}
 

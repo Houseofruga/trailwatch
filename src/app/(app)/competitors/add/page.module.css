@@ -24,60 +24,10 @@
   text-wrap: pretty;
 }
 
-.upsell {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 22px 24px;
-  max-width: 460px;
-}
-
-.upsellHead {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 16px;
-}
-
-.upsellName {
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.upsellPrice {
-  font-size: 15px;
-}
-
-.upsellPricePer {
-  color: var(--ink-4);
-  font-size: 13px;
-}
-
-/* Annual savings line under the price (pulled up snug to it). */
-.upsellSavings {
-  margin: -8px 0 4px;
-  font-size: 12px;
-  color: var(--ink-4);
-}
-
-.upsellTax {
-  margin: 0 0 18px;
-  font-size: 11.5px;
-  color: var(--ink-faint);
-}
-
-.upsellFeatures {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  font-size: 13.5px;
-  color: var(--ink-2);
-  margin-bottom: 20px;
-}
-
-.upsellCta {
-  width: 100%;
-  padding: 11px;
-  font-size: 13.5px;
+/* Wrapper around the shared <ProPricingCard>; caps its width so the card sits
+   compact on this page rather than stretching the whole 720px column. */
+.upsellCard {
+  max-width: 440px;
 }
 
 .swap {
