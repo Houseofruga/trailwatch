@@ -169,16 +169,22 @@ export function OnboardingPlanStep({
       <div className={styles.planGrid}>
         {/* Free */}
         <div className={styles.planCard}>
-          <div className={styles.planName}>Free</div>
-          <div className={styles.planPrice}>$0</div>
+          <div className={styles.planHeadRow}>
+            <div className={styles.planName}>Free</div>
+          </div>
+          <div className={styles.priceBlock}>
+            <div className={styles.planPrice}>$0</div>
+          </div>
           <ul className={styles.planFeatures}>
             {features("free").map((f) => (
               <li key={f}>{f}</li>
             ))}
           </ul>
-          <Button type="button" variant="secondary" full onClick={onContinueFree} disabled={busy}>
-            {busy ? "Setting up…" : "Continue with Free plan"}
-          </Button>
+          <div className={styles.action}>
+            <Button type="button" variant="secondary" full onClick={onContinueFree} disabled={busy}>
+              {busy ? "Setting up…" : "Continue with Free plan"}
+            </Button>
+          </div>
         </div>
 
         {/* Pro */}
@@ -201,30 +207,37 @@ export function OnboardingPlanStep({
                 onClick={() => setPeriod("annual")}
               >
                 Annual
+                <span className={styles.bestValue}>Best value</span>
               </button>
             </div>
           </div>
-          <div className={styles.planPrice}>
-            {price.amount}
-            <span className={styles.planPer}>{price.per}</span>
+          <div className={styles.priceBlock}>
+            <div className={styles.planPrice}>
+              <span className={styles.priceAmount}>{price.amount}</span>
+              <span className={styles.planPer}>{price.per}</span>
+            </div>
+            {period === "annual" && (
+              <div className={styles.savings}>
+                ${PRO_ANNUAL_USD} billed annually · <span className={styles.badge}>2 months free</span>
+              </div>
+            )}
           </div>
-          {period === "annual" && (
-            <div className={styles.savings}>${PRO_ANNUAL_USD} billed annually · 2 months free</div>
-          )}
           <ul className={styles.planFeatures}>
             {features("paid").map((f) => (
               <li key={f}>{f}</li>
             ))}
           </ul>
-          <Button
-            type="button"
-            full
-            onClick={openCheckout}
-            disabled={!configured || !paddle || busy}
-          >
-            {configured ? "Upgrade to Pro" : "Upgrade unavailable"}
-          </Button>
-          <div className={styles.checkoutNote}>Secure checkout by Paddle · cancel any time</div>
+          <div className={styles.action}>
+            <Button
+              type="button"
+              full
+              onClick={openCheckout}
+              disabled={!configured || !paddle || busy}
+            >
+              {configured ? "Upgrade to Pro" : "Upgrade unavailable"}
+            </Button>
+            <div className={styles.checkoutNote}>Secure checkout by Paddle · cancel any time</div>
+          </div>
         </div>
       </div>
     </div>
