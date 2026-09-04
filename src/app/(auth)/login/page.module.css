@@ -6,6 +6,14 @@
   padding: 40px;
 }
 
+@media (max-width: 560px) {
+  .wrap {
+    padding: 24px 20px;
+    align-items: flex-start;
+    padding-top: 56px;
+  }
+}
+
 .inner {
   width: 100%;
   max-width: 376px;
