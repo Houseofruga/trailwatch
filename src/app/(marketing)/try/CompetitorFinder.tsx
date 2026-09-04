@@ -22,6 +22,10 @@ export function CompetitorFinder() {
   );
   const [list, setList] = useState<Competitor[]>([]);
   const [addValue, setAddValue] = useState("");
+  // Controlled company input so the search button only shows when there's a new
+  // query to run (dirty) — no dead "Find competitors" button after a lookup.
+  const [company, setCompany] = useState("");
+  const [lastQuery, setLastQuery] = useState("");
 
   // Seed the editable list from a suggestion result, re-seeding whenever a new
   // lookup lands. Setting state during render (guarded on the result identity) is
@@ -34,6 +38,12 @@ export function CompetitorFinder() {
 
   const showEditor = state !== null; // after the first lookup (ok or error)
   const errored = state?.status === "error";
+
+  // Show "Find competitors" only when there's something new to search: a
+  // non-empty query that differs from the last one, while searching, or after an
+  // error (so they can retry). Hidden once results for the current query are in.
+  const dirty = company.trim() !== "" && company.trim() !== lastQuery;
+  const showFind = pending || dirty || errored;
 
   function removeAt(i: number) {
     setList((l) => l.filter((_, idx) => idx !== i));
@@ -48,7 +58,11 @@ export function CompetitorFinder() {
 
   return (
     <div className={styles.finder}>
-      <form action={formAction} className={styles.finderForm}>
+      <form
+        action={formAction}
+        onSubmit={() => setLastQuery(company.trim())}
+        className={styles.finderForm}
+      >
         <label htmlFor="company" className={styles.finderLabel}>
           Your company (name or website)
         </label>
@@ -61,11 +75,15 @@ export function CompetitorFinder() {
             className={styles.finderInput}
             autoComplete="off"
             aria-label="Your company name or website"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
             required
           />
-          <button type="submit" className={styles.finderSubmit} disabled={pending}>
-            {pending ? "Finding…" : "Find competitors"}
-          </button>
+          {showFind && (
+            <button type="submit" className={styles.finderSubmit} disabled={pending}>
+              {pending ? "Finding…" : "Find competitors"}
+            </button>
+          )}
         </div>
         <p className={styles.finderHint}>
           {pending
