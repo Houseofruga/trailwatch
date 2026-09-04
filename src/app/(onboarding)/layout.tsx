@@ -3,8 +3,9 @@ import { getAccount } from "@/features/account/queries";
 import { logOut } from "@/features/auth/actions";
 import styles from "./layout.module.css";
 
-// Focused onboarding chrome — no app sidebar. Just the TrailWatch mark up top,
-// the flow in the middle, and the signed-in profile + Log out at the bottom.
+// Focused onboarding chrome — no app sidebar. A top bar mirroring the public
+// header (TrailWatch mark left, signed-in profile + Log out right), with the
+// flow centered below.
 export default async function OnboardingLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -16,11 +17,7 @@ export default async function OnboardingLayout({
       <header className={styles.top}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.logo} src="/logo.svg" alt="TrailWatch" />
-      </header>
 
-      <main className={styles.main}>{children}</main>
-
-      <footer className={styles.bottom}>
         <div className={styles.profile}>
           <div className={styles.avatar} aria-hidden="true">
             {account.initials}
@@ -35,7 +32,9 @@ export default async function OnboardingLayout({
             </button>
           </form>
         </div>
-      </footer>
+      </header>
+
+      <main className={styles.main}>{children}</main>
     </div>
   );
 }

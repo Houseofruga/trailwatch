@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { initializePaddle, type Paddle } from "@paddle/paddle-js";
 import { Button } from "@/components/Button";
+import { ChevronLeftIcon } from "@/components/icons";
 import { ProPricingCard } from "@/features/billing/ProPricingCard";
 import { seedCompetitors, currentPlan } from "@/features/competitors/actions";
 import { LIMITS, type BillingPeriod } from "@/features/plan/limits";
@@ -153,7 +154,10 @@ export function OnboardingPlanStep({
   return (
     <div className={styles.plansWrap}>
       <button type="button" className={styles.back} onClick={onBack} disabled={busy}>
-        ← Back
+        <span className={styles.backIcon}>
+          <ChevronLeftIcon />
+        </span>
+        Back
       </button>
       <h1 className={styles.title}>Choose your plan</h1>
       <p className={styles.sub}>

@@ -31,22 +31,6 @@
   margin: 0 0 14px;
 }
 
-.upgradeLink {
-  color: var(--link);
-  font-weight: 600;
-  font-size: inherit;
-  font-family: inherit;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.upgradeLink:hover {
-  color: var(--link-hover);
-}
-
 /* Column headers over the watchlist rows — mirrors the in-product add-competitor
    form. The leading spacer aligns with the row checkbox. */
 .colLabels {
@@ -209,23 +193,45 @@
 
 /* ---------------------------------------------------------- Step 2 · plans */
 .plansWrap {
-  max-width: 720px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 40px 24px 60px;
 }
 
+/* Mirrors the product's BackLink (components/BackLink) — chevron in a square
+   box + label — but as a button since this steps back within the flow. */
 .back {
-  font-size: 0.9rem;
-  color: var(--ink-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12.5px;
+  color: var(--ink-4);
   background: none;
   border: none;
   padding: 0;
-  margin-bottom: 18px;
+  margin-bottom: 22px;
   cursor: pointer;
 }
 
 .back:hover {
-  color: var(--ink);
+  color: var(--accent-ink);
+}
+
+.backIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-3);
+}
+
+.back:hover .backIcon {
+  border-color: var(--accent-ink);
+  color: var(--accent-ink);
 }
 
 .finalizing {

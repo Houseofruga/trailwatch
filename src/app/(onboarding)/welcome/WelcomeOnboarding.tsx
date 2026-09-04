@@ -158,15 +158,8 @@ export function WelcomeOnboarding({
 
       {overLimit && (
         <p className={styles.limitNote}>
-          {PLAN_LABEL[plan]} tracks {limit} competitors — choose {limit} to start free, or{" "}
-          <button
-            type="button"
-            className={styles.upgradeLink}
-            onClick={() => setStep("plan")}
-          >
-            upgrade to Pro
-          </button>{" "}
-          to watch all {total}.
+          {PLAN_LABEL[plan]} tracks {limit} competitors — choose {limit} to start free, or
+          upgrade to Pro to watch all {total}.
         </p>
       )}
 

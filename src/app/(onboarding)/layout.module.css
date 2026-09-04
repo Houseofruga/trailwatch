@@ -1,5 +1,5 @@
-/* Chrome-free onboarding shell: logo top-center, content centered, profile +
-   Log out pinned bottom-center. No sidebar. */
+/* Chrome-free onboarding shell: a top bar (logo left, profile + Log out right)
+   mirroring the public SiteHeader, with the flow centered below. No sidebar. */
 .shell {
   display: flex;
   flex-direction: column;
@@ -7,15 +7,23 @@
   background: var(--bg);
 }
 
+/* Mirrors SiteHeader.module.css .inner — same 1280/48 container, logo left,
+   actions right. */
 .top {
   display: flex;
-  justify-content: center;
-  padding: 28px 24px 8px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 48px;
 }
 
 .logo {
-  height: 26px;
+  height: 40px;
   width: auto;
+  display: block;
 }
 
 .main {
@@ -26,17 +34,11 @@
   padding: 24px;
 }
 
-.bottom {
-  display: flex;
-  justify-content: center;
-  padding: 24px 24px 40px;
-}
-
 .profile {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
+  padding: 8px 12px;
   border: 1px solid var(--border);
   background: var(--surface);
 }
@@ -84,4 +86,18 @@
 .logout:hover {
   border-color: var(--border-input-hover);
   color: var(--ink);
+}
+
+/* Match SiteHeader's mobile treatment; drop the name/email so the top bar
+   stays a compact avatar + Log out on small screens. */
+@media (max-width: 560px) {
+  .top {
+    padding: 20px 22px;
+  }
+  .logo {
+    height: 34px;
+  }
+  .who {
+    display: none;
+  }
 }
