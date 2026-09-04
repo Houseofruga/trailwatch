@@ -99,7 +99,7 @@ convenient:
   accent `--accent: #9ff50a`, blue links, DM Sans + Geist Mono, zero border-radius).
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
-## Recent work (pushed; onboarding rework is in PR #2, not yet on `main`)
+## Recent work (all pushed to `main`)
 
 **`/try` interactive landing + competitor pre-seeding (2026-09-04).** A promotable,
 `noindex` (canonical→`/`) landing variant for the Product Hunt launch. Same content
@@ -124,8 +124,8 @@ shared by both so pricing/FAQ can't drift) — only the hero differs.
   a6e0256), not the billing page; the old `/billing?from=welcome` "Back to setup"
   link was removed (47526cd).
 
-**Onboarding rework — runs for every signup + in-product UI (2026-09-04, PR #2 /
-branch `onboarding-ui-parity`, NOT yet merged to `main`).**
+**Onboarding rework — runs for every signup + in-product UI (2026-09-04, merged to
+`main` via PR #2 `onboarding-ui-parity`; deploying to production on Vercel).**
 - **Every signup now onboards, not just `/try` pre-picks.** `PendingSeedRedirect`
   (dashboard 0-competitor state) sends **any** not-yet-onboarded user to `/welcome`,
   tracked by a `tw_onboarded` localStorage flag (set on successful setup) so it can't
@@ -275,9 +275,8 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
    (part of §9 below).
 
 **`/try` + onboarding (owner's active track):**
-0. **Merge PR #2 (`onboarding-ui-parity`)** — the onboarding rework (runs for every
-   signup, in-product UI, no Skip, Homepage note). Then **verify the authed flow
-   end-to-end with a real login** (couldn't be driven from the preview):
+0. **Verify the reworked onboarding on production with a real login** (merged in PR #2;
+   couldn't be driven from the preview — it's behind auth):
    - `/try` path: pick 3–4 → Start free → sign up → forced to `/welcome` → pick which 2
      (or Upgrade → in-flow plans step) → "Continue free"/"Start watching" → dashboard
      shows real competitors with baselines, demo gone.
