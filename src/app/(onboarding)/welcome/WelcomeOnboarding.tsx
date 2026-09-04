@@ -2,18 +2,29 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { seedCompetitors } from "@/features/competitors/actions";
 import { normalizeUrl } from "@/features/competitors/url";
 import { PLAN_LABEL, type Plan } from "@/features/plan/limits";
+import { OnboardingPlanStep } from "./OnboardingPlanStep";
 import styles from "./welcome.module.css";
 
 type Row = { name: string; url: string; selected: boolean };
 const KEY = "tw_pending_competitors";
 
-export function WelcomeOnboarding({ plan, limit }: { plan: Plan; limit: number }) {
+export function WelcomeOnboarding({
+  plan,
+  limit,
+  email,
+  userId,
+}: {
+  plan: Plan;
+  limit: number;
+  email: string;
+  userId: string;
+}) {
   const router = useRouter();
   const [rows, setRows] = useState<Row[] | null>(null); // null = still loading
+  const [step, setStep] = useState<"watchlist" | "plan">("watchlist");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -106,6 +117,19 @@ export function WelcomeOnboarding({ plan, limit }: { plan: Plan; limit: number }
     router.push(`/dashboard?flash=${encodeURIComponent(msg)}`);
   }
 
+  if (step === "plan") {
+    return (
+      <OnboardingPlanStep
+        allRows={rows.map((r) => ({ name: r.name.trim(), url: r.url.trim() }))}
+        email={email}
+        userId={userId}
+        busy={busy}
+        onBack={() => setStep("watchlist")}
+        onContinueFree={start}
+      />
+    );
+  }
+
   return (
     <div className={styles.wrap}>
       <h1 className={styles.title}>Set up your watchlist</h1>
@@ -117,9 +141,13 @@ export function WelcomeOnboarding({ plan, limit }: { plan: Plan; limit: number }
       {overLimit && (
         <p className={styles.limitNote}>
           {PLAN_LABEL[plan]} tracks {limit} competitors — choose {limit} to start free, or{" "}
-          <Link href="/billing?from=welcome" className={styles.upgradeLink}>
+          <button
+            type="button"
+            className={styles.upgradeLink}
+            onClick={() => setStep("plan")}
+          >
             upgrade to Pro
-          </Link>{" "}
+          </button>{" "}
           to watch all {total}.
         </p>
       )}
@@ -176,9 +204,14 @@ export function WelcomeOnboarding({ plan, limit }: { plan: Plan; limit: number }
       <div className={styles.actions}>
         {overLimit ? (
           <>
-            <Link href="/billing?from=welcome" className={styles.primary}>
+            <button
+              type="button"
+              className={styles.primary}
+              onClick={() => setStep("plan")}
+              disabled={busy}
+            >
               Upgrade to watch all {total} competitors
-            </Link>
+            </button>
             <button
               type="button"
               className={styles.secondary}

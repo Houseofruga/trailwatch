@@ -37,6 +37,17 @@ async function loadPlanAndUsage(supabase: Awaited<ReturnType<typeof createClient
   return { userId: user.id, plan, competitorCount: competitors?.length ?? 0 };
 }
 
+/**
+ * The caller's current plan. Used by the onboarding plans step to poll after a
+ * Pro checkout completes — the plan flips to "paid" only when Paddle's webhook
+ * lands, a beat after checkout.completed fires client-side.
+ */
+export async function currentPlan(): Promise<Plan> {
+  const supabase = await createClient();
+  const { plan } = await loadPlanAndUsage(supabase);
+  return plan;
+}
+
 // Pages under one competitor must share a registrable domain — subdomains of
 // the same site (www., docs., app.) count as the same competitor; different
 // domains belong to different competitors. `establishedUrl` is the URL that sets

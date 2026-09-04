@@ -31,6 +31,17 @@
 .upgradeLink {
   color: var(--link);
   font-weight: 600;
+  font-size: inherit;
+  font-family: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.upgradeLink:hover {
+  color: var(--link-hover);
 }
 
 .list {
@@ -205,5 +216,149 @@
   }
   .name {
     flex-basis: auto;
+  }
+}
+
+/* ---------------------------------------------------------- Step 2 · plans */
+.plansWrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+}
+
+.back {
+  font-size: 0.9rem;
+  color: var(--ink-3);
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 18px;
+  cursor: pointer;
+}
+
+.back:hover {
+  color: var(--ink);
+}
+
+.finalizing {
+  font-size: 1.05rem;
+  color: var(--ink);
+  text-align: center;
+  padding: 40px 0 12px;
+}
+
+.planGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.planCard {
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.planCardPro {
+  border-color: var(--accent-line);
+  background: var(--surface-alt);
+}
+
+.planHeadRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 30px;
+}
+
+.planName {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.planPrice {
+  margin-top: 8px;
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.planPer {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink-3);
+}
+
+.savings {
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: var(--accent-ink);
+}
+
+.planFeatures {
+  list-style: none;
+  margin: 16px 0 20px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.planFeatures li {
+  font-size: 0.9rem;
+  color: var(--ink-2);
+  padding-left: 20px;
+  position: relative;
+}
+
+.planFeatures li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+/* Monthly/Annual toggle (mirrors the billing card) */
+.toggle {
+  display: inline-flex;
+  border: 1px solid var(--border-input);
+}
+
+.toggleOpt,
+.toggleActive {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  background: var(--surface);
+  color: var(--ink-3);
+  border: none;
+  cursor: pointer;
+}
+
+.toggleActive {
+  background: var(--ink);
+  color: #fff;
+}
+
+.checkoutNote {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--ink-3);
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .planGrid {
+    grid-template-columns: 1fr;
   }
 }
