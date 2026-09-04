@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-01._
+_Last updated: 2026-09-04._
 
 ## Product in one line
 
@@ -62,8 +62,12 @@ convenient:
 ## Where things live (organized by domain, per CLAUDE.md)
 
 - `src/features/` — `account`, `auth`, `billing`, `changes`, `checks`, `competitors`,
-  `demo`, `digest`, `plan`, `summaries`. The noise filter (`isMeaningfulChange`) and
-  the Paddle signature verify are the pure, unit-tested functions.
+  `competitorFinder`, `competitorTeardown`, `demo`, `digest`, `lastUpdated`, `plan`,
+  `robotsTester`, `sitemapFinder`, `summaries`. The noise filter (`isMeaningfulChange`),
+  the Paddle signature verify, the teardown/finder prompt parses, and `competitors/url`
+  `normalizeUrl` are the pure, unit-tested functions. `competitors/actions.ts` also
+  exports `seedCompetitors` (onboarding pre-seed) + a shared `insertCompetitorWithPages`
+  helper reused by `createCompetitor`.
 - `src/app/(marketing)/` — landing at the subdomain root `/`. `page.tsx` composes four
   scroll-driven client components: `HeroScene` (pinned full-sky hero), `StepsScroller`
   ("Set it once" 3-step pinned scroller with built product-UI mockups), `CloudScene`
@@ -80,6 +84,10 @@ convenient:
   `src/features/auth/actions.ts` are env-driven off `NEXT_PUBLIC_SITE_URL`.
 - `src/app/(app)/` — authed shell: `dashboard`, `competitors`, `billing`, `settings`,
   `changes/[id]`. Guarded by `src/proxy.ts` + a belt-and-braces check in the layout.
+- `src/app/(onboarding)/` — authed but **chrome-free** (no sidebar): its own
+  `layout.tsx` (logo top-center, content centered, profile + Log out bottom-center).
+  Holds `welcome/` — the post-signup pre-seed confirm screen. `/welcome` is in
+  `proxy.ts` `APP_PREFIXES` and the page self-guards.
 - `src/app/(legal)/` — `terms`, `privacy`, `refunds` (placeholder content, real routes).
 - `src/app/api/cron/` — `check` (daily) and `digest` (weekly), Bearer-guarded by
   `CRON_SECRET`. Schedules in `vercel.json`: check `0 7 * * *`, digest `0 8 * * 1`.
@@ -89,6 +97,39 @@ convenient:
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
 ## Recent work (all pushed to `main`)
+
+**`/try` interactive landing + competitor pre-seeding (2026-09-04).** A promotable,
+`noindex` (canonical→`/`) landing variant for the Product Hunt launch. Same content
+as `/` below the hero (extracted into `src/app/(marketing)/MarketingSections.tsx`,
+shared by both so pricing/FAQ can't drift) — only the hero differs.
+- **`/try` hero = "Find your competitors"** (`CompetitorFinder.tsx` + `try/actions.ts`
+  → new `src/features/competitorFinder/`): enter your company (name/URL) → we ground on
+  your site (`extractSite`) and LLM-suggest 3–4 direct competitors (Groq→Anthropic→null
+  seam; declines return `{competitors:[]}` and providers catch errors so an unknown
+  company degrades to manual entry, never a 500). Editable list, dirty-aware "Find
+  competitors" button, one accent CTA at a time. Same homepage **sky** background
+  (static, scrim for legible copy), square UI, WCAG-safe inks. The earlier teardown
+  hero was replaced (the standalone teardown tool at `/tools/competitor-teardown`
+  stays). It first went in as a teardown hero, then swapped to the finder per owner.
+- **Pre-seeding:** the finder CTA stashes the chosen `{name,url}` list in
+  `localStorage` (`tw_pending_competitors`) → signup. On the dashboard's 0-competitor
+  state, `PendingSeedRedirect` sends new accounts to **`/welcome`**. That onboarding
+  (now in the **chrome-free `(onboarding)` group**) prefills each competitor with its
+  homepage page, lets the user **pick which N** via checkboxes capped at the free
+  limit, and creates them via `seedCompetitors` (re-caps server-side, skips invalid).
+  Over-limit CTAs: **primary "Upgrade to watch all N"** → `/billing?from=welcome`
+  (which shows a **"← Back to setup"** link), **secondary "Continue free with N"**;
+  "Skip for now" clears and exits. **Authed E2E of the seed/limit flow still needs a
+  real login to verify** — the unauthed parts (localStorage carry, `/welcome` guard,
+  billing back link) were verified in-browser.
+
+**Landing motion polish (2026-09-04, no back-end change).** A per-step scroll-progress
+rail on the pinned `StepsScroller` ("Set it once") that shows only on the active step;
+a short content zoom-in on the pricing reveal in `CloudScene` (content settles ~60%
+into the hold, after the cloud fully fades, while the sky keeps its longer zoom).
+
+**Tooling:** `graphify-out/` is gitignored (local knowledge-graph artifacts from the
+`/graphify` skill — per-machine, not shared).
 
 **Domain migration → `gettrailwatch.com` + auth/email hardening (2026-09-01).**
 - **Migrated** the app from the subdomain to `gettrailwatch.com`: one env var
@@ -196,7 +237,7 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
 
 - `npm run dev` / `npm run test` / `npm run lint` / `npm run typecheck`.
 - A pre-commit hook runs the tests and blocks the commit if they fail (currently
-  116 passing).
+  126 passing).
 - TypeScript strict; validate all external input. Keep functions small and pure,
   simplest approach, stay in scope (`SPEC.md` §6 is off-limits).
 
@@ -210,6 +251,14 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
 3. Auth was verified working end-to-end (reset cross-device, signup confirmation, Google
    OAuth on the new domain). Digest **email send** to real users still wants a live test
    (part of §9 below).
+
+**`/try` + pre-seeding (owner's active track):**
+0. **Verify the authed pre-seed flow end-to-end with a real login** (couldn't be driven
+   from the preview): `/try` → pick 3–4 → Start free → sign up → land on `/welcome`
+   (chrome-free) → pick which 2 (or Upgrade) → "Continue free" → dashboard shows the
+   real competitors with baselines captured, demo gone. Then decide whether `/try`
+   graduates to `/` (currently `noindex`, absent from `sitemap.ts`). Post-upgrade return
+   to `/welcome` relies on the dashboard redirect (no special Paddle return wiring).
 
 **Pre-launch (unchanged, still the gate):**
 4. Do a full `SPEC.md` §9 end-to-end pass in a test environment (`BACKLOG.md`) — the real
