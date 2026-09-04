@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { AddPageDialog } from "@/components/AddPageDialog";
 import { EditPageDialog } from "@/components/EditPageDialog";
+import { ButtonLink } from "@/components/Button";
 import { PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { deleteCompetitor, deletePage, togglePageActive } from "@/features/competitors/actions";
@@ -56,6 +57,64 @@ export function ManageBoard({
       document.removeEventListener("keydown", onEsc);
     };
   }, [openMenuPageId]);
+
+  if (competitors.length === 0) {
+    return (
+      <div className={styles.empty}>
+        {/* A competitor's page under a magnifier — "TrailWatch watches their pages". */}
+        <svg
+          className={styles.emptyArt}
+          viewBox="0 0 140 116"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          {/* the page */}
+          <rect x="26" y="14" width="60" height="82" stroke="currentColor" strokeWidth="2" />
+          {/* content lines */}
+          <line x1="36" y1="32" x2="76" y2="32" stroke="currentColor" strokeWidth="2" />
+          <line x1="36" y1="44" x2="76" y2="44" stroke="currentColor" strokeWidth="2" />
+          <line x1="36" y1="56" x2="62" y2="56" stroke="currentColor" strokeWidth="2" />
+          {/* the "changed" line the digest would flag */}
+          <line
+            x1="36"
+            y1="68"
+            x2="70"
+            y2="68"
+            className={styles.emptyArtAccent}
+            strokeWidth="2"
+          />
+          {/* magnifier watching the page */}
+          <circle
+            cx="94"
+            cy="76"
+            r="22"
+            className={styles.emptyArtAccent}
+            strokeWidth="2.5"
+          />
+          <line
+            x1="110"
+            y1="92"
+            x2="126"
+            y2="108"
+            className={styles.emptyArtAccent}
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+        </svg>
+
+        <h2 className={styles.emptyTitle}>No competitors yet</h2>
+        <p className={styles.emptyBody}>
+          Add a competitor and TrailWatch starts watching their pages — you’ll get a
+          plain-English email when something actually changes.
+        </p>
+        <ButtonLink href="/competitors/add">
+          <PlusIcon />
+          Add your first competitor
+        </ButtonLink>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.list}>
