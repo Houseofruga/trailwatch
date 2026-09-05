@@ -42,6 +42,7 @@ export function CompetitorFinder() {
 
   const showEditor = state !== null; // after the first lookup (ok or error)
   const errored = state?.status === "error";
+  const rateLimited = state?.status === "error" && state.kind === "rate-limited";
 
   // Show "Find competitors" only when there's something new to search: a
   // non-empty query that differs from the last one, while searching, or after an
@@ -124,13 +125,19 @@ export function CompetitorFinder() {
           <div className={styles.finderResult}>
             <div className={styles.finderResultHead}>
               <span className={styles.finderResultTitle}>
-                {errored
-                  ? "Add the competitors you want to watch"
-                  : "Suggested competitors — remove any, or add your own"}
+                {!errored
+                  ? "Suggested competitors — remove any, or add your own"
+                  : rateLimited
+                    ? "Too many lookups"
+                    : "No competitors found"}
               </span>
             </div>
 
-            {errored && <p className={styles.finderError}>{state.message}</p>}
+            {errored && (
+              <p className={styles.finderError}>
+                {rateLimited ? state.message : "Add the ones you want to watch below."}
+              </p>
+            )}
 
             {list.length > 0 ? (
               <ul className={styles.compList}>
@@ -157,7 +164,7 @@ export function CompetitorFinder() {
                 </li>
               ))}
             </ul>
-          ) : (
+          ) : errored ? null : (
             <p className={styles.compEmpty}>No competitors yet — add a few below.</p>
           )}
 

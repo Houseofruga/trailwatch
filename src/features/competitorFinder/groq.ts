@@ -32,7 +32,7 @@ export function createGroqFinder(apiKey: string): FinderProvider {
         if (!competitors) {
           return {
             ok: false,
-            reason: "We couldn't find competitors for that — add them yourself below.",
+            reason: "We couldn't find competitors for that.",
           };
         }
         return { ok: true, result: { company, competitors, provider: "groq" } };
@@ -41,7 +41,7 @@ export function createGroqFinder(apiKey: string): FinderProvider {
         // limits, timeouts) degrades to manual entry instead of 500-ing.
         return {
           ok: false,
-          reason: "We couldn't find competitors for that — add them yourself below.",
+          reason: "We couldn't find competitors for that.",
         };
       }
     },

@@ -6,7 +6,7 @@ import type { FinderResult } from "@/features/competitorFinder/types";
 
 export type FinderState =
   | { status: "ok"; result: FinderResult }
-  | { status: "error"; message: string }
+  | { status: "error"; message: string; kind: "no-results" | "rate-limited" }
   | null;
 
 // Same shape as the teardown action: this endpoint may fetch a page AND call a
@@ -44,10 +44,11 @@ export async function findCompetitorsAction(
     return {
       status: "error",
       message: "That's a lot of lookups — give it a minute and try again.",
+      kind: "rate-limited",
     };
   }
 
   const result = await runFind(company);
-  if (!result.ok) return { status: "error", message: result.reason };
+  if (!result.ok) return { status: "error", message: result.reason, kind: "no-results" };
   return { status: "ok", result: result.result };
 }
