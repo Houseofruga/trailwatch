@@ -41,24 +41,40 @@ export async function POST(request: Request): Promise<Response> {
     paddle_subscription_id: change.plan === "paid" ? change.paddleSubscriptionId : null,
   };
 
-  // Prefer the userId we stamped at checkout; fall back to the customer id for
-  // later events (cancellations) that don't carry custom_data.
-  const updateFor = (column: "id" | "paddle_customer_id", value: string) =>
-    service.from("users").update(patch).eq(column, value).select("id");
+  const updateFor = async (column: "id" | "paddle_customer_id", value: string) => {
+    const { data, error } = await service.from("users").update(patch).eq(column, value).select("id");
+    if (error) throw error;
+    return data?.length ?? 0;
+  };
 
-  const { data, error } =
-    change.userId != null
-      ? await updateFor("id", change.userId)
-      : change.paddleCustomerId != null
-        ? await updateFor("paddle_customer_id", change.paddleCustomerId)
-        : { data: [] as { id: string }[], error: null };
-
-  if (error) {
-    console.error("Paddle webhook DB update failed:", error);
+  // Prefer the userId we stamped at checkout; fall back to the customer id when
+  // it's absent (later events like cancellations don't carry custom_data) OR
+  // when the stamped id matched nothing (a bad/stale custom_data still resolves
+  // by customer id).
+  let matched = 0;
+  try {
+    if (change.userId != null) matched = await updateFor("id", change.userId);
+    if (matched === 0 && change.paddleCustomerId != null) {
+      matched = await updateFor("paddle_customer_id", change.paddleCustomerId);
+    }
+  } catch (err) {
+    console.error("Paddle webhook DB update failed:", err);
     return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
-  if (!data || data.length === 0) {
-    console.warn(`Paddle webhook matched no user (event ${event.event_type}).`);
+
+  if (matched === 0) {
+    console.error(
+      `Paddle webhook matched no user (event ${event.event_type}, plan ${change.plan}, ` +
+        `customer ${change.paddleCustomerId ?? "?"}, subscription ${change.paddleSubscriptionId ?? "?"}).`,
+    );
+    // An upgrade we couldn't apply is a paying customer left on Free — fail so
+    // Paddle retries (covers a transient DB blip) and it surfaces loudly. A
+    // downgrade that matches nothing has nothing to revert (e.g. the account was
+    // already deleted), so acknowledge it to stop the retries.
+    if (change.plan === "paid") {
+      return NextResponse.json({ error: "No matching user for upgrade" }, { status: 500 });
+    }
+    return NextResponse.json({ ok: true, matched: 0, event: event.event_type });
   }
 
   return NextResponse.json({ ok: true, plan: change.plan });
