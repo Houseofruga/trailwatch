@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import Link from "next/link";
 import { findCompetitorsAction, type FinderState } from "./actions";
 import { CompetitorAvatar } from "@/components/CompetitorAvatar";
-import type { Competitor, FinderResult } from "@/features/competitorFinder/types";
+import type { Competitor } from "@/features/competitorFinder/types";
 import styles from "./home.module.css";
 
 const SIGNUP_HREF = "/login?mode=signup&src=hero-finder";
@@ -28,13 +28,16 @@ export function CompetitorFinder() {
   const [company, setCompany] = useState("");
   const [lastQuery, setLastQuery] = useState("");
 
-  // Seed the editable list from a suggestion result, re-seeding whenever a new
-  // lookup lands. Setting state during render (guarded on the result identity) is
-  // the React-sanctioned way to reset state when derived-from input changes.
-  const [seeded, setSeeded] = useState<FinderResult | null>(null);
-  if (state?.status === "ok" && state.result !== seeded) {
-    setSeeded(state.result);
-    setList(state.result.competitors);
+  // Reset the editable list whenever a new lookup lands: replace it with the new
+  // suggestions on success, or clear it on a failed lookup so a previous search's
+  // results don't linger under the "no results" message. Guarded on state
+  // identity (a fresh object per submission) — the React-sanctioned way to reset
+  // state when derived-from input changes.
+  const [processed, setProcessed] = useState<FinderState>(null);
+  if (state !== processed) {
+    setProcessed(state);
+    if (state?.status === "ok") setList(state.result.competitors);
+    else if (state?.status === "error") setList([]);
   }
 
   const showEditor = state !== null; // after the first lookup (ok or error)
