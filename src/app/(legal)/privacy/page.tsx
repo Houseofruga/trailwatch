@@ -96,6 +96,11 @@ export default function PrivacyPage() {
             summarization. They do not use it to train their models on our behalf.
           </li>
           <li>
+            <strong>Exa</strong> — powering the homepage &ldquo;find your competitors&rdquo;
+            suggestions. When you use that tool, the company name or website you enter is sent
+            to Exa to search the public web for likely competitors.
+          </li>
+          <li>
             <strong>Paddle</strong> — payment processing as merchant of record.
           </li>
         </ul>

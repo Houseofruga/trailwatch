@@ -5,6 +5,7 @@
 
 import { lookup } from "node:dns/promises";
 import { extractSite } from "../competitorTeardown/extract";
+import { fetchCompetitorContext } from "./exa";
 import { getFinderProvider } from "./index";
 import type { Competitor, FinderResult } from "./types";
 
@@ -50,18 +51,26 @@ export async function runFind(
   const company = rawInput.trim();
   if (!company) return { ok: false, reason: "Enter your company name or website." };
 
-  let groundingText: string | null = null;
+  const isUrl = looksLikeUrl(company);
+  let siteText: string | null = null;
   let companyLabel = company;
 
-  if (looksLikeUrl(company)) {
+  if (isUrl) {
     const extracted = await extractSite(company);
     if (extracted.ok) {
-      groundingText = extracted.site.pages.map((p) => p.text).join("\n\n");
+      siteText = extracted.site.pages.map((p) => p.text).join("\n\n");
       companyLabel = extracted.site.title || company;
     }
     // If extraction fails (JS-only site, blocked, etc.) we don't bail — the model
     // can still try from the domain alone.
   }
+
+  // Live web grounding (Exa) — the key to recent/niche competitors. Placed FIRST
+  // so it survives the prompt's grounding cap and the model treats it as primary.
+  // Null (no key / error / out of free credits) → we just use the site text.
+  const exaKey = process.env.EXA_API_KEY;
+  const exaContext = exaKey ? await fetchCompetitorContext(company, isUrl, exaKey) : null;
+  const groundingText = [exaContext, siteText].filter(Boolean).join("\n\n") || null;
 
   const provider = getFinderProvider();
   const outcome = await provider.suggest({ company: companyLabel, groundingText });
