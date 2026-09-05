@@ -80,6 +80,17 @@ convenient:
   Groq tier, much better recall + more accurate homepage URLs (`competitorFinder/groq.ts`).
   Anthropic Haiku stays the fallback. `runFind` now DNS-verifies each suggested homepage and
   blanks the URL (keeping the name) if it doesn't resolve.
+- **Finder live web grounding via Exa (`EXA_API_KEY`, optional).** When set, `runFind`
+  calls Exa `/search` (`competitorFinder/exa.ts`) for current competitor candidates and
+  feeds them to the Groq model as grounding — so it finds RECENT/niche competitors, not just
+  famous ones (verified in prod: Formbricks → Heyform/Typebot/Form.io/SurveyJS, not the
+  offline model's analytics-tool miscategorisation). The prompt BLENDS live results with
+  known competitors. Exa free tier = monthly credits, no card → no overage; on error/quota
+  it degrades to the offline model. **Must be set in Vercel (Production) for the live finder
+  to be grounded** — without it, prod silently falls back to offline (famous-only). Also
+  disclosed as a sub-processor in the privacy policy. (Note: Gemini/Groq-Compound grounding
+  were trialed and rejected — Compound 413s on free tier, Gemini grounding is no longer free
+  for new keys; see git history.)
 - **Competitor logos are favicons via a first-party proxy** — `/api/favicon?domain=…`
   (`features/favicon/fetchFavicon.ts`, SSRF-safe) resolves each competitor's own favicon
   server-side and edge-caches it; the browser never hits a third-party icon service. The
