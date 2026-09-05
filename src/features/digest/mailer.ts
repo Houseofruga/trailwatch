@@ -9,7 +9,7 @@ import type { RenderedEmail } from "./email";
 export type SendResult = { sent: true } | { sent: false; reason: string };
 
 export interface Mailer {
-  send(to: string, email: RenderedEmail): Promise<SendResult>;
+  send(to: string, email: RenderedEmail, headers?: Record<string, string>): Promise<SendResult>;
 }
 
 // From address is env-configurable. Resend requires a verified domain in
@@ -21,13 +21,14 @@ function createResendMailer(apiKey: string): Mailer {
   const from = process.env.EMAIL_FROM || DEFAULT_FROM;
 
   return {
-    async send(to, email) {
+    async send(to, email, headers) {
       const { error } = await resend.emails.send({
         from,
         to,
         subject: email.subject,
         html: email.html,
         text: email.text,
+        ...(headers ? { headers } : {}),
       });
       if (error) return { sent: false, reason: error.message };
       return { sent: true };

@@ -2,6 +2,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { collectWeeklyDigests } from "./queries";
 import { renderDigest } from "./email";
 import { getMailer } from "./mailer";
+import { unsubscribeUrl } from "./unsubscribe";
 
 export type DigestRunResult = {
   usersWithChanges: number;
@@ -23,8 +24,17 @@ export async function runWeeklyDigest(now: number = Date.now()): Promise<DigestR
 
   for (const digest of digests) {
     try {
-      const email = renderDigest(digest, siteUrl);
-      const result = await mailer.send(digest.email, email);
+      const unsubUrl = unsubscribeUrl(siteUrl, digest.userId) ?? undefined;
+      const email = renderDigest(digest, siteUrl, unsubUrl);
+      // One-click unsubscribe (RFC 8058) — required by Gmail/Yahoo bulk-sender
+      // rules and what keeps us out of spam folders.
+      const headers = unsubUrl
+        ? {
+            "List-Unsubscribe": `<${unsubUrl}>`,
+            "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+          }
+        : undefined;
+      const result = await mailer.send(digest.email, email, headers);
       if (result.sent) {
         sent += 1;
         await service

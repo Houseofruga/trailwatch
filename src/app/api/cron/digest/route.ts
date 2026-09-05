@@ -9,11 +9,14 @@ export const maxDuration = 60;
 
 export async function GET(request: Request): Promise<Response> {
   const secret = process.env.CRON_SECRET;
-  if (secret) {
-    const auth = request.headers.get("authorization");
-    if (auth !== `Bearer ${secret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  // Fail closed: with no secret configured the endpoint would be world-triggerable
+  // (anyone could trigger digest sends), so refuse to run.
+  if (!secret) {
+    console.error("CRON_SECRET is not set — refusing to run the digest job.");
+    return NextResponse.json({ error: "Not configured" }, { status: 500 });
+  }
+  if (request.headers.get("authorization") !== `Bearer ${secret}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const result = await runWeeklyDigest();

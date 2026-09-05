@@ -20,7 +20,11 @@ function subjectFor(digest: UserDigest): string {
   return `Your weekly digest — ${n} ${n === 1 ? "change" : "changes"}`;
 }
 
-export function renderDigest(digest: UserDigest, siteUrl: string): RenderedEmail {
+export function renderDigest(
+  digest: UserDigest,
+  siteUrl: string,
+  unsubscribeUrl?: string,
+): RenderedEmail {
   const subject = subjectFor(digest);
 
   const textSections = digest.competitors.map((c) => {
@@ -36,6 +40,9 @@ export function renderDigest(digest: UserDigest, siteUrl: string): RenderedEmail
     ``,
     `—`,
     `Manage your competitors: ${siteUrl}/dashboard`,
+    unsubscribeUrl
+      ? `Unsubscribe from the weekly digest: ${unsubscribeUrl}`
+      : `Turn off the weekly digest in Settings: ${siteUrl}/settings`,
   ].join("\n");
 
   const htmlSections = digest.competitors
@@ -71,6 +78,10 @@ export function renderDigest(digest: UserDigest, siteUrl: string): RenderedEmail
         </td></tr>
         <tr><td style="padding:20px 28px 28px;border-top:1px solid #ececec;">
           <a href="${escapeHtml(siteUrl)}/dashboard" style="font-size:13px;color:#57544d;text-decoration:none;">Manage your competitors →</a>
+          <div style="font-size:11px;color:#8a8780;margin-top:12px;">
+            You get this because you track competitors on TrailWatch.
+            <a href="${escapeHtml(unsubscribeUrl ?? `${siteUrl}/settings`)}" style="color:#8a8780;text-decoration:underline;">Unsubscribe</a>.
+          </div>
         </td></tr>
       </table>
     </td></tr>
