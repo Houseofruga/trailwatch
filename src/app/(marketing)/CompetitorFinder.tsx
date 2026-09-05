@@ -80,7 +80,7 @@ export function CompetitorFinder() {
         className={styles.finderForm}
       >
         <label htmlFor="company" className={styles.finderLabel}>
-          Your company (name or website)
+          Your company website
         </label>
         <div className={styles.finderRow}>
           <input
@@ -104,7 +104,7 @@ export function CompetitorFinder() {
         <p className={styles.finderHint}>
           {pending
             ? "Reading your site and finding who to watch — a few seconds."
-            : "We’ll suggest competitors to track — you can edit them before you start."}
+            : "Your website gives the most accurate matches — a company name works too. You can edit the list before you start."}
         </p>
       </form>
 

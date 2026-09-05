@@ -2,8 +2,10 @@ import OpenAI from "openai";
 import { buildFinderPrompt, parseCompetitors } from "./prompt";
 import type { FinderProvider } from "./types";
 
-// Groq's OpenAI-compatible endpoint, same as the teardown / change summarizer.
-const MODEL = "openai/gpt-oss-20b";
+// Groq's OpenAI-compatible endpoint. gpt-oss-120b (same family as the 20b, but
+// far better company/competitor recall and more accurate homepage URLs) — still
+// free on Groq's tier. Verified available on the account 2026-09-05.
+const MODEL = "openai/gpt-oss-120b";
 const BASE_URL = "https://api.groq.com/openai/v1";
 const MAX_TOKENS = 600;
 

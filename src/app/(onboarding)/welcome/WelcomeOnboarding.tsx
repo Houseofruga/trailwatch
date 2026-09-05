@@ -125,7 +125,7 @@ export function WelcomeOnboarding({
 
         <form action={finderAction} className={styles.domainForm}>
           <label htmlFor="company" className={styles.domainLabel}>
-            Your company (name or website)
+            Your company website
           </label>
           <div className={styles.domainRow}>
             <input
@@ -146,7 +146,7 @@ export function WelcomeOnboarding({
           <p className={styles.domainHint}>
             {finding
               ? "Reading your site and finding who to watch — a few seconds."
-              : "We suggest competitors from your site — you choose which to track."}
+              : "Your website gives the most accurate matches — a company name works too."}
           </p>
         </form>
 
