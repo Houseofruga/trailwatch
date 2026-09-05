@@ -213,6 +213,14 @@
   color: var(--ink-2);
 }
 
+/* Sets the "these are AI guesses — review/edit before saving" expectation. */
+.finderResultNote {
+  margin: -4px 0 12px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ink-4);
+}
+
 .finderError {
   margin: 0 0 12px;
   font-size: 0.9rem;

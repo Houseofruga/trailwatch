@@ -126,12 +126,19 @@ export function CompetitorFinder() {
             <div className={styles.finderResultHead}>
               <span className={styles.finderResultTitle}>
                 {!errored
-                  ? "Suggested competitors — remove any, or add your own"
+                  ? "Suggested competitors — review before you start"
                   : rateLimited
                     ? "Too many lookups"
                     : "No competitors found"}
               </span>
             </div>
+
+            {!errored && (
+              <p className={styles.finderResultNote}>
+                Our best guesses — they may not be perfect. Remove any that don’t fit and
+                add your own. Nothing’s saved until you sign up.
+              </p>
+            )}
 
             {errored && (
               <p className={styles.finderError}>
