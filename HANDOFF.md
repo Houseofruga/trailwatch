@@ -24,6 +24,17 @@ of done) have not been re-verified end-to-end in this workspace. Treat MVP as
 "feature-complete, needs a full §9 pass in a test environment" — especially the
 Paddle checkout→plan-flip→cancel→revert loop and the digest send/no-send.
 
+**Pre-launch hardening + mobile pass done (2026-09-05, this session).** A launch
+audit fixed the real blockers: an authenticated **SSRF** in the check engine, a
+total absence of **error boundaries**, and a **non-responsive app shell**. The
+whole authed app was rebuilt mobile-first (bottom tab bar, account sheet,
+bottom-sheet dialogs). Also: one-click **email unsubscribe**, **fail-closed
+crons**, a stricter Paddle webhook, competitor **favicons** via a first-party
+proxy, and finder accuracy work. 130 tests pass. Details under Recent work. The
+authed-page changes were verified by compiling every route + a throwaway mock
+harness (screenshotted), **not** by a real logged-in walkthrough — that's still
+the owner's job (§9 / production login).
+
 ## Deviations from SPEC.md / CLAUDE.md (important)
 
 These docs predate some decisions — trust the code, and reconcile the docs when
@@ -65,6 +76,20 @@ convenient:
   The app reflects it with "Plus applicable taxes — calculated at checkout" on the checkout
   surfaces only (`ProPricingCard` + the add-competitor upsell); the marketing landing has no
   tax line. If the Paddle prices ever revert to inclusive, that copy would be wrong.
+- **Competitor finder model is `openai/gpt-oss-120b`** (was `gpt-oss-20b`) — same free
+  Groq tier, much better recall + more accurate homepage URLs (`competitorFinder/groq.ts`).
+  Anthropic Haiku stays the fallback. `runFind` now DNS-verifies each suggested homepage and
+  blanks the URL (keeping the name) if it doesn't resolve.
+- **Competitor logos are favicons via a first-party proxy** — `/api/favicon?domain=…`
+  (`features/favicon/fetchFavicon.ts`, SSRF-safe) resolves each competitor's own favicon
+  server-side and edge-caches it; the browser never hits a third-party icon service. The
+  shared `components/CompetitorAvatar` renders it with initials fallback, used on the
+  dashboard, demo dashboard, Competitors board, change detail, and the marketing finder.
+- **Digest email has one-click unsubscribe** — signed `/api/unsubscribe?u=&t=` (HMAC keyed by
+  `UNSUBSCRIBE_SECRET`, falling back to `CRON_SECRET`) + `List-Unsubscribe` /
+  `List-Unsubscribe-Post` headers (RFC 8058). GET confirms, POST flips `digest_enabled=false`.
+- **Both cron routes fail closed** — if `CRON_SECRET` is unset they 500 instead of running
+  wide open (previously the auth check was skipped when the secret was missing).
 
 ## Where things live (organized by domain, per CLAUDE.md)
 
@@ -116,6 +141,34 @@ convenient:
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
 ## Recent work (all pushed to `main`)
+
+**Pre-launch audit fixes, mobile-first rebuild, finder + favicons (2026-09-05, this
+session — commits `7cf3c97`…`813de66`).**
+- **Perceived perf:** added `(app)/loading.tsx` skeletons (no more blank-screen navigations)
+  and wrapped `getAccount` in React `cache()` so the layout + page share one query per request.
+- **Onboarding domain-first:** a no-pre-picks signup now hits a **domain step** in `/welcome`
+  that runs the finder and seeds the editable watchlist, instead of blank URL rows.
+- **Security — SSRF:** the daily check engine (`features/checks/fetchPage.ts`) now routes every
+  fetch (page + robots.txt) through the SSRF-safe `safeFetch` (DNS/private-IP block, per-hop
+  redirect re-validation, byte cap) — it previously used naive `fetch` and stored the response,
+  an authenticated SSRF+exfil hole.
+- **Error boundaries:** added `error.tsx`, `global-error.tsx`, `not-found.tsx`, and an
+  `(app)/error.tsx` (keeps the shell) built on a shared `components/ErrorState`. No more bare
+  "Application error" white screen.
+- **Mobile app rebuild:** the authed shell was desktop-only (fixed 252px sidebar, no media
+  queries). Now below 860px it's a fixed top bar + **bottom tab bar** + an **account sheet**
+  (`components/Sidebar.tsx`); dialogs become **bottom sheets**; the Competitors board and all
+  page paddings/grids reflow; inputs forced to 16px (no iOS zoom); safe-area insets. Desktop
+  unchanged. Marketing/tools pages were already responsive (audited, no changes needed).
+- **Competitor favicons:** see Deviations — `CompetitorAvatar` + `/api/favicon` first-party proxy.
+- **Digest email + crons:** one-click unsubscribe + `List-Unsubscribe` headers; crons fail closed
+  (see Deviations). New `features/digest/unsubscribe.ts` (token unit-tested).
+- **Paddle webhook robustness:** falls back to customer-id even when a stamped userId matched
+  nothing; an upgrade matching no user now returns 500 (Paddle retries + loud) instead of a
+  silent 200; a downgrade matching nothing still acks. All no-match cases error-log with context.
+- **Finder accuracy:** `gpt-oss-120b`, DNS URL verification, website-first copy, cleared stale
+  results on a new lookup, and a de-cluttered "No competitors found" no-results state (see
+  Deviations). Test count 126 → **130**.
 
 **Homepage swap, onboarding polish, upsell + tax model (2026-09-05, all in production
 on `gettrailwatch.com`).**
@@ -293,6 +346,8 @@ Supabase: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
 `SUPABASE_SERVICE_ROLE_KEY`.
 Site/cron: `NEXT_PUBLIC_SITE_URL`, `CRON_SECRET`.
 Email (Resend): `RESEND_API_KEY`, `EMAIL_FROM`, `COMP_EMAILS`.
+Unsubscribe (optional): `UNSUBSCRIBE_SECRET` — HMAC key for the one-click digest
+unsubscribe link; falls back to `CRON_SECRET` if unset, so nothing new is required.
 LLM: `GROQ_API_KEY` and/or `ANTHROPIC_API_KEY`.
 Paddle: `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `NEXT_PUBLIC_PADDLE_ENV`,
 `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN`, `NEXT_PUBLIC_PADDLE_PRICE_PRO_MONTHLY`,
@@ -338,7 +393,7 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
    NB: the `/try` graduation question is **resolved** — the finder IS `/` now (indexed),
    animated landing is `/1` (noindex).
 
-**Pre-launch (unchanged, still the gate):**
+**Pre-launch (still the gate):**
 4. Do a full `SPEC.md` §9 end-to-end pass in a test environment (`BACKLOG.md`) — the real
    Paddle sandbox checkout→flip→cancel loop and a real digest send. Auth email is now real
    (Supabase SMTP → Resend), so the signup/reset legs are effectively covered.
@@ -346,6 +401,14 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
    needs a lawyer pass, not drafting).
 6. Landing has **no automated coverage** for the scroll animations — manual QA on real
    desktop + mobile (effects gated ≥1041px, static/stacked fallback below).
+7. **Walk the authed app on a real phone** — this session's mobile rebuild was verified by
+   compiling every route + a mock harness, not a live logged-in session. Open the digest link →
+   `/dashboard`, tap the bottom tabs, open the account sheet, add/delete a competitor (bottom
+   sheets), and confirm it all reads well on a 375px screen.
+
+**Audit blockers from this session — DONE** (SSRF, error boundaries, mobile, email unsubscribe,
+fail-closed crons, webhook no-match). Remaining finder idea if niche-company misses persist:
+`groq/compound` (Groq's free web-search model) as a grounding step — a spike, not started.
 
 **Marketing (owner's active track — see `DISTRIBUTION.md` + `LAUNCH-COPY.md`):**
 7. Lanes done: teardown tool, 3 compare pages, distribution playbook + copy kit. Remaining
