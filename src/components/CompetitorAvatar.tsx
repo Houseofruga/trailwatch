@@ -4,14 +4,13 @@ import { useState } from "react";
 import styles from "./CompetitorAvatar.module.css";
 
 // Shows a competitor's favicon as their logo, falling back to the two-letter
-// initials (the previous behaviour) when there's no URL or the icon fails to
-// load. Rendered inside the caller's existing avatar box — pass that box's class
-// as `className` so sizing/background stay consistent per page.
+// initials when there's no URL or the icon fails to load. Rendered inside the
+// caller's existing avatar box — pass that box's class as `className` so
+// sizing/background stay consistent per page.
 //
-// The icon comes from Google's favicon service (keyed by domain), so there's no
-// backend or stored asset. Trade-off: it discloses the competitor's domain to
-// that service at render time; swap the URL builder for a first-party proxy if
-// that ever matters.
+// The icon is served by our own /api/favicon proxy, which fetches the
+// competitor's favicon server-side (SSRF-safe) — so the viewer's browser never
+// discloses which competitors they track to a third-party icon service.
 function domainOf(raw: string): string | null {
   try {
     const url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
@@ -37,9 +36,9 @@ export function CompetitorAvatar({
   return (
     <span className={className}>
       {showIcon ? (
-        // eslint-disable-next-line @next/next/no-img-element -- external favicon, no next/image loader
+        // eslint-disable-next-line @next/next/no-img-element -- proxied favicon, no next/image loader
         <img
-          src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`}
+          src={`/api/favicon?domain=${encodeURIComponent(domain)}`}
           alt=""
           aria-hidden="true"
           className={styles.favicon}
