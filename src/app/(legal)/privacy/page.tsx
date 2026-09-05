@@ -96,13 +96,6 @@ export default function PrivacyPage() {
             summarization. They do not use it to train their models on our behalf.
           </li>
           <li>
-            <strong>Google (Gemini)</strong> — powering the homepage &ldquo;find your
-            competitors&rdquo; suggestions. When you use that tool, the company name or URL
-            you enter is sent to Google to generate suggestions; on Google&rsquo;s free tier
-            that input may be used to improve their services, so please don&rsquo;t enter
-            anything you consider confidential there.
-          </li>
-          <li>
             <strong>Paddle</strong> — payment processing as merchant of record.
           </li>
         </ul>
