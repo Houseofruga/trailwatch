@@ -16,7 +16,7 @@ You are given a company (a name, and sometimes text extracted from its website).
 Respond with ONLY a JSON object — no markdown, no code fence, no preamble — with exactly this key:
 - "competitors": an array of 3 to 4 objects {"name": string, "url": string, "why": string}, where "url" is the competitor's best-guess homepage as a bare domain (e.g. "linear.app"), and "why" is one short clause (max ~12 words) on why it competes. Order by how directly they compete.
 
-Only name real companies you are reasonably confident exist and that are CURRENTLY OPERATING — exclude any product that has shut down, been discontinued, or was acquired and folded into another product. If the company's country or primary market is evident (from its name, domain TLD, or website text), prefer competitors that operate in that same region. Prefer specific direct product competitors over broad categories. If you genuinely cannot identify real competitors from the input, return an empty array — {"competitors": []} — and never invent companies.`;
+Never include the company itself in the list — only its competitors. Only name real companies you are reasonably confident exist and that are CURRENTLY OPERATING — exclude any product that has shut down, been discontinued, or was acquired and folded into another product. If the company's country or primary market is evident (from its name, domain TLD, or website text), prefer competitors that operate in that same region. Prefer specific direct product competitors over broad categories. If you genuinely cannot identify real competitors from the input, return an empty array — {"competitors": []} — and never invent companies.`;
 
 export function buildFinderPrompt(
   company: string,

@@ -2,9 +2,12 @@ import OpenAI from "openai";
 import { buildFinderPrompt, parseCompetitors } from "./prompt";
 import type { FinderProvider } from "./types";
 
-// Groq's OpenAI-compatible endpoint. gpt-oss-120b (same family as the 20b, but
-// far better company/competitor recall and more accurate homepage URLs) — still
-// free on Groq's tier. Verified available on the account 2026-09-05.
+// Groq's OpenAI-compatible endpoint. gpt-oss-120b (free on Groq): strong,
+// consistent, clean-JSON competitor recall with correct homepage URLs. (Trialed
+// qwen3.8-27b for its fresher regional knowledge, but it self-included the
+// company and hallucinated obscure/fake competitors, so gpt-oss stays.) Still
+// offline — can't know about a shutdown after its cutoff — which is why the UI
+// frames results as editable suggestions. Verified against the account 2026-09-05.
 const MODEL = "openai/gpt-oss-120b";
 const BASE_URL = "https://api.groq.com/openai/v1";
 const MAX_TOKENS = 600;
