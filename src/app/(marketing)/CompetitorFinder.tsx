@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { findCompetitorsAction, type FinderState } from "./actions";
+import { CompetitorAvatar } from "@/components/CompetitorAvatar";
 import type { Competitor, FinderResult } from "@/features/competitorFinder/types";
 import styles from "./home.module.css";
 
@@ -132,6 +133,7 @@ export function CompetitorFinder() {
               <ul className={styles.compList}>
               {list.map((c, i) => (
                 <li key={`${c.name}-${i}`} className={styles.compRow}>
+                  <CompetitorAvatar url={c.url} name={c.name} className={styles.compFavicon} />
                   <div className={styles.compMain}>
                     <span className={styles.compName}>{c.name}</span>
                     {c.url && (

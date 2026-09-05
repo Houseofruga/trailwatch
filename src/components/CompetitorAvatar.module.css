@@ -1,0 +1,7 @@
+/* Fills the caller's avatar box; object-fit keeps non-square favicons tidy. */
+.favicon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}

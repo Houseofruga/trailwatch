@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BackLink } from "@/components/BackLink";
+import { CompetitorAvatar } from "@/components/CompetitorAvatar";
 import { getRealChangeDetail } from "@/features/changes/queries";
 import { getDemoChangeDetail } from "@/features/demo/demoFeed";
 import styles from "./page.module.css";
@@ -23,6 +24,7 @@ export default async function ChangeDetailPage({ params }: { params: Promise<{ i
       <BackLink href="/dashboard">This week</BackLink>
 
       <div className={styles.crumb}>
+        <CompetitorAvatar url={detail.url} name={detail.competitorName} className={styles.crumbAvatar} />
         <span className={styles.crumbComp}>{detail.competitorName}</span>
         <span className={styles.crumbDot}>&middot;</span>
         <span className={styles.crumbLabel}>{detail.pageLabel}</span>

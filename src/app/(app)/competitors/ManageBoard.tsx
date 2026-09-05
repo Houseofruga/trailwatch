@@ -6,6 +6,7 @@ import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { AddPageDialog } from "@/components/AddPageDialog";
 import { EditPageDialog } from "@/components/EditPageDialog";
 import { ButtonLink } from "@/components/Button";
+import { CompetitorAvatar } from "@/components/CompetitorAvatar";
 import { PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { deleteCompetitor, deletePage, togglePageActive } from "@/features/competitors/actions";
@@ -125,7 +126,7 @@ export function ManageBoard({
           <section key={c.id} className={styles.card}>
             <div className={styles.cardHead}>
               <div className={styles.cardHeadLeft}>
-                <div className={styles.avatar}>{c.name.slice(0, 2).toUpperCase()}</div>
+                <CompetitorAvatar url={c.pages[0]?.url} name={c.name} className={styles.avatar} />
                 <span className={styles.compName}>{c.name}</span>
                 <span className={styles.pageCount}>
                   {c.pages.length} of {pagesPerCompetitor} pages

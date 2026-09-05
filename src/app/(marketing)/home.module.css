@@ -238,8 +238,23 @@
   background: var(--surface-alt);
 }
 
+.compFavicon {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-sunken);
+  color: #5d5a53;
+  font-size: 9px;
+  font-weight: 600;
+}
+
 .compMain {
   display: flex;
+  flex: 1;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 4px 8px;

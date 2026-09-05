@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { ButtonLink } from "@/components/Button";
+import { CompetitorAvatar } from "@/components/CompetitorAvatar";
 import { PlusIcon } from "@/components/icons";
 import { FlashToast } from "@/components/FlashToast";
 import { getAccount } from "@/features/account/queries";
@@ -167,7 +168,7 @@ export default async function DashboardPage() {
             <section key={c.id} className={styles.compCard}>
               <div className={styles.compHead}>
                 <div className={styles.compHeadLeft}>
-                  <div className={styles.compAvatar}>{c.name.slice(0, 2).toUpperCase()}</div>
+                  <CompetitorAvatar url={c.pages[0]?.url} name={c.name} className={styles.compAvatar} />
                   <div className={styles.compName}>{c.name}</div>
                   {c.pages[0] ? <div className={styles.compDomain}>{domainOf(c.pages[0].url)}</div> : null}
                 </div>

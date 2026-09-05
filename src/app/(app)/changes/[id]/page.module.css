@@ -8,8 +8,20 @@
 .crumb {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 20px;
+}
+.crumbAvatar {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-sunken);
+  color: #5d5a53;
+  font-size: 9px;
+  font-weight: 600;
 }
 .crumbComp {
   font-size: 13.5px;
