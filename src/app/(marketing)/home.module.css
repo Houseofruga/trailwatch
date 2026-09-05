@@ -10,15 +10,17 @@
   min-height: 620px;
 }
 
-/* Full-bleed sky, same image as the homepage hero. Zoomed into the image's clear
-   deep-blue upper-left (anchored top-left) so the copy sits on blue — no dark
-   scrim. The green hills are cropped out; the foreground .hill supplies the green
-   at the bottom. */
+/* Full-bleed sky — matches the /1 hero's at-rest frame exactly (HeroScene.sky):
+   fullBG cover/centered, then scaled up and slid right so the deep-blue left of
+   the image fills the frame behind the copy (no dark scrim needed). Static here
+   (no scroll zoom). */
 .sky {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: url("/fullBG.webp") left top / 200% auto no-repeat;
+  background: url("/fullBG.webp") center center / cover no-repeat;
+  transform: translate(26vw, 170px) scale(2.25);
+  transform-origin: center center;
 }
 
 .header {
@@ -26,9 +28,10 @@
   z-index: 10;
 }
 
-/* Foreground hill for parity with the homepage — decorative, behind the content
-   (above the sky) so it never covers the tool. */
+/* Foreground hill — hidden on desktop so the hero reads as /1's deep-blue sky at
+   rest (no green foreground). Still shown on mobile (stacked layout) below. */
 .hill {
+  display: none;
   position: absolute;
   left: 0;
   bottom: -1px;
@@ -43,9 +46,11 @@
 .heroInner {
   position: relative;
   z-index: 3;
-  max-width: 1180px;
+  /* Match the shared section/header container (1280 / 48px) so the copy aligns
+     with the logo and the tool card gets proper right padding. */
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 40px 32px 96px;
+  padding: 48px 48px 96px;
   display: grid;
   grid-template-columns: 1fr 0.92fr;
   gap: 56px;
@@ -371,11 +376,15 @@
   .sky {
     background-size: cover;
     background-position: left top;
+    transform: none; /* the desktop zoom/slide is desktop-only */
+  }
+  .hill {
+    display: block; /* grounds the stacked mobile hero */
   }
   .heroInner {
     grid-template-columns: 1fr;
     gap: 28px;
-    padding: 28px 20px 72px;
+    padding: 28px 22px 72px;
   }
   .heroCopy {
     max-width: none;
