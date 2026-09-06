@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-06 (summary-pipeline fixes: Groq truncation + diff-blindness, quiet-card summaries, Recent history incl. live changes, copy)._
+_Last updated: 2026-09-07 (baseline card reworked page-focused; "What to watch" removed. Prior: summary-pipeline fixes, quiet-card summaries, Recent history incl. live changes)._
 
 ## Product in one line
 
@@ -162,13 +162,21 @@ convenient:
   history beyond recent changes" is out of scope until paying users ask — the owner is
   driving this expansion anyway to justify $19 on day 0. Two shipped pieces:
   - **Phase 1 — instant baseline profile** (`src/features/insights/`, migration `0005_page_insights`).
-    Per active page on the Competitors screen, a cached AI "What we're now watching" card
-    (positioning / pricing tiers / what-to-watch), generated once from the page's baseline
-    snapshot by **reusing the `competitorTeardown` provider seam** (Groq→Anthropic→null) — no
-    re-fetch. `getOrCreatePageInsight` reads RLS-scoped, writes via service role, caches in
-    `page_insights` (owner-scoped SELECT policy only). UI `BaselinePanel.tsx` lazy-loads +
-    caches. NB: uses the canonical `live`-flag effect (a `startedRef` guard + StrictMode left
-    it stuck on the skeleton — fixed).
+    Per active page on the Competitors screen, a cached AI "What we're now watching" card,
+    generated once from the page's baseline snapshot — no re-fetch. `getOrCreatePageInsight` reads
+    RLS-scoped, writes via service role, caches in `page_insights` (owner-scoped SELECT policy only).
+    UI is `PageIntel.tsx` (the old `BaselinePanel.tsx` was consolidated — see v3 notes).
+    **REWORKED 2026-09-07 (`f39dab1`, `071af13`):** the card is now **page-focused**, not
+    company-level. It originally reused the `competitorTeardown` seam fed a single page, so every
+    page of a competitor showed the SAME (and drifting) whole-company positioning, plus a confusing
+    "What to watch" list that named OTHER pages. Now insights has its **own** page-focused provider
+    seam (`insights/prompt.ts` + `insights/provider.ts`, Groq→Anthropic→null, `reasoning_effort:"low"`)
+    that describes what THIS page shows; `PageProfile` is `{ summary, pricingTiers }`
+    (`positioning`→`summary`, `title`/`whatToWatch` dropped). The public teardown tool
+    (`competitorTeardown/*`, `/tools/competitor-teardown`) is unchanged and stays company-level. When
+    the shape changed, existing `page_insights` rows were cleared so they regenerate page-focused
+    (lazy on view + via warm/cron). NB: `PageIntel` uses the canonical `live`-flag effect (a
+    `startedRef` guard + StrictMode once left it stuck on the skeleton — fixed).
   - **Phase 2 — Wayback historical backfill** (`src/features/backfill/`, migration
     `0006_change_source`). A collapsed **"Recent history"** timeline per page (`HistoryPanel.tsx`,
     beside the baseline) reconstructs recent changes from the Internet Archive: CDX capture list
@@ -304,6 +312,22 @@ convenient:
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
 ## Recent work (all pushed to `main`)
+
+**Baseline card reworked page-focused (2026-09-07 — commits `f39dab1`, `071af13`; pushed).**
+The Competitors "What we're now watching" card was showing a generic, company-level blurb that
+drifted page-to-page (the homepage and pricing pages of the same competitor gave two different
+Notion descriptions) and a "What to watch" list that named OTHER pages.
+- `f39dab1`: removed the confusing **"What to watch"** section from the card (it was company-level
+  "which pages to monitor" guidance, redundant per page). Dropped `whatToWatch` from the insights
+  `PageProfile` (the public teardown tool keeps its own).
+- `071af13`: gave insights its **own page-focused generation seam** (`insights/prompt.ts` +
+  `insights/provider.ts`) instead of reusing the company-level teardown. The card now describes
+  what THIS page shows — pricing card → the plans + tiers; homepage → the positioning message;
+  changelog → what they ship. `PageProfile` is now `{ summary, pricingTiers }`. Cleared the 14
+  cached `page_insights` rows so they regenerate in the new shape. Verified live in the sandbox
+  (Notion Home vs Pricing now describe their own pages). Owner decisions this session: keep the
+  card **per-page** (not competitor-level) and **remove** "What to watch". typecheck/lint/137 tests
+  green; no new migration.
 
 **Summary-pipeline + quiet-card fixes (2026-09-06, this session — commits `e0fbdae`,
 `0f00680`, `74c2f45`, `6817e7c`, `de4ff31`, `c70cebf`, `8cd2126`; pushed to `8cd2126`).**
