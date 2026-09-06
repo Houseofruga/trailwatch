@@ -137,17 +137,25 @@ async function insightsReachable(): Promise<boolean> {
   return r.ok;
 }
 
-async function prewarmBaseline(pageId: string, url: string, label: string, text: string) {
-  const outcome = await getTeardownProvider().analyze({ url, title: label, pages: [{ label, text }] });
-  if (!outcome.ok) return false;
-  const r = outcome.result;
-  const profile = { title: r.title, positioning: r.positioning, pricingTiers: r.pricingTiers, whatToWatch: r.whatToWatch };
-  const up = await fetch(rest("page_insights?on_conflict=page_id"), {
-    method: "POST",
-    headers: { ...H, Prefer: "resolution=merge-duplicates" },
-    body: JSON.stringify({ page_id: pageId, profile, model: r.provider }),
-  });
-  return up.ok;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// Best-effort: a failed generation (rate limit, unusable JSON) is non-fatal —
+// the dashboard regenerates that page on view. Never aborts the seed.
+async function prewarmBaseline(pageId: string, url: string, label: string, text: string): Promise<boolean> {
+  try {
+    const outcome = await getTeardownProvider().analyze({ url, title: label, pages: [{ label, text }] });
+    if (!outcome.ok) return false;
+    const r = outcome.result;
+    const profile = { title: r.title, positioning: r.positioning, pricingTiers: r.pricingTiers, whatToWatch: r.whatToWatch };
+    const up = await fetch(rest("page_insights?on_conflict=page_id"), {
+      method: "POST",
+      headers: { ...H, Prefer: "resolution=merge-duplicates" },
+      body: JSON.stringify({ page_id: pageId, profile, model: r.provider }),
+    });
+    return up.ok;
+  } catch {
+    return false;
+  }
 }
 
 async function main() {
@@ -208,7 +216,11 @@ async function main() {
           headers: H,
           body: JSON.stringify({ latest_snapshot_id: snap.id, last_checked_at: new Date().toISOString() }),
         });
-        if (canBaseline) await prewarmBaseline(page.id, pg.url, pg.label, pg.text);
+        if (canBaseline) {
+          const ok = await prewarmBaseline(page.id, pg.url, pg.label, pg.text);
+          if (!ok) console.log(`   · baseline for ${comp.name}/${pg.label} deferred (will generate on view)`);
+          await sleep(2500); // stay under Groq's free-tier TPM limit
+        }
         pageCount++;
       }
     }
