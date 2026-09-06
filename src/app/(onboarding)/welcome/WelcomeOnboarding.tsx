@@ -10,6 +10,7 @@ import { seedCompetitors } from "@/features/competitors/actions";
 import { normalizeUrl } from "@/features/competitors/url";
 import { LIMITS, PLAN_LABEL, type Plan } from "@/features/plan/limits";
 import { OnboardingPlanStep } from "./OnboardingPlanStep";
+import { StepIndicator } from "./StepIndicator";
 import styles from "./welcome.module.css";
 
 type Row = { name: string; url: string; selected: boolean };
@@ -117,6 +118,7 @@ export function WelcomeOnboarding({
     }
     return (
       <div className={styles.wrap}>
+        <StepIndicator step={1} label="Build your watchlist" />
         <h1 className={styles.title}>What do you want to keep an eye on?</h1>
         <p className={styles.sub}>
           Tell us your website and we’ll suggest the competitors worth watching. You can
@@ -237,6 +239,7 @@ export function WelcomeOnboarding({
 
   return (
     <div className={styles.wrap}>
+      <StepIndicator step={1} label="Build your watchlist" />
       {cameFromDomain && (
         <button
           type="button"

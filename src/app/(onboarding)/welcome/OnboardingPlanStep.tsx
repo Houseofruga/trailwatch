@@ -8,6 +8,7 @@ import { ChevronLeftIcon } from "@/components/icons";
 import { ProPricingCard } from "@/features/billing/ProPricingCard";
 import { seedCompetitors, currentPlan } from "@/features/competitors/actions";
 import { LIMITS, type BillingPeriod } from "@/features/plan/limits";
+import { StepIndicator } from "./StepIndicator";
 import styles from "./welcome.module.css";
 
 const KEY = "tw_pending_competitors";
@@ -153,6 +154,7 @@ export function OnboardingPlanStep({
 
   return (
     <div className={styles.plansWrap}>
+      <StepIndicator step={2} label="Choose your plan" />
       <button type="button" className={styles.back} onClick={onBack} disabled={busy}>
         <span className={styles.backIcon}>
           <ChevronLeftIcon />
