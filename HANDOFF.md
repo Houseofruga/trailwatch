@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-05._
+_Last updated: 2026-09-06._
 
 ## Product in one line
 
@@ -34,6 +34,16 @@ proxy, and finder accuracy work. 130 tests pass. Details under Recent work. The
 authed-page changes were verified by compiling every route + a throwaway mock
 harness (screenshotted), **not** by a real logged-in walkthrough — that's still
 the owner's job (§9 / production login).
+
+**Day-0 value expansion in progress (2026-09-06, this session).** A deliberate
+Phase-2-style expansion beyond `SPEC.md` §6, owner-driven, to justify the paid tier:
+adding a page now gives immediate in-app value instead of a dashboard that's empty
+until the first cron change. **Phase 1 (instant baseline profile)** and **Phase 2
+(Wayback historical backfill)** are shipped, pushed, and verified live in a sandbox.
+**In progress, NOT yet built: the adaptive dashboard** (value-forward when quiet,
+feed-forward when active) + **background backfill warming** — see Recent work and
+Suggested next steps. Two DB migrations (`0005`, `0006`) were added and **applied to
+the hosted Supabase this session**; a different environment must apply them too.
 
 ## Deviations from SPEC.md / CLAUDE.md (important)
 
@@ -101,12 +111,46 @@ convenient:
   `List-Unsubscribe-Post` headers (RFC 8058). GET confirms, POST flips `digest_enabled=false`.
 - **Both cron routes fail closed** — if `CRON_SECRET` is unset they 500 instead of running
   wide open (previously the auth check was skipped when the secret was missing).
+- **Day-0 value beyond SPEC §6 (owner-driven, 2026-09-06).** SPEC §6 says "in-app change
+  history beyond recent changes" is out of scope until paying users ask — the owner is
+  driving this expansion anyway to justify $19 on day 0. Two shipped pieces:
+  - **Phase 1 — instant baseline profile** (`src/features/insights/`, migration `0005_page_insights`).
+    Per active page on the Competitors screen, a cached AI "What we're now watching" card
+    (positioning / pricing tiers / what-to-watch), generated once from the page's baseline
+    snapshot by **reusing the `competitorTeardown` provider seam** (Groq→Anthropic→null) — no
+    re-fetch. `getOrCreatePageInsight` reads RLS-scoped, writes via service role, caches in
+    `page_insights` (owner-scoped SELECT policy only). UI `BaselinePanel.tsx` lazy-loads +
+    caches. NB: uses the canonical `live`-flag effect (a `startedRef` guard + StrictMode left
+    it stuck on the skeleton — fixed).
+  - **Phase 2 — Wayback historical backfill** (`src/features/backfill/`, migration
+    `0006_change_source`). A collapsed **"Recent history"** timeline per page (`HistoryPanel.tsx`,
+    beside the baseline) reconstructs recent changes from the Internet Archive: CDX capture list
+    (`collapse=digest`, **capped at 4** recent captures → ≤3 diffs) → raw `id_` fetch via the
+    hardened `safeFetch` → the SAME `extract`/`normalize`/`hash` → the pure `isMeaningfulChange`
+    → the existing summarizer seam → stored as `changes` rows with `source='archive'`,
+    `from/to_snapshot_id=null`, excerpts on the row, `detected_at`/`compared_from_at` = the
+    capture dates. Lazy-on-expand + cached via `pages.backfilled_at` (stamped before the work →
+    runs once). `maxDuration=60` on the competitors route. Archive rows are kept OUT of the
+    "this week" dashboard feed (`competitors/queries.ts` filters `source!=='archive'`) and the
+    weekly digest (`digest/build.ts` guard + they're old-dated); the change-detail renders them
+    with a Wayback provenance note and the archive before-date. New migration columns:
+    `changes.source`, `changes.compared_from_at`, `pages.backfilled_at`.
+- **Sandbox seed script** (`scripts/seed-sandbox.ts`, dev tooling, run with
+  `npx tsx --env-file=.env.local scripts/seed-sandbox.ts`). Idempotent Pro + Free **test**
+  users (`pro-test@ / free-test@trailwatch.test`, throwaway passwords in the file) with sample
+  competitors/pages/snapshots (Free seeded at its 2-competitor limit to exercise the upsell),
+  optional baseline pre-warm, and **magic-link logins** minted via the Auth admin API (so a
+  browser can log in without typing a password). `--teardown` removes them. Writes to the
+  HOSTED project via the service-role key (no local Supabase — Docker isn't installed).
+- **Vitest now resolves the `@/` alias** (`vitest.config.ts`) so tests can import modules that
+  use it (the check pipeline reused by backfill does). Test count **130 → 137**.
 
 ## Where things live (organized by domain, per CLAUDE.md)
 
-- `src/features/` — `account`, `auth`, `billing`, `changes`, `checks`, `competitors`,
-  `competitorFinder`, `competitorTeardown`, `demo`, `digest`, `lastUpdated`, `plan`,
-  `robotsTester`, `sitemapFinder`, `summaries`. The noise filter (`isMeaningfulChange`),
+- `src/features/` — `account`, `auth`, `backfill`, `billing`, `changes`, `checks`,
+  `competitors`, `competitorFinder`, `competitorTeardown`, `demo`, `digest`, `insights`,
+  `lastUpdated`, `plan`, `robotsTester`, `sitemapFinder`, `summaries`. (`insights` = Phase-1
+  baseline; `backfill` = Phase-2 Wayback history — both reuse existing seams, see Deviations.) The noise filter (`isMeaningfulChange`),
   the Paddle signature verify, the teardown/finder prompt parses, and `competitors/url`
   `normalizeUrl` are the pure, unit-tested functions. `competitors/actions.ts` also
   exports `seedCompetitors` (onboarding pre-seed) + a shared `insertCompetitorWithPages`
@@ -153,7 +197,24 @@ convenient:
 
 ## Recent work (all pushed to `main`)
 
-**Pre-launch audit fixes, mobile-first rebuild, finder + favicons (2026-09-05, this
+**Day-0 value: baseline profiles + Wayback history + sandbox (2026-09-06, this session —
+commits `5c2fb1c`…`c9279aa`).**
+- **Phase 1 — instant baseline profile** per page on the Competitors screen (`src/features/insights/`,
+  `BaselinePanel.tsx`, migration `0005`). Cached "What we're now watching" card reusing the
+  teardown provider. Verified live in the sandbox (Notion tiers, Linear positioning). Fixed a
+  StrictMode bug that stuck the panel on its skeleton.
+- **Phase 2 — Wayback historical backfill** (`src/features/backfill/`, `HistoryPanel.tsx`,
+  migration `0006`). Collapsed "Recent history" timeline reconstructed from the Internet Archive,
+  capped at 4 captures, reusing the whole check pipeline; stored as `source='archive'` changes,
+  kept out of the feed + email, linking to the change-detail (with a Wayback note). Verified live:
+  Linear/Home → a real reconstructed change ("Sub-Teams → Linear for Agents", 18 Apr 2025).
+- **Sandbox seed** (`scripts/seed-sandbox.ts`) + **vitest `@/` alias**. See Deviations. 137 tests.
+- **NOT yet built (next):** the adaptive dashboard + background backfill warming (owner approved
+  mid-session; see Suggested next steps). The dashboard is still today's version — for a
+  competitor-but-no-changes user it shows a wall of "No meaningful changes yet" with the new
+  value nowhere on it. That's the problem the next step fixes.
+
+**Pre-launch audit fixes, mobile-first rebuild, finder + favicons (2026-09-05, prior
 session — commits `7cf3c97`…`813de66`).**
 - **Perceived perf:** added `(app)/loading.tsx` skeletons (no more blank-screen navigations)
   and wrapped `getAccount` in React `cache()` so the layout + page share one query per request.
@@ -374,11 +435,33 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
 
 - `npm run dev` / `npm run test` / `npm run lint` / `npm run typecheck`.
 - A pre-commit hook runs the tests and blocks the commit if they fail (currently
-  126 passing).
+  137 passing).
 - TypeScript strict; validate all external input. Keep functions small and pure,
   simplest approach, stay in scope (`SPEC.md` §6 is off-limits).
 
 ## Suggested next steps for whoever picks this up
+
+**Day-0 value — ACTIVE, mid-build (2026-09-06, owner-approved plan, not started):**
+0. **Adaptive dashboard.** Today's `dashboard/page.tsx` shows quiet pages as a wall of
+   "No meaningful changes yet" — the Phase-1/2 value is only on the low-traffic Competitors
+   page. Make the dashboard adaptive: **value-forward when quiet, feed-forward when active.**
+   - Reframe the header when `changesThisWeek === 0` (sell low-noise: "All quiet — exactly the
+     point. Here's what we're watching." — owner OK'd this voice).
+   - Per page row: an **active** page (meaningful change this week) keeps today's change link;
+     a **quiet** page renders a value card instead of "No meaningful changes yet" — the Phase-1
+     baseline (positioning + pricing chips, via a small client cmpt reusing `loadPageInsight`,
+     cached) + a "last notable change" line linking to the change-detail **only if already
+     backfilled** (a cheap read; don't auto-run backfill on the dashboard — too heavy).
+   - Order competitors/pages with changes-this-week first. Reuse components, don't rebuild.
+1. **Background backfill warming** (owner asked for this). So history is ready on the dashboard
+   without the user first visiting Competitors: warm baseline + backfill **after** add/onboarding
+   using Next 16's **`after()`** from `next/server` (runs post-response in the same invocation;
+   respects `maxDuration`). Hook it into `captureBaselines` (add flow) and `seedCompetitors`
+   (onboarding) in `competitors/actions.ts`. Cap/throttle to stay under the function limit; it's
+   best-effort (lazy-on-view still the fallback). I had just confirmed `after` exists and read its
+   docs when this handoff was invoked — nothing written yet.
+   **Apply migrations `0005` + `0006` in any new environment** (already applied to the hosted
+   project this session). Re-run `scripts/seed-sandbox.ts` to get test logins.
 
 **Domain-migration loose ends (owner, mostly done):**
 1. **Finish Search Console / Bing on the new domain** — the `gettrailwatch.com` Domain
