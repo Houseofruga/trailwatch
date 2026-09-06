@@ -116,7 +116,7 @@ export function PageIntel({ pageId }: { pageId: string }) {
 
       {open === "baseline" ? (
         <div className={styles.intelPanel}>
-          {profile.positioning ? <p className={styles.positioning}>{profile.positioning}</p> : null}
+          {profile.summary ? <p className={styles.positioning}>{profile.summary}</p> : null}
 
           {profile.pricingTiers && profile.pricingTiers.length > 0 ? (
             <>

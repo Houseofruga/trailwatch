@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { getTeardownProvider } from "@/features/competitorTeardown";
+import { getInsightProvider } from "./provider";
 import type { PageInsightState, PageProfile } from "./types";
 
 /**
@@ -20,10 +20,15 @@ export async function getOrCreatePageInsight(pageId: string): Promise<PageInsigh
 
     const { data: page } = await user
       .from("pages")
-      .select("id, url, label, latest_snapshot_id")
+      .select("id, url, label, latest_snapshot_id, competitors(name)")
       .eq("id", pageId)
       .single();
     if (!page) return { status: "not-found" };
+
+    // The parent competitor's name (a to-one relation may come back as an object
+    // or a single-element array depending on the client) — a hint for the prompt.
+    const rel = page.competitors as { name?: string } | { name?: string }[] | null;
+    const competitorName = (Array.isArray(rel) ? rel[0]?.name : rel?.name) ?? "";
 
     // Cached?
     const { data: cached } = await user
@@ -43,25 +48,22 @@ export async function getOrCreatePageInsight(pageId: string): Promise<PageInsigh
     const text = snap?.content_text?.trim();
     if (!text) return { status: "pending" };
 
-    const outcome = await getTeardownProvider().analyze({
+    const outcome = await getInsightProvider().analyzePage({
+      competitorName,
+      label: page.label,
       url: page.url,
-      title: page.label,
-      pages: [{ label: page.label, text }],
+      text,
     });
     if (!outcome.ok) return { status: "unavailable" };
 
-    const profile: PageProfile = {
-      title: outcome.result.title,
-      positioning: outcome.result.positioning,
-      pricingTiers: outcome.result.pricingTiers,
-    };
+    const profile: PageProfile = outcome.profile;
 
     // Persist via service role (RLS has no insert policy — same pattern as snapshots).
     const service = createServiceClient();
     await service
       .from("page_insights")
       .upsert(
-        { page_id: pageId, profile, model: outcome.result.provider },
+        { page_id: pageId, profile, model: outcome.provider },
         { onConflict: "page_id" },
       );
 
