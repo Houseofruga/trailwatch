@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-06 (adaptive dashboard + warming shipped)._
+_Last updated: 2026-09-06 (v3 UI overhaul shipped)._
 
 ## Product in one line
 
@@ -44,6 +44,20 @@ the **adaptive dashboard** (value-forward when quiet, feed-forward when active),
 **background warming** (baseline + history pre-built after add/onboarding via Next's
 `after()`). See Recent work. Two DB migrations (`0005`, `0006`) were added and
 **applied to the hosted Supabase**; a different environment must apply them too.
+
+**v3 UI overhaul — COMPLETE across the authed app (2026-09-06, this session).** The
+owner supplied a Claude Design canvas (`trailwatch v3/`, committed like `v2`) and asked
+to apply its visual design over the existing functionality. Done + verified live for:
+app shell/Sidebar, Competitors (baseline+history as paired toggle **pills**), Billing,
+Dashboard (v3 pass over the adaptive layout), Settings (grouped card), Change detail
+(web-archive badge + callout), Add competitor + Auth/login (already matched), plan cards
+(plain feature lists), and **Onboarding** — both the v3 visuals AND the proper v3 step-1↔
+step-2 state machine (Pro-intent, "Select all & go Pro" → Pro-only "Check the benefits"
+vs "Choose your plan"). **Owner decisions:** keep the **plain trailwatch logo** (NOT the
+canvas's "by House of Ruga" lockup — the branding rule below stands); use **real values**
+(not the mock's $15/$180/40); and **keep the existing animated landing** (`/1`) + finder
+homepage (`/`) — the v3 canvas's simple static landing was NOT built. Typecheck/lint/build
+clean; 137 tests pass.
 
 ## Deviations from SPEC.md / CLAUDE.md (important)
 
@@ -161,6 +175,22 @@ convenient:
   HOSTED project via the service-role key (no local Supabase — Docker isn't installed).
 - **Vitest now resolves the `@/` alias** (`vitest.config.ts`) so tests can import modules that
   use it (the check pipeline reused by backfill does). Test count **130 → 137**.
+- **v3 UI specifics (2026-09-06):**
+  - `account.changesThisWeek` (new field on `getAccount`, one indexed count query) powers the
+    Dashboard nav badge + mobile-tab badge (meaningful non-archive changes in the last 7 days).
+  - Competitors baseline + history are now ONE component — `src/app/(app)/competitors/PageIntel.tsx`
+    (paired pills, one panel open at a time). The old `BaselinePanel.tsx`/`HistoryPanel.tsx` were
+    **deleted**; the dashboard still has its own `DashboardBaseline.tsx`.
+  - Plan-card feature lists are **plain** (no bullet markers) — the shared `ProPricingCard`
+    (`.feature`) drives Billing, onboarding step 2, and the add-competitor upsell together.
+  - Onboarding is a 2-step v3 flow with a shared `StepIndicator`; step 1 uses tap-to-toggle
+    rows for finder picks (editable inputs only for blank/manual rows). Pro-intent state:
+    "Select all & go Pro" selects all + routes step 2 to the Pro-only "Check the benefits"
+    variant; otherwise step 2 is "Choose your plan". Free users now confirm the plan on step 2
+    (no more direct-seed from step 1).
+  - `trailwatch v3/` (the design canvas) is committed + eslint-ignored, like `trailwatch v2/`.
+  - Landing was deliberately NOT changed to the v3 static mock — the animated `/1` + finder `/`
+    stay (owner decision).
 
 ## Where things live (organized by domain, per CLAUDE.md)
 
@@ -213,6 +243,25 @@ convenient:
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
 ## Recent work (all pushed to `main`)
+
+**v3 UI overhaul (2026-09-06, this session — commits `2bf5d12`…`ff96fc3`).** Applied the
+`trailwatch v3/` Claude Design canvas over the existing authed app, screen by screen,
+verified live in a sandbox each step:
+- Sidebar: plan price in the usage head, Dashboard changes-this-week badge
+  (`account.changesThisWeek`), Settings in the profile menu (kept the custom nav icons +
+  Add page/Edit/Delete icons + plain logo per owner).
+- Competitors: baseline + history consolidated into `PageIntel.tsx` — two toggle **pills**
+  ("What we're now watching" / "Recent history"), one panel open at a time.
+- Billing: v3 scale, "Full change history & archive" Pro feature, amber cancelling note.
+- Dashboard: v3 pass over the adaptive layout (lime "All quiet" pulse, colored stat icons,
+  arrow chips on active rows, tinted quiet/paused rows).
+- Settings: sections grouped into one bordered card.
+- Change detail: "Web archive" badge + amber provenance callout for Phase-2 rows.
+- Plan cards: dropped the square-bullet markers → plain feature lists (shared ProPricingCard).
+- Onboarding: v3 step indicator + toggle-row watchlist (step 1) + the proper step-1↔step-2
+  state machine (Pro-intent → "Check the benefits" vs "Choose your plan"). See Deviations.
+- NOT changed (owner): the Landing — animated `/1` + finder `/` stay; the v3 static landing
+  mock was not built.
 
 **Design brief for the v2 redesign (2026-09-06).** Added `DESIGN-BRIEF.md` at the repo
 root — a delta spec of everything dev has shipped/hosted since the "TrailWatch v2" design
@@ -484,9 +533,15 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
 
 ## Suggested next steps for whoever picks this up
 
-**v2 redesign (design lane, in flight off-repo):** `DESIGN-BRIEF.md` is out with Claude
-Design. When redesigned artboards come back, develop them here 1:1 against that brief —
-Dashboard + Competitors are the priority screens. Keep the existing icon set + v2 tokens.
+**v3 UI overhaul — COMPLETE (2026-09-06).** The `trailwatch v3/` canvas came back and has
+been developed across the whole authed app (see Recent work + Deviations). Remaining:
+- **Verify on production with a real login** — all v3 work was verified locally via the
+  sandbox magic-link flow against hosted Supabase, not on `gettrailwatch.com` (this env can't
+  reach that domain — Cloudflare/Vercel edge is blocked here; both curl and the in-app browser
+  fail on it, though other sites load). Hard-refresh + check each authed screen in prod.
+- **Landing stays as-is** (owner decision) — do NOT swap in the v3 static landing.
+- Sandbox onboarding test users exist (`onb-test@`, `onb2-test@trailwatch.test`) from live
+  flow testing; harmless, delete if you want to tidy.
 
 **Day-0 value — COMPLETE (2026-09-06).** The adaptive dashboard and background warming are
 shipped and verified (commit `f6e44e9`; see Recent work + Deviations). Nothing left in this
