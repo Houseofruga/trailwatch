@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { loadPageInsight } from "@/features/insights/actions";
 import type { PageInsightState } from "@/features/insights/types";
 import styles from "./page.module.css";
@@ -14,11 +14,11 @@ import styles from "./page.module.css";
  */
 export function BaselinePanel({ pageId }: { pageId: string }) {
   const [state, setState] = useState<PageInsightState | null>(null);
-  const startedRef = useRef(false);
 
   useEffect(() => {
-    if (startedRef.current) return;
-    startedRef.current = true;
+    // `live` guards against setting state after unmount / a pageId change. The
+    // generation is cached server-side, so a re-run (e.g. React StrictMode's
+    // double-invoke in dev) costs at most one extra call before the cache warms.
     let live = true;
     loadPageInsight(pageId)
       .then((result) => {

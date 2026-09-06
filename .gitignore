@@ -19,3 +19,6 @@ graphify-out/
 
 # vercel (local project linkage — not shared)
 .vercel/
+
+# Supabase CLI local cache
+supabase/.temp/
