@@ -241,10 +241,6 @@ export function Sidebar({ account }: { account: Account }) {
 
           {menuOpen ? (
             <div className={styles.menu} role="menu">
-              <Link href="/settings" className={styles.menuItem} role="menuitem" onClick={() => setMenuOpen(false)}>
-                <SettingsIcon />
-                Settings
-              </Link>
               <form action={logOut}>
                 <button type="submit" className={styles.menuItemDanger}>
                   <LogoutIcon />

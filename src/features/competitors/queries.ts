@@ -13,6 +13,14 @@ export type PageRow = {
   label: string;
   isActive: boolean;
   lastCheckedAt: string | null;
+  // Last check outcome — 'broken' (a 4xx, usually a wrong/404 URL), 'error' (a
+  // transient failure), 'ok', or null (never checked). Drives the "can't reach
+  // this page" state on the dashboard and Competitors board.
+  lastCheckStatus: "ok" | "broken" | "error" | null;
+  lastCheckError: string | null;
+  // When the page's Wayback history was reconstructed (null = not yet). Lets the
+  // dashboard tell "no notable change found" apart from "haven't checked yet".
+  backfilledAt: string | null;
   // Newest first. Includes trivial (filtered) changes so the dashboard can
   // count "trivial edits filtered" without a second query.
   changes: ChangeRow[];
@@ -39,7 +47,7 @@ export async function getCompetitorsWithPages(): Promise<CompetitorRow[]> {
   const { data, error } = await supabase
     .from("competitors")
     .select(
-      "id, name, created_at, pages ( id, url, label, is_active, last_checked_at, created_at, changes ( id, summary, is_meaningful, detected_at, source ) )",
+      "id, name, created_at, pages ( id, url, label, is_active, last_checked_at, last_check_status, last_check_error, backfilled_at, created_at, changes ( id, summary, is_meaningful, detected_at, source ) )",
     )
     .order("created_at", { ascending: false })
     .order("created_at", { ascending: true, referencedTable: "pages" })
@@ -57,6 +65,9 @@ export async function getCompetitorsWithPages(): Promise<CompetitorRow[]> {
       label: p.label,
       isActive: p.is_active,
       lastCheckedAt: p.last_checked_at,
+      lastCheckStatus: (p.last_check_status as PageRow["lastCheckStatus"]) ?? null,
+      lastCheckError: p.last_check_error ?? null,
+      backfilledAt: p.backfilled_at ?? null,
       // Archive-backfilled changes live only in the per-page HistoryPanel and
       // change-detail — never in the "this week" dashboard feed.
       changes: (p.changes ?? [])

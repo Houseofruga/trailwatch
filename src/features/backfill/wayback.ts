@@ -10,9 +10,10 @@ import { hashContent } from "@/features/checks/hash";
 // just fetching public pages, same as the live check.
 
 const CDX_ENDPOINT = "https://web.archive.org/cdx/search/cdx";
-// Only look at the recent past — old marketing copy is noise for "what's been
-// changing lately", and it keeps the capture set (and fetch cost) small.
-const HISTORY_MONTHS = 18;
+// The "last notable change" lookback window. 6 months keeps the search recent and
+// bounds fetch cost, and it's the number the dashboard reports ("No notable change
+// in the last 180 days"). Keep this in sync with the copy in the dashboard.
+const HISTORY_MONTHS = 6;
 
 export type Capture = { timestamp: string; date: string /* ISO */ };
 
@@ -80,9 +81,39 @@ export async function listCaptures(url: string, cap: number): Promise<Capture[]>
     from: monthsAgoStamp(HISTORY_MONTHS),
     limit: "40",
   });
-  const res = await safeFetch(`${CDX_ENDPOINT}?${params.toString()}`, { maxBytes: 512_000 });
+  // The CDX API is often slow (multi-second); give it more room than the default
+  // 10s so a real capture list isn't lost to a timeout.
+  const res = await safeFetch(`${CDX_ENDPOINT}?${params.toString()}`, {
+    maxBytes: 512_000,
+    timeoutMs: 25_000,
+  });
   if (!res.ok) return [];
   return parseCaptures(res.html, cap);
+}
+
+/**
+ * The date the page's content last changed per the archive — the newest
+ * distinct-content capture. Returns `ok:false` when the CDX request itself failed
+ * (timeout, rate-limit, network) so the caller can retry later instead of caching
+ * a wrong "no history"; `ok:true` with `iso:null` means the archive genuinely has
+ * no captures for this URL.
+ */
+export async function latestCaptureDate(url: string): Promise<{ ok: boolean; iso: string | null }> {
+  const params = new URLSearchParams({
+    url,
+    output: "json",
+    fl: "timestamp,digest,statuscode",
+    filter: "statuscode:200",
+    collapse: "digest",
+    from: monthsAgoStamp(HISTORY_MONTHS),
+    limit: "40",
+  });
+  const res = await safeFetch(`${CDX_ENDPOINT}?${params.toString()}`, {
+    maxBytes: 512_000,
+    timeoutMs: 25_000,
+  });
+  if (!res.ok) return { ok: false, iso: null };
+  return { ok: true, iso: parseCaptures(res.html, 1).at(-1)?.date ?? null };
 }
 
 /**

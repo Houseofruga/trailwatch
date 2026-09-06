@@ -17,6 +17,9 @@ export type CheckFetch =
       ok: false;
       reason: "invalid-url" | "blocked" | "robots" | "fetch-error";
       message: string;
+      // The HTTP status, when the failure was a non-2xx response (e.g. 404). Lets
+      // callers distinguish a permanent 4xx from a transient/network error.
+      status?: number;
     };
 
 /** Resolve a hostname and confirm every address it maps to is public. */
@@ -39,12 +42,15 @@ function headersToRecord(headers: Headers): Record<string, string> {
 }
 
 /** Fetch a URL following redirects manually, re-validating each hop.
- *  `maxBytes` caps how much of the body is read (default MAX_BYTES). */
+ *  `maxBytes` caps how much of the body is read (default MAX_BYTES).
+ *  `timeoutMs` overrides the per-request timeout (default TIMEOUT_MS) — some
+ *  endpoints (e.g. the Internet Archive CDX API) are legitimately slow. */
 export async function safeFetch(
   rawUrl: string,
-  options?: { maxBytes?: number },
+  options?: { maxBytes?: number; timeoutMs?: number },
 ): Promise<CheckFetch> {
   const maxBytes = options?.maxBytes ?? MAX_BYTES;
+  const timeoutMs = options?.timeoutMs ?? TIMEOUT_MS;
   const parsed = validateUrlInput(rawUrl);
   if (!parsed.ok) return { ok: false, reason: "invalid-url", message: parsed.reason };
 
@@ -65,7 +71,7 @@ export async function safeFetch(
         method: "GET",
         headers: { "User-Agent": USER_AGENT, Accept: "text/html,*/*" },
         redirect: "manual",
-        signal: AbortSignal.timeout(TIMEOUT_MS),
+        signal: AbortSignal.timeout(timeoutMs),
       });
     } catch (err) {
       return {
@@ -91,7 +97,12 @@ export async function safeFetch(
     }
 
     if (!res.ok) {
-      return { ok: false, reason: "fetch-error", message: `The page returned HTTP ${res.status}.` };
+      return {
+        ok: false,
+        reason: "fetch-error",
+        message: `The page returned HTTP ${res.status}.`,
+        status: res.status,
+      };
     }
 
     const html = await readCapped(res, maxBytes);

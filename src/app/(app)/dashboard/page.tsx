@@ -9,9 +9,8 @@ import { getCompetitorsWithPages, type CompetitorRow } from "@/features/competit
 import { getDemoFeed } from "@/features/demo/demoFeed";
 import { LIMITS } from "@/features/plan/limits";
 import { DemoDashboard } from "./DemoDashboard";
-import { DashboardBaseline } from "./DashboardBaseline";
 import { PendingSeedRedirect } from "./PendingSeedRedirect";
-import { domainOf, timeAgo, withinWeek } from "./dashboardFeed";
+import { domainOf, formatFullDate, timeAgo, withinWeek } from "./dashboardFeed";
 import styles from "./page.module.css";
 
 const SUGGESTIONS = [
@@ -255,8 +254,32 @@ export default async function DashboardPage() {
                   );
                 }
 
-                // Quiet, active page: value-forward — the baseline profile + a
-                // link to its last notable change, instead of "nothing happened".
+                // Broken/unreachable page: we can't watch it — surface that plainly
+                // (a 4xx is almost always a wrong URL) with a link to fix it.
+                if (p.lastCheckStatus === "broken" || p.lastCheckStatus === "error") {
+                  const broken = p.lastCheckStatus === "broken";
+                  return (
+                    <div key={p.id} className={styles.pageRowError}>
+                      <div className={styles.pageMeta}>
+                        <div className={styles.pageLabel}>{p.label}</div>
+                        <div className={styles.pageErrorTag}>{broken ? "Can’t reach" : "Check failed"}</div>
+                      </div>
+                      <div className={styles.pageErrorBody}>
+                        <span className={styles.pageErrorText}>
+                          {p.lastCheckError ??
+                            (broken ? "This page couldn’t be reached." : "The last check didn’t complete.")}
+                        </span>
+                        <Link href={`/competitors/${c.id}/edit`} className={styles.pageErrorFix}>
+                          Edit URL
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Quiet, active page: one line — the last notable change (linked to
+                // its diff) when we have one, otherwise a plain "none in the last
+                // 180 days" once history has been reconstructed.
                 const notable = lastNotable(p);
                 return (
                   <div key={p.id} className={styles.pageRowQuiet}>
@@ -265,10 +288,15 @@ export default async function DashboardPage() {
                       <div className={styles.pageQuietSub}>Quiet</div>
                     </div>
                     <div className={styles.pageValue}>
-                      <DashboardBaseline
-                        pageId={p.id}
-                        lastNotable={notable ? { id: notable.id, label: timeAgo(notable.detectedAt, now) } : null}
-                      />
+                      {notable ? (
+                        <Link href={`/changes/${notable.id}`} className={styles.quietNotable}>
+                          Last notable change on {formatFullDate(notable.detectedAt)} ({timeAgo(notable.detectedAt, now)})
+                        </Link>
+                      ) : p.backfilledAt ? (
+                        <span className={styles.quietNote}>No notable change in the last 180 days</span>
+                      ) : (
+                        <span className={styles.quietNote}>Checking history&hellip;</span>
+                      )}
                     </div>
                   </div>
                 );

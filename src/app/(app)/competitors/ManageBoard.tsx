@@ -8,7 +8,7 @@ import { EditPageDialog } from "@/components/EditPageDialog";
 import { ButtonLink } from "@/components/Button";
 import { CompetitorAvatar } from "@/components/CompetitorAvatar";
 import { PageIntel } from "./PageIntel"; // per-page baseline + history panels (v3)
-import { PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
+import { ExternalLinkIcon, PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { deleteCompetitor, deletePage, togglePageActive } from "@/features/competitors/actions";
 import { originOf } from "@/features/competitors/domain";
@@ -178,13 +178,19 @@ export function ManageBoard({
                 <div className={styles.rowLabel}>{p.label}</div>
                 <a href={p.url} target="_blank" rel="noreferrer" className={styles.rowUrl}>
                   <span className={styles.rowUrlText}>{p.url}</span>
-                  <span className={styles.rowUrlIcon}>&#8599;</span>
+                  <span className={styles.rowUrlIcon}>
+                    <ExternalLinkIcon />
+                  </span>
                 </a>
                 <div className={styles.rowActions}>
-                  {p.isActive ? (
-                    <span className={styles.badgeActive}>Checking daily</span>
-                  ) : (
+                  {!p.isActive ? (
                     <span className={styles.badgePaused}>Paused</span>
+                  ) : p.lastCheckStatus === "broken" || p.lastCheckStatus === "error" ? (
+                    <span className={styles.badgeError}>
+                      {p.lastCheckStatus === "broken" ? "Can’t reach" : "Check failed"}
+                    </span>
+                  ) : (
+                    <span className={styles.badgeActive}>Checking daily</span>
                   )}
                   <div className={styles.menuWrap} data-page-menu>
                     <button
@@ -250,7 +256,14 @@ export function ManageBoard({
                   </div>
                 </div>
               </div>
-              {p.isActive ? <PageIntel pageId={p.id} /> : null}
+              {p.isActive && (p.lastCheckStatus === "broken" || p.lastCheckStatus === "error") ? (
+                <div className={styles.rowError}>
+                  {p.lastCheckError ?? "This page couldn’t be reached on the last check."} Edit the URL to fix it.
+                </div>
+              ) : null}
+              {p.isActive && p.lastCheckStatus !== "broken" && p.lastCheckStatus !== "error" ? (
+                <PageIntel pageId={p.id} />
+              ) : null}
               </div>
             ))}
           </section>

@@ -10,7 +10,7 @@ import { getSummarizer } from "@/features/summaries";
 
 export type CheckResult =
   | { status: "skipped-robots" }
-  | { status: "fetch-error"; message: string }
+  | { status: "fetch-error"; message: string; httpStatus?: number }
   | { status: "unchanged" }
   | { status: "first-check" }
   | { status: "recorded"; meaningful: boolean; summarized?: boolean };
@@ -51,22 +51,37 @@ export async function runCheckForPage(
   }
 
   const service = createServiceClient();
-  const touchLastChecked = () =>
-    service.from("pages").update({ last_checked_at: new Date().toISOString() }).eq("id", pageId);
+  // Every check stamps last_checked_at; `extra` also records the check outcome so
+  // the UI can flag a page we can't reach (and clear the flag once it works again).
+  const markChecked = (extra: Record<string, unknown> = {}) =>
+    service
+      .from("pages")
+      .update({ last_checked_at: new Date().toISOString(), ...extra })
+      .eq("id", pageId);
+  const OK = { last_check_status: "ok", last_check_error: null };
 
   const fetched = await fetchPageIfAllowed(page.url);
   if (!fetched.ok) {
-    await touchLastChecked();
-    return fetched.reason === "robots"
-      ? { status: "skipped-robots" }
-      : { status: "fetch-error", message: fetched.message };
+    if (fetched.reason === "robots") {
+      // Robots-disallowed is a deliberate non-check, not a broken page — leave the
+      // error state untouched.
+      await markChecked();
+      return { status: "skipped-robots" };
+    }
+    // A 4xx (usually 404) is a permanent "broken URL"; anything else is transient.
+    const broken = fetched.status !== undefined && fetched.status >= 400 && fetched.status < 500;
+    await markChecked({
+      last_check_status: broken ? "broken" : "error",
+      last_check_error: fetched.message,
+    });
+    return { status: "fetch-error", message: fetched.message, httpStatus: fetched.status };
   }
 
   const normalized = normalizeText(extractMainText(fetched.html));
   const hash = hashContent(normalized);
 
   if (previousSnapshot && previousSnapshot.content_hash === hash) {
-    await touchLastChecked();
+    await markChecked(OK);
     return { status: "unchanged" };
   }
 
@@ -79,7 +94,11 @@ export async function runCheckForPage(
 
   await service
     .from("pages")
-    .update({ last_checked_at: new Date().toISOString(), latest_snapshot_id: newSnapshot.id })
+    .update({
+      last_checked_at: new Date().toISOString(),
+      latest_snapshot_id: newSnapshot.id,
+      ...OK,
+    })
     .eq("id", pageId);
 
   if (!previousSnapshot) {

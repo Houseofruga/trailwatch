@@ -11,6 +11,18 @@ export function PlusIcon({ size = 14 }: IconProps) {
   );
 }
 
+// Diagonal "opens in a new tab" arrow — sharp, matching the stroke icon set.
+export function ExternalLinkIcon({ size = 12 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <g stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" strokeLinejoin="miter">
+        <path d="M6 4.5 H11.5 V10" />
+        <path d="M11.5 4.5 L4.5 11.5" />
+      </g>
+    </svg>
+  );
+}
+
 export function ChevronLeftIcon({ size = 12 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">

@@ -148,6 +148,9 @@ export function getDemoFeed(now: number): CompetitorRow[] {
       label: p.label,
       isActive: p.active ?? true,
       lastCheckedAt: new Date(now - 3 * 60 * 60 * 1000).toISOString(),
+      lastCheckStatus: "ok" as const, // demo pages are always reachable
+      lastCheckError: null,
+      backfilledAt: null, // the demo feed has no reconstructed history
       changes: p.changes.map((ch, chi) => ({
         id: `demo-${ci}-${pi}-${chi}`,
         summary: ch.summary,

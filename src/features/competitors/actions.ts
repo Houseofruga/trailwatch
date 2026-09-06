@@ -67,7 +67,7 @@ function findDomainMismatch(establishedUrl: string, rows: { url: string }[]): st
 // the baseline and creates NO change row and NO LLM summary. A failed fetch is a
 // soft-fail: the page still exists and the daily cron (or Check now) captures it
 // later, so one unreachable URL never breaks the add.
-type CaptureOutcome = { label: string; captured: boolean };
+type CaptureOutcome = { label: string; captured: boolean; httpStatus?: number };
 
 async function captureBaselines(pages: { id: string; label: string }[]): Promise<CaptureOutcome[]> {
   const settled = await Promise.allSettled(pages.map((p) => runCheckForPage(p.id)));
@@ -78,7 +78,11 @@ async function captureBaselines(pages: { id: string; label: string }[]): Promise
       (r.value.status === "first-check" ||
         r.value.status === "unchanged" ||
         r.value.status === "recorded");
-    return { label: p.label, captured };
+    // Surface a 4xx (usually 404) so the confirmation can tell the user their URL
+    // is wrong, rather than implying we'll succeed on a later retry.
+    const httpStatus =
+      r.status === "fulfilled" && r.value.status === "fetch-error" ? r.value.httpStatus : undefined;
+    return { label: p.label, captured, httpStatus };
   });
 }
 
@@ -127,10 +131,21 @@ function captureFlash(outcomes: CaptureOutcome[]): string {
       ? `✓ Captured ${captured[0].label} as of ${date}. We'll alert you the moment it changes.`
       : `✓ Captured ${captured.length} pages as of ${date}. We'll alert you the moment they change.`;
   }
+  const is4xx = (o: CaptureOutcome) => o.httpStatus !== undefined && o.httpStatus >= 400 && o.httpStatus < 500;
+
   if (captured.length === 0) {
+    // A single 4xx is almost always a wrong URL — say so plainly instead of
+    // implying a later retry will fix it.
+    if (failed.length === 1 && is4xx(failed[0])) {
+      return `Added ${failed[0].label}, but it returned ${failed[0].httpStatus} — check the URL and edit it.`;
+    }
     return failed.length === 1
       ? `Added ${failed[0].label}, but we couldn't reach it yet. We'll keep trying — next check is tonight.`
       : `Added ${failed.length} pages, but we couldn't reach them yet. We'll keep trying — next check is tonight.`;
+  }
+  const broken = failed.filter(is4xx).length;
+  if (broken > 0) {
+    return `Captured ${captured.length} of ${outcomes.length} pages as of ${date}. ${broken} returned an error — check ${broken === 1 ? "that URL" : "those URLs"}.`;
   }
   return `Captured ${captured.length} of ${outcomes.length} pages as of ${date}. We couldn't reach ${failed.length} yet — we'll retry tonight.`;
 }

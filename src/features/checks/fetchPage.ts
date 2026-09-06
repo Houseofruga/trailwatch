@@ -14,7 +14,7 @@ const ROBOTS_MAX_BYTES = 512_000;
 export type FetchResult =
   | { ok: true; html: string }
   | { ok: false; reason: "robots"; message: string }
-  | { ok: false; reason: "fetch-error"; message: string };
+  | { ok: false; reason: "fetch-error"; message: string; status?: number };
 
 async function checkRobots(origin: string, pathname: string): Promise<boolean> {
   const res = await safeFetch(`${origin}/robots.txt`, { maxBytes: ROBOTS_MAX_BYTES });
@@ -44,8 +44,10 @@ export async function fetchPageIfAllowed(pageUrl: string): Promise<FetchResult> 
   if (!res.ok) {
     // reason "blocked" = private/internal host caught by the SSRF guard; "invalid-url"
     // / "fetch-error" = unreachable or bad. Either way it's a soft fetch-error so the
-    // daily batch keeps going and this page simply doesn't capture this run.
-    return { ok: false, reason: "fetch-error", message: res.message };
+    // daily batch keeps going and this page simply doesn't capture this run. `status`
+    // is present when the failure was a non-2xx response (e.g. 404), so callers can
+    // flag a broken URL distinctly from a transient error.
+    return { ok: false, reason: "fetch-error", message: res.message, status: res.status };
   }
   return { ok: true, html: res.html };
 }

@@ -3,8 +3,12 @@ import { isMeaningfulChange } from "@/features/checks/noiseFilter";
 import { getSummarizer } from "@/features/summaries";
 import { listCaptures, fetchArchivedText, type Capture } from "./wayback";
 
-// Owner ask: keep the first load fast and the LLM/fetch cost bounded.
-const MAX_CAPTURES = 4; // → at most 3 consecutive diffs
+// Owner ask: search the last ~6 months for a notable change. Cap the distinct
+// captures we diff to keep the LLM/fetch cost bounded — collapse=digest means
+// typical competitor pages have few distinct versions in the window, so 8 usually
+// covers it; a page with more than this changed often enough that a notable change
+// almost always surfaces anyway.
+const MAX_CAPTURES = 8; // → at most 7 consecutive diffs
 const EXCERPT_CAP = 4000; // mirrors runCheck.ts
 const FALLBACK_SUMMARY = "This page changed meaningfully (summary unavailable).";
 
