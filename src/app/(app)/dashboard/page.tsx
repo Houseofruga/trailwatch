@@ -277,10 +277,41 @@ export default async function DashboardPage() {
                   );
                 }
 
-                // Quiet, active page: one line — the last notable change (linked to
-                // its diff) when we have one, otherwise a plain "none in the last
-                // 180 days" once history has been reconstructed.
+                // Quiet, active page: surface the last notable change — its summary
+                // (calmer than an active change row) with the date beneath, the whole
+                // card linking to the diff. When we have no notable change, a plain
+                // "none in the last 180 days" once history has been reconstructed.
                 const notable = lastNotable(p);
+                if (notable) {
+                  return (
+                    <Link key={p.id} href={`/changes/${notable.id}`} className={styles.pageRowQuietLink}>
+                      <div className={styles.pageMeta}>
+                        <div className={styles.pageLabel}>{p.label}</div>
+                        <div className={styles.pageQuietSub}>Quiet</div>
+                      </div>
+                      <div className={styles.pageValue}>
+                        {notable.summary ? (
+                          <span className={styles.quietSummary}>{notable.summary}</span>
+                        ) : null}
+                        <div className={styles.quietNotableMeta}>
+                          Last notable change · {formatFullDate(notable.detectedAt)} ({timeAgo(notable.detectedAt, now)})
+                        </div>
+                      </div>
+                      <span className={styles.arrowBox} aria-hidden="true">
+                        <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
+                          <path
+                            d="M1 1l4.5 5L1 11"
+                            stroke="currentColor"
+                            strokeWidth="1.7"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </span>
+                    </Link>
+                  );
+                }
+
                 return (
                   <div key={p.id} className={styles.pageRowQuiet}>
                     <div className={styles.pageMeta}>
@@ -288,11 +319,7 @@ export default async function DashboardPage() {
                       <div className={styles.pageQuietSub}>Quiet</div>
                     </div>
                     <div className={styles.pageValue}>
-                      {notable ? (
-                        <Link href={`/changes/${notable.id}`} className={styles.quietNotable}>
-                          Last notable change on {formatFullDate(notable.detectedAt)} ({timeAgo(notable.detectedAt, now)})
-                        </Link>
-                      ) : p.backfilledAt ? (
+                      {p.backfilledAt ? (
                         <span className={styles.quietNote}>No notable change in the last 180 days</span>
                       ) : (
                         <span className={styles.quietNote}>Checking history&hellip;</span>
