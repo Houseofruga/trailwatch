@@ -214,6 +214,18 @@ convenient:
 
 ## Recent work (all pushed to `main`)
 
+**Design brief for the v2 redesign (2026-09-06).** Added `DESIGN-BRIEF.md` at the repo
+root — a delta spec of everything dev has shipped/hosted since the "TrailWatch v2" design
+file, written to feed **Claude Design** (a separate tool) so it redesigns the screens in
+the v2 visual language; the redesigns come **back here to develop**. Covers, per route with
+all states: the adaptive **Dashboard** (§1) and full **Competitors** manage board incl. the
+baseline/history panels, row kebab menu, dialogs, upsell (§2), plus Change detail,
+Onboarding, Billing, Settings, Auth, and marketing/legal. Keeps the v2 tokens fixed
+(cream/ink, lime `#9ff50a`, DM Sans + Geist Mono, zero radius) and the **custom icon set**
+(`src/components/icons.tsx` + a handful of unicode glyphs; **no external icon library**).
+No code changed — this is a design-handoff artifact only. Paste-ready per-screen
+follow-ups were also drafted in chat (not stored) for revising the already-pasted brief.
+
 **Day-0 value: adaptive dashboard + background warming (2026-09-06, this session —
 commit `f6e44e9`).** Completes the Day-0 expansion.
 - **Adaptive dashboard** (`dashboard/page.tsx`, new `DashboardBaseline.tsx`): quiet-week
@@ -471,6 +483,10 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
   simplest approach, stay in scope (`SPEC.md` §6 is off-limits).
 
 ## Suggested next steps for whoever picks this up
+
+**v2 redesign (design lane, in flight off-repo):** `DESIGN-BRIEF.md` is out with Claude
+Design. When redesigned artboards come back, develop them here 1:1 against that brief —
+Dashboard + Competitors are the priority screens. Keep the existing icon set + v2 tokens.
 
 **Day-0 value — COMPLETE (2026-09-06).** The adaptive dashboard and background warming are
 shipped and verified (commit `f6e44e9`; see Recent work + Deviations). Nothing left in this
