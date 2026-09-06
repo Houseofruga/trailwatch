@@ -54,7 +54,6 @@ export async function getOrCreatePageInsight(pageId: string): Promise<PageInsigh
       title: outcome.result.title,
       positioning: outcome.result.positioning,
       pricingTiers: outcome.result.pricingTiers,
-      whatToWatch: outcome.result.whatToWatch,
     };
 
     // Persist via service role (RLS has no insert policy — same pattern as snapshots).

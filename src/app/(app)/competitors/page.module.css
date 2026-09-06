@@ -335,24 +335,6 @@
   color: var(--ink);
 }
 
-.watchList {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.watchItem {
-  display: flex;
-  gap: 9px;
-  align-items: baseline;
-  font-size: 13px;
-  color: var(--ink-2);
-}
-
-.watchBullet {
-  color: var(--accent-ink);
-}
-
 .panelFoot {
   margin-top: 16px;
   padding-top: 12px;

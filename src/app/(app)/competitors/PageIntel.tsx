@@ -132,20 +132,6 @@ export function PageIntel({ pageId }: { pageId: string }) {
             </>
           ) : null}
 
-          {profile.whatToWatch && profile.whatToWatch.length > 0 ? (
-            <>
-              <div className={styles.panelLabel}>What to watch</div>
-              <div className={styles.watchList}>
-                {profile.whatToWatch.slice(0, 4).map((item, i) => (
-                  <div key={i} className={styles.watchItem}>
-                    <span className={styles.watchBullet}>&bull;</span>
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : null}
-
           <div className={styles.panelFoot}>Captured now &mdash; you&rsquo;ll get an email when this changes.</div>
         </div>
       ) : null}

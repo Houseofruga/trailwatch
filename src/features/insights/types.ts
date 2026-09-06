@@ -6,7 +6,6 @@ export type PageProfile = {
   title: string;
   positioning: string;
   pricingTiers: PricingTier[] | null;
-  whatToWatch: string[];
 };
 
 // What the client renders. Only "ready" carries a profile; the rest are quiet
