@@ -159,7 +159,7 @@ export function PageIntel({ pageId }: { pageId: string }) {
             </div>
           ) : history.status === "ready" ? (
             <>
-              <div className={styles.histNote}>Reconstructed from the web archive.</div>
+              <div className={styles.histNote}>Recent changes, newest first.</div>
               <div className={styles.timeline}>
                 {history.items.map((item) => (
                   <Link key={item.id} href={`/changes/${item.id}`} className={styles.timeItem}>
@@ -168,7 +168,10 @@ export function PageIntel({ pageId }: { pageId: string }) {
                       <span className={styles.timeLine} />
                     </span>
                     <span className={styles.timeBody}>
-                      <span className={styles.timeDate}>{formatFullDate(item.detectedAt)}</span>
+                      <span className={styles.timeDate}>
+                        {formatFullDate(item.detectedAt)}
+                        {item.isArchive ? <span className={styles.timeArchiveTag}>Web archive</span> : null}
+                      </span>
                       <span className={styles.timeSummary}>{item.summary}</span>
                       <span className={styles.timeLink}>
                         View change
