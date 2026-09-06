@@ -42,6 +42,7 @@ export function OnboardingPlanStep({
   email,
   userId,
   busy,
+  proIntent,
   onBack,
   onContinueFree,
 }: {
@@ -49,6 +50,9 @@ export function OnboardingPlanStep({
   email: string;
   userId: string;
   busy: boolean;
+  // v3: set when the user chose "Select all & go Pro" on step 1 — show the
+  // Pro-only "Check the benefits" view instead of the Free/Pro choice.
+  proIntent: boolean;
   onBack: () => void;
   onContinueFree: () => void;
 }) {
@@ -161,55 +165,75 @@ export function OnboardingPlanStep({
         </span>
         Back
       </button>
-      <h1 className={styles.title}>Choose your plan</h1>
+      <h1 className={styles.title}>{proIntent ? "Check the benefits" : "Choose your plan"}</h1>
       <p className={styles.sub}>
-        Free tracks {LIMITS.free.competitors} competitors. Go Pro to watch all{" "}
-        {allRows.length}.
+        {proIntent
+          ? `You're watching all ${allRows.length}. Here's everything Pro unlocks — pick monthly or annual, then continue.`
+          : `Free tracks ${LIMITS.free.competitors} competitors. Go Pro to watch all ${allRows.length}.`}
       </p>
 
-      <div className={styles.planGrid}>
-        {/* Free */}
-        <div className={styles.planCard}>
-          <div className={styles.planHeadRow}>
-            <div className={styles.planName}>Free</div>
-          </div>
-          <div className={styles.priceBlock}>
-            <div className={styles.planPrice}>$0</div>
-          </div>
-          <ul className={styles.planFeatures}>
-            {features("free").map((f) => (
-              <li key={f}>{f}</li>
-            ))}
-          </ul>
-          <div className={styles.action}>
-            <Button type="button" variant="secondary" full onClick={onContinueFree} disabled={busy}>
-              {busy ? "Setting up…" : "Continue with Free plan"}
-            </Button>
-          </div>
+      {proIntent ? (
+        // Pro committed on step 1 — just the Pro card + checkout.
+        <div className={styles.proOnly}>
+          <ProPricingCard
+            email={email}
+            userId={userId}
+            features={features("paid")}
+            renderButton={(period) => {
+              const configured = Boolean(token && PRICE_ID_BY_PERIOD[period]);
+              return (
+                <Button type="button" full onClick={() => openCheckout(period)} disabled={!configured || !paddle || busy}>
+                  {configured ? "Continue to checkout" : "Upgrade unavailable"}
+                </Button>
+              );
+            }}
+          />
         </div>
-
-        {/* Pro — the shared in-product card, so onboarding and Plan & billing
-            can't drift. We only swap in our own checkout button (it seeds the
-            competitors after payment). */}
-        <ProPricingCard
-          email={email}
-          userId={userId}
-          features={features("paid")}
-          renderButton={(period) => {
-            const configured = Boolean(token && PRICE_ID_BY_PERIOD[period]);
-            return (
-              <Button
-                type="button"
-                full
-                onClick={() => openCheckout(period)}
-                disabled={!configured || !paddle || busy}
-              >
-                {configured ? "Upgrade to Pro" : "Upgrade unavailable"}
+      ) : (
+        <div className={styles.planGrid}>
+          {/* Free */}
+          <div className={styles.planCard}>
+            <div className={styles.planHeadRow}>
+              <div className={styles.planName}>Free</div>
+            </div>
+            <div className={styles.priceBlock}>
+              <div className={styles.planPrice}>$0</div>
+            </div>
+            <ul className={styles.planFeatures}>
+              {features("free").map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+            </ul>
+            <div className={styles.action}>
+              <Button type="button" variant="secondary" full onClick={onContinueFree} disabled={busy}>
+                {busy ? "Setting up…" : "Continue with Free plan"}
               </Button>
-            );
-          }}
-        />
-      </div>
+            </div>
+          </div>
+
+          {/* Pro — the shared in-product card, so onboarding and Plan & billing
+              can't drift. We only swap in our own checkout button (it seeds the
+              competitors after payment). */}
+          <ProPricingCard
+            email={email}
+            userId={userId}
+            features={features("paid")}
+            renderButton={(period) => {
+              const configured = Boolean(token && PRICE_ID_BY_PERIOD[period]);
+              return (
+                <Button
+                  type="button"
+                  full
+                  onClick={() => openCheckout(period)}
+                  disabled={!configured || !paddle || busy}
+                >
+                  {configured ? "Upgrade to Pro" : "Upgrade unavailable"}
+                </Button>
+              );
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

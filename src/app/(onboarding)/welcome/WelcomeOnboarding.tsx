@@ -59,6 +59,10 @@ export function WelcomeOnboarding({
   // True when they reached the watchlist through the domain step (no homepage
   // picks) — lets them jump back and try a different domain.
   const [cameFromDomain, setCameFromDomain] = useState(false);
+  // v3 Pro intent: "Select all & go Pro" on step 1 selects every competitor and
+  // routes step 2 to the Pro-only "Check the benefits" view instead of the
+  // Free/Pro choice. Cleared by "Switch back to Free".
+  const [proIntent, setProIntent] = useState(false);
   const pagesPerCompetitor = LIMITS[plan].pagesPerCompetitor;
 
   // The domain step's "find my competitors" lookup — same server action the
@@ -174,15 +178,14 @@ export function WelcomeOnboarding({
     );
   }
 
-  const total = rows.length;
-  const overLimit = total > limit;
   const selectedCount = rows.filter((r) => r.selected).length;
-  const atCap = plan === "free" && selectedCount >= limit;
+  // On Free without Pro intent, selecting past the limit is blocked (rows show a
+  // Pro badge); Pro intent unlocks everything.
+  const atCap = plan === "free" && !proIntent && selectedCount >= limit;
   const selectedRows = rows.filter((r) => r.selected);
-  const canSeed =
-    selectedCount > 0 &&
-    selectedCount <= limit &&
-    selectedRows.every((r) => r.name.trim() && r.url.trim());
+  // Enough to advance to step 2: at least one valid selected row (Pro intent may
+  // exceed the free limit — that's the whole point).
+  const canContinue = selectedRows.length > 0 && selectedRows.every((r) => r.name.trim() && r.url.trim());
 
   function update(i: number, patch: Partial<Row>) {
     setRows((r) => (r ? r.map((row, idx) => (idx === i ? { ...row, ...patch } : row)) : r));
@@ -191,11 +194,31 @@ export function WelcomeOnboarding({
     setRows((r) => {
       if (!r) return r;
       const row = r[i];
-      // Block selecting past the plan cap; unselecting is always allowed.
-      if (!row.selected && plan === "free" && r.filter((x) => x.selected).length >= limit) {
+      // Block selecting past the plan cap (Free, no Pro intent); unselect is free.
+      if (!row.selected && plan === "free" && !proIntent && r.filter((x) => x.selected).length >= limit) {
         return r;
       }
       return r.map((x, idx) => (idx === i ? { ...x, selected: !x.selected } : x));
+    });
+  }
+  // "Select all & go Pro": watch everything, route step 2 to the Pro view.
+  function selectAllPro() {
+    setRows((r) => (r ? r.map((x) => ({ ...x, selected: true })) : r));
+    setProIntent(true);
+  }
+  // "Switch back to Free": drop Pro intent and trim the selection to the free limit.
+  function switchBackToFree() {
+    setProIntent(false);
+    setRows((r) => {
+      if (!r) return r;
+      let kept = 0;
+      return r.map((x) => {
+        if (x.selected && kept < limit) {
+          kept += 1;
+          return x;
+        }
+        return { ...x, selected: false };
+      });
     });
   }
   function remove(i: number) {
@@ -242,6 +265,7 @@ export function WelcomeOnboarding({
         email={email}
         userId={userId}
         busy={busy}
+        proIntent={proIntent}
         onBack={() => setStep("watchlist")}
         onContinueFree={start}
       />
@@ -269,9 +293,11 @@ export function WelcomeOnboarding({
       </p>
 
       <p className={styles.pickNote}>
-        {plan === "free"
-          ? `Pick up to ${limit} to start free — ${selectedCount} of ${limit} selected.`
-          : `${selectedCount} selected.`}
+        {plan !== "free"
+          ? `${selectedCount} selected.`
+          : proIntent
+            ? `${selectedCount} selected · Pro`
+            : `${selectedCount} of ${limit} selected on Free`}
       </p>
 
       <div className={styles.list}>
@@ -370,7 +396,18 @@ export function WelcomeOnboarding({
         Add one yourself instead
       </button>
 
-      {overLimit && plan === "free" && (
+      {plan === "free" && proIntent && (
+        <div className={styles.proSelected}>
+          <div className={styles.proSelectedText}>
+            <strong>Pro selected</strong> &middot; watching all {selectedCount}
+          </div>
+          <button type="button" className={styles.switchBack} onClick={switchBackToFree} disabled={busy}>
+            Switch back to Free
+          </button>
+        </div>
+      )}
+
+      {plan === "free" && !proIntent && selectedCount >= limit && (
         <div className={styles.upgradeNudge}>
           <div>
             <div className={styles.upgradeNudgeTitle}>Watching more than {limit}?</div>
@@ -379,7 +416,7 @@ export function WelcomeOnboarding({
               happens right here, no redirect.
             </div>
           </div>
-          <Button type="button" onClick={() => setStep("plan")} disabled={busy}>
+          <Button type="button" onClick={selectAllPro} disabled={busy}>
             Select all &amp; go Pro
           </Button>
         </div>
@@ -388,10 +425,13 @@ export function WelcomeOnboarding({
       {error && <p className={styles.error}>{error}</p>}
 
       <div className={styles.actions}>
-        <Button type="button" onClick={start} disabled={!canSeed || busy}>
-          {busy
-            ? "Setting up…"
-            : `Start watching ${selectedCount} competitor${selectedCount !== 1 ? "s" : ""}`}
+        <Button
+          type="button"
+          variant={proIntent ? "primary" : "secondary"}
+          onClick={() => setStep("plan")}
+          disabled={!canContinue || busy}
+        >
+          {proIntent ? "Upgrade to Pro to continue" : "Continue"}
         </Button>
       </div>
     </div>
