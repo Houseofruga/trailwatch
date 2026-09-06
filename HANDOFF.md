@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-06._
+_Last updated: 2026-09-06 (adaptive dashboard + warming shipped)._
 
 ## Product in one line
 
@@ -35,15 +35,15 @@ authed-page changes were verified by compiling every route + a throwaway mock
 harness (screenshotted), **not** by a real logged-in walkthrough — that's still
 the owner's job (§9 / production login).
 
-**Day-0 value expansion in progress (2026-09-06, this session).** A deliberate
+**Day-0 value expansion — COMPLETE (2026-09-06, across two sessions).** A deliberate
 Phase-2-style expansion beyond `SPEC.md` §6, owner-driven, to justify the paid tier:
 adding a page now gives immediate in-app value instead of a dashboard that's empty
-until the first cron change. **Phase 1 (instant baseline profile)** and **Phase 2
-(Wayback historical backfill)** are shipped, pushed, and verified live in a sandbox.
-**In progress, NOT yet built: the adaptive dashboard** (value-forward when quiet,
-feed-forward when active) + **background backfill warming** — see Recent work and
-Suggested next steps. Two DB migrations (`0005`, `0006`) were added and **applied to
-the hosted Supabase this session**; a different environment must apply them too.
+until the first cron change. All four pieces are shipped, pushed, and verified live:
+**Phase 1 (instant baseline profile)**, **Phase 2 (Wayback historical backfill)**,
+the **adaptive dashboard** (value-forward when quiet, feed-forward when active), and
+**background warming** (baseline + history pre-built after add/onboarding via Next's
+`after()`). See Recent work. Two DB migrations (`0005`, `0006`) were added and
+**applied to the hosted Supabase**; a different environment must apply them too.
 
 ## Deviations from SPEC.md / CLAUDE.md (important)
 
@@ -135,6 +135,23 @@ convenient:
     weekly digest (`digest/build.ts` guard + they're old-dated); the change-detail renders them
     with a Wayback provenance note and the archive before-date. New migration columns:
     `changes.source`, `changes.compared_from_at`, `pages.backfilled_at`.
+  - **Adaptive dashboard** (`dashboard/page.tsx`, `DashboardBaseline.tsx`). The dashboard
+    is now value-forward when quiet, feed-forward when active. Quiet week → header reframes
+    to "All quiet — exactly the point"; a quiet-but-active page renders a value card (cached
+    baseline positioning + pricing chips via `DashboardBaseline`, a compact client cmpt
+    reusing `loadPageInsight`) plus a "last notable change" link **only if history already
+    exists** — it never triggers a backfill. Active pages (meaningful change this week) keep
+    the change link; competitors/pages with movement sort first. `queries.ts` now exposes
+    each page's most recent archive change as `lastArchived` (a cheap read off rows already
+    fetched, kept out of the "this week" feed). Paused pages stay a plain state.
+  - **Background warming** (`competitors/warm.ts`, wired into `createCompetitor`,
+    `addPages`, `seedCompetitors`). After add/onboarding, `warmPages()` pre-builds each new
+    page's baseline + Wayback history via Next 16's **`after()`** (post-response, same
+    invocation), so the dashboard has value on first visit without the user visiting
+    Competitors. Bounded (`MAX_WARM_PAGES = 6`) and best-effort: `getOrCreatePageInsight`
+    and `loadPageHistory` are both idempotent/cached and individually guarded, and
+    lazy-on-view stays the fallback. The `/competitors/add` and `/welcome` routes got
+    `maxDuration = 60` to give the post-response work budget.
 - **Sandbox seed script** (`scripts/seed-sandbox.ts`, dev tooling, run with
   `npx tsx --env-file=.env.local scripts/seed-sandbox.ts`). Idempotent Pro + Free **test**
   users (`pro-test@ / free-test@trailwatch.test`, throwaway passwords in the file) with sample
@@ -197,6 +214,22 @@ convenient:
 
 ## Recent work (all pushed to `main`)
 
+**Day-0 value: adaptive dashboard + background warming (2026-09-06, this session —
+commit `f6e44e9`).** Completes the Day-0 expansion.
+- **Adaptive dashboard** (`dashboard/page.tsx`, new `DashboardBaseline.tsx`): quiet-week
+  header reframe, quiet-page value cards (baseline + pricing chips), "last notable change"
+  link when history already exists, and movement-first ordering. `queries.ts` gained
+  `lastArchived` per page. See Deviations for the full shape.
+- **Background warming** (new `competitors/warm.ts`): `after()`-based post-response warming
+  of baseline + Wayback history on add/onboarding, wired into `createCompetitor`/`addPages`/
+  `seedCompetitors`; `/competitors/add` + `/welcome` got `maxDuration=60`.
+- **Verified live** (seeded Pro account, local dev against hosted Supabase): the quiet
+  dashboard rendered real baselines + pricing tiers (Notion/Linear) with no console errors;
+  a freshly-added page (vercel.com) showed its baseline generated (`groq`) and backfill run
+  (`backfilled_at` stamped) in the DB **without** visiting Competitors — proving warming.
+  137 tests pass. NB: verification used the sandbox seed's magic-link login; the full §9
+  production pass (real Paddle loop, real digest send) is still owed.
+
 **Day-0 value: baseline profiles + Wayback history + sandbox (2026-09-06, this session —
 commits `5c2fb1c`…`c9279aa`).**
 - **Phase 1 — instant baseline profile** per page on the Competitors screen (`src/features/insights/`,
@@ -209,10 +242,8 @@ commits `5c2fb1c`…`c9279aa`).**
   kept out of the feed + email, linking to the change-detail (with a Wayback note). Verified live:
   Linear/Home → a real reconstructed change ("Sub-Teams → Linear for Agents", 18 Apr 2025).
 - **Sandbox seed** (`scripts/seed-sandbox.ts`) + **vitest `@/` alias**. See Deviations. 137 tests.
-- **NOT yet built (next):** the adaptive dashboard + background backfill warming (owner approved
-  mid-session; see Suggested next steps). The dashboard is still today's version — for a
-  competitor-but-no-changes user it shows a wall of "No meaningful changes yet" with the new
-  value nowhere on it. That's the problem the next step fixes.
+- (The adaptive dashboard + background warming that were "next" here are now DONE — see the
+  `f6e44e9` entry above.)
 
 **Pre-launch audit fixes, mobile-first rebuild, finder + favicons (2026-09-05, prior
 session — commits `7cf3c97`…`813de66`).**
@@ -441,27 +472,14 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
 
 ## Suggested next steps for whoever picks this up
 
-**Day-0 value — ACTIVE, mid-build (2026-09-06, owner-approved plan, not started):**
-0. **Adaptive dashboard.** Today's `dashboard/page.tsx` shows quiet pages as a wall of
-   "No meaningful changes yet" — the Phase-1/2 value is only on the low-traffic Competitors
-   page. Make the dashboard adaptive: **value-forward when quiet, feed-forward when active.**
-   - Reframe the header when `changesThisWeek === 0` (sell low-noise: "All quiet — exactly the
-     point. Here's what we're watching." — owner OK'd this voice).
-   - Per page row: an **active** page (meaningful change this week) keeps today's change link;
-     a **quiet** page renders a value card instead of "No meaningful changes yet" — the Phase-1
-     baseline (positioning + pricing chips, via a small client cmpt reusing `loadPageInsight`,
-     cached) + a "last notable change" line linking to the change-detail **only if already
-     backfilled** (a cheap read; don't auto-run backfill on the dashboard — too heavy).
-   - Order competitors/pages with changes-this-week first. Reuse components, don't rebuild.
-1. **Background backfill warming** (owner asked for this). So history is ready on the dashboard
-   without the user first visiting Competitors: warm baseline + backfill **after** add/onboarding
-   using Next 16's **`after()`** from `next/server` (runs post-response in the same invocation;
-   respects `maxDuration`). Hook it into `captureBaselines` (add flow) and `seedCompetitors`
-   (onboarding) in `competitors/actions.ts`. Cap/throttle to stay under the function limit; it's
-   best-effort (lazy-on-view still the fallback). I had just confirmed `after` exists and read its
-   docs when this handoff was invoked — nothing written yet.
-   **Apply migrations `0005` + `0006` in any new environment** (already applied to the hosted
-   project this session). Re-run `scripts/seed-sandbox.ts` to get test logins.
+**Day-0 value — COMPLETE (2026-09-06).** The adaptive dashboard and background warming are
+shipped and verified (commit `f6e44e9`; see Recent work + Deviations). Nothing left in this
+track except:
+- **Apply migrations `0005` + `0006` in any new environment** (already applied to the hosted
+  project). Re-run `scripts/seed-sandbox.ts` to get test logins.
+- **A real production/authed pass would still help:** confirm the adaptive dashboard and the
+  `after()` warming behave the same on Vercel (function budget under load, `after()` firing in
+  prod) — local verification used the sandbox seed's magic-link login against hosted Supabase.
 
 **Domain-migration loose ends (owner, mostly done):**
 1. **Finish Search Console / Bing on the new domain** — the `gettrailwatch.com` Domain
