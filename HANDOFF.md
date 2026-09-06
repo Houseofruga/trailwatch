@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-06 (v3 UI overhaul shipped + owner tweaks)._
+_Last updated: 2026-09-06 (v3 UI overhaul + follow-up fixes: 404 states, Wayback "last notable change", a11y)._
 
 ## Product in one line
 
@@ -58,6 +58,16 @@ canvas's "by House of Ruga" lockup — the branding rule below stands); use **re
 (not the mock's $15/$180/40); and **keep the existing animated landing** (`/1`) + finder
 homepage (`/`) — the v3 canvas's simple static landing was NOT built. Typecheck/lint/build
 clean; 137 tests pass.
+
+**v3 follow-up fixes — DONE + verified live (2026-09-06, this session, commit `1bceeee`).**
+Five owner asks on the v3 authed UI + a reworked quiet dashboard row. **Migration `0007`
+was added and applied to the hosted Supabase this session — every other environment must
+apply it.** See Recent work + Deviations. Highlights: unreachable/404 pages are now
+surfaced everywhere (persisted `last_check_status`); the quiet dashboard row is a single
+Wayback-sourced line ("Last notable change on <date> (Nd ago)" linked, else "No notable
+change in the last 180 days"); background backfill warming now runs in the daily cron for
+all pages, not just newly-added ones. 137 tests pass; verified with a real logged-in Pro
+account (arrow, contrast, a 404 page end-to-end, the quiet line, and the dropdown).
 
 ## Deviations from SPEC.md / CLAUDE.md (important)
 
@@ -158,14 +168,22 @@ convenient:
     the change link; competitors/pages with movement sort first. `queries.ts` now exposes
     each page's most recent archive change as `lastArchived` (a cheap read off rows already
     fetched, kept out of the "this week" feed). Paused pages stay a plain state.
+    **SUPERSEDED by `1bceeee`:** `DashboardBaseline` is gone. A quiet page's row is now a
+    single server-rendered line — `Last notable change on <date> (Nd ago)` (linked to the
+    diff) when `lastNotable` exists, else `No notable change in the last 180 days` (plain,
+    once `backfilledAt` is set), else `Checking history…`. No AI baseline blurb on the
+    dashboard; the Competitors `PageIntel` baseline is unchanged. `queries.ts` now also
+    exposes `backfilledAt`. Also: broken/unreachable pages render an error row (see the
+    404 deviation below) instead of a quiet card.
   - **Background warming** (`competitors/warm.ts`, wired into `createCompetitor`,
     `addPages`, `seedCompetitors`). After add/onboarding, `warmPages()` pre-builds each new
     page's baseline + Wayback history via Next 16's **`after()`** (post-response, same
-    invocation), so the dashboard has value on first visit without the user visiting
-    Competitors. Bounded (`MAX_WARM_PAGES = 6`) and best-effort: `getOrCreatePageInsight`
-    and `loadPageHistory` are both idempotent/cached and individually guarded, and
-    lazy-on-view stays the fallback. The `/competitors/add` and `/welcome` routes got
-    `maxDuration = 60` to give the post-response work budget.
+    invocation). Bounded (`MAX_WARM_PAGES = 6`) and best-effort; the `/competitors/add` and
+    `/welcome` routes have `maxDuration = 60`. **Updated `1bceeee`:** warming no longer does
+    the removed `pageFreshness`; and the daily cron (`runDailyChecks`) now runs the same
+    Wayback backfill for **every** page never backfilled (`backfilled_at` null), bounded
+    `MAX_BACKFILL_PER_RUN = 8`/run and guarded once-per-page — so "Last notable change" fills
+    in across all pages over the daily runs, not just newly-added/clicked-into ones.
 - **Sandbox seed script** (`scripts/seed-sandbox.ts`, dev tooling, run with
   `npx tsx --env-file=.env.local scripts/seed-sandbox.ts`). Idempotent Pro + Free **test**
   users (`pro-test@ / free-test@trailwatch.test`, throwaway passwords in the file) with sample
@@ -246,6 +264,26 @@ convenient:
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
 ## Recent work (all pushed to `main`)
+
+**v3 follow-up fixes (2026-09-06, this session — commit `1bceeee`).**
+- **URL arrow:** Competitors URL rows use a new SVG `ExternalLinkIcon` (was the `↗` glyph).
+- **WCAG:** the "Quiet" sub-label + "Quiet this week" / "Not being checked" moved off
+  `--ink-hint`/`--ink-5`/`--ink-faint` (~1.3–2.9:1) to `--ink-3` (~5:1, passes AA).
+- **404 / unreachable pages** (see Deviations): migration `0007` adds
+  `pages.last_check_status` + `last_check_error`; `safeFetch` exposes the HTTP status,
+  `runCheck` persists 'broken' (4xx) vs 'error' (transient) and clears to 'ok' on success;
+  add-time flash says "returned 404 — check the URL"; the dashboard renders a "Can't reach /
+  HTTP 404 / Edit URL" row and Competitors a "Can't reach" badge + message (PageIntel hidden).
+- **Quiet dashboard row → Wayback "last notable change"** (see Deviations): dropped the AI
+  baseline blurb; one line now — `Last notable change on <date> (Nd ago)` (linked to the
+  diff) when we have one, else `No notable change in the last 180 days` (plain), else
+  `Checking history…`. Backfill window narrowed to 6 months (`HISTORY_MONTHS` 18→6) with the
+  capture cap raised 4→8 so "180 days" is honest. The interim `pageFreshness` feature (a
+  "Last updated" date from the last-updated finder) was built then removed in favour of this.
+- **Background warming across all pages:** the daily cron (`runDailyChecks`) now also
+  reconstructs Wayback history for any page never backfilled (bounded `MAX_BACKFILL_PER_RUN=8`
+  per run, guarded once-per-page), so "Last notable change" fills in everywhere over time.
+- **Settings** removed from the desktop profile dropdown (still in the sidebar nav).
 
 **v3 UI overhaul (2026-09-06, this session — commits `2bf5d12`…`ff96fc3`).** Applied the
 `trailwatch v3/` Claude Design canvas over the existing authed app, screen by screen,
