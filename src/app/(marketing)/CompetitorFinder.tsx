@@ -9,6 +9,11 @@ import styles from "./home.module.css";
 
 const SIGNUP_HREF = "/login?mode=signup&src=hero-finder";
 
+// The finder is a pre-signup teaser: at most 5 competitors (≤4 auto-suggested +
+// manual additions). Past that, we nudge the visitor to sign up — the real
+// per-plan limits are enforced in onboarding.
+const MAX_TOTAL = 5;
+
 /**
  * "Find your competitors" hero tool. Enter a company name or URL → we suggest a
  * few direct competitors (LLM, grounded on the site when a URL is given). The
@@ -36,7 +41,7 @@ export function CompetitorFinder() {
   const [processed, setProcessed] = useState<FinderState>(null);
   if (state !== processed) {
     setProcessed(state);
-    if (state?.status === "ok") setList(state.result.competitors);
+    if (state?.status === "ok") setList(state.result.competitors.slice(0, MAX_TOTAL));
     else if (state?.status === "error") setList([]);
   }
 
@@ -55,9 +60,9 @@ export function CompetitorFinder() {
   }
   function addManual() {
     const v = addValue.trim();
-    if (!v) return;
+    if (!v || list.length >= MAX_TOTAL) return;
     const isUrl = /\.[a-z]{2,}/i.test(v) && !/\s/.test(v);
-    setList((l) => [...l, { name: v, url: isUrl ? v : "", why: "" }]);
+    setList((l) => (l.length >= MAX_TOTAL ? l : [...l, { name: v, url: isUrl ? v : "", why: "" }]));
     setAddValue("");
   }
   // Stash the chosen competitors so the new account can be pre-seeded after
@@ -175,25 +180,31 @@ export function CompetitorFinder() {
             <p className={styles.compEmpty}>No competitors yet — add a few below.</p>
           )}
 
-          <div className={styles.addRow}>
-            <input
-              type="text"
-              value={addValue}
-              onChange={(e) => setAddValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addManual();
-                }
-              }}
-              placeholder="Add a competitor (name or URL)"
-              className={styles.addInput}
-              aria-label="Add a competitor"
-            />
-            <button type="button" onClick={addManual} className={styles.addBtn}>
-              Add
-            </button>
-          </div>
+          {list.length >= MAX_TOTAL ? (
+            <p className={styles.addMax}>
+              That’s 5 — the most to start with. Sign up free to add and track more.
+            </p>
+          ) : (
+            <div className={styles.addRow}>
+              <input
+                type="text"
+                value={addValue}
+                onChange={(e) => setAddValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addManual();
+                  }
+                }}
+                placeholder="Add a competitor (name or URL)"
+                className={styles.addInput}
+                aria-label="Add a competitor"
+              />
+              <button type="button" onClick={addManual} className={styles.addBtn}>
+                Add
+              </button>
+            </div>
+          )}
 
             <Link href={SIGNUP_HREF} onClick={persistPending} className={styles.finderCta}>
               {list.length > 0

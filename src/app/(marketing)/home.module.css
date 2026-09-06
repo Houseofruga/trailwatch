@@ -320,6 +320,14 @@
   margin-bottom: 16px;
 }
 
+/* Shown in place of the add row once the 5-competitor teaser cap is reached. */
+.addMax {
+  margin: 0 0 16px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ink-4);
+}
+
 .addInput {
   flex: 1;
   min-width: 0;
