@@ -22,7 +22,10 @@ export default async function CompetitorsPage() {
       <div className={styles.head}>
         <div>
           <h1 className={styles.title}>Competitors</h1>
-          <p className={styles.sub}>Pause a page to stop checking it without losing its history.</p>
+          <p className={styles.sub}>
+            Expand a page for the baseline we captured and its history. Pause to stop checks
+            without losing anything.
+          </p>
         </div>
         <ButtonLink href="/competitors/add">
           <PlusIcon />

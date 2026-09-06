@@ -14,6 +14,8 @@ export type Account = {
   pageAllowance: number;
   /** Whether the weekly digest is on for this account (Settings toggle). */
   digestEnabled: boolean;
+  /** Meaningful (non-archive) changes in the trailing 7 days — the Dashboard nav badge. */
+  changesThisWeek: number;
 };
 
 /** Google gives us a full name; email/password signups only give us an address. */
@@ -39,10 +41,17 @@ export const getAccount = cache(async function getAccount(): Promise<Account | n
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const [profileResult, competitorsResult, pagesResult] = await Promise.all([
+  const weekAgoIso = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const [profileResult, competitorsResult, pagesResult, changesResult] = await Promise.all([
     supabase.from("users").select("email, plan, digest_enabled").eq("id", user.id).single(),
     supabase.from("competitors").select("id"),
     supabase.from("pages").select("id"),
+    supabase
+      .from("changes")
+      .select("id", { count: "exact", head: true })
+      .eq("is_meaningful", true)
+      .neq("source", "archive")
+      .gte("detected_at", weekAgoIso),
   ]);
 
   const email = profileResult.data?.email ?? user.email ?? "";
@@ -61,5 +70,6 @@ export const getAccount = cache(async function getAccount(): Promise<Account | n
     pageCount,
     pageAllowance: LIMITS[plan].pagesPerCompetitor * LIMITS[plan].competitors,
     digestEnabled: profileResult.data?.digest_enabled ?? true,
+    changesThisWeek: changesResult.count ?? 0,
   };
 });

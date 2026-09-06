@@ -1,6 +1,6 @@
 .wrap {
-  padding: 48px 56px 80px 56px;
-  max-width: 920px;
+  padding: 48px 44px 80px 44px;
+  max-width: 940px;
   width: 100%;
   margin: 0 auto;
 }
@@ -193,181 +193,282 @@
   gap: 16px;
 }
 
-/* -------------------------------------------------- baseline profile (day-0 value) */
-.baseline {
-  padding: 2px 20px 16px 112px; /* left aligns under the URL, past the 92px label */
+/* ---------------------------------- intelligence panels (baseline + history) */
+/* Two pills under a page row, indented under the URL; one panel opens below. */
+.intel {
+  padding: 0 20px 14px 128px;
 }
 
-.baselineHead {
-  font-size: 11px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--ink-4);
-  margin-bottom: 8px;
-}
-
-.baselinePositioning {
-  margin: 0 0 10px;
-  font-size: 13px;
-  line-height: 1.55;
-  color: var(--ink-2);
-  text-wrap: pretty;
-}
-
-.baselineTiers {
+.intelPills {
   display: flex;
+  gap: 8px;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 10px;
 }
 
-.baselineTier {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  border: 1px solid var(--border);
-  background: var(--surface-alt, var(--bg));
-  padding: 3px 9px;
-}
-
-.tierName {
-  font-size: 12px;
-  color: var(--ink-3);
-}
-
-.tierPrice {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ink);
-}
-
-.baselineWatch {
-  margin: 0 0 10px;
-  padding-left: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.baselineWatch li {
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--ink-2);
-}
-
-.baselineFoot {
-  margin: 0;
-  font-size: 11.5px;
-  color: var(--ink-faint);
-}
-
-.baselineNote {
-  margin: 0;
-  font-size: 12.5px;
-  color: var(--ink-4);
-}
-
-/* -------------------------------------------------- recent history (Wayback backfill) */
-.history {
-  padding: 0 20px 14px 112px; /* aligns under the URL, like .baseline */
-}
-
-.historyToggle {
+.pill {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 0;
-  background: none;
-  border: none;
+  border: 1px solid var(--border-input);
+  background: var(--surface);
+  color: var(--ink-3);
+  padding: 5px 11px;
+  font-size: 12px;
   cursor: pointer;
   font-family: inherit;
-  font-size: 11px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--ink-4);
 }
 
-.historyToggle:hover {
-  color: var(--ink-2);
+.pill:hover {
+  border-color: var(--accent-ink);
+  color: var(--accent-ink);
 }
 
-.historyChevron {
-  display: inline-block;
-  font-size: 13px;
-  line-height: 1;
-  transition: transform 0.15s ease;
-}
-
-.historyChevron[data-open="true"] {
-  transform: rotate(90deg);
-}
-
-.historyCount {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  font-size: 10.5px;
-  letter-spacing: 0;
+.pillOpen {
+  border-color: var(--accent-ink);
   color: var(--accent-ink);
   background: var(--accent-wash);
 }
 
-.historyBody {
-  margin-top: 10px;
+.pillSkel {
+  width: 150px;
+  height: 28px;
+  border-color: var(--border-softer);
+  background: var(--surface-sunken);
+  pointer-events: none;
 }
 
-.historyList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  border-left: 1px solid var(--border-soft);
+.pillChevron {
+  display: inline-flex;
+  font-size: 9px;
+  transition: transform 0.15s ease;
 }
 
-.historyItem {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding: 6px 0 6px 14px;
+.pillChevron[data-open="true"] {
+  transform: rotate(180deg);
 }
 
-.historyDate {
-  flex: 0 0 84px;
-  font-size: 11.5px;
+.pillCount {
+  font-size: 11px;
   color: var(--ink-faint);
   font-variant-numeric: tabular-nums;
 }
 
-.historyLink {
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--ink-2);
-  text-decoration: none;
-}
-
-.historyLink:hover {
-  color: var(--ink);
-  text-decoration: underline;
-}
-
-.historyNote {
-  margin: 0;
+/* capturing (no baseline snapshot yet) */
+.capturing {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   font-size: 12.5px;
+  color: var(--ink-5);
+  background: var(--surface-alt);
+  border: 1px solid var(--border-soft);
+  padding: 10px 12px;
+}
+
+.spinner {
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--border-input);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: intelSpin 0.7s linear infinite;
+}
+
+@keyframes intelSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* the open panel */
+.intelPanel {
+  margin-top: 12px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border-soft);
+  padding: 16px 18px;
+}
+
+.positioning {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.panelLabel {
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 10px;
+}
+
+.tierList {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-soft);
+  margin-bottom: 18px;
+}
+
+.tierRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-softer);
+  font-size: 13px;
+  background: var(--surface);
+}
+
+.tierRow:last-child {
+  border-bottom: none;
+}
+
+.tierName {
+  color: var(--ink-2);
+}
+
+.tierPrice {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.watchList {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.watchItem {
+  display: flex;
+  gap: 9px;
+  align-items: baseline;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.watchBullet {
+  color: var(--accent-ink);
+}
+
+.panelFoot {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
+/* history timeline inside the panel */
+.histNote {
+  font-size: 11.5px;
+  color: var(--ink-5);
+  margin-bottom: 14px;
+}
+
+.histNoteMuted {
+  font-size: 13px;
+  color: var(--ink-4);
+  line-height: 1.6;
+}
+
+.histError {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 13px;
   color: var(--ink-4);
 }
 
-.historySkeleton {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.histRetry {
+  font-size: 12.5px;
+  color: var(--accent-ink);
+  font-weight: 500;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
 }
 
-/* Loading skeleton — three shimmering lines matching the profile shape. */
-.baselineSkeleton {
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeItem {
+  display: flex;
+  gap: 14px;
+  padding: 0 0 16px 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.timeItem:last-child {
+  padding-bottom: 0;
+}
+
+.timeItem:hover {
+  opacity: 0.72;
+  text-decoration: none;
+}
+
+.timeMarker {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 3px;
+}
+
+.timeDot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-line);
+  border: 1px solid var(--accent);
+}
+
+.timeLine {
+  flex: 1;
+  width: 1px;
+  background: var(--border);
+  margin-top: 4px;
+}
+
+.timeBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.timeDate {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-5);
+  margin-bottom: 4px;
+}
+
+.timeSummary {
+  display: block;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.timeLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--link);
+  margin-top: 6px;
+}
+
+.historySkeleton {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -563,14 +664,8 @@
     height: 36px;
   }
 
-  /* Full-width profile on mobile — no room for the desktop URL-aligned indent. */
-  .baseline {
-    padding: 2px 16px 14px;
-  }
-  .history {
+  /* Full-width panels on mobile — no room for the desktop URL-aligned indent. */
+  .intel {
     padding: 0 16px 14px;
-  }
-  .historyDate {
-    flex-basis: 72px;
   }
 }

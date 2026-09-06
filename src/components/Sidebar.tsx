@@ -7,7 +7,7 @@ import { ButtonLink } from "@/components/Button";
 import { usePathname } from "next/navigation";
 import { logOut } from "@/features/auth/actions";
 import type { Account } from "@/features/account/queries";
-import { LIMITS, PLAN_LABEL } from "@/features/plan/limits";
+import { LIMITS, PLAN_LABEL, PLAN_PRICE } from "@/features/plan/limits";
 import {
   DashboardIcon,
   CompetitorsIcon,
@@ -84,7 +84,12 @@ export function Sidebar({ account }: { account: Account }) {
               className={active ? styles.tabActive : styles.tab}
               aria-current={active ? "page" : undefined}
             >
-              <item.Icon />
+              <span className={styles.tabIconWrap}>
+                <item.Icon />
+                {item.href === "/dashboard" && account.changesThisWeek > 0 ? (
+                  <span className={styles.tabBadge}>{account.changesThisWeek}</span>
+                ) : null}
+              </span>
               <span className={styles.tabLabel}>{item.label === "Plan & billing" ? "Billing" : item.label}</span>
             </Link>
           );
@@ -151,6 +156,9 @@ export function Sidebar({ account }: { account: Account }) {
                 <item.Icon />
                 {item.label}
               </span>
+              {item.href === "/dashboard" && account.changesThisWeek > 0 ? (
+                <span className={styles.badge}>{account.changesThisWeek}</span>
+              ) : null}
               {active ? <div className={styles.navBar} /> : null}
             </Link>
           );
@@ -161,6 +169,7 @@ export function Sidebar({ account }: { account: Account }) {
         <div className={styles.usage}>
           <div className={styles.usageHead}>
             <span className={styles.usagePlan}>{PLAN_LABEL[account.plan]} plan</span>
+            <span className={styles.usagePrice}>{PLAN_PRICE[account.plan]}</span>
           </div>
 
           <div className={styles.meters}>
@@ -233,6 +242,10 @@ export function Sidebar({ account }: { account: Account }) {
 
           {menuOpen ? (
             <div className={styles.menu} role="menu">
+              <Link href="/settings" className={styles.menuItem} role="menuitem" onClick={() => setMenuOpen(false)}>
+                <SettingsIcon />
+                Settings
+              </Link>
               <form action={logOut}>
                 <button type="submit" className={styles.menuItemDanger}>
                   <LogoutIcon />
