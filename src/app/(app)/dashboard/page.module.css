@@ -339,7 +339,7 @@
   text-wrap: pretty;
 }
 
-/* Green arrow chip at the end of an active change row (feed-forward affordance). */
+/* Green chevron chip at the end of an active change row (feed-forward affordance). */
 .arrowBox {
   flex: 0 0 auto;
   align-self: center;
@@ -348,7 +348,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
   background: var(--accent-wash);
   color: var(--accent-ink);
 }
