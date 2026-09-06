@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-06 (v3 UI overhaul + follow-up fixes: 404 states, Wayback "last notable change", a11y)._
+_Last updated: 2026-09-06 (summary-pipeline fixes: Groq truncation + diff-blindness, quiet-card summaries, Recent history incl. live changes, copy)._
 
 ## Product in one line
 
@@ -69,6 +69,21 @@ change in the last 180 days"); background backfill warming now runs in the daily
 all pages, not just newly-added ones. 137 tests pass; verified with a real logged-in Pro
 account (arrow, contrast, a 404 page end-to-end, the quiet line, and the dropdown).
 
+**Summary-pipeline + quiet-card fixes — DONE + verified live (2026-09-06, this session,
+commits `e0fbdae`…`8cd2126`, pushed).** A round of fixes triggered by an archive change
+showing "(summary unavailable)". Two real *live-pipeline* bugs were found and fixed: the
+Groq summarizer truncated mid-sentence (reasoning model ate the token budget) and was
+"diff-blind" (only saw the first 2000 chars of each full page, so real changes lower down
+were wrongly declined). Then: quiet dashboard cards now show the last-notable **summary**
+(not just a date) with the **lime chevron chip** matching active rows; "Recent history" on
+Competitors now includes **live** changes (was archive-only), newest-first, with archive
+rows tagged "Web archive"; the 404 error line on Competitors was indented to the URL; copy
+updated to reflect the **instant on-add baseline**; and backfill now retries a flaky decline
+and never leaves "(summary unavailable)". The 13 pre-existing archive rows with that
+fallback text were **re-summarised in the hosted DB** via a new repair script. All verified
+live in the sandbox (Pro account, magic-link); 137 tests pass, typecheck/lint clean. No new
+migrations. See Recent work + Deviations.
+
 ## Deviations from SPEC.md / CLAUDE.md (important)
 
 These docs predate some decisions — trust the code, and reconcile the docs when
@@ -81,6 +96,14 @@ convenient:
 - **Summaries are provider-pluggable.** `src/features/summaries/index.ts` picks
   Groq (`GROQ_API_KEY`) if present, else Anthropic (`ANTHROPIC_API_KEY`, model
   `claude-haiku-4-5`). Adding/swapping a provider is one new file + one line here.
+  **Two fixes (2026-09-06, `e0fbdae`):** (1) Groq's `gpt-oss-20b` is a reasoning model
+  and was truncating summaries mid-sentence — now `reasoning_effort: "low"` +
+  `max_tokens: 700` (`summaries/groq.ts`). (2) The prompt was **diff-blind** — it sent
+  the first 2000 chars of each full page, so on a long page the shared top boilerplate
+  looked identical and the model wrongly declined a real change lower down. `prompt.ts`
+  now feeds the model the actual **changed lines** via a shared `diffLines()` helper
+  exported from `checks/noiseFilter.ts` (one definition of "what changed" for both the
+  filter and the summarizer), falling back to truncated full text for within-line edits.
 - **Branding: "House of Ruga" is legal/ownership only** (owner decision 2026-08-31).
   House of Ruga is the parent company; TrailWatch is a product under it and is the only
   brand surfaced in visible marketing copy. The parent name appears ONLY in: the `(legal)`
@@ -168,13 +191,16 @@ convenient:
     the change link; competitors/pages with movement sort first. `queries.ts` now exposes
     each page's most recent archive change as `lastArchived` (a cheap read off rows already
     fetched, kept out of the "this week" feed). Paused pages stay a plain state.
-    **SUPERSEDED by `1bceeee`:** `DashboardBaseline` is gone. A quiet page's row is now a
-    single server-rendered line — `Last notable change on <date> (Nd ago)` (linked to the
-    diff) when `lastNotable` exists, else `No notable change in the last 180 days` (plain,
-    once `backfilledAt` is set), else `Checking history…`. No AI baseline blurb on the
-    dashboard; the Competitors `PageIntel` baseline is unchanged. `queries.ts` now also
-    exposes `backfilledAt`. Also: broken/unreachable pages render an error row (see the
-    404 deviation below) instead of a quiet card.
+    **SUPERSEDED by `1bceeee`, then extended by `0f00680`:** `DashboardBaseline` is gone.
+    A quiet page's row now shows the **last notable change's summary** (clamped to 2 lines,
+    calmer than an active row) with `Last notable change · <date> (Nd ago)` beneath, the
+    whole card linking to the diff and carrying the **same lime chevron chip** as an active
+    row (`--accent-wash`/`--accent-ink`, per the v3 design) — `dashboard/page.tsx`
+    `lastNotable()` picks the newest of the live/`lastArchived` meaningful changes. When
+    there's no notable change: `No notable change in the last 180 days` (once `backfilledAt`
+    is set) else `Checking history…`. No AI baseline blurb. `queries.ts` exposes
+    `backfilledAt` + `lastArchived`. Broken/unreachable pages render an error row (see the
+    404 deviation) instead of a quiet card.
   - **Background warming** (`competitors/warm.ts`, wired into `createCompetitor`,
     `addPages`, `seedCompetitors`). After add/onboarding, `warmPages()` pre-builds each new
     page's baseline + Wayback history via Next 16's **`after()`** (post-response, same
@@ -184,6 +210,20 @@ convenient:
     Wayback backfill for **every** page never backfilled (`backfilled_at` null), bounded
     `MAX_BACKFILL_PER_RUN = 8`/run and guarded once-per-page — so "Last notable change" fills
     in across all pages over the daily runs, not just newly-added/clicked-into ones.
+- **"Recent history" now merges live + archive (2026-09-06, `c70cebf`).** `getPageHistory`
+  (`backfill/queries.ts`) previously filtered `source='archive'`, so a page's most recent
+  *live-detected* change never appeared in its own Competitors "Recent history" pill (it only
+  showed on the dashboard). It now returns all meaningful changes newest-first; `PageIntel`
+  tags archive-sourced rows "Web archive" and the note reads "Recent changes, newest first."
+- **Backfill summaries retry a flaky decline (2026-09-06, `de4ff31`).** Archive changes are
+  already judged meaningful by the noise filter, so a "declined as trivial" verdict from the
+  nondeterministic Groq model was just noise (it left rows reading "<reason> (summary
+  unavailable)"). `backfill.ts` now retries the summarizer once on a decline and, on genuine
+  failure, uses plain user-facing wording ("This page changed — open it to see what's
+  different.") — never the internal filter reason. **Repair scripts** `scripts/inspect-archive.ts`
+  + `scripts/resummarize-archive.ts` (`8cd2126`) list/re-summarise rows still carrying the old
+  fallback from stored excerpts (no Wayback refetch); idempotent, `--dry`. Run once this session
+  → 0 rows left with "(summary unavailable)" in the hosted DB.
 - **Sandbox seed script** (`scripts/seed-sandbox.ts`, dev tooling, run with
   `npx tsx --env-file=.env.local scripts/seed-sandbox.ts`). Idempotent Pro + Free **test**
   users (`pro-test@ / free-test@trailwatch.test`, throwaway passwords in the file) with sample
@@ -264,6 +304,27 @@ convenient:
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
 ## Recent work (all pushed to `main`)
+
+**Summary-pipeline + quiet-card fixes (2026-09-06, this session — commits `e0fbdae`,
+`0f00680`, `74c2f45`, `6817e7c`, `de4ff31`, `c70cebf`, `8cd2126`; pushed to `8cd2126`).**
+- **Groq summary truncation** (`summaries/groq.ts`): `gpt-oss-20b` reasoning ate the 256-token
+  budget → summaries cut off mid-sentence. Now `reasoning_effort: "low"` + `max_tokens: 700`.
+- **Summarizer diff-blindness** (`summaries/prompt.ts` + `checks/noiseFilter.ts`): the prompt
+  saw only the first 2000 chars of each full page and wrongly declined real changes lower down.
+  Now feeds the actual changed lines via a shared `diffLines()` helper.
+- **Quiet dashboard cards show the summary** (`dashboard/page.tsx` + css): last-notable summary
+  (2-line clamp) + date beneath + the lime chevron chip matching active rows; whole card links
+  to the diff. (Corrected mid-session from a grey right-chip → inline blue → the design's lime
+  chip per owner.)
+- **Recent history includes live changes** (`backfill/queries.ts`, `types.ts`, `PageIntel.tsx`
+  + css): merged live+archive newest-first; archive rows tagged "Web archive".
+- **Competitors 404 line aligned to the URL** (`competitors/page.module.css`, `.rowError` 128px).
+- **Copy** (`dashboard/page.tsx`, `competitors/add/AddForm.tsx`, `PageIntel.tsx`): reflect the
+  instant on-add baseline ("We capture each page the moment you add it, then check daily").
+- **Backfill retry + fallback** (`backfill.ts`) and **repair scripts** — see Deviations. The 13
+  legacy "(summary unavailable)" archive rows were re-summarised in the hosted DB (0 left).
+- Verified live in the sandbox (Pro account, magic-link); typecheck/lint clean, 137 tests. No
+  new migrations.
 
 **v3 follow-up fixes (2026-09-06, this session — commit `1bceeee`).**
 - **URL arrow:** Competitors URL rows use a new SVG `ExternalLinkIcon` (was the `↗` glyph).
