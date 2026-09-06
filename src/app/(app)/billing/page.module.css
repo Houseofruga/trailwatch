@@ -92,20 +92,9 @@
   color: var(--ink-2);
 }
 
+/* v3: plain feature list — no bullet markers. */
 .feature {
-  position: relative;
-  padding-left: 20px;
-}
-
-.feature::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 6px;
-  width: 7px;
-  height: 7px;
-  background: var(--accent-wash);
-  border: 1.5px solid var(--accent-hover);
+  color: var(--ink-2);
 }
 
 .action {
