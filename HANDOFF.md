@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-06 (v3 UI overhaul shipped)._
+_Last updated: 2026-09-06 (v3 UI overhaul shipped + owner tweaks)._
 
 ## Product in one line
 
@@ -178,6 +178,9 @@ convenient:
 - **v3 UI specifics (2026-09-06):**
   - `account.changesThisWeek` (new field on `getAccount`, one indexed count query) powers the
     Dashboard nav badge + mobile-tab badge (meaningful non-archive changes in the last 7 days).
+    NOTE: the sidebar usage-card header was reverted to pre-v3 per owner — plan name only, no
+    inline price, divider restored (`.usagePrice` CSS is now unused but left in place).
+    The Dashboard active change-row chip uses an SVG right **chevron** (not a → arrow).
   - Competitors baseline + history are now ONE component — `src/app/(app)/competitors/PageIntel.tsx`
     (paired pills, one panel open at a time). The old `BaselinePanel.tsx`/`HistoryPanel.tsx` were
     **deleted**; the dashboard still has its own `DashboardBaseline.tsx`.
