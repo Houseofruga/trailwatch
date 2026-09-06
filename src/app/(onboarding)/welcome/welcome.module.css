@@ -176,6 +176,151 @@
   gap: 10px;
 }
 
+.pickNote {
+  font-size: 12.5px;
+  color: var(--ink-5);
+  margin: 0 0 18px;
+}
+
+/* v3 toggle row: tap anywhere to select/deselect a suggested competitor. */
+.pickRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-input);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.pickRow:hover {
+  border-color: var(--border-input-hover);
+}
+
+.pickRowOn {
+  border-color: var(--accent-hover);
+  background: var(--surface);
+}
+
+.pickMain {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.pickAvatar {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  background: var(--surface-sunken);
+  color: #5d5a53;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pickTextWrap {
+  min-width: 0;
+}
+
+.pickName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pickDomain {
+  font-size: 12px;
+  color: var(--ink-faint);
+  font-family: var(--font-geist-mono), monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pickRight {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 0 0 auto;
+}
+
+.proBadge {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-5);
+  border: 1px solid var(--border);
+  padding: 2px 7px;
+}
+
+.pickRemove {
+  font-size: 16px;
+  line-height: 1;
+  color: var(--ink-faint);
+  background: none;
+  border: none;
+  padding: 0 2px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pickRemove:hover {
+  color: var(--danger);
+}
+
+.checkBox {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-input);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.checkBoxOn {
+  border-color: var(--accent-hover);
+  background: var(--accent);
+}
+
+/* v3 upgrade nudge shown when picks exceed the free limit. */
+.upgradeNudge {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  border: 1px solid var(--accent-line);
+  background: var(--accent-wash);
+  padding: 16px 18px;
+}
+
+.upgradeNudgeTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.upgradeNudgeBody {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  max-width: 360px;
+  line-height: 1.5;
+}
+
 .row {
   display: flex;
   align-items: center;

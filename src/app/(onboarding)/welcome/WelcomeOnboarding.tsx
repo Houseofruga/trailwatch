@@ -4,17 +4,28 @@ import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { findCompetitorsAction, type FinderState } from "@/app/(marketing)/actions";
 import { Button } from "@/components/Button";
+import { CompetitorAvatar } from "@/components/CompetitorAvatar";
 import { PlusIcon } from "@/components/icons";
 import type { FinderResult } from "@/features/competitorFinder/types";
 import { seedCompetitors } from "@/features/competitors/actions";
 import { normalizeUrl } from "@/features/competitors/url";
-import { LIMITS, PLAN_LABEL, type Plan } from "@/features/plan/limits";
+import { LIMITS, type Plan } from "@/features/plan/limits";
 import { OnboardingPlanStep } from "./OnboardingPlanStep";
 import { StepIndicator } from "./StepIndicator";
 import styles from "./welcome.module.css";
 
-type Row = { name: string; url: string; selected: boolean };
+// `editing` rows are blank/manual entries shown as name+URL inputs; suggested
+// rows (from the homepage finder or the domain step) render as v3 toggle rows.
+type Row = { name: string; url: string; selected: boolean; editing?: boolean };
 type Step = "domain" | "watchlist" | "plan";
+
+function domainOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url.replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
+  }
+}
 const KEY = "tw_pending_competitors";
 // Set once the visitor has been through onboarding (finished or skipped), so the
 // dashboard's redirect gate doesn't send them back here on every empty-dashboard
@@ -101,7 +112,7 @@ export function WelcomeOnboarding({
       selected: i < limit,
     }));
     setRows(
-      suggested.length > 0 ? suggested : [{ name: "", url: "", selected: true }],
+      suggested.length > 0 ? suggested : [{ name: "", url: "", selected: true, editing: true }],
     );
     setStep("watchlist");
   }
@@ -113,7 +124,7 @@ export function WelcomeOnboarding({
   // editable watchlist so they can add competitors by hand — never a dead end.
   if (step === "domain") {
     function skipToManual() {
-      setRows([{ name: "", url: "", selected: true }]);
+      setRows([{ name: "", url: "", selected: true, editing: true }]);
       setStep("watchlist");
     }
     return (
@@ -195,7 +206,7 @@ export function WelcomeOnboarding({
       if (!r) return r;
       // New rows start selected unless that would exceed the free cap.
       const selected = plan !== "free" || r.filter((x) => x.selected).length < limit;
-      return [...r, { name: "", url: "", selected }];
+      return [...r, { name: "", url: "", selected, editing: true }];
     });
   }
   async function start() {
@@ -257,61 +268,98 @@ export function WelcomeOnboarding({
         pages per competitor once you’re in.
       </p>
 
-      {overLimit && (
-        <p className={styles.limitNote}>
-          {PLAN_LABEL[plan]} tracks {limit} competitors — choose {limit} to start free, or
-          upgrade to Pro to watch all {total}.
-        </p>
-      )}
-
-      <div className={styles.colLabels}>
-        <div className={styles.colLabelName}>Competitor</div>
-        <div className={styles.colLabelUrl}>Homepage URL</div>
-        <div className={styles.colLabelSpacer} />
-      </div>
+      <p className={styles.pickNote}>
+        {plan === "free"
+          ? `Pick up to ${limit} to start free — ${selectedCount} of ${limit} selected.`
+          : `${selectedCount} selected.`}
+      </p>
 
       <div className={styles.list}>
         {rows.map((row, i) => {
-          const disabled = !row.selected && atCap;
+          // Blank / manually-added rows stay editable name + URL inputs.
+          if (row.editing) {
+            const disabled = !row.selected && atCap;
+            return (
+              <div key={i} className={`${styles.row} ${row.selected ? "" : styles.rowUnselected}`}>
+                <label className={styles.check}>
+                  <input
+                    type="checkbox"
+                    checked={row.selected}
+                    disabled={disabled}
+                    onChange={() => toggle(i)}
+                    aria-label={`Watch ${row.name || `competitor ${i + 1}`}`}
+                  />
+                </label>
+                <div className={styles.fields}>
+                  <input
+                    className={styles.name}
+                    value={row.name}
+                    onChange={(e) => update(i, { name: e.target.value })}
+                    placeholder="Competitor name"
+                    aria-label={`Competitor ${i + 1} name`}
+                  />
+                  <input
+                    className={styles.url}
+                    value={row.url}
+                    onChange={(e) => update(i, { url: e.target.value })}
+                    placeholder="https://competitor.com"
+                    aria-label={`Competitor ${i + 1} homepage URL`}
+                    inputMode="url"
+                  />
+                </div>
+                <button
+                  type="button"
+                  className={styles.remove}
+                  onClick={() => remove(i)}
+                  aria-label={`Remove ${row.name || "competitor"}`}
+                >
+                  Remove
+                </button>
+              </div>
+            );
+          }
+
+          // Suggested rows: v3 toggle row — tap anywhere to select/deselect.
+          const locked = plan === "free" && !row.selected && atCap;
           return (
             <div
               key={i}
-              className={`${styles.row} ${row.selected ? "" : styles.rowUnselected}`}
+              className={row.selected ? `${styles.pickRow} ${styles.pickRowOn}` : styles.pickRow}
+              role="button"
+              tabIndex={0}
+              aria-pressed={row.selected}
+              onClick={() => toggle(i)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  toggle(i);
+                }
+              }}
             >
-              <label className={styles.check}>
-                <input
-                  type="checkbox"
-                  checked={row.selected}
-                  disabled={disabled}
-                  onChange={() => toggle(i)}
-                  aria-label={`Watch ${row.name || `competitor ${i + 1}`}`}
-                />
-              </label>
-              <div className={styles.fields}>
-                <input
-                  className={styles.name}
-                  value={row.name}
-                  onChange={(e) => update(i, { name: e.target.value })}
-                  placeholder="Competitor name"
-                  aria-label={`Competitor ${i + 1} name`}
-                />
-                <input
-                  className={styles.url}
-                  value={row.url}
-                  onChange={(e) => update(i, { url: e.target.value })}
-                  placeholder="https://competitor.com"
-                  aria-label={`Competitor ${i + 1} homepage URL`}
-                  inputMode="url"
-                />
+              <div className={styles.pickMain}>
+                <CompetitorAvatar url={row.url} name={row.name} className={styles.pickAvatar} />
+                <div className={styles.pickTextWrap}>
+                  <div className={styles.pickName}>{row.name || "Untitled"}</div>
+                  <div className={styles.pickDomain}>{domainOf(row.url)}</div>
+                </div>
               </div>
-              <button
-                type="button"
-                className={styles.remove}
-                onClick={() => remove(i)}
-                aria-label={`Remove ${row.name || "competitor"}`}
-              >
-                Remove
-              </button>
+              <div className={styles.pickRight}>
+                {locked ? <span className={styles.proBadge}>Pro</span> : null}
+                <button
+                  type="button"
+                  className={styles.pickRemove}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    remove(i);
+                  }}
+                  aria-label={`Remove ${row.name || "competitor"}`}
+                >
+                  &times;
+                </button>
+                <span className={row.selected ? `${styles.checkBox} ${styles.checkBoxOn}` : styles.checkBox}>
+                  {row.selected ? "✓" : ""}
+                </span>
+              </div>
             </div>
           );
         })}
@@ -319,35 +367,32 @@ export function WelcomeOnboarding({
 
       <button type="button" className={styles.addRow} onClick={addRow} disabled={busy}>
         <PlusIcon size={12} />
-        Add another competitor
+        Add one yourself instead
       </button>
+
+      {overLimit && plan === "free" && (
+        <div className={styles.upgradeNudge}>
+          <div>
+            <div className={styles.upgradeNudgeTitle}>Watching more than {limit}?</div>
+            <div className={styles.upgradeNudgeBody}>
+              Free watches {limit}. Go Pro to track up to {LIMITS.paid.competitors} — checkout
+              happens right here, no redirect.
+            </div>
+          </div>
+          <Button type="button" onClick={() => setStep("plan")} disabled={busy}>
+            Select all &amp; go Pro
+          </Button>
+        </div>
+      )}
 
       {error && <p className={styles.error}>{error}</p>}
 
       <div className={styles.actions}>
-        {overLimit ? (
-          <>
-            <Button type="button" onClick={() => setStep("plan")} disabled={busy}>
-              Upgrade to watch all {total} competitors
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={start}
-              disabled={!canSeed || busy}
-            >
-              {busy
-                ? "Setting up…"
-                : `Continue free with ${selectedCount} competitor${selectedCount !== 1 ? "s" : ""}`}
-            </Button>
-          </>
-        ) : (
-          <Button type="button" onClick={start} disabled={!canSeed || busy}>
-            {busy
-              ? "Setting up…"
-              : `Start watching ${selectedCount} competitor${selectedCount !== 1 ? "s" : ""}`}
-          </Button>
-        )}
+        <Button type="button" onClick={start} disabled={!canSeed || busy}>
+          {busy
+            ? "Setting up…"
+            : `Start watching ${selectedCount} competitor${selectedCount !== 1 ? "s" : ""}`}
+        </Button>
       </div>
     </div>
   );
