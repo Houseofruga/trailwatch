@@ -7,6 +7,7 @@ import { AddPageDialog } from "@/components/AddPageDialog";
 import { EditPageDialog } from "@/components/EditPageDialog";
 import { ButtonLink } from "@/components/Button";
 import { CompetitorAvatar } from "@/components/CompetitorAvatar";
+import { BaselinePanel } from "./BaselinePanel";
 import { PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { deleteCompetitor, deletePage, togglePageActive } from "@/features/competitors/actions";
@@ -172,7 +173,8 @@ export function ManageBoard({
             </div>
 
             {c.pages.map((p) => (
-              <div key={p.id} className={styles.row}>
+              <div key={p.id} className={styles.pageBlock}>
+              <div className={styles.row}>
                 <div className={styles.rowLabel}>{p.label}</div>
                 <a href={p.url} target="_blank" rel="noreferrer" className={styles.rowUrl}>
                   <span className={styles.rowUrlText}>{p.url}</span>
@@ -247,6 +249,8 @@ export function ManageBoard({
                     ) : null}
                   </div>
                 </div>
+              </div>
+              {p.isActive ? <BaselinePanel pageId={p.id} /> : null}
               </div>
             ))}
           </section>

@@ -176,16 +176,123 @@
   color: var(--danger);
 }
 
+/* Each page + its baseline profile, grouped so they read as one unit and the
+   divider falls between pages (not between a page and its own profile). */
+.pageBlock {
+  border-bottom: 1px solid var(--border-softer);
+}
+
+.pageBlock:last-child {
+  border-bottom: none;
+}
+
 .row {
   padding: 13px 20px;
-  border-bottom: 1px solid var(--border-softer);
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.row:last-child {
-  border-bottom: none;
+/* -------------------------------------------------- baseline profile (day-0 value) */
+.baseline {
+  padding: 2px 20px 16px 112px; /* left aligns under the URL, past the 92px label */
+}
+
+.baselineHead {
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  margin-bottom: 8px;
+}
+
+.baselinePositioning {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.baselineTiers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.baselineTier {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface-alt, var(--bg));
+  padding: 3px 9px;
+}
+
+.tierName {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.tierPrice {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.baselineWatch {
+  margin: 0 0 10px;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.baselineWatch li {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+.baselineFoot {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
+.baselineNote {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-4);
+}
+
+/* Loading skeleton — three shimmering lines matching the profile shape. */
+.baselineSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skelLine {
+  height: 11px;
+  background: linear-gradient(
+    90deg,
+    var(--border-softer) 0%,
+    var(--border-soft) 50%,
+    var(--border-softer) 100%
+  );
+  background-size: 200% 100%;
+  animation: baselineShimmer 1.3s ease-in-out infinite;
+}
+
+@keyframes baselineShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .rowLabel {
@@ -355,5 +462,10 @@
   .menuBtn {
     width: 36px;
     height: 36px;
+  }
+
+  /* Full-width profile on mobile — no room for the desktop URL-aligned indent. */
+  .baseline {
+    padding: 2px 16px 14px;
   }
 }
