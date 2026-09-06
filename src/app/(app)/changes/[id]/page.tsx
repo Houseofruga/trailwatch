@@ -28,9 +28,24 @@ export default async function ChangeDetailPage({ params }: { params: Promise<{ i
         <span className={styles.crumbComp}>{detail.competitorName}</span>
         <span className={styles.crumbDot}>&middot;</span>
         <span className={styles.crumbLabel}>{detail.pageLabel}</span>
+        {detail.isArchive ? <span className={styles.archiveBadge}>Web archive</span> : null}
       </div>
 
       <h1 className={styles.summary}>{detail.summary}</h1>
+
+      {detail.isArchive ? (
+        <div className={styles.archiveCallout}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" className={styles.archiveIcon}>
+            <path d="M8 1.5A6.5 6.5 0 108 14.5 6.5 6.5 0 008 1.5z" stroke="currentColor" strokeWidth="1.3" />
+            <path d="M8 4.6v3.6l2.4 1.4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          </svg>
+          <div>
+            Reconstructed from the web archive &mdash; we didn&rsquo;t watch this page when the change
+            happened, so the &ldquo;before&rdquo; is the nearest archived snapshot from {detail.beforeDate}.
+            Exact wording may differ slightly.
+          </div>
+        </div>
+      ) : null}
 
       <div className={styles.meta}>
         <span>Detected {detail.detectedDate}</span>
@@ -54,7 +69,6 @@ export default async function ChangeDetailPage({ params }: { params: Promise<{ i
         <p className={styles.note}>
           Excerpt only &mdash; the part of the page our filter judged meaningful.
           {detail.ignoredNote ? ` ${detail.ignoredNote}` : ""}
-          {detail.provenanceNote ? ` ${detail.provenanceNote}` : ""}
         </p>
       </div>
 

@@ -154,3 +154,33 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------------------------------- archive-reconstructed change (Phase 2) */
+.archiveBadge {
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8a6d2b;
+  background: #f6efdd;
+  border: 1px solid #e7d9b8;
+  padding: 2px 8px;
+}
+
+.archiveCallout {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  background: #fbf7ee;
+  border: 1px solid #eadfc6;
+  padding: 12px 16px;
+  margin-bottom: 22px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+
+.archiveIcon {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: #b8933b;
+}

@@ -19,6 +19,8 @@ export type ChangeDetail = {
   ignoredNote: string;
   // Non-empty for archive-reconstructed changes (Phase 2 backfill).
   provenanceNote: string;
+  // True for archive-reconstructed changes — drives the "Web archive" badge + callout.
+  isArchive: boolean;
 };
 
 // Shape we cast the (untyped) Supabase select into.
@@ -85,5 +87,6 @@ export async function getRealChangeDetail(changeId: string): Promise<ChangeDetai
       row.source === "archive"
         ? "Reconstructed from the Wayback Machine, so the exact wording may differ from the live page."
         : "",
+    isArchive: row.source === "archive",
   };
 }

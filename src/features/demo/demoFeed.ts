@@ -186,5 +186,6 @@ export function getDemoChangeDetail(id: string, now: number): ChangeDetail | nul
     after: change.after ?? "",
     ignoredNote: change.ignored ?? "",
     provenanceNote: "",
+    isArchive: false,
   };
 }
