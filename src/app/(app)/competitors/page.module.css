@@ -267,6 +267,105 @@
   color: var(--ink-4);
 }
 
+/* -------------------------------------------------- recent history (Wayback backfill) */
+.history {
+  padding: 0 20px 14px 112px; /* aligns under the URL, like .baseline */
+}
+
+.historyToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.historyToggle:hover {
+  color: var(--ink-2);
+}
+
+.historyChevron {
+  display: inline-block;
+  font-size: 13px;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+
+.historyChevron[data-open="true"] {
+  transform: rotate(90deg);
+}
+
+.historyCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10.5px;
+  letter-spacing: 0;
+  color: var(--accent-ink);
+  background: var(--accent-wash);
+}
+
+.historyBody {
+  margin-top: 10px;
+}
+
+.historyList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border-soft);
+}
+
+.historyItem {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 6px 0 6px 14px;
+}
+
+.historyDate {
+  flex: 0 0 84px;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.historyLink {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  text-decoration: none;
+}
+
+.historyLink:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.historyNote {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-4);
+}
+
+.historySkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 /* Loading skeleton — three shimmering lines matching the profile shape. */
 .baselineSkeleton {
   display: flex;
@@ -467,5 +566,11 @@
   /* Full-width profile on mobile — no room for the desktop URL-aligned indent. */
   .baseline {
     padding: 2px 16px 14px;
+  }
+  .history {
+    padding: 0 16px 14px;
+  }
+  .historyDate {
+    flex-basis: 72px;
   }
 }

@@ -17,6 +17,8 @@ export type ChangeDetail = {
   // The trailing sentence of the "excerpt only…" note, e.g.
   // "4 other edits on this page were ignored as boilerplate." May be empty.
   ignoredNote: string;
+  // Non-empty for archive-reconstructed changes (Phase 2 backfill).
+  provenanceNote: string;
 };
 
 // Shape we cast the (untyped) Supabase select into.
@@ -26,6 +28,8 @@ type ChangeRow = {
   excerpt_before: string | null;
   excerpt_after: string | null;
   page_id: string;
+  source: string | null;
+  compared_from_at: string | null;
   from_snapshot: { fetched_at: string } | null;
   pages: { label: string; url: string; competitors: { name: string } | null } | null;
 };
@@ -43,7 +47,7 @@ export async function getRealChangeDetail(changeId: string): Promise<ChangeDetai
   const { data, error } = await supabase
     .from("changes")
     .select(
-      "summary, detected_at, excerpt_before, excerpt_after, page_id, from_snapshot:snapshots!from_snapshot_id ( fetched_at ), pages ( label, url, competitors ( name ) )",
+      "summary, detected_at, excerpt_before, excerpt_after, page_id, source, compared_from_at, from_snapshot:snapshots!from_snapshot_id ( fetched_at ), pages ( label, url, competitors ( name ) )",
     )
     .eq("id", changeId)
     .eq("is_meaningful", true)
@@ -67,10 +71,19 @@ export async function getRealChangeDetail(changeId: string): Promise<ChangeDetai
     domain: domainOf(row.pages.url),
     summary: row.summary ?? "Meaningful change detected.",
     detectedDate: formatFullDate(row.detected_at),
-    beforeDate: row.from_snapshot ? formatShortDate(row.from_snapshot.fetched_at) : "—",
+    // Archive rows have no snapshot; their before-date is carried on the row.
+    beforeDate: row.compared_from_at
+      ? formatShortDate(row.compared_from_at)
+      : row.from_snapshot
+        ? formatShortDate(row.from_snapshot.fetched_at)
+        : "—",
     afterDate: formatShortDate(row.detected_at),
     before: row.excerpt_before ?? "",
     after: row.excerpt_after ?? "",
     ignoredNote: realIgnoredNote(count ?? 0),
+    provenanceNote:
+      row.source === "archive"
+        ? "Reconstructed from the Wayback Machine, so the exact wording may differ from the live page."
+        : "",
   };
 }

@@ -184,5 +184,6 @@ export function getDemoChangeDetail(id: string, now: number): ChangeDetail | nul
     before: change.before ?? "",
     after: change.after ?? "",
     ignoredNote: change.ignored ?? "",
+    provenanceNote: "",
   };
 }

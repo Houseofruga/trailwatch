@@ -8,6 +8,7 @@ import { EditPageDialog } from "@/components/EditPageDialog";
 import { ButtonLink } from "@/components/Button";
 import { CompetitorAvatar } from "@/components/CompetitorAvatar";
 import { BaselinePanel } from "./BaselinePanel";
+import { HistoryPanel } from "./HistoryPanel";
 import { PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { deleteCompetitor, deletePage, togglePageActive } from "@/features/competitors/actions";
@@ -251,6 +252,7 @@ export function ManageBoard({
                 </div>
               </div>
               {p.isActive ? <BaselinePanel pageId={p.id} /> : null}
+              {p.isActive ? <HistoryPanel pageId={p.id} /> : null}
               </div>
             ))}
           </section>

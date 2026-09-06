@@ -118,4 +118,31 @@ describe("buildDigests", () => {
 
     expect(digests[0].competitors[0].lines.map((l) => l.summary)).toEqual(["newer", "older"]);
   });
+
+  it("never emails archive-backfilled changes, even if recently dated", () => {
+    const digests = buildDigests(
+      [
+        user({
+          competitors: [
+            {
+              name: "Acme",
+              pages: [
+                {
+                  label: "Pricing",
+                  url: "https://acme.com/pricing",
+                  changes: [
+                    // recent + meaningful, but reconstructed from the archive
+                    { summary: "archived price drop", is_meaningful: true, detected_at: recent, source: "archive" },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ],
+      NOW,
+    );
+
+    expect(digests).toEqual([]);
+  });
 });

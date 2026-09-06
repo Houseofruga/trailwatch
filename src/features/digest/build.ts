@@ -10,6 +10,7 @@ export type RawChange = {
   summary: string | null;
   is_meaningful: boolean;
   detected_at: string;
+  source?: string | null;
 };
 
 export type RawPage = { label: string; url: string; changes: RawChange[] };
@@ -35,6 +36,10 @@ const FALLBACK_SUMMARY = "This page changed meaningfully (summary unavailable)."
 
 function isRecentMeaningful(change: RawChange, now: number): boolean {
   if (!change.is_meaningful) return false;
+  // Archive-backfilled changes are in-app only — never emailed. (They're also
+  // historically dated, so the window below would exclude them anyway; this is
+  // the explicit guard.)
+  if (change.source === "archive") return false;
   return now - new Date(change.detected_at).getTime() <= WEEK_MS;
 }
 

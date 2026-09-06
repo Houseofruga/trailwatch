@@ -34,7 +34,7 @@ export async function getCompetitorsWithPages(): Promise<CompetitorRow[]> {
   const { data, error } = await supabase
     .from("competitors")
     .select(
-      "id, name, created_at, pages ( id, url, label, is_active, last_checked_at, created_at, changes ( id, summary, is_meaningful, detected_at ) )",
+      "id, name, created_at, pages ( id, url, label, is_active, last_checked_at, created_at, changes ( id, summary, is_meaningful, detected_at, source ) )",
     )
     .order("created_at", { ascending: false })
     .order("created_at", { ascending: true, referencedTable: "pages" })
@@ -52,12 +52,16 @@ export async function getCompetitorsWithPages(): Promise<CompetitorRow[]> {
       label: p.label,
       isActive: p.is_active,
       lastCheckedAt: p.last_checked_at,
-      changes: (p.changes ?? []).map((ch) => ({
-        id: ch.id,
-        summary: ch.summary,
-        isMeaningful: ch.is_meaningful,
-        detectedAt: ch.detected_at,
-      })),
+      // Archive-backfilled changes live only in the per-page HistoryPanel and
+      // change-detail — never in the "this week" dashboard feed.
+      changes: (p.changes ?? [])
+        .filter((ch) => (ch as { source?: string }).source !== "archive")
+        .map((ch) => ({
+          id: ch.id,
+          summary: ch.summary,
+          isMeaningful: ch.is_meaningful,
+          detectedAt: ch.detected_at,
+        })),
     })),
   }));
 }

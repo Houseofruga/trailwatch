@@ -54,6 +54,7 @@ export default async function ChangeDetailPage({ params }: { params: Promise<{ i
         <p className={styles.note}>
           Excerpt only &mdash; the part of the page our filter judged meaningful.
           {detail.ignoredNote ? ` ${detail.ignoredNote}` : ""}
+          {detail.provenanceNote ? ` ${detail.provenanceNote}` : ""}
         </p>
       </div>
 
