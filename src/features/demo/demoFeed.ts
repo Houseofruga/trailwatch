@@ -154,6 +154,7 @@ export function getDemoFeed(now: number): CompetitorRow[] {
         isMeaningful: ch.meaningful ?? true,
         detectedAt: detectedIso(now, ch.hoursAgo),
       })),
+      lastArchived: null, // the demo feed has no backfilled history
     })),
   }));
 }

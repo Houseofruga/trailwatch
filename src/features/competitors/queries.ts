@@ -16,6 +16,11 @@ export type PageRow = {
   // Newest first. Includes trivial (filtered) changes so the dashboard can
   // count "trivial edits filtered" without a second query.
   changes: ChangeRow[];
+  // The most recent archive-backfilled ("last notable change") row, if this page
+  // has been backfilled. Kept out of `changes` (the "this week" feed) but surfaced
+  // on a quiet page's dashboard card as a "last notable change" link. Null until
+  // the page's history has been reconstructed — the dashboard never triggers that.
+  lastArchived: ChangeRow | null;
 };
 
 export type CompetitorRow = {
@@ -62,6 +67,16 @@ export async function getCompetitorsWithPages(): Promise<CompetitorRow[]> {
           isMeaningful: ch.is_meaningful,
           detectedAt: ch.detected_at,
         })),
+      // Rows are ordered detected_at desc, so the first archive row is the most
+      // recent backfilled change — the "last notable change" a quiet page shows.
+      lastArchived: (() => {
+        const a = (p.changes ?? []).find(
+          (ch) => (ch as { source?: string }).source === "archive",
+        );
+        return a
+          ? { id: a.id, summary: a.summary, isMeaningful: a.is_meaningful, detectedAt: a.detected_at }
+          : null;
+      })(),
     })),
   }));
 }

@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { LIMITS, type Plan } from "@/features/plan/limits";
 import { resolvePlan } from "@/features/plan/comp";
 import { runCheckForPage } from "@/features/checks/runCheck";
+import { warmPages } from "./warm";
 import { competitorName, pageRow } from "./validation";
 import { normalizeUrl } from "./url";
 import { originOf, sameSite, siteOf } from "./domain";
@@ -89,7 +90,7 @@ async function insertCompetitorWithPages(
   userId: string,
   name: string,
   rows: { url: string; label: string }[],
-): Promise<{ ok: true; outcomes: CaptureOutcome[] } | { ok: false; error: string }> {
+): Promise<{ ok: true; outcomes: CaptureOutcome[]; pageIds: string[] } | { ok: false; error: string }> {
   const { data: competitor, error: competitorError } = await supabase
     .from("competitors")
     .insert({ name, user_id: userId })
@@ -108,7 +109,7 @@ async function insertCompetitorWithPages(
   }
 
   const outcomes = await captureBaselines(newPages);
-  return { ok: true, outcomes };
+  return { ok: true, outcomes, pageIds: newPages.map((p) => p.id) };
 }
 
 function today(): string {
@@ -173,6 +174,10 @@ export async function createCompetitor(_prev: FormState, formData: FormData): Pr
   const result = await insertCompetitorWithPages(supabase, userId, nameResult.data, rowsResult.data);
   if (!result.ok) return { error: result.error };
 
+  // Warm the day-0 value (baseline + Wayback history) post-response, so the
+  // dashboard already has it on first visit. Best-effort — see warmPages.
+  warmPages(result.pageIds);
+
   revalidatePath("/dashboard");
   revalidatePath("/competitors");
   redirect(flashUrl("/dashboard", captureFlash(result.outcomes)));
@@ -203,14 +208,21 @@ export async function seedCompetitors(
 
   const toCreate = items.slice(0, remaining);
   let created = 0;
+  const pageIds: string[] = [];
   for (const item of toCreate) {
     const nameResult = competitorName.safeParse(item.name);
     if (!nameResult.success) continue;
     const rowResult = pageRow.safeParse({ url: normalizeUrl(item.url), label: "Homepage" });
     if (!rowResult.success) continue;
     const res = await insertCompetitorWithPages(supabase, userId, nameResult.data, [rowResult.data]);
-    if (res.ok) created++;
+    if (res.ok) {
+      created++;
+      pageIds.push(...res.pageIds);
+    }
   }
+
+  // Warm the day-0 value for the seeded pages post-response (best-effort).
+  warmPages(pageIds);
 
   revalidatePath("/dashboard");
   revalidatePath("/competitors");
@@ -255,6 +267,7 @@ export async function addPages(_prev: FormState, formData: FormData): Promise<Fo
   if (error || !newPages) return { error: "Couldn't add those pages. Try again." };
 
   const outcomes = await captureBaselines(newPages);
+  warmPages(newPages.map((p) => p.id));
 
   revalidatePath("/dashboard");
   revalidatePath("/competitors");

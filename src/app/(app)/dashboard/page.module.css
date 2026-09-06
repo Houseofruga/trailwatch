@@ -351,6 +351,91 @@ a.pageRowLink:hover {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------------------------------- quiet-page value card (adaptive dashboard) */
+
+/* A quiet but active page shows its baseline profile instead of "nothing
+   happened" — value-forward when the feed is calm. */
+.pageValue {
+  flex: 1;
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.quietCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quietPositioning {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.quietTiers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.quietTier {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface-alt, var(--bg));
+  padding: 3px 9px;
+}
+
+.quietTierName {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.quietTierPrice {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.quietNotable {
+  font-size: 12px;
+  color: var(--ink-5);
+}
+
+.quietNotable:hover {
+  color: var(--accent-ink);
+}
+
+.quietPlain {
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
+.skelLine {
+  height: 11px;
+  background: linear-gradient(
+    90deg,
+    var(--border-softer) 0%,
+    var(--border-soft) 50%,
+    var(--border-softer) 100%
+  );
+  background-size: 200% 100%;
+  animation: dashShimmer 1.3s ease-in-out infinite;
+}
+
+@keyframes dashShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 /* ------------------------------------------- Seeded demo dashboard (example) */
 
 /* Dotted-stroke container so the demo reads as an example at a glance — no fill,

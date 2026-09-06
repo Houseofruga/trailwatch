@@ -8,6 +8,10 @@ import { WelcomeOnboarding } from "./WelcomeOnboarding";
 
 export const metadata: Metadata = { title: "Set up your watchlist" };
 
+// seedCompetitors warms baseline + Wayback history via after() (post-response);
+// give that work room under the function budget.
+export const maxDuration = 60;
+
 // Post-signup onboarding: confirm and create the competitors the visitor picked
 // on the homepage / (carried in localStorage). Only for fresh accounts — anyone who already
 // has competitors is sent to the dashboard.

@@ -9,6 +9,10 @@ import { LIMITS, PLAN_LABEL } from "@/features/plan/limits";
 import { AddForm } from "./AddForm";
 import styles from "./page.module.css";
 
+// The add action warms baseline + Wayback history via after() (post-response);
+// give that work room under the function budget, matching the competitors route.
+export const maxDuration = 60;
+
 export default async function AddCompetitorPage({
   searchParams,
 }: {

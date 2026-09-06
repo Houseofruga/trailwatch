@@ -9,8 +9,9 @@ import { getCompetitorsWithPages, type CompetitorRow } from "@/features/competit
 import { getDemoFeed } from "@/features/demo/demoFeed";
 import { LIMITS } from "@/features/plan/limits";
 import { DemoDashboard } from "./DemoDashboard";
+import { DashboardBaseline } from "./DashboardBaseline";
 import { PendingSeedRedirect } from "./PendingSeedRedirect";
-import { domainOf, latestMeaningful, timeAgo, withinWeek } from "./dashboardFeed";
+import { domainOf, timeAgo, withinWeek } from "./dashboardFeed";
 import styles from "./page.module.css";
 
 const SUGGESTIONS = [
@@ -19,10 +20,24 @@ const SUGGESTIONS = [
   { n: "03", text: "Their homepage — how the positioning moves" },
 ];
 
-function quietNote(page: CompetitorRow["pages"][number]): string {
-  if (!page.isActive) return "Paused";
-  if (!page.lastCheckedAt) return "First check runs within the hour";
-  return "No meaningful changes yet";
+type Page = CompetitorRow["pages"][number];
+type Change = Page["changes"][number];
+
+// The most recent meaningful change from this week — the page is "active" and
+// keeps its change link. `withinWeek` decides active vs quiet, per the adaptive
+// design (value-forward when quiet, feed-forward when active).
+function activeChange(page: Page, now: number): Change | null {
+  return page.changes.find((c) => c.isMeaningful && withinWeek(c.detectedAt, now)) ?? null;
+}
+
+// For a quiet page, the most notable change to link to: the newest meaningful
+// change of any age (necessarily older than this week here) or the archive
+// backfill — whichever is more recent. The dashboard only ever links to it.
+function lastNotable(page: Page): Change | null {
+  const live = page.changes.find((c) => c.isMeaningful) ?? null;
+  const arch = page.lastArchived;
+  if (live && arch) return live.detectedAt >= arch.detectedAt ? live : arch;
+  return live ?? arch;
 }
 
 export default async function DashboardPage() {
@@ -102,16 +117,24 @@ export default async function DashboardPage() {
       0,
     );
 
-  const headSub =
-    changesThisWeek > 0
-      ? `${changesThisWeek} meaningful ${changesThisWeek === 1 ? "change" : "changes"} across your tracked pages.`
-      : "No meaningful changes this week — we'll email a digest each Monday.";
+  // Adaptive header: feed-forward when something moved, value-forward when quiet.
+  // A quiet week is the product working, not a dead screen — say so.
+  const quiet = changesThisWeek === 0;
+  const heading = quiet ? "All quiet" : "This week";
+  const headSub = quiet
+    ? "Exactly the point — here's what we're watching for you."
+    : `${changesThisWeek} meaningful ${changesThisWeek === 1 ? "change" : "changes"} across your tracked pages.`;
+
+  // Competitors with the most movement this week float to the top; ties keep the
+  // query's newest-first order (Array.sort is stable). Within a competitor, pages
+  // that changed this week come before quiet ones.
+  const orderedCompetitors = [...competitors].sort((a, b) => meaningfulThisWeek(b) - meaningfulThisWeek(a));
 
   return (
     <div className={styles.wrap}>
       <div className={styles.head}>
         <div>
-          <h1 className={styles.heading}>This week</h1>
+          <h1 className={styles.heading}>{heading}</h1>
           <p className={styles.headSub}>{headSub}</p>
         </div>
         <ButtonLink href="/competitors/add">
@@ -162,8 +185,12 @@ export default async function DashboardPage() {
       ) : null}
 
       <div className={styles.compList}>
-        {competitors.map((c) => {
+        {orderedCompetitors.map((c) => {
           const meaningful = meaningfulThisWeek(c);
+          // Changed-this-week pages first; ties keep the query's page order.
+          const orderedPages = [...c.pages].sort(
+            (a, b) => (activeChange(b, now) ? 1 : 0) - (activeChange(a, now) ? 1 : 0),
+          );
           return (
             <section key={c.id} className={styles.compCard}>
               <div className={styles.compHead}>
@@ -179,8 +206,9 @@ export default async function DashboardPage() {
                 </div>
               </div>
 
-              {c.pages.map((p) => {
-                const change = latestMeaningful(p);
+              {orderedPages.map((p) => {
+                // Active page: a meaningful change landed this week — keep the feed link.
+                const change = activeChange(p, now);
                 if (change) {
                   return (
                     <Link key={p.id} href={`/changes/${change.id}`} className={styles.pageRowLink}>
@@ -197,13 +225,34 @@ export default async function DashboardPage() {
                     </Link>
                   );
                 }
+
+                // Paused pages aren't being watched — no value card, just the state.
+                if (!p.isActive) {
+                  return (
+                    <div key={p.id} className={styles.pageRow}>
+                      <div className={styles.pageMeta}>
+                        <div className={styles.pageLabel}>{p.label}</div>
+                        <div className={styles.pagePaused}>Paused</div>
+                      </div>
+                      <div className={styles.pageQuiet}>Paused</div>
+                    </div>
+                  );
+                }
+
+                // Quiet, active page: value-forward — the baseline profile + a
+                // link to its last notable change, instead of "nothing happened".
+                const notable = lastNotable(p);
                 return (
                   <div key={p.id} className={styles.pageRow}>
                     <div className={styles.pageMeta}>
                       <div className={styles.pageLabel}>{p.label}</div>
-                      {!p.isActive ? <div className={styles.pagePaused}>Paused</div> : null}
                     </div>
-                    <div className={styles.pageQuiet}>{quietNote(p)}</div>
+                    <div className={styles.pageValue}>
+                      <DashboardBaseline
+                        pageId={p.id}
+                        lastNotable={notable ? { id: notable.id, label: timeAgo(notable.detectedAt, now) } : null}
+                      />
+                    </div>
                   </div>
                 );
               })}
