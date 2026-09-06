@@ -67,7 +67,7 @@ export function PageIntel({ pageId }: { pageId: string }) {
       <div className={styles.intel}>
         <div className={styles.capturing}>
           <span className={styles.spinner} aria-hidden="true" />
-          We&rsquo;ll profile this page right after its first check
+          We&rsquo;ll profile this page as soon as we&rsquo;ve captured it
         </div>
       </div>
     );

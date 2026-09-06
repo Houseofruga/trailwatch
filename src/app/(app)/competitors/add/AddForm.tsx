@@ -146,8 +146,8 @@ export function AddForm({ slotsLeft, totalCompetitorSlots, pagesPerCompetitor }:
         </div>
 
         <p className={styles.hint}>
-          First check runs within an hour. After that, once a day — and we only tell you when something actually
-          changed.
+          We capture the page the moment you add it, then check once a day — and we only tell you when
+          something actually changed.
         </p>
       </form>
     </div>

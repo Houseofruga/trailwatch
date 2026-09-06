@@ -170,7 +170,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className={styles.metaRow}>
-        <span>Checks start within an hour of adding a page</span>
+        <span>We capture each page the moment you add it, then check daily</span>
         <span>Digests go out Mondays at 8am</span>
       </div>
 
