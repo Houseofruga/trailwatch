@@ -7,7 +7,7 @@ import { ButtonLink } from "@/components/Button";
 import { usePathname } from "next/navigation";
 import { logOut } from "@/features/auth/actions";
 import type { Account } from "@/features/account/queries";
-import { LIMITS, PLAN_LABEL, PLAN_PRICE } from "@/features/plan/limits";
+import { LIMITS, PLAN_LABEL } from "@/features/plan/limits";
 import {
   DashboardIcon,
   CompetitorsIcon,
@@ -169,7 +169,6 @@ export function Sidebar({ account }: { account: Account }) {
         <div className={styles.usage}>
           <div className={styles.usageHead}>
             <span className={styles.usagePlan}>{PLAN_LABEL[account.plan]} plan</span>
-            <span className={styles.usagePrice}>{PLAN_PRICE[account.plan]}</span>
           </div>
 
           <div className={styles.meters}>
