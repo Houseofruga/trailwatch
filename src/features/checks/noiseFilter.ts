@@ -28,17 +28,27 @@ function linesOf(text: string): Set<string> {
   );
 }
 
+// The whole lines that differ between two versions, split into those only in the
+// new text and those only in the old. Shared by the noise filter (which counts
+// their characters) and the summarizer prompt (which shows them to the model,
+// rather than the first N chars of each full page). One definition keeps "what
+// changed" identical on both sides.
+export function diffLines(oldText: string, newText: string): { added: string[]; removed: string[] } {
+  const oldLines = linesOf(oldText);
+  const newLines = linesOf(newText);
+  return {
+    added: [...newLines].filter((line) => !oldLines.has(line)),
+    removed: [...oldLines].filter((line) => !newLines.has(line)),
+  };
+}
+
 export function isMeaningfulChange(oldText: string, newText: string): MeaningfulChangeResult {
   if (collapseForCompare(oldText) === collapseForCompare(newText)) {
     return { meaningful: false, reason: "identical after ignoring whitespace and case" };
   }
 
-  const oldLines = linesOf(oldText);
-  const newLines = linesOf(newText);
-  const changedLines = [
-    ...[...newLines].filter((line) => !oldLines.has(line)),
-    ...[...oldLines].filter((line) => !newLines.has(line)),
-  ];
+  const { added, removed } = diffLines(oldText, newText);
+  const changedLines = [...added, ...removed];
 
   if (changedLines.length === 0) {
     return { meaningful: false, reason: "identical after ignoring whitespace and case" };

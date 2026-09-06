@@ -17,7 +17,15 @@ export function createGroqSummarizer(apiKey: string): Summarizer {
 
       const response = await client.chat.completions.create({
         model: MODEL,
-        max_tokens: 256,
+        // gpt-oss-20b is a reasoning model: it spends completion tokens on hidden
+        // reasoning BEFORE the answer. Two knobs keep the summary from being cut
+        // off mid-sentence (finish_reason "length"):
+        //  - reasoning_effort "low" — a diff summary needs little deliberation;
+        //    this cuts reasoning tokens ~250 -> ~80 (also cheaper and faster).
+        //  - max_tokens 700 — headroom for that reasoning plus a 1-2 sentence
+        //    answer. Groq bills only tokens actually produced, so it's free slack.
+        reasoning_effort: "low",
+        max_tokens: 700,
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },

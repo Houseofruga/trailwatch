@@ -1,3 +1,4 @@
+import { diffLines } from "@/features/checks/noiseFilter";
 import type { SummaryInput } from "./types";
 
 // The model may return this exact string instead of a summary to decline a
@@ -17,8 +18,15 @@ Rules:
 - If the difference is trivial or cosmetic (reworded boilerplate, reordering, a moved element with no new information), reply with exactly ${NO_CHANGE_SENTINEL} and nothing else.`;
 
 export function buildPrompt(input: SummaryInput): { system: string; user: string } {
-  const before = input.oldText.slice(0, EXCERPT_CAP);
-  const after = input.newText.slice(0, EXCERPT_CAP);
+  // Show the model the lines that actually changed, not the first N chars of the
+  // whole page. On a long page the top is shared nav/hero boilerplate, so
+  // full-text excerpts look identical and the model wrongly declines a real
+  // change lower down. Fall back to truncated full text when there's no
+  // whole-line diff (a within-line edit), so we never send an empty diff.
+  const { added, removed } = diffLines(input.oldText, input.newText);
+  const hasLineDiff = added.length > 0 || removed.length > 0;
+  const before = (hasLineDiff ? removed.join("\n") : input.oldText).slice(0, EXCERPT_CAP);
+  const after = (hasLineDiff ? added.join("\n") : input.newText).slice(0, EXCERPT_CAP);
 
   const user = `Page: ${input.label}
 
