@@ -563,7 +563,9 @@
   font-size: 12.5px;
   line-height: 1.5;
   color: var(--ink-2);
-  padding: 0 20px 14px 20px;
+  /* Indent to line up with the URL start (20 padding + 92 label + 16 gap),
+     matching the .intel panels below a healthy row. */
+  padding: 0 20px 14px 128px;
   text-wrap: pretty;
 }
 
@@ -684,6 +686,9 @@
 
   /* Full-width panels on mobile — no room for the desktop URL-aligned indent. */
   .intel {
+    padding: 0 16px 14px;
+  }
+  .rowError {
     padding: 0 16px 14px;
   }
 }
