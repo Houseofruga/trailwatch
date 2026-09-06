@@ -134,7 +134,10 @@ export default async function DashboardPage() {
     <div className={styles.wrap}>
       <div className={styles.head}>
         <div>
-          <h1 className={styles.heading}>{heading}</h1>
+          <div className={styles.headingRow}>
+            <h1 className={styles.heading}>{heading}</h1>
+            {quiet ? <span className={styles.quietDot} aria-hidden="true" /> : null}
+          </div>
           <p className={styles.headSub}>{headSub}</p>
         </div>
         <ButtonLink href="/competitors/add">
@@ -222,6 +225,7 @@ export default async function DashboardPage() {
                         </span>
                         <div className={styles.pageChangeMeta}>{timeAgo(change.detectedAt, now)}</div>
                       </div>
+                      <span className={styles.arrowBox} aria-hidden="true">&rarr;</span>
                     </Link>
                   );
                 }
@@ -229,12 +233,14 @@ export default async function DashboardPage() {
                 // Paused pages aren't being watched — no value card, just the state.
                 if (!p.isActive) {
                   return (
-                    <div key={p.id} className={styles.pageRow}>
+                    <div key={p.id} className={styles.pageRowPaused}>
                       <div className={styles.pageMeta}>
-                        <div className={styles.pageLabel}>{p.label}</div>
-                        <div className={styles.pagePaused}>Paused</div>
+                        <div className={styles.pageLabelMuted}>{p.label}</div>
                       </div>
-                      <div className={styles.pageQuiet}>Paused</div>
+                      <div className={styles.pausedLine}>
+                        <span className={styles.pagePausedTag}>Paused</span>
+                        <span className={styles.pageQuiet}>Not being checked</span>
+                      </div>
                     </div>
                   );
                 }
@@ -243,9 +249,10 @@ export default async function DashboardPage() {
                 // link to its last notable change, instead of "nothing happened".
                 const notable = lastNotable(p);
                 return (
-                  <div key={p.id} className={styles.pageRow}>
+                  <div key={p.id} className={styles.pageRowQuiet}>
                     <div className={styles.pageMeta}>
                       <div className={styles.pageLabel}>{p.label}</div>
+                      <div className={styles.pageQuietSub}>Quiet</div>
                     </div>
                     <div className={styles.pageValue}>
                       <DashboardBaseline

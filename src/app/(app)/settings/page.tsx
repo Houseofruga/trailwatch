@@ -36,6 +36,7 @@ export default async function SettingsPage() {
       <h1 className={styles.heading}>Settings</h1>
       <p className={styles.sub}>Manage your account, plan, digest, and sign-in.</p>
 
+      <div className={styles.card}>
       {/* Plan */}
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Plan</h2>
@@ -99,6 +100,7 @@ export default async function SettingsPage() {
         </p>
         <DeleteAccount />
       </section>
+      </div>
     </div>
   );
 }

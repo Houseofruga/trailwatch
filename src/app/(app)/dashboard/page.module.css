@@ -98,18 +98,35 @@
   margin-bottom: 8px;
 }
 
+.headingRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
 .heading {
   font-family: var(--font-dm-sans), system-ui, sans-serif;
   font-size: 30px;
   font-weight: 600;
   letter-spacing: -0.015em;
-  margin: 0 0 8px 0;
+  margin: 0;
+}
+
+/* Lime pulse next to "All quiet" — the product working, at a glance. */
+.quietDot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-wash);
 }
 
 .headSub {
   margin: 0;
   font-size: 14px;
   color: var(--ink-3);
+  max-width: 460px;
+  text-wrap: pretty;
 }
 
 .stats {
@@ -315,11 +332,25 @@
 }
 
 .pageSummary {
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
-  color: var(--ink-2);
+  color: var(--ink);
   text-decoration: none;
   text-wrap: pretty;
+}
+
+/* Green arrow chip at the end of an active change row (feed-forward affordance). */
+.arrowBox {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  background: var(--accent-wash);
+  color: var(--accent-ink);
 }
 
 /* The whole row is the click target (.pageRowLink); the summary just shifts
@@ -338,7 +369,7 @@ a.pageRowLink:hover {
 }
 
 a.pageRowLink:hover {
-  background: var(--surface-sunken);
+  background: var(--surface-alt);
 }
 
 .pageRowLink:hover .pageSummary {
@@ -354,7 +385,44 @@ a.pageRowLink:hover {
 /* ---------------------------------- quiet-page value card (adaptive dashboard) */
 
 /* A quiet but active page shows its baseline profile instead of "nothing
-   happened" — value-forward when the feed is calm. */
+   happened" — value-forward when the feed is calm. Tinted so it reads as a
+   distinct, calmer state than an active change row. */
+.pageRowQuiet {
+  composes: pageRow;
+  align-items: flex-start;
+  background: var(--surface-alt);
+}
+
+.pageRowPaused {
+  composes: pageRow;
+  background: var(--surface-sunken);
+}
+
+.pageQuietSub {
+  font-size: 10px;
+  color: var(--ink-hint);
+  margin-top: 4px;
+}
+
+.pageLabelMuted {
+  composes: pageLabel;
+  color: var(--ink-hint);
+}
+
+.pausedLine {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagePausedTag {
+  font-size: 10.5px;
+  color: var(--ink-faint);
+  border: 1px solid var(--border);
+  padding: 1px 8px;
+}
+
 .pageValue {
   flex: 1;
   min-width: 0;
@@ -369,7 +437,7 @@ a.pageRowLink:hover {
 
 .quietPositioning {
   margin: 0;
-  font-size: 13.5px;
+  font-size: 14.5px;
   line-height: 1.5;
   color: var(--ink-2);
   text-wrap: pretty;
@@ -403,11 +471,11 @@ a.pageRowLink:hover {
 
 .quietNotable {
   font-size: 12px;
-  color: var(--ink-5);
+  color: var(--link);
 }
 
 .quietNotable:hover {
-  color: var(--accent-ink);
+  text-decoration: underline;
 }
 
 .quietPlain {

@@ -54,6 +54,12 @@ export default async function BillingPage() {
   const proPrice = formatProPrice(period);
   const renewalAmount = period === "annual" ? PRO_ANNUAL_USD : PRO_MONTHLY_USD;
 
+  // Pro now includes the day-0 baseline + Wayback history (Phases 1–2).
+  const paidFeatures = [
+    ...planFeatures(LIMITS.paid.competitors, LIMITS.paid.pagesPerCompetitor),
+    "Full change history & archive",
+  ];
+
   return (
     <div className={styles.wrap}>
       <h1 className={styles.heading}>Plan &amp; billing</h1>
@@ -85,11 +91,7 @@ export default async function BillingPage() {
         {/* Pro — the toggle + checkout card (not yet subscribed), or a plain
             summary card (already on Pro: nothing to toggle post-purchase). */}
         {isFree ? (
-          <ProPricingCard
-            email={account.email}
-            userId={user.id}
-            features={planFeatures(LIMITS.paid.competitors, LIMITS.paid.pagesPerCompetitor)}
-          />
+          <ProPricingCard email={account.email} userId={user.id} features={paidFeatures} />
         ) : (
           <div className={`${styles.card} ${styles.cardPro}`}>
             <div className={styles.cardHead}>
@@ -101,7 +103,7 @@ export default async function BillingPage() {
               <span className={styles.pricePer}>{proPrice.per}</span>
             </div>
             <ul className={styles.features}>
-              {planFeatures(LIMITS.paid.competitors, LIMITS.paid.pagesPerCompetitor).map((f) => (
+              {paidFeatures.map((f) => (
                 <li key={f} className={styles.feature}>
                   {f}
                 </li>
@@ -110,7 +112,7 @@ export default async function BillingPage() {
 
             {hasSubscription && cancelsAt ? (
               <div className={styles.action}>
-                <div className={styles.compNote}>
+                <div className={styles.cancelNote}>
                   Cancels {formatBillingDate(cancelsAt)} — you keep Pro until then.
                 </div>
               </div>
