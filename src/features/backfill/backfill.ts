@@ -10,7 +10,7 @@ import { listCaptures, fetchArchivedText, type Capture } from "./wayback";
 // almost always surfaces anyway.
 const MAX_CAPTURES = 8; // → at most 7 consecutive diffs
 const EXCERPT_CAP = 4000; // mirrors runCheck.ts
-const FALLBACK_SUMMARY = "This page changed meaningfully (summary unavailable).";
+const FALLBACK_SUMMARY = "This page changed — open it to see what's different.";
 
 type ArchiveChange = {
   page_id: string;
@@ -56,7 +56,7 @@ export async function backfillPage(
     const verdict = isMeaningfulChange(before.text, after.text);
     if (!verdict.meaningful) continue;
 
-    const summary = await summarize(page.label, before.text, after.text, verdict.reason);
+    const summary = await summarize(page.label, before.text, after.text);
 
     rows.push({
       page_id: pageId,
@@ -81,21 +81,22 @@ export async function backfillPage(
   return rows.length;
 }
 
-// A meaningful diff always yields a row; a declined/failed summary falls back to
-// plain wording rather than dropping a real change (mirrors runCheck.ts).
-async function summarize(
-  label: string,
-  oldText: string,
-  newText: string,
-  reason: string,
-): Promise<string> {
-  try {
-    const out = await getSummarizer().summarize({ label, oldText, newText });
-    if ("summary" in out) return out.summary;
-    return `${reason} (summary unavailable)`;
-  } catch {
-    return FALLBACK_SUMMARY;
+// A meaningful diff always yields a row. The noise filter has already judged this
+// change meaningful, so a "declined as trivial" verdict is just model noise
+// (gpt-oss is nondeterministic on large diffs) — retry once before giving up. A
+// genuine failure falls back to plain, user-facing wording (the change-detail
+// page still shows the full before/after), never the internal filter reason.
+async function summarize(label: string, oldText: string, newText: string): Promise<string> {
+  const summarizer = getSummarizer();
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const out = await summarizer.summarize({ label, oldText, newText });
+      if ("summary" in out) return out.summary;
+    } catch {
+      break; // hard error (rate/network) — a retry won't help; use the fallback
+    }
   }
+  return FALLBACK_SUMMARY;
 }
 
 // Run an async map one at a time — we're being polite to archive.org and keeping
