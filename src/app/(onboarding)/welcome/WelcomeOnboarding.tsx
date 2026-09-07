@@ -382,7 +382,9 @@ export function WelcomeOnboarding({
       <div className={styles.actions}>
         <Button
           type="button"
-          variant={proIntent ? "primary" : "secondary"}
+          // Pro: "Start watching" is the only (finalizing) action → primary. Free:
+          // "Continue" is secondary unless they've committed to Pro (proIntent).
+          variant={plan !== "free" || proIntent ? "primary" : "secondary"}
           // Existing Pro users have no plan to choose — seed their picks and go
           // straight to the dashboard, skipping the Free/Pro step entirely.
           onClick={() => (plan === "free" ? setStep("plan") : void start())}
