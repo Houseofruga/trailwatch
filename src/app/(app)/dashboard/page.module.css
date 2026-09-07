@@ -372,10 +372,6 @@ a.pageRowLink:hover {
   text-decoration: none;
 }
 
-a.pageRowLink:hover {
-  background: var(--surface-alt);
-}
-
 .pageRowLink:hover .pageSummary {
   color: var(--accent-ink);
 }
@@ -403,6 +399,10 @@ a.activeRow,
 a.activeRow:hover {
   color: inherit;
   text-decoration: none;
+}
+/* Single-change row is one link — hover greens just its headline, no block bg. */
+a.activeRow:hover .activeHeadline {
+  color: var(--accent-ink);
 }
 .activeRowExpanded {
   composes: pageRow;
@@ -434,11 +434,15 @@ a.activeRow:hover {
   text-decoration: none;
   color: inherit;
 }
-/* No visual change on hover — just guard against the global a:hover
-   (blue + underline). The row stays as-is; the cursor still shows it's clickable. */
+/* Multi-change headline: hover greens only the headline text (guard against the
+   global a:hover blue+underline), so hovering it never tints the toggle or the
+   expanded sub-list below. */
 a.activeHeadlineLink:hover {
   color: inherit;
   text-decoration: none;
+}
+.activeHeadlineLink:hover .activeHeadline {
+  color: var(--accent-ink);
 }
 .activeHeadline {
   font-size: 16px;
@@ -531,6 +535,9 @@ a.subRow,
 a.subRow:hover {
   color: inherit;
   text-decoration: none;
+}
+.subRow:hover .subSummary {
+  color: var(--accent-ink);
 }
 .subMain {
   flex: 1;
@@ -631,10 +638,6 @@ a.pageRowQuietLink:hover {
   text-decoration: none;
 }
 
-a.pageRowQuietLink:hover {
-  background: var(--surface-sunken);
-}
-
 .quietSummary {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -647,7 +650,7 @@ a.pageRowQuietLink:hover {
 }
 
 .pageRowQuietLink:hover .quietSummary {
-  color: var(--ink);
+  color: var(--accent-ink);
 }
 
 .quietNotableMeta {

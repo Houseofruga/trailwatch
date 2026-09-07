@@ -394,8 +394,12 @@
 }
 
 .timeItem:hover {
-  opacity: 0.72;
   text-decoration: none;
+}
+/* Hover shifts only this item's summary colour — never a block background, so a
+   list of items doesn't light up together. */
+.timeItem:hover .timeSummary {
+  color: var(--accent-ink);
 }
 
 .timeMarker {
