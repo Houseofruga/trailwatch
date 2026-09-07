@@ -76,6 +76,11 @@ export function CompetitorFinder() {
       } else {
         localStorage.removeItem("tw_pending_competitors");
       }
+      // Carry the searched company across signup so onboarding can pre-seed the
+      // watchlist search bar with it.
+      const q = lastQuery.trim();
+      if (q) localStorage.setItem("tw_pending_company", q);
+      else localStorage.removeItem("tw_pending_company");
     } catch {
       /* private mode / storage disabled — pre-seed just won't happen */
     }
