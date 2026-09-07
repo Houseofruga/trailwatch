@@ -9,10 +9,11 @@ import { getCompetitorsWithPages, type CompetitorRow } from "@/features/competit
 import { getDemoFeed } from "@/features/demo/demoFeed";
 import { LIMITS } from "@/features/plan/limits";
 import { originOf } from "@/features/competitors/domain";
+import { DashboardActiveRow } from "./DashboardActiveRow";
 import { DashboardEditUrl } from "./DashboardEditUrl";
 import { DemoDashboard } from "./DemoDashboard";
 import { PendingSeedRedirect } from "./PendingSeedRedirect";
-import { domainOf, formatFullDate, timeAgo, withinWeek } from "./dashboardFeed";
+import { activeChanges, domainOf, formatFullDate, timeAgo, withinWeek } from "./dashboardFeed";
 import styles from "./page.module.css";
 
 const SUGGESTIONS = [
@@ -218,34 +219,11 @@ export default async function DashboardPage() {
               </div>
 
               {orderedPages.map((p) => {
-                // Active page: a meaningful change landed this week — keep the feed link.
-                const change = activeChange(p, now);
-                if (change) {
-                  return (
-                    <Link key={p.id} href={`/changes/${change.id}`} className={styles.pageRowLink}>
-                      <div className={styles.pageMeta}>
-                        <div className={styles.pageLabel}>{p.label}</div>
-                        {!p.isActive ? <div className={styles.pagePaused}>Paused</div> : null}
-                      </div>
-                      <div className={styles.pageChange}>
-                        <span className={styles.pageSummary}>
-                          {change.summary ?? "Meaningful change detected (summary unavailable)."}
-                        </span>
-                        <div className={styles.pageChangeMeta}>{timeAgo(change.detectedAt, now)}</div>
-                      </div>
-                      <span className={styles.arrowBox} aria-hidden="true">
-                        <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
-                          <path
-                            d="M1 1l4.5 5L1 11"
-                            stroke="currentColor"
-                            strokeWidth="1.7"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </span>
-                    </Link>
-                  );
+                // Active page: meaningful change(s) landed this week — show the
+                // newest inline; the row expands to the rest when there are more.
+                const changes = activeChanges(p, now);
+                if (changes.length) {
+                  return <DashboardActiveRow key={p.id} changes={changes} label={p.label} now={now} />;
                 }
 
                 // Paused pages aren't being watched — no value card, just the state.

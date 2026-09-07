@@ -43,3 +43,11 @@ export function timeAgo(detectedAt: string, now: number): string {
 export function latestMeaningful(page: CompetitorRow["pages"][number]) {
   return page.changes.find((c) => c.isMeaningful) ?? null;
 }
+
+// Every meaningful change on a page from this week, newest first (changes are
+// already ordered detected_at desc). The dashboard shows the newest inline and
+// lets the row expand to the rest, so the feed matches the "N changes this
+// week" count instead of hiding all but the latest.
+export function activeChanges(page: CompetitorRow["pages"][number], now: number) {
+  return page.changes.filter((c) => c.isMeaningful && withinWeek(c.detectedAt, now));
+}
