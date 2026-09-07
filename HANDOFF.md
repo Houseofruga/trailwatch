@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-07 (⏸ UNCOMMITTED local WIP: dashboard multi-change expandable row, held back pending a v3 design pass — see Suggested next steps. Already pushed: back-nav real browser-back + generic "Back"; watched URLs require a real public domain; Pro price raised to $29/$290 in code — Paddle dashboard update still owed; onboarding rework; auth Terms/Privacy consent links + legal breadcrumbs; dashboard/digest UX)._
+_Last updated: 2026-09-07 (⏸ local-branch WIP: dashboard multi-change expandable row parked on `wip/dashboard-multi-change-row` (not pushed), held pending a v3 design pass — see Suggested next steps. Already pushed: back-nav real browser-back + generic "Back"; watched URLs require a real public domain; Pro price raised to $29/$290 in code — Paddle dashboard update still owed; onboarding rework; auth Terms/Privacy consent links + legal breadcrumbs; dashboard/digest UX)._
 
 ## Product in one line
 
@@ -755,10 +755,12 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
 
 ## Suggested next steps for whoever picks this up
 
-**⏸ UNCOMMITTED local WIP — dashboard multi-change expandable row (2026-09-07).**
-Fully implemented and verified locally, but **deliberately NOT committed or pushed** (owner
-wants a v3 design pass from Claude Design first). If you `git status` you'll see the working
-tree is dirty with these five dashboard files — that is expected, not stray work:
+**⏸ local-branch WIP — dashboard multi-change expandable row (2026-09-07).**
+Fully implemented and verified locally, committed to the **local branch
+`wip/dashboard-multi-change-row`** (commit `564cf8e`) — **NOT merged to `main` and NOT pushed**
+(owner wants a v3 design pass from Claude Design first). `main`'s working tree is clean; to see
+this work run `git checkout wip/dashboard-multi-change-row`. The branch touches five dashboard
+files:
 - `src/app/(app)/dashboard/dashboardFeed.ts` — new pure `activeChanges(page, now)` (every
   meaningful change this week, newest-first) + its test `dashboardFeed.test.ts`.
 - `src/app/(app)/dashboard/DashboardActiveRow.tsx` (new client component) + `page.tsx` wire-in
@@ -771,8 +773,8 @@ tree is dirty with these five dashboard files — that is expected, not stray wo
   single-change row is unchanged. Verified live (typecheck/lint clean; 143 tests pass).
 - **Why held:** the visual treatment of the expand/disclosure is going through Claude Design in
   the **v3** language first (a follow-up design prompt was drafted in chat, not stored). Once the
-  design comes back, reconcile this implementation with it, then commit + push. Until then, do NOT
-  push these files, and don't panic about the dirty tree.
+  design comes back, reconcile the branch with it, then merge to `main` + push. Until then, leave
+  the branch unpushed — `main` is deliberately clean of this work.
 
 **v3 UI overhaul — COMPLETE (2026-09-06).** The `trailwatch v3/` canvas came back and has
 been developed across the whole authed app (see Recent work + Deviations). Remaining:
