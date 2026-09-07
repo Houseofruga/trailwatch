@@ -562,6 +562,9 @@ a.pageRowQuietLink:hover {
 .demoWrap {
   border: 1.5px dotted var(--accent-hover);
   padding: 18px;
+  /* Match the real dashboard's header-to-content rhythm (.head 8px + .stats 24px)
+     so the example box doesn't crowd the heading and the Add button above it. */
+  margin-top: 24px;
 }
 
 .demoBanner {
