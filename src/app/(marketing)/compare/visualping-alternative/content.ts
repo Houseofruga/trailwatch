@@ -58,7 +58,7 @@ export const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "How much does TrailWatch cost?",
-    a: "There's a free plan (no card required) and a single Pro plan at $19/mo, or $190/yr (two months free). Flat pricing — you're not metered by the number of checks or pages the way many monitors are.",
+    a: "There's a free plan (no card required) and a single Pro plan at $29/mo, or $290/yr (two months free). Flat pricing — you're not metered by the number of checks or pages the way many monitors are.",
   },
   {
     q: "Can I try it before switching?",

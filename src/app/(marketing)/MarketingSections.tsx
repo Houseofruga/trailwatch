@@ -111,9 +111,9 @@ export function MarketingSections() {
               <span className={styles.planBadge}>Cancel anytime</span>
             </div>
             <div className={styles.planPrice}>
-              $15.83<span className={styles.planPer}>/mo</span>
+              $24.17<span className={styles.planPer}>/mo</span>
               <div className={styles.planPer}>
-                billed annually ($190/yr, 2 months free). Or $19/mo month-to-month.
+                billed annually ($290/yr, 2 months free). Or $29/mo month-to-month.
               </div>
             </div>
             <div className={styles.planFeatures}>

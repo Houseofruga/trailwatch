@@ -58,7 +58,7 @@ export const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "How much does TrailWatch cost?",
-    a: "A free plan, then a single Pro plan at $19/mo or $190/yr (two months free). Flat, published pricing — not a custom enterprise quote.",
+    a: "A free plan, then a single Pro plan at $29/mo or $290/yr (two months free). Flat, published pricing — not a custom enterprise quote.",
   },
   {
     q: "Are the AI summaries included on every plan?",

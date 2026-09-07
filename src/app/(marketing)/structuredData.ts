@@ -20,7 +20,7 @@ export const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "How much is Pro, and what do I get?",
-    a: "Pro is $19/month, or $190/year (two months free). It raises your limits to 10 competitors and 100 pages, with daily checks and the same weekly digest.",
+    a: "Pro is $29/month, or $290/year (two months free). It raises your limits to 10 competitors and 100 pages, with daily checks and the same weekly digest.",
   },
   {
     q: "How often are pages checked?",
@@ -64,13 +64,13 @@ export function structuredData(): Record<string, unknown> {
           {
             "@type": "Offer",
             name: "Pro (monthly)",
-            price: "19",
+            price: "29",
             priceCurrency: "USD",
           },
           {
             "@type": "Offer",
             name: "Pro (annual)",
-            price: "190",
+            price: "290",
             priceCurrency: "USD",
           },
         ],

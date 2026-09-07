@@ -3,12 +3,12 @@ import { formatProPrice, PRO_ANNUAL_MONTHS_FREE } from "./limits";
 
 describe("formatProPrice", () => {
   it("shows the flat monthly price", () => {
-    expect(formatProPrice("monthly")).toEqual({ amount: "$19", per: "/mo" });
+    expect(formatProPrice("monthly")).toEqual({ amount: "$29", per: "/mo" });
   });
 
   it("shows the annual price as a per-month equivalent", () => {
     expect(formatProPrice("annual")).toEqual({
-      amount: "$15.83",
+      amount: "$24.17",
       per: "/mo, billed annually",
     });
   });
