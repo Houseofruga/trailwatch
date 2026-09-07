@@ -386,75 +386,179 @@ a.pageRowLink:hover {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- multi-change active row: newest inline, the rest behind a toggle ---- */
-/* The headline summary as its own link (the whole row isn't the link here, so
-   the toggle + sub-list can sit beside it without nesting interactives). */
-a.pageSummaryLink,
-a.pageSummaryLink:hover {
+/* ---- multi-change active row (per "Dashboard Multi-Change Row.dc.html") ---- */
+/* The newest change stays the ordinary v3 headline row; a quiet "N more this
+   week" disclosure expands into a lighter sub-list of the week's other changes.
+   Every value below is taken from the design file. */
+
+/* Row frame: a single-change row, top-aligned (the chip sits beside the first
+   line of a multi-line headline). Collapsed/single are one clickable row;
+   expanded is a plain container (only the headline + each sub-row link out). */
+.activeRow {
+  composes: pageRow;
+  align-items: flex-start;
+  cursor: pointer;
+}
+a.activeRow,
+a.activeRow:hover {
+  color: inherit;
+  text-decoration: none;
+}
+.activeRow:hover {
+  background: var(--surface-alt);
+}
+.activeRowExpanded {
+  composes: pageRow;
+  align-items: flex-start;
+  padding-bottom: 18px;
+}
+
+/* Body holds the headline row, the toggle and the sub-list. It spans from the
+   label to the row's right edge, so the green chip in `.activeTop` lands far
+   right on desktop, and drops beside the headline when the label goes to its own
+   line on mobile. */
+.activeBody {
+  flex: 1;
+  min-width: 0;
+}
+.activeTop {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+.activeContent {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Headline change: 16px ink, a 12px time, 7px apart. */
+.activeHeadlineLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+a.activeHeadlineLink:hover {
+  opacity: 0.72;
+}
+.activeHeadline {
   font-size: 16px;
   line-height: 1.5;
   color: var(--ink);
-  text-decoration: none;
   text-wrap: pretty;
+  margin-bottom: 7px;
 }
-a.pageSummaryLink:hover {
-  color: var(--accent-ink);
+.activeTime {
+  font-size: 12px;
+  color: var(--ink-5);
 }
 
+/* Green headline chip: a text arrow (matching the design, not an SVG). */
+.headlineChip {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+  font-size: 15px;
+  line-height: 1;
+}
+a.headlineChip,
+a.headlineChip:hover {
+  color: var(--accent-ink);
+  text-decoration: none;
+}
+
+/* Disclosure toggle: the text is underlined, not the chevron; muted when
+   collapsed, accent when expanded. */
 .moreToggle {
-  align-self: flex-start;
-  margin-top: 8px;
+  margin-top: 12px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   padding: 0;
   background: none;
   border: none;
   cursor: pointer;
   font-family: inherit;
-  font-size: 12px;
-  color: var(--ink-3);
+  font-size: 12.5px;
+  color: var(--ink-4);
 }
 .moreToggle:hover {
   color: var(--accent-ink);
+}
+.moreToggleOpen {
+  color: var(--accent-ink);
+}
+.moreToggleOpen:hover {
+  opacity: 0.75;
+}
+.moreToggleText {
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 1px;
 }
 .moreChevron {
   display: inline-flex;
   transition: transform 0.15s ease;
 }
 .moreToggleOpen .moreChevron {
-  transform: rotate(90deg);
+  transform: rotate(180deg);
 }
 
-.changeSubList {
-  list-style: none;
-  margin: 10px 0 2px;
-  padding: 0 0 0 13px;
-  border-left: 1px solid var(--border-softer);
-  display: flex;
-  flex-direction: column;
+/* The week's other changes: lighter + smaller, each its own link. Dividers sit
+   only between rows — no line above the first or below the last. On desktop the
+   right padding keeps each sub-chip left of (indented from) the green chip; on
+   mobile that padding is dropped so the sub-chips align to the card edge. */
+.subList {
+  margin-top: 14px;
+  padding-right: 48px;
 }
-.changeSubRow {
+.subRow {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--border-softer);
+  gap: 14px;
+  align-items: center;
+  padding: 13px 0;
+  border-bottom: 1px solid #f5f3ee;
   text-decoration: none;
   color: inherit;
 }
-.changeSubList li:last-child .changeSubRow {
+.subRow:last-child {
   border-bottom: none;
-  padding-bottom: 0;
 }
-.changeSubSummary {
+a.subRow,
+a.subRow:hover {
+  color: inherit;
+  text-decoration: none;
+}
+.subRow:hover {
+  opacity: 0.7;
+}
+.subMain {
+  flex: 1;
+  min-width: 0;
+}
+.subSummary {
   font-size: 14px;
   line-height: 1.5;
-  color: var(--ink);
+  color: var(--ink-2);
   text-wrap: pretty;
 }
-.changeSubRow:hover .changeSubSummary {
-  color: var(--accent-ink);
+.subWhen {
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  margin-top: 3px;
+}
+.subChip {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f4f2ec;
+  color: var(--ink-4);
 }
 
 /* ---------------------------------- quiet-page value card (adaptive dashboard) */
@@ -715,5 +819,45 @@ a.pageRowQuietLink:hover {
   }
   .heading {
     font-size: 24px;
+  }
+
+  /* All page rows drop the 96px label column — the label sits on its own line
+     above the content, which then gets the full card width (design section 05). */
+  .pageRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 15px 16px;
+  }
+  .pageMeta {
+    flex: none;
+    padding-top: 0;
+    margin-bottom: 9px;
+  }
+  .pageLabel {
+    font-size: 10.5px;
+  }
+
+  /* Active (multi-change) row: chip stays beside the headline; smaller type. */
+  .activeTop {
+    gap: 13px;
+  }
+  .activeHeadline {
+    font-size: 15px;
+  }
+  .activeTime {
+    font-size: 11.5px;
+  }
+  .subList {
+    padding-right: 0;
+  }
+  .subRow {
+    gap: 12px;
+  }
+  .subSummary {
+    font-size: 13.5px;
+  }
+  .subWhen {
+    font-size: 11px;
   }
 }

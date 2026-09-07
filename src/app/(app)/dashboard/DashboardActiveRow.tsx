@@ -9,83 +9,138 @@ type Change = { id: string; summary: string | null; detectedAt: string };
 
 const FALLBACK = "Meaningful change detected (summary unavailable).";
 
-function Chevron() {
+// Disclosure chevron — points down; rotated 180° (up) when expanded via CSS.
+function ToggleChevron() {
   return (
-    <svg width="7" height="12" viewBox="0 0 7 12" fill="none" aria-hidden="true">
-      <path d="M1 1l4.5 5L1 11" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="9" height="6" viewBox="0 0 9 6" fill="none" aria-hidden="true" style={{ display: "block" }}>
+      <path d="M1 1l3.5 3.5L8 1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-// One dashboard page row for an "active" page (a meaningful change this week).
-// A single change renders exactly as before — the whole row links to its detail.
-// When a page had several this week, the newest stays the headline and a subtle
-// toggle reveals the rest, each linking to its own detail, so the row matches
-// the "N changes this week" count instead of hiding all but the latest.
+// Small right chevron in the muted chip on each older change.
+function SubChevron() {
+  return (
+    <svg width="6" height="9" viewBox="0 0 6 9" fill="none" aria-hidden="true" style={{ display: "block" }}>
+      <path d="M1 1l3.5 3.5L1 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+// Crisp right arrow for the lime headline chip (a real stroke, not a text glyph).
+function ArrowRight() {
+  return (
+    <svg width="15" height="12" viewBox="0 0 15 12" fill="none" aria-hidden="true" style={{ display: "block" }}>
+      <path d="M1 6h11.4M8.8 2l4.2 4-4.2 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/**
+ * One dashboard row for an "active" page (a meaningful change this week), built
+ * to the "Dashboard Multi-Change Row" design. A single change is the ordinary v3
+ * row. With several, the newest is the headline (green → chip) and a quiet
+ * "N more this week" toggle reveals the week's other changes as a lighter
+ * sub-list, each linking to its own detail. All this week's changes are shown
+ * when expanded.
+ *
+ * Layout: [label] [body]. The body's top line holds the headline + chip; the
+ * toggle and sub-list sit below it. On mobile the label drops to its own line
+ * (see the media query) and the chip stays beside the headline.
+ */
 export function DashboardActiveRow({ changes, label, now }: { changes: Change[]; label: string; now: number }) {
   const [open, setOpen] = useState(false);
   const listId = useId();
 
   const [newest, ...rest] = changes;
 
+  const meta = (
+    <div className={styles.pageMeta}>
+      <div className={styles.pageLabel}>{label}</div>
+    </div>
+  );
+
+  // Single change — the whole row is one link (unchanged v3 behaviour).
   if (rest.length === 0) {
     return (
-      <Link href={`/changes/${newest.id}`} className={styles.pageRowLink}>
-        <div className={styles.pageMeta}>
-          <div className={styles.pageLabel}>{label}</div>
+      <Link href={`/changes/${newest.id}`} className={styles.activeRow}>
+        {meta}
+        <div className={styles.activeBody}>
+          <div className={styles.activeTop}>
+            <div className={styles.activeContent}>
+              <div className={styles.activeHeadline}>{newest.summary ?? FALLBACK}</div>
+              <div className={styles.activeTime}>{timeAgo(newest.detectedAt, now)}</div>
+            </div>
+            <span className={styles.headlineChip} aria-hidden="true">
+              <ArrowRight />
+            </span>
+          </div>
         </div>
-        <div className={styles.pageChange}>
-          <span className={styles.pageSummary}>{newest.summary ?? FALLBACK}</span>
-          <div className={styles.pageChangeMeta}>{timeAgo(newest.detectedAt, now)}</div>
-        </div>
-        <span className={styles.arrowBox} aria-hidden="true">
-          <Chevron />
-        </span>
       </Link>
     );
   }
 
-  return (
-    <div className={styles.pageRow}>
-      <div className={styles.pageMeta}>
-        <div className={styles.pageLabel}>{label}</div>
-      </div>
-      <div className={styles.pageChange}>
-        <Link href={`/changes/${newest.id}`} className={styles.pageSummaryLink}>
-          {newest.summary ?? FALLBACK}
-        </Link>
-        <div className={styles.pageChangeMeta}>{timeAgo(newest.detectedAt, now)}</div>
-
-        <button
-          type="button"
-          className={`${styles.moreToggle} ${open ? styles.moreToggleOpen : ""}`}
-          aria-expanded={open}
-          aria-controls={listId}
-          onClick={() => setOpen((v) => !v)}
-        >
-          <span className={styles.moreChevron}>
-            <Chevron />
-          </span>
-          {open ? "Show less" : `+${rest.length} more this week`}
-        </button>
-
-        {open ? (
-          <ul id={listId} className={styles.changeSubList}>
-            {rest.map((c) => (
-              <li key={c.id}>
-                <Link href={`/changes/${c.id}`} className={styles.changeSubRow}>
-                  <span className={styles.changeSubSummary}>{c.summary ?? FALLBACK}</span>
-                  <span className={styles.pageChangeMeta}>{timeAgo(c.detectedAt, now)}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-      </div>
-
-      <Link href={`/changes/${newest.id}`} className={styles.arrowBox} aria-label="Open latest change">
-        <Chevron />
+  const topLine = (
+    <div className={styles.activeTop}>
+      <Link href={`/changes/${newest.id}`} className={`${styles.activeContent} ${styles.activeHeadlineLink}`}>
+        <div className={styles.activeHeadline}>{newest.summary ?? FALLBACK}</div>
+        <div className={styles.activeTime}>{timeAgo(newest.detectedAt, now)}</div>
       </Link>
+      <Link href={`/changes/${newest.id}`} className={styles.headlineChip} aria-label="Read latest change">
+        <ArrowRight />
+      </Link>
+    </div>
+  );
+
+  const toggle = (
+    <button
+      type="button"
+      className={`${styles.moreToggle} ${open ? styles.moreToggleOpen : ""}`}
+      aria-expanded={open}
+      aria-controls={listId}
+      onClick={() => setOpen((v) => !v)}
+    >
+      <span className={styles.moreChevron}>
+        <ToggleChevron />
+      </span>
+      <span className={styles.moreToggleText}>{open ? "Show less" : `${rest.length} more this week`}</span>
+    </button>
+  );
+
+  // Collapsed — headline row plus the toggle.
+  if (!open) {
+    return (
+      <div className={styles.activeRow}>
+        {meta}
+        <div className={styles.activeBody}>
+          {topLine}
+          {toggle}
+        </div>
+      </div>
+    );
+  }
+
+  // Expanded — the week's other changes as a lighter sub-list (all of them).
+  return (
+    <div className={styles.activeRowExpanded}>
+      {meta}
+      <div className={styles.activeBody}>
+        {topLine}
+        {toggle}
+        <div id={listId} className={styles.subList}>
+          {rest.map((c) => (
+            <Link key={c.id} href={`/changes/${c.id}`} className={styles.subRow}>
+              <div className={styles.subMain}>
+                <div className={styles.subSummary}>{c.summary ?? FALLBACK}</div>
+                <div className={styles.subWhen}>{timeAgo(c.detectedAt, now)}</div>
+              </div>
+              <span className={styles.subChip} aria-hidden="true">
+                <SubChevron />
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

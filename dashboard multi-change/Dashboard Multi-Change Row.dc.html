@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Geist+Mono:wght@400&display=swap" rel="stylesheet" />
+<meta name="design_doc_mode" content="canvas" />
+<style>
+  html, body { margin:0; padding:0; background:#EEEBE3; }
+  * { box-sizing:border-box; }
+</style>
+</helmet>
+
+<div style="font-family:'DM Sans',system-ui,sans-serif;color:#1A1A17;background:#EEEBE3;padding:56px 60px 90px 60px;display:flex;flex-direction:column;align-items:center;gap:8px">
+
+  <!-- intro -->
+  <div style="width:100%;max-width:1180px">
+    <div style="font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:#948F86;margin-bottom:12px">TrailWatch v3 &middot; Dashboard active row</div>
+    <h1 style="font-size:27px;font-weight:600;letter-spacing:-0.02em;margin:0 0 12px 0">A page with several changes this week</h1>
+    <p style="font-size:15px;line-height:1.6;color:#5D5A53;margin:0;max-width:660px;text-wrap:pretty">The newest change stays the headline line, exactly as today. A quiet <strong style="font-weight:600;color:#1A1A17">&ldquo;+N more this week&rdquo;</strong> disclosure sits beneath it and expands into a lighter sub-list of the week&rsquo;s other changes. One lime chevron chip per row keeps the surface calm; only multi-change pages gain the affordance.</p>
+  </div>
+
+  <!-- ===================== DESKTOP ===================== -->
+  <div style="width:100%;max-width:1180px;margin-top:34px;display:flex;flex-direction:column;gap:40px">
+
+    <!-- 1 collapsed -->
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div style="display:flex;align-items:baseline;gap:12px"><span style="font-family:'Geist Mono',monospace;font-size:12px;color:#557A00">01</span><span style="font-size:15px;font-weight:600">Collapsed &mdash; default</span><span style="font-size:13px;color:#8B877E">Scans like any single-change row; the affordance is understated.</span></div>
+      <section style="background:#FFFFFF;border:1px solid #E6E2DA;overflow:hidden;max-width:780px">
+        <div style="padding:16px 20px 14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #EFECE6">
+          <div style="display:flex;align-items:center;gap:11px;min-width:0">
+            <div style="width:26px;height:26px;background:#F1EEE8;color:#5D5A53;font-size:11.5px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:0 0 auto">ST</div>
+            <div style="font-size:15px;font-weight:500;letter-spacing:-0.005em">Stripe</div>
+            <div style="font-size:12.5px;color:#A8A49A">stripe.com</div>
+          </div>
+          <div style="font-size:12px;white-space:nowrap;color:#557A00">3 changes this week</div>
+        </div>
+        <div onClick="{{ noop }}" style="padding:17px 20px;border-bottom:1px solid #F3F1EC;cursor:pointer;display:flex;gap:18px;align-items:flex-start" style-hover="background:#FCFBF9">
+          <div style="flex:0 0 96px;padding-top:1px;font-size:11px;letter-spacing:0.07em;text-transform:uppercase;color:#8B877E">Homepage</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:16px;line-height:1.5;color:#1A1A17;text-wrap:pretty;margin-bottom:7px">Reworked the hero to lead with &ldquo;Financial infrastructure for the internet&rdquo; and refreshed the customer logo strip.</div>
+            <div style="font-size:12px;color:#948F86">2h ago</div>
+            <div onClick="{{ stopNoop }}" style="margin-top:12px;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:#8B877E;cursor:pointer" style-hover="color:#557A00">
+              <svg width="9" height="6" viewBox="0 0 9 6" fill="none" style="display:block"><path d="M1 1l3.5 3.5L8 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span style="border-bottom:1px solid currentColor;padding-bottom:1px">2 more this week</span>
+            </div>
+          </div>
+          <div title="Read change" style="flex:0 0 auto;width:30px;height:30px;background:#EEFBC7;color:#557A00;display:flex;align-items:center;justify-content:center;font-size:15px">&rarr;</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 2 expanded -->
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div style="display:flex;align-items:baseline;gap:12px"><span style="font-family:'Geist Mono',monospace;font-size:12px;color:#557A00">02</span><span style="font-size:15px;font-weight:600">Expanded</span><span style="font-size:13px;color:#8B877E">The week&rsquo;s other changes as a lighter, indented sub-list &mdash; each its own link.</span></div>
+      <section style="background:#FFFFFF;border:1px solid #E6E2DA;overflow:hidden;max-width:780px">
+        <div style="padding:16px 20px 14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #EFECE6">
+          <div style="display:flex;align-items:center;gap:11px;min-width:0">
+            <div style="width:26px;height:26px;background:#F1EEE8;color:#5D5A53;font-size:11.5px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:0 0 auto">ST</div>
+            <div style="font-size:15px;font-weight:500;letter-spacing:-0.005em">Stripe</div>
+            <div style="font-size:12.5px;color:#A8A49A">stripe.com</div>
+          </div>
+          <div style="font-size:12px;white-space:nowrap;color:#557A00">3 changes this week</div>
+        </div>
+        <div style="padding:17px 20px 18px 20px;border-bottom:1px solid #F3F1EC;display:flex;gap:18px;align-items:flex-start">
+          <div style="flex:0 0 96px;padding-top:1px;font-size:11px;letter-spacing:0.07em;text-transform:uppercase;color:#8B877E">Homepage</div>
+          <div style="flex:1;min-width:0">
+            <div onClick="{{ noop }}" style="cursor:pointer" style-hover="opacity:0.72">
+              <div style="font-size:16px;line-height:1.5;color:#1A1A17;text-wrap:pretty;margin-bottom:7px">Reworked the hero to lead with &ldquo;Financial infrastructure for the internet&rdquo; and refreshed the customer logo strip.</div>
+              <div style="font-size:12px;color:#948F86">2h ago</div>
+            </div>
+            <div onClick="{{ stopNoop }}" style="margin-top:12px;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:#557A00;cursor:pointer" style-hover="opacity:0.75">
+              <svg width="9" height="6" viewBox="0 0 9 6" fill="none" style="display:block;transform:rotate(180deg)"><path d="M1 1l3.5 3.5L8 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span style="border-bottom:1px solid currentColor;padding-bottom:1px">Show less</span>
+            </div>
+            <div style="margin-top:14px;border-top:1px solid #F0EDE7">
+              <sc-for list="{{ subChanges }}" as="sc" hint-placeholder-count="2">
+                <div onClick="{{ sc.open }}" style="display:flex;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid #F5F3EE;cursor:pointer" style-hover="opacity:0.7">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:14px;line-height:1.5;color:#4A4740;text-wrap:pretty">{{ sc.summary }}</div>
+                    <div style="font-size:11.5px;color:#A8A49A;margin-top:3px">{{ sc.when }}</div>
+                  </div>
+                  <div style="flex:0 0 auto;width:22px;height:22px;background:#F4F2EC;color:#8B877E;display:flex;align-items:center;justify-content:center"><svg width="6" height="9" viewBox="0 0 6 9" fill="none" style="display:block"><path d="M1 1l3.5 3.5L1 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div title="Read change" style="flex:0 0 auto;width:30px;height:30px;background:#EEFBC7;color:#557A00;display:flex;align-items:center;justify-content:center;font-size:15px">&rarr;</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 3 single -->
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div style="display:flex;align-items:baseline;gap:12px"><span style="font-family:'Geist Mono',monospace;font-size:12px;color:#557A00">03</span><span style="font-size:15px;font-weight:600">Single change &mdash; unchanged</span><span style="font-size:13px;color:#8B877E">One meaningful change: the ordinary v3 row, no affordance.</span></div>
+      <section style="background:#FFFFFF;border:1px solid #E6E2DA;overflow:hidden;max-width:780px">
+        <div style="padding:16px 20px 14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #EFECE6">
+          <div style="display:flex;align-items:center;gap:11px;min-width:0">
+            <div style="width:26px;height:26px;background:#F1EEE8;color:#5D5A53;font-size:11.5px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:0 0 auto">LI</div>
+            <div style="font-size:15px;font-weight:500;letter-spacing:-0.005em">Linear</div>
+            <div style="font-size:12.5px;color:#A8A49A">linear.app</div>
+          </div>
+          <div style="font-size:12px;white-space:nowrap;color:#557A00">1 change this week</div>
+        </div>
+        <div onClick="{{ noop }}" style="padding:17px 20px;border-bottom:1px solid #F3F1EC;cursor:pointer;display:flex;gap:18px;align-items:flex-start" style-hover="background:#FCFBF9">
+          <div style="flex:0 0 96px;padding-top:1px;font-size:11px;letter-spacing:0.07em;text-transform:uppercase;color:#8B877E">Pricing</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:16px;line-height:1.5;color:#1A1A17;text-wrap:pretty;margin-bottom:7px">Linear raised the Business plan from $14 to $16 per user per month and introduced a 250 GB workspace file cap.</div>
+            <div style="font-size:12px;color:#948F86">2 days ago</div>
+          </div>
+          <div title="Read change" style="flex:0 0 auto;width:30px;height:30px;background:#EEFBC7;color:#557A00;display:flex;align-items:center;justify-content:center;font-size:15px">&rarr;</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 4 busy edge -->
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div style="display:flex;align-items:baseline;gap:12px"><span style="font-family:'Geist Mono',monospace;font-size:12px;color:#557A00">04</span><span style="font-size:15px;font-weight:600">Busy edge &mdash; ~5 changes</span><span style="font-size:13px;color:#8B877E">The sub-list is capped at three; the rest route out to the full history.</span></div>
+      <section style="background:#FFFFFF;border:1px solid #E6E2DA;overflow:hidden;max-width:780px">
+        <div style="padding:16px 20px 14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #EFECE6">
+          <div style="display:flex;align-items:center;gap:11px;min-width:0">
+            <div style="width:26px;height:26px;background:#F1EEE8;color:#5D5A53;font-size:11.5px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:0 0 auto">NO</div>
+            <div style="font-size:15px;font-weight:500;letter-spacing:-0.005em">Notion</div>
+            <div style="font-size:12.5px;color:#A8A49A">notion.so</div>
+          </div>
+          <div style="font-size:12px;white-space:nowrap;color:#557A00">5 changes this week</div>
+        </div>
+        <div style="padding:17px 20px 18px 20px;border-bottom:1px solid #F3F1EC;display:flex;gap:18px;align-items:flex-start">
+          <div style="flex:0 0 96px;padding-top:1px;font-size:11px;letter-spacing:0.07em;text-transform:uppercase;color:#8B877E">Pricing</div>
+          <div style="flex:1;min-width:0">
+            <div onClick="{{ noop }}" style="cursor:pointer" style-hover="opacity:0.72">
+              <div style="font-size:16px;line-height:1.5;color:#1A1A17;text-wrap:pretty;margin-bottom:7px">Notion AI is now bundled into the Business plan and the $10 standalone AI add-on row was removed entirely.</div>
+              <div style="font-size:12px;color:#948F86">3h ago</div>
+            </div>
+            <div onClick="{{ stopNoop }}" style="margin-top:12px;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:#557A00;cursor:pointer" style-hover="opacity:0.75">
+              <svg width="9" height="6" viewBox="0 0 9 6" fill="none" style="display:block;transform:rotate(180deg)"><path d="M1 1l3.5 3.5L8 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span style="border-bottom:1px solid currentColor;padding-bottom:1px">Show less</span>
+            </div>
+            <div style="margin-top:14px;border-top:1px solid #F0EDE7">
+              <sc-for list="{{ busyChanges }}" as="sc" hint-placeholder-count="3">
+                <div onClick="{{ sc.open }}" style="display:flex;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid #F5F3EE;cursor:pointer" style-hover="opacity:0.7">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:14px;line-height:1.5;color:#4A4740;text-wrap:pretty">{{ sc.summary }}</div>
+                    <div style="font-size:11.5px;color:#A8A49A;margin-top:3px">{{ sc.when }}</div>
+                  </div>
+                  <div style="flex:0 0 auto;width:22px;height:22px;background:#F4F2EC;color:#8B877E;display:flex;align-items:center;justify-content:center"><svg width="6" height="9" viewBox="0 0 6 9" fill="none" style="display:block"><path d="M1 1l3.5 3.5L1 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                </div>
+              </sc-for>
+              <div onClick="{{ noop }}" style="padding:14px 0 2px 0;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#2563EB;cursor:pointer" style-hover="text-decoration:underline">Older changes &mdash; see all 5 on Notion&rsquo;s Pricing history <svg width="6" height="9" viewBox="0 0 6 9" fill="none" style="display:block"><path d="M1 1l3.5 3.5L1 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+          </div>
+          <div title="Read change" style="flex:0 0 auto;width:30px;height:30px;background:#EEFBC7;color:#557A00;display:flex;align-items:center;justify-content:center;font-size:15px">&rarr;</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ===================== MOBILE ===================== -->
+  <div style="width:100%;max-width:1180px;margin-top:52px">
+    <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:20px"><span style="font-family:'Geist Mono',monospace;font-size:12px;color:#557A00">05</span><span style="font-size:15px;font-weight:600">Mobile &mdash; ~375px</span><span style="font-size:13px;color:#8B877E">Label on its own line; the lime chip stays with the headline, the toggle sits below.</span></div>
+    <div style="display:flex;gap:36px;flex-wrap:wrap">
+
+      <!-- mobile collapsed -->
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <div style="font-size:12.5px;color:#8B877E">Collapsed</div>
+        <section style="width:375px;background:#FFFFFF;border:1px solid #E6E2DA;overflow:hidden">
+          <div style="padding:15px 16px 13px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #EFECE6">
+            <div style="display:flex;align-items:center;gap:9px;min-width:0">
+              <div style="width:24px;height:24px;background:#F1EEE8;color:#5D5A53;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:0 0 auto">ST</div>
+              <div style="font-size:14.5px;font-weight:500">Stripe</div>
+            </div>
+            <div style="font-size:11.5px;white-space:nowrap;color:#557A00">3 changes</div>
+          </div>
+          <div onClick="{{ noop }}" style="padding:15px 16px;cursor:pointer" style-hover="background:#FCFBF9">
+            <div style="font-size:10.5px;letter-spacing:0.07em;text-transform:uppercase;color:#8B877E;margin-bottom:9px">Homepage</div>
+            <div style="display:flex;gap:13px;align-items:flex-start">
+              <div style="flex:1;min-width:0">
+                <div style="font-size:15px;line-height:1.5;color:#1A1A17;text-wrap:pretty;margin-bottom:7px">Reworked the hero to lead with &ldquo;Financial infrastructure for the internet&rdquo; and refreshed the customer logo strip.</div>
+                <div style="font-size:11.5px;color:#948F86">2h ago</div>
+              </div>
+              <div style="flex:0 0 auto;width:30px;height:30px;background:#EEFBC7;color:#557A00;display:flex;align-items:center;justify-content:center;font-size:15px">&rarr;</div>
+            </div>
+            <div onClick="{{ stopNoop }}" style="margin-top:13px;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:#8B877E;cursor:pointer" style-hover="color:#557A00">
+              <svg width="9" height="6" viewBox="0 0 9 6" fill="none" style="display:block"><path d="M1 1l3.5 3.5L8 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span style="border-bottom:1px solid currentColor;padding-bottom:1px">2 more this week</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- mobile expanded -->
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <div style="font-size:12.5px;color:#8B877E">Expanded</div>
+        <section style="width:375px;background:#FFFFFF;border:1px solid #E6E2DA;overflow:hidden">
+          <div style="padding:15px 16px 13px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #EFECE6">
+            <div style="display:flex;align-items:center;gap:9px;min-width:0">
+              <div style="width:24px;height:24px;background:#F1EEE8;color:#5D5A53;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:0 0 auto">ST</div>
+              <div style="font-size:14.5px;font-weight:500">Stripe</div>
+            </div>
+            <div style="font-size:11.5px;white-space:nowrap;color:#557A00">3 changes</div>
+          </div>
+          <div style="padding:15px 16px 16px 16px">
+            <div style="font-size:10.5px;letter-spacing:0.07em;text-transform:uppercase;color:#8B877E;margin-bottom:9px">Homepage</div>
+            <div onClick="{{ noop }}" style="display:flex;gap:13px;align-items:flex-start;cursor:pointer" style-hover="opacity:0.72">
+              <div style="flex:1;min-width:0">
+                <div style="font-size:15px;line-height:1.5;color:#1A1A17;text-wrap:pretty;margin-bottom:7px">Reworked the hero to lead with &ldquo;Financial infrastructure for the internet&rdquo; and refreshed the customer logo strip.</div>
+                <div style="font-size:11.5px;color:#948F86">2h ago</div>
+              </div>
+              <div style="flex:0 0 auto;width:30px;height:30px;background:#EEFBC7;color:#557A00;display:flex;align-items:center;justify-content:center;font-size:15px">&rarr;</div>
+            </div>
+            <div onClick="{{ stopNoop }}" style="margin-top:13px;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:#557A00;cursor:pointer" style-hover="opacity:0.75">
+              <svg width="9" height="6" viewBox="0 0 9 6" fill="none" style="display:block;transform:rotate(180deg)"><path d="M1 1l3.5 3.5L8 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span style="border-bottom:1px solid currentColor;padding-bottom:1px">Show less</span>
+            </div>
+            <div style="margin-top:13px;border-top:1px solid #F0EDE7">
+              <sc-for list="{{ subChanges }}" as="sc" hint-placeholder-count="2">
+                <div onClick="{{ sc.open }}" style="display:flex;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid #F5F3EE;cursor:pointer" style-hover="opacity:0.7">
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:13.5px;line-height:1.5;color:#4A4740;text-wrap:pretty">{{ sc.summary }}</div>
+                    <div style="font-size:11px;color:#A8A49A;margin-top:3px">{{ sc.when }}</div>
+                  </div>
+                  <div style="flex:0 0 auto;width:22px;height:22px;background:#F4F2EC;color:#8B877E;display:flex;align-items:center;justify-content:center"><svg width="6" height="9" viewBox="0 0 6 9" fill="none" style="display:block"><path d="M1 1l3.5 3.5L1 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals(){
+    const noop = () => {};
+    return {
+      noop, stopNoop: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
+      subChanges: [
+        { summary: 'Added a global \u201cAI\u201d item to the top nav, linking to a new agents overview page.', when: '3d ago', open: noop },
+        { summary: 'Swapped the primary \u201cStart now\u201d button from blurple to solid black.', when: '5d ago', open: noop }
+      ],
+      busyChanges: [
+        { summary: 'Plus plan dropped its 5-guest cap; guest collaborators are now unlimited on all paid tiers.', when: '2d ago', open: noop },
+        { summary: 'Enterprise pricing moved from a public \u201cfrom $20/seat\u201d to a \u201cContact sales\u201d gate.', when: '4d ago', open: noop },
+        { summary: 'Added an annual-billing toggle that advertises \u201c2 months free\u201d across every tier.', when: '6d ago', open: noop }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

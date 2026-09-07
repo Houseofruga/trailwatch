@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-07 (⏸ local-branch WIP: dashboard multi-change expandable row parked on `wip/dashboard-multi-change-row` (not pushed), held pending a v3 design pass — see Suggested next steps. Already pushed: back-nav real browser-back + generic "Back"; watched URLs require a real public domain; Pro price raised to $29/$290 in code — Paddle dashboard update still owed; onboarding rework; auth Terms/Privacy consent links + legal breadcrumbs; dashboard/digest UX)._
+_Last updated: 2026-09-07 (✅ dashboard multi-change row COMMITTED + MERGED to main — v3 design applied per `dashboard multi-change/*.dc.html`, desktop + mobile, verified live. One open decision (cap-at-3 vs show-all) — see Suggested next steps. Already pushed: back-nav real browser-back + generic "Back"; watched URLs require a real public domain; Pro price raised to $29/$290 in code — Paddle dashboard update still owed; onboarding rework; auth Terms/Privacy consent links + legal breadcrumbs; dashboard/digest UX)._
 
 ## Product in one line
 
@@ -755,26 +755,30 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
 
 ## Suggested next steps for whoever picks this up
 
-**⏸ local-branch WIP — dashboard multi-change expandable row (2026-09-07).**
-Fully implemented and verified locally, committed to the **local branch
-`wip/dashboard-multi-change-row`** (commit `564cf8e`) — **NOT merged to `main` and NOT pushed**
-(owner wants a v3 design pass from Claude Design first). `main`'s working tree is clean; to see
-this work run `git checkout wip/dashboard-multi-change-row`. The branch touches five dashboard
-files:
-- `src/app/(app)/dashboard/dashboardFeed.ts` — new pure `activeChanges(page, now)` (every
-  meaningful change this week, newest-first) + its test `dashboardFeed.test.ts`.
-- `src/app/(app)/dashboard/DashboardActiveRow.tsx` (new client component) + `page.tsx` wire-in
-  + `page.module.css` additions.
-- **What it does:** the "this week" feed row showed only the newest change even when a page had
-  several this week (so the competitor header's "N changes this week" count disagreed with the
-  single row, and older changes were unreachable from the dashboard). The row now keeps the calm
-  one-line default; when a page has >1 change this week it shows the newest inline + a subtle
-  "+N more this week" toggle that expands to the rest, each linking to its own change detail. A
-  single-change row is unchanged. Verified live (typecheck/lint clean; 143 tests pass).
-- **Why held:** the visual treatment of the expand/disclosure is going through Claude Design in
-  the **v3** language first (a follow-up design prompt was drafted in chat, not stored). Once the
-  design comes back, reconcile the branch with it, then merge to `main` + push. Until then, leave
-  the branch unpushed — `main` is deliberately clean of this work.
+**✅ dashboard multi-change row — COMMITTED + MERGED to `main` (2026-09-07).**
+The v3 design pass came back, was **fully implemented + verified live (desktop AND mobile)**, and
+is now **committed and merged into `main`** (via the `wip/dashboard-multi-change-row` branch, which
+also carried the earlier WIP commit `564cf8e`). Nothing left dirty for this.
+- **Design source:** `dashboard multi-change/Dashboard Multi-Change Row.dc.html` (a Claude Design
+  canvas committed to the repo root, like `trailwatch v2/`, `trailwatch v3/`). It is the exact spec.
+  (`eslint.config.mjs` lists `dashboard multi-change/**` in `ignores`, same as the other design
+  folders, so its `support.js` doesn't fail lint.)
+- **Files:** `DashboardActiveRow.tsx` (built to the design), `page.module.css` (multi-change block
+  + a `@media (max-width:640px)` mobile block), `dashboardFeed.ts` `activeChanges()`, `page.tsx`
+  wire-in, `dashboardFeed.test.ts`, `eslint.config.mjs`.
+- **What it does / cases (all verified live):** a page with 1 change = the ordinary v3 row (green
+  **→** SVG chip). With several: newest is the headline + a muted **"N more this week"** toggle
+  (underlined text + down chevron) that expands to **"Show less"** (accent) + the week's other
+  changes as a lighter sub-list (14px `--ink-2`, 22px grey `›` chips), dividers **only between**
+  rows. **Mobile (≤640px):** all dashboard rows drop the 96px label column → label on its own line,
+  content full-width, chip stays beside the headline (design section 05). typecheck/lint clean, 143 tests.
+- **OPEN DECISION (owner):** the design file's case 4 (~5 changes) **caps the sub-list at 3** and
+  adds a blue *"Older changes — see all N on {Competitor}'s {Page} history"* link. Per the owner's
+  explicit instruction this session it currently shows **ALL** changes (no cap, no history link).
+  If the owner later wants the file's capped version, the history link needs a destination — there
+  is **no per-page history route** yet, so one must be built or the link pointed somewhere.
+- **Test data note:** this session inserted synthetic `changes` rows into the sandbox `pro-test@`
+  account (Notion/Linear pages) to exercise the cases; they vanish on the next `scripts/seed-sandbox.ts` run.
 
 **v3 UI overhaul — COMPLETE (2026-09-06).** The `trailwatch v3/` canvas came back and has
 been developed across the whole authed app (see Recent work + Deviations). Remaining:
