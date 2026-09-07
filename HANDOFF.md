@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-07 (Pro price raised to $29/$290 in code — Paddle dashboard update still owed; onboarding rework; auth Terms/Privacy consent links + legal breadcrumbs; dashboard/digest UX)._
+_Last updated: 2026-09-07 (back-nav now real browser-back + generic "Back"; watched URLs require a real public domain; Pro price raised to $29/$290 in code — Paddle dashboard update still owed; onboarding rework; auth Terms/Privacy consent links + legal breadcrumbs; dashboard/digest UX)._
 
 ## Product in one line
 
@@ -248,6 +248,24 @@ convenient:
 - **Digest send time is 08:00 UTC Monday** (`vercel.json` `0 8 * * 1`); UI copy says "Mondays at 8am
   UTC". The dashboard's broken-page "Edit URL" opens the shared `EditPageDialog` modal in place
   (`DashboardEditUrl`), and the Competitors kebab item + dialog title are "Edit URL" (not "Edit page").
+- **Back navigation is real browser-back (2026-09-07, `56b9e24`).** The shared `components/BackLink`
+  is now a client component that reads a generic **"Back"** (chevron kept, destination name dropped).
+  Default `mode="history"` renders a `<button>` that does `window.history.length > 1 ? router.back()
+  : router.push(href)` — so it returns the user to wherever they came from, with the old hardcoded
+  route kept only as a **fallback** for direct landings (email links, fresh tabs). `mode="link"`
+  renders a fixed `<Link href>` for places where browser-back is unsafe. Call sites pass their old
+  route as the fallback: change-detail → `/dashboard` (its redundant footer "Back to this week" link
+  was removed), add-competitor → `/competitors` or `/dashboard`, edit-competitor → `/competitors`,
+  forgot-password → `mode="link"` `/login`. Error/404 (`ErrorState.HomeLink`) deliberately kept as a
+  fixed `/dashboard` **button** CTA (browser-back would bounce back into the broken page).
+- **Watched URLs must be a real public domain (2026-09-07, `eb66be1`).** The shared `pageUrl` schema
+  (`features/competitors/validation.ts`) gained a `hasPublicDomain` refine (hostname must end in a dot
+  + a ≥2-letter TLD). `z.url()` alone accepted `https://asdf` (a dotless host is legal to the URL
+  parser), so the onboarding "Add competitor" modal — which normalizes bare input to `https://…`
+  before validating — appeared to accept junk. The refine sits at the single choke point, so it fixes
+  every entry point at once (onboarding modal, main Add form, Add/Edit-page dialogs, server-side
+  `pageRow`). Rejects `asdf`, `localhost`, raw IPs, and 1-char TLDs; real domains/paths/subdomains
+  unaffected. Covered by `features/competitors/validation.test.ts`.
 - **Sandbox seed script** (`scripts/seed-sandbox.ts`, dev tooling, run with
   `npx tsx --env-file=.env.local scripts/seed-sandbox.ts`). Idempotent Pro + Free **test**
   users (`pro-test@ / free-test@trailwatch.test`, throwaway passwords in the file) with sample
@@ -335,12 +353,27 @@ convenient:
 - `src/app/(legal)/` — `terms`, `privacy`, `refunds` (placeholder content, real routes).
 - `src/app/api/cron/` — `check` (daily) and `digest` (weekly), Bearer-guarded by
   `CRON_SECRET`. Schedules in `vercel.json`: check `0 7 * * *`, digest `0 8 * * 1`.
-- `src/components/` — shared UI incl. `Sidebar`, `SiteFooter`, `BackLink`, `Button`.
+- `src/components/` — shared UI incl. `Sidebar`, `SiteFooter`, `BackLink` (client, real
+  browser-back — see Deviations), `Button`.
 - `src/styles/tokens.css` — the whole design system (cream/ink palette, lime-green
   accent `--accent: #9ff50a`, blue links, DM Sans + Geist Mono, zero border-radius).
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
 ## Recent work (all pushed to `main`)
+
+**Back-nav fix + URL domain validation (2026-09-07 — commits `56b9e24`, `eb66be1`, pushed).**
+- **Back navigation** (`56b9e24`): every back control was a hardcoded link to a fixed route, so a
+  user who reached `/changes/[id]` from Competitors was still sent to `/dashboard`. `BackLink` now
+  does real `router.back()` with the old route as a fallback, reads a generic "Back" (chevron kept),
+  and the redundant change-detail footer link was removed. Auth forgot-password uses the shared
+  control (`mode="link"` → `/login`); error/404 kept as fixed-target button CTAs. Verified live
+  (Competitors → Add → Back returned to `/competitors`). See Deviations.
+- **URL validation** (`eb66be1`): the "Add one yourself instead" modal appeared to skip URL
+  validation — really the shared `pageUrl` rule accepted any syntactic URL, so a normalized
+  `https://asdf` passed. Added a `hasPublicDomain` refine (dot + ≥2-letter TLD) at the shared choke
+  point; fixes onboarding modal + all add/edit flows + server. New unit fixtures; 141 tests pass.
+  Verified live in the onboarding modal (`asdf` blocked with an inline error, `linear.app` accepted).
+  See Deviations.
 
 **Pro price raised $19→$29 / $190→$290 in code (2026-09-07 — commit `518de7e`, pushed).**
 Display values only: `plan/limits.ts` (`PRO_MONTHLY_USD` 29, `PRO_ANNUAL_USD` 290, `PLAN_PRICE`),
