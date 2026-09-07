@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-07 (back-nav now real browser-back + generic "Back"; watched URLs require a real public domain; Pro price raised to $29/$290 in code — Paddle dashboard update still owed; onboarding rework; auth Terms/Privacy consent links + legal breadcrumbs; dashboard/digest UX)._
+_Last updated: 2026-09-07 (⏸ UNCOMMITTED local WIP: dashboard multi-change expandable row, held back pending a v3 design pass — see Suggested next steps. Already pushed: back-nav real browser-back + generic "Back"; watched URLs require a real public domain; Pro price raised to $29/$290 in code — Paddle dashboard update still owed; onboarding rework; auth Terms/Privacy consent links + legal breadcrumbs; dashboard/digest UX)._
 
 ## Product in one line
 
@@ -754,6 +754,25 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
   simplest approach, stay in scope (`SPEC.md` §6 is off-limits).
 
 ## Suggested next steps for whoever picks this up
+
+**⏸ UNCOMMITTED local WIP — dashboard multi-change expandable row (2026-09-07).**
+Fully implemented and verified locally, but **deliberately NOT committed or pushed** (owner
+wants a v3 design pass from Claude Design first). If you `git status` you'll see the working
+tree is dirty with these five dashboard files — that is expected, not stray work:
+- `src/app/(app)/dashboard/dashboardFeed.ts` — new pure `activeChanges(page, now)` (every
+  meaningful change this week, newest-first) + its test `dashboardFeed.test.ts`.
+- `src/app/(app)/dashboard/DashboardActiveRow.tsx` (new client component) + `page.tsx` wire-in
+  + `page.module.css` additions.
+- **What it does:** the "this week" feed row showed only the newest change even when a page had
+  several this week (so the competitor header's "N changes this week" count disagreed with the
+  single row, and older changes were unreachable from the dashboard). The row now keeps the calm
+  one-line default; when a page has >1 change this week it shows the newest inline + a subtle
+  "+N more this week" toggle that expands to the rest, each linking to its own change detail. A
+  single-change row is unchanged. Verified live (typecheck/lint clean; 143 tests pass).
+- **Why held:** the visual treatment of the expand/disclosure is going through Claude Design in
+  the **v3** language first (a follow-up design prompt was drafted in chat, not stored). Once the
+  design comes back, reconcile this implementation with it, then commit + push. Until then, do NOT
+  push these files, and don't panic about the dirty tree.
 
 **v3 UI overhaul — COMPLETE (2026-09-06).** The `trailwatch v3/` canvas came back and has
 been developed across the whole authed app (see Recent work + Deviations). Remaining:
