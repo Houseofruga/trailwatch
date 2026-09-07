@@ -1,11 +1,11 @@
-/* Full-screen overlay with a 12px gap on all four sides; the scrim shows through
+/* Full-screen overlay with a 20px gap on all four sides; the scrim shows through
    that gap. Sits above everything (sidebar included) so the modal has no left nav. */
 .overlay {
   position: fixed;
   inset: 0;
   z-index: 120;
-  padding: 12px;
-  background: rgba(26, 26, 23, 0.5);
+  padding: 20px;
+  background: rgba(26, 26, 23, 0.1);
   display: flex;
 }
 

@@ -518,7 +518,7 @@ a.headlineChip:hover {
 .subRow {
   display: flex;
   gap: 14px;
-  align-items: center;
+  align-items: flex-start;
   padding: 13px 0;
   border-bottom: 1px solid #f5f3ee;
   text-decoration: none;
