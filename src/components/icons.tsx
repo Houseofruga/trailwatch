@@ -23,6 +23,18 @@ export function ExternalLinkIcon({ size = 12 }: IconProps) {
   );
 }
 
+// Close (X) — sharp, matching the stroke icon set.
+export function CloseIcon({ size = 16 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <g stroke="currentColor" strokeWidth="1.5" strokeLinecap="square">
+        <path d="M4 4l8 8" />
+        <path d="M12 4l-8 8" />
+      </g>
+    </svg>
+  );
+}
+
 export function ChevronLeftIcon({ size = 12 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { HeroScene } from "../HeroScene";
@@ -98,12 +99,12 @@ export default async function RootPage() {
               to babysit one. It just works.
             </p>
             <div className={styles.heroCta}>
-              <a
+              <Link
                 className={`${styles.btn} ${styles.btnPrimary}`}
                 href="/login?mode=signup"
               >
                 Start free — no card required
-              </a>
+              </Link>
             </div>
           </>
         }

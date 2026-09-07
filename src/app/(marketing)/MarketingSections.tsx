@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SiteFooter } from "@/components/SiteFooter";
 import { StepsScroller } from "./StepsScroller";
 import { CloudScene } from "./CloudScene";
@@ -97,12 +98,12 @@ export function MarketingSections() {
               <div>Weekly digest</div>
               <div>AI summaries included</div>
             </div>
-            <a
+            <Link
               className={`${styles.btn} ${styles.btnSecondary} ${styles.planCta}`}
               href="/login?mode=signup"
             >
               Start free
-            </a>
+            </Link>
           </div>
 
           <div className={`${styles.plan} ${styles.planPro}`}>
@@ -121,12 +122,12 @@ export function MarketingSections() {
               <div>100 pages</div>
               <div>Daily checks</div>
             </div>
-            <a
+            <Link
               className={`${styles.btn} ${styles.btnPrimary} ${styles.planCta}`}
               href="/login?mode=signup"
             >
               Start free, upgrade later
-            </a>
+            </Link>
           </div>
         </div>
         <p className={styles.pricingFoot}>
@@ -173,12 +174,12 @@ export function MarketingSections() {
               no growth-hack dark patterns, and you can actually reach the person who built it.
             </p>
             <div className={styles.finalCta}>
-              <a
+              <Link
                 className={`${styles.btn} ${styles.btnPrimary}`}
                 href="/login?mode=signup"
               >
                 Start free — no card required
-              </a>
+              </Link>
             </div>
             <div className={styles.finalQuiet}>
               Also a great fit for small marketing teams, PMs, and agencies.

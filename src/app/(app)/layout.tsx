@@ -5,7 +5,8 @@ import styles from "./layout.module.css";
 
 export default async function AppLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+  modal,
+}: Readonly<{ children: React.ReactNode; modal: React.ReactNode }>) {
   const account = await getAccount();
 
   // src/proxy.ts already guards these routes; this is the belt to its braces,
@@ -16,6 +17,9 @@ export default async function AppLayout({
     <div className={styles.shell}>
       <Sidebar account={account} />
       <main className={styles.main}>{children}</main>
+      {/* Intercepting-route overlay (e.g. change detail); position:fixed, so it
+          renders above the shell regardless of DOM order. */}
+      {modal}
     </div>
   );
 }

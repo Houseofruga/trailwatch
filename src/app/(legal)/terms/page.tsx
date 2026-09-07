@@ -102,9 +102,9 @@ export default function TermsPage() {
           billed through our payment provider, Paddle, which acts as the merchant of
           record for your purchase. Billing, cancellation, and refunds are described in
           our{" "}
-          <a className={styles.link} href="/refunds">
+          <Link className={styles.link} href="/refunds">
             Refund Policy
-          </a>
+          </Link>
           .
         </p>
       </section>
@@ -161,9 +161,9 @@ export default function TermsPage() {
           suspend or terminate accounts that violate these terms or that we reasonably
           believe create legal or security risk. Deleting your account removes your data
           as described in our{" "}
-          <a className={styles.link} href="/privacy">
+          <Link className={styles.link} href="/privacy">
             Privacy Policy
-          </a>
+          </Link>
           .
         </p>
       </section>

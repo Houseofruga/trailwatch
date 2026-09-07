@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { domainOf, formatFullDate, formatShortDate } from "@/app/(app)/dashboard/dashboardFeed";
+import { getDemoChangeDetail } from "@/features/demo/demoFeed";
 
 // The view-model for the change-detail page. Both the real (DB) and demo (static)
 // sources resolve to this shape, so the page renders one way.
@@ -39,6 +40,13 @@ type ChangeRow = {
 function realIgnoredNote(n: number): string {
   if (n <= 0) return "";
   return `${n} other edit${n === 1 ? "" : "s"} on this page ${n === 1 ? "was" : "were"} ignored as boilerplate.`;
+}
+
+// Resolve a change detail by id from whichever source owns it — the display-only
+// demo feed (demo- ids) or the real DB. Shared by the full page and the modal so
+// the demo/real branch lives in one place.
+export async function getChangeDetail(id: string, now: number): Promise<ChangeDetail | null> {
+  return id.startsWith("demo-") ? getDemoChangeDetail(id, now) : await getRealChangeDetail(id);
 }
 
 // One meaningful change, by id, for the signed-in user. RLS scopes the read to
