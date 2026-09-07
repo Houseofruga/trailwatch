@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-07 (✅ dashboard multi-change row COMMITTED + MERGED to main — v3 design applied per `dashboard multi-change/*.dc.html`, desktop + mobile, verified live. One open decision (cap-at-3 vs show-all) — see Suggested next steps. Already pushed: back-nav real browser-back + generic "Back"; watched URLs require a real public domain; Pro price raised to $29/$290 in code — Paddle dashboard update still owed; onboarding rework; auth Terms/Privacy consent links + legal breadcrumbs; dashboard/digest UX)._
+_Last updated: 2026-09-08 (shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
 
 ## Product in one line
 
@@ -89,6 +89,33 @@ migrations. See Recent work + Deviations.
 These docs predate some decisions — trust the code, and reconcile the docs when
 convenient:
 
+- **Change detail is an overlay modal via an intercepting route (2026-09-08).** In-app clicks on
+  `/changes/[id]` open the detail as a full-screen overlay over the current page (no left nav; 20px
+  gap all sides, 10% scrim, X top-right, inner scroll) — it does NOT reload/replace the page behind
+  it, so closing keeps that page's scroll/state. Built with a Next 16 parallel `@modal` slot +
+  intercepting route: `src/app/(app)/@modal/(.)changes/[id]/page.tsx` (renders
+  `ChangeDetailModal` + `ChangeDetailView`), `@modal/default.tsx` (null — REQUIRED by Next 16), and
+  `@modal/[...catchAll]/page.tsx` (null, so soft-nav elsewhere unmounts it); `(app)/layout.tsx` takes
+  the `modal` slot. A **direct visit / refresh / shared link** isn't intercepted and renders the
+  **full page** (`changes/[id]/page.tsx`) with the sidebar — the owner-chosen fallback. Content is
+  shared via `ChangeDetailCrumb` + `ChangeDetailBody` (both page and modal); `getChangeDetail(id,now)`
+  in `changes/queries.ts` is the shared demo/real fetch. New `CloseIcon` in `components/icons.tsx`.
+- **Editing a page URL re-checks + re-profiles it (2026-09-08).** `updatePage`
+  (`competitors/actions.ts`) used to write only url/label, leaving a fixed URL showing the OLD
+  "can't reach"/404 (and stale baseline/history/profile) until the nightly cron. Now, when the URL
+  actually changes, it clears `last_check_status`/`last_check_error`, deletes the page's
+  snapshots/changes/`page_insights`, nulls `latest_snapshot_id`/`backfilled_at`, then re-captures the
+  new URL immediately (`captureBaselines` → clean first-check, no spurious change) and `warmPages`.
+  Label-only edits are untouched. Deletes/resets use the **service client** (RLS gives users only
+  read on snapshots/changes). Also: `PageIntel` now shows a quiet "We couldn't profile this page yet
+  — we'll try again." note when the AI declines/errs, instead of rendering nothing.
+- **Finder logos: favicon robustness + real URLs (2026-09-08).** `fetchFavicon` now probes the
+  `www` host + post-redirect origin and more icon paths (favicon.png/.svg, apple-touch-icon-
+  precomposed, icon.svg), bounded. And the finder corrects the model's guessed homepage with Exa's
+  real result domains (a conservative name match in `competitorFinder/find.ts`; `exa.ts` now returns
+  structured `{title, domain}` candidates) — fixing wrong domains like `loopshq.com`→`loops.so`.
+  Still first-party only (no third-party icon service). Pages the AI/fetch genuinely can't handle
+  fall back to initials + the note above.
 - **Billing is Paddle** (docs now reconciled — `SPEC.md` and `CLAUDE.md` say Paddle).
   Webhook at `src/app/api/webhooks/paddle/route.ts`, signature verify in
   `src/features/billing/verifyPaddleSignature.ts` (unit-tested), plan resolution in
@@ -360,6 +387,21 @@ convenient:
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
 ## Recent work (all pushed to `main`)
+
+**Change-detail modal + finder logos + edit-URL re-check + UI polish (2026-09-08, commits
+`65ad7d5`…`f6b3942`).** All shipped + verified live in the sandbox; typecheck/lint clean, 143 tests.
+See Deviations for the load-bearing details.
+- **Dashboard multi-change row** (`65ad7d5`): active rows show the newest change inline + a
+  "N more this week" disclosure to the week's other changes (v3 design canvas `dashboard multi-change/`).
+- **Change detail as an overlay modal** (`4f51719`, `0a2f96b`): intercepting `@modal` route; 20px gap,
+  10% scrim, header (competitor + page + X), padded scroll body; external links use the blue `--link`.
+- **Dashboard/hover/badge polish** (`36358e3`, `2a92b41`, `bb07104`): change rows have no
+  background/opacity hover — hovering an item greens only its own summary (`--accent-ink`), applied to
+  the active rows, sub-rows, the Competitors "Recent history" list, and the quiet card (which also got
+  the `→` arrow chip); the sidebar Dashboard badge is a black chip with a white count.
+- **Finder logos** (`9379d15`): favicon robustness + Exa real-URL correction (see Deviations).
+- **Edit-URL re-check** (`f6b3942`): editing a page URL now re-checks + re-profiles it, and PageIntel
+  shows a note instead of vanishing when profiling declines (see Deviations).
 
 **Back-nav fix + URL domain validation (2026-09-07 — commits `56b9e24`, `eb66be1`, pushed).**
 - **Back navigation** (`56b9e24`): every back control was a hardcoded link to a fixed route, so a
@@ -755,28 +797,12 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
 
 ## Suggested next steps for whoever picks this up
 
-**✅ dashboard multi-change row — COMMITTED + MERGED to `main` (2026-09-07).**
-The v3 design pass came back, was **fully implemented + verified live (desktop AND mobile)**, and
-is now **committed and merged into `main`** (via the `wip/dashboard-multi-change-row` branch, which
-also carried the earlier WIP commit `564cf8e`). Nothing left dirty for this.
-- **Design source:** `dashboard multi-change/Dashboard Multi-Change Row.dc.html` (a Claude Design
-  canvas committed to the repo root, like `trailwatch v2/`, `trailwatch v3/`). It is the exact spec.
-  (`eslint.config.mjs` lists `dashboard multi-change/**` in `ignores`, same as the other design
-  folders, so its `support.js` doesn't fail lint.)
-- **Files:** `DashboardActiveRow.tsx` (built to the design), `page.module.css` (multi-change block
-  + a `@media (max-width:640px)` mobile block), `dashboardFeed.ts` `activeChanges()`, `page.tsx`
-  wire-in, `dashboardFeed.test.ts`, `eslint.config.mjs`.
-- **What it does / cases (all verified live):** a page with 1 change = the ordinary v3 row (green
-  **→** SVG chip). With several: newest is the headline + a muted **"N more this week"** toggle
-  (underlined text + down chevron) that expands to **"Show less"** (accent) + the week's other
-  changes as a lighter sub-list (14px `--ink-2`, 22px grey `›` chips), dividers **only between**
-  rows. **Mobile (≤640px):** all dashboard rows drop the 96px label column → label on its own line,
-  content full-width, chip stays beside the headline (design section 05). typecheck/lint clean, 143 tests.
-- **OPEN DECISION (owner):** the design file's case 4 (~5 changes) **caps the sub-list at 3** and
-  adds a blue *"Older changes — see all N on {Competitor}'s {Page} history"* link. Per the owner's
-  explicit instruction this session it currently shows **ALL** changes (no cap, no history link).
-  If the owner later wants the file's capped version, the history link needs a destination — there
-  is **no per-page history route** yet, so one must be built or the link pointed somewhere.
+**OPEN DECISION — dashboard multi-change row cap (owner).** The multi-change expandable row is
+shipped (see Deviations), but its design file (`dashboard multi-change/Dashboard Multi-Change Row.dc.html`)
+case 4 (~5 changes) **caps the sub-list at 3** with a blue *"Older changes — see all N on
+{Competitor}'s {Page} history"* link. Per the owner's instruction it currently shows **ALL** changes
+(no cap, no link). If you switch to the capped version, that link needs a destination — there is
+**no per-page history route** yet, so one must be built (or the link pointed at the Competitors page).
 - **Test data note:** this session inserted synthetic `changes` rows into the sandbox `pro-test@`
   account (Notion/Linear pages) to exercise the cases; they vanish on the next `scripts/seed-sandbox.ts` run.
 
