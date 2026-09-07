@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-08 (shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
+_Last updated: 2026-09-08 (fixed a robots.txt parser bug that silently blocked every check on sites using Cloudflare's default managed robots.txt — see Recent work; shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
 
 ## Product in one line
 
@@ -387,6 +387,18 @@ convenient:
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
 ## Recent work (all pushed to `main`)
+
+**robots.txt parser fix — pages on Cloudflare-default robots were silently un-watchable (2026-09-08).**
+`isPathAllowed` ([src/features/checks/robots.ts](src/features/checks/robots.ts)) only started a new
+User-agent record after a `Disallow` and ignored `Allow`. Cloudflare's default managed robots.txt is
+`User-agent: * / Allow: /` immediately followed by `Disallow: /` blocks for AI bots (GPTBot, CCBot,
+ClaudeBot…). The Allow-only `*` record absorbed the next agent's block, so our bot inherited
+`Disallow: /` and **every check was skipped as robots-disallowed** — no baseline captured, status left
+untouched, so the page sat on "Checking daily" + "We'll profile this page as soon as we've captured it"
+forever (real symptom hit on `watchmycompetitor.com`). Fix: a record now closes its agent list on the
+first rule of *either* kind, and `Allow`/`Disallow` are both honored with longest-match-wins (Allow
+wins ties). Reproduced against the live file; regression tests added. Recovery for an already-stuck
+page: ⋮ → **Check now** (or the next daily cron). ✓ typecheck/lint, 146 tests.
 
 **Change-detail modal + finder logos + edit-URL re-check + UI polish (2026-09-08, commits
 `65ad7d5`…`f6b3942`).** All shipped + verified live in the sandbox; typecheck/lint clean, 143 tests.
