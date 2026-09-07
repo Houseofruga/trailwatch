@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-07 (onboarding reworked: Pro skips plan step, finder search + add-competitor modal on the watchlist; auth Terms/Privacy consent links + legal breadcrumbs; dashboard/digest UX. Prior: page-focused baseline card, summary-pipeline fixes)._
+_Last updated: 2026-09-07 (Pro price raised to $29/$290 in code — Paddle dashboard update still owed; onboarding rework; auth Terms/Privacy consent links + legal breadcrumbs; dashboard/digest UX)._
 
 ## Product in one line
 
@@ -123,13 +123,18 @@ convenient:
   sending is `weekly@gettrailwatch.com` (`EMAIL_FROM`).
 - **Plan limits** (`src/features/plan/limits.ts`): free = 2 competitors × 3 pages
   each (6 total); paid = 10 competitors × 10 pages each (100 total). Pro pricing:
-  `$19/mo` monthly or `$190/yr` annual (2 months free), via `PRO_MONTHLY_USD` /
-  `PRO_ANNUAL_USD`. Landing pricing copy now says Pro = "100 pages", matching the
-  enforced 100-page limit (owner-confirmed 2026-08-26).
-- **Prices exclude tax (2026-09-05).** The shown $190/yr and $19/mo are the pre-tax base;
-  Paddle (Merchant of Record) adds the buyer's local tax **on top** at checkout (India GST
-  18% → $224.20 / $22.42; VAT/sales tax elsewhere). This is a **Paddle dashboard** setting
-  (both Pro prices have `tax_mode: external`), NOT in code — don't look for it in the repo.
+  `$29/mo` monthly or `$290/yr` annual (2 months free; per-month equiv `$24.17`), via
+  `PRO_MONTHLY_USD` / `PRO_ANNUAL_USD` (**raised from $19/$190 on 2026-09-07, commit `518de7e`**).
+  Landing pricing copy now says Pro = "100 pages", matching the enforced 100-page limit
+  (owner-confirmed 2026-08-26). **These are DISPLAY-ONLY** — the actual charge is the Paddle
+  price behind `NEXT_PUBLIC_PADDLE_PRICE_PRO_MONTHLY` / `_ANNUAL`. **Owner must set $29/$290 in
+  the Paddle dashboard (new price IDs → repoint the env vars) for the raise to be real; until
+  then checkout still charges the old amount while the site shows the new one.**
+- **Prices exclude tax (2026-09-05, amounts updated 2026-09-07).** The shown $290/yr and $29/mo
+  are the pre-tax base; Paddle (Merchant of Record) adds the buyer's local tax **on top** at
+  checkout (India GST 18% → $342.20 / $34.22; VAT/sales tax elsewhere). This is a **Paddle
+  dashboard** setting (both Pro prices have `tax_mode: external`), NOT in code — don't look for it
+  in the repo.
   The app reflects it with "Plus applicable taxes — calculated at checkout" on the checkout
   surfaces only (`ProPricingCard` + the add-competitor upsell); the marketing landing has no
   tax line. If the Paddle prices ever revert to inclusive, that copy would be wrong.
@@ -336,6 +341,14 @@ convenient:
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
 ## Recent work (all pushed to `main`)
+
+**Pro price raised $19→$29 / $190→$290 in code (2026-09-07 — commit `518de7e`, pushed).**
+Display values only: `plan/limits.ts` (`PRO_MONTHLY_USD` 29, `PRO_ANNUAL_USD` 290, `PLAN_PRICE`),
+which feed billing/ProPricingCard/onboarding/settings; hardcoded copy in `structuredData.ts`
+(FAQ + Offer prices), the landing `MarketingSections.tsx` ($24.17/mo, $290/yr, $29/mo), and the 3
+compare-page FAQs; test updated. **NOT YET REAL:** the Paddle dashboard prices must be changed to
+$29/$290 (new price IDs → repoint `NEXT_PUBLIC_PADDLE_PRICE_PRO_MONTHLY`/`_ANNUAL`) — see Suggested
+next steps. Until then the site shows $29/$290 but checkout still charges the old amount.
 
 **Onboarding rework + auth/legal + dashboard UX (2026-09-07 — commits `08b6af6`…`acdcc99`,
 pushed).**
@@ -737,6 +750,14 @@ track except:
    OAuth on the new domain). Digest **email send** to real users still wants a live test
    (part of §9 below).
 
+**⚠️ Pro price raise — Paddle side still owed (owner, blocking the raise):**
+The code now shows **$29/mo · $290/yr** (commit `518de7e`) but that's display-only. To make the
+raise real: in the **Paddle dashboard** create new Pro monthly ($29) + annual ($290) prices
+(tax-exclusive, `tax_mode: external`), repoint `NEXT_PUBLIC_PADDLE_PRICE_PRO_MONTHLY` /
+`_ANNUAL` (Vercel Production) to the new price IDs, and redeploy. Decide grandfather-vs-migrate for
+existing subscribers (they keep the old price unless migrated). **Until this is done, the site shows
+$29/$290 but checkout charges the old $19/$190 — do not launch the raise until the overlay matches.**
+
 **Onboarding + checkout (owner's active track):**
 0. **Verify end-to-end on production with a real login** (all behind auth — couldn't be
    driven from the preview; only static/compiled + Paddle-API checks were possible):
@@ -747,8 +768,8 @@ track except:
      seeds correctly. Google + email-confirm signups also land on `/welcome`.
    - Free user at the 2-competitor limit → **Add competitor** → the upsell shows the shared
      Pro card with the **Monthly/Annual toggle** and opens the Paddle overlay in place.
-   - **Checkout tax:** confirm the Paddle overlay now shows tax **added on top** ($224.20
-     annual / $22.42 monthly for India), not baked into $190/$19.
+   - **Checkout tax:** confirm the Paddle overlay now shows tax **added on top** ($342.20
+     annual / $34.22 monthly for India at 18% GST), not baked into $290/$29.
    NB: the `/try` graduation question is **resolved** — the finder IS `/` now (indexed),
    animated landing is `/1` (noindex).
 
