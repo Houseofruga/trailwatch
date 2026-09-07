@@ -57,10 +57,11 @@
   border-bottom: 1px solid var(--border);
 }
 .metaLink {
-  color: var(--accent-ink);
+  color: var(--link);
   text-decoration: none;
 }
 .metaLink:hover {
+  color: var(--link-hover);
   text-decoration: underline;
 }
 
@@ -131,10 +132,11 @@
 }
 .footOpen {
   font-size: 13.5px;
-  color: var(--accent-ink);
+  color: var(--link);
   text-decoration: none;
 }
 .footOpen:hover {
+  color: var(--link-hover);
   text-decoration: underline;
 }
 
