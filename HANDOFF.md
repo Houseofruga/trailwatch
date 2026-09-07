@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-07 (baseline card reworked page-focused; "What to watch" removed. Prior: summary-pipeline fixes, quiet-card summaries, Recent history incl. live changes)._
+_Last updated: 2026-09-07 (onboarding reworked: Pro skips plan step, finder search + add-competitor modal on the watchlist; auth Terms/Privacy consent links + legal breadcrumbs; dashboard/digest UX. Prior: page-focused baseline card, summary-pipeline fixes)._
 
 ## Product in one line
 
@@ -232,6 +232,17 @@ convenient:
   + `scripts/resummarize-archive.ts` (`8cd2126`) list/re-summarise rows still carrying the old
   fallback from stored excerpts (no Wayback refetch); idempotent, `--dry`. Run once this session
   → 0 rows left with "(summary unavailable)" in the hosted DB.
+- **Auth consent + cookies (2026-09-07).** Login/signup shows "By continuing, you agree to our
+  Terms and Privacy Policy" (links to `/terms`, `/privacy`, opened in a **new tab**) — in
+  `features/auth/AuthForm.tsx`, both modes, covering Google + email. Legal pages carry a breadcrumb
+  (Home › Legal › page) instead of a back link. **No cookie-consent banner** exists or is required:
+  the app uses only essential/functional first-party storage (Supabase auth cookie; `localStorage`
+  onboarding keys `tw_pending_competitors` / `tw_pending_company` / `tw_onboarded`) and Paddle's
+  checkout cookies — **no analytics or tracking**. Privacy policy §6 says so. **If any analytics or
+  marketing tracker is ever added, an EU-style opt-in consent banner becomes mandatory** — add it then.
+- **Digest send time is 08:00 UTC Monday** (`vercel.json` `0 8 * * 1`); UI copy says "Mondays at 8am
+  UTC". The dashboard's broken-page "Edit URL" opens the shared `EditPageDialog` modal in place
+  (`DashboardEditUrl`), and the Competitors kebab item + dialog title are "Edit URL" (not "Edit page").
 - **Sandbox seed script** (`scripts/seed-sandbox.ts`, dev tooling, run with
   `npx tsx --env-file=.env.local scripts/seed-sandbox.ts`). Idempotent Pro + Free **test**
   users (`pro-test@ / free-test@trailwatch.test`, throwaway passwords in the file) with sample
@@ -252,11 +263,24 @@ convenient:
     **deleted**; the dashboard still has its own `DashboardBaseline.tsx`.
   - Plan-card feature lists are **plain** (no bullet markers) — the shared `ProPricingCard`
     (`.feature`) drives Billing, onboarding step 2, and the add-competitor upsell together.
-  - Onboarding is a 2-step v3 flow with a shared `StepIndicator`; step 1 uses tap-to-toggle
-    rows for finder picks (editable inputs only for blank/manual rows). Pro-intent state:
-    "Select all & go Pro" selects all + routes step 2 to the Pro-only "Check the benefits"
-    variant; otherwise step 2 is "Choose your plan". Free users now confirm the plan on step 2
-    (no more direct-seed from step 1).
+  - Onboarding (`/welcome`, `WelcomeOnboarding.tsx`) — **REWORKED 2026-09-07** (commits
+    `7093800`, `5a3bf15`, `4729801`). It's now plan-aware and single-screen for the watchlist:
+    - **Existing Pro users skip the Free/Pro plan step entirely** — the primary button is
+      "Start watching" (green/primary), which seeds the picks and goes straight to the
+      dashboard; no `StepIndicator` shown (single step). **Free** users are unchanged:
+      "Continue" → the Free/Pro plan step (`OnboardingPlanStep`), "1 — 2" indicator, and the
+      Pro-intent path ("Select all & go Pro" → "Check the benefits" vs "Choose your plan").
+    - **The separate first "domain" step is gone.** Everyone lands on the watchlist step, which
+      now carries the **finder search bar** (same `findCompetitorsAction` as the homepage),
+      **pre-seeded** with the company the visitor typed on the homepage (new `tw_pending_company`
+      localStorage stash, written in `CompetitorFinder.persistPending`). A search **merges**
+      suggestions into the list (dedup by URL, keeps curated picks, respects the free cap); the
+      "Find competitors" button only appears once the input differs from the last/pre-seeded
+      query (mirrors the homepage `dirty` logic). A no-picks visitor just starts with an empty
+      list + the search bar.
+    - **"Add one yourself instead" opens a modal** (`AddCompetitorDialog.tsx`, reuses
+      `EditPageDialog.module.css`) collecting competitor name + homepage URL, adding a normal
+      selected toggle row. The old inline name/URL editable rows are removed (`Row.editing` gone).
   - `trailwatch v3/` (the design canvas) is committed + eslint-ignored, like `trailwatch v2/`.
   - Landing was deliberately NOT changed to the v3 static mock — the animated `/1` + finder `/`
     stay (owner decision).
@@ -312,6 +336,32 @@ convenient:
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
 ## Recent work (all pushed to `main`)
+
+**Onboarding rework + auth/legal + dashboard UX (2026-09-07 — commits `08b6af6`…`acdcc99`,
+pushed).**
+- **Onboarding** (`7093800`, `5a3bf15`, `4729801`): existing **Pro users skip the Free/Pro plan
+  step** (single-step, no indicator, green "Start watching" → dashboard); the **domain step is
+  gone** — the watchlist step now carries the **finder search bar** pre-seeded with the homepage
+  company (new `tw_pending_company` stash), a search **merges** results (dedup, keeps picks, free
+  cap), and the CTA only shows when the query changes; **"Add one yourself instead" is now a modal**
+  (`AddCompetitorDialog`, reuses the EditPageDialog chrome) — inline editable rows removed. See the
+  onboarding deviation for details.
+- **Auth Terms/Privacy** (`acdcc99`): a consent line — "By continuing, you agree to our Terms and
+  Privacy Policy" — on the login/signup card (both modes, Google + email), linking to `/terms` and
+  `/privacy` **in a new tab**. The legal pages (terms/privacy/refunds) swapped their "Back to home"
+  link for a **breadcrumb** (Home › Legal › page) + `BreadcrumbList` JSON-LD, matching tools/compare.
+  Privacy §6 (Cookies) tightened to cover cookies + local storage and state **no consent banner is
+  needed** (no analytics/trackers — verified none in the codebase; add a banner the day analytics is
+  introduced).
+- **Dashboard/competitors UX** (`08b6af6`, `9d50ca4`, `936021a`): digest copy now says
+  **"Mondays at 8am UTC"**; the dashboard broken-page **"Edit URL" opens the EditPageDialog modal
+  in place** (new `DashboardEditUrl`) and the Competitors kebab item + dialog title were renamed
+  **"Edit page" → "Edit URL"**; the seeded **demo dashboard** active rows got the lime chevron chip
+  and the example box got proper top spacing; the dashboard **"Last notable change" line is tagged
+  "Web archive"** when the pick is archive-reconstructed (matches Recent history).
+- Verified live in the sandbox throughout (Pro/Free onboarding, auth pages, demo dashboard);
+  typecheck/lint clean, 137 tests. No new migrations.
+
 
 **Baseline card reworked page-focused (2026-09-07 — commits `f39dab1`, `071af13`; pushed).**
 The Competitors "What we're now watching" card was showing a generic, company-level blurb that
