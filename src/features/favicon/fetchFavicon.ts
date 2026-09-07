@@ -145,20 +145,57 @@ function iconHrefsFromHtml(html: string, baseUrl: string): string[] {
  * homepage first, then the conventional /favicon.ico and /apple-touch-icon.png.
  * Returns null when nothing usable is found (caller serves 404 → initials).
  */
+// Conventional icon paths to try when a homepage declares none (or can't be
+// fetched) — covers common variants beyond the classic /favicon.ico.
+const CONVENTIONAL_PATHS = [
+  "/favicon.ico",
+  "/favicon.png",
+  "/favicon.svg",
+  "/apple-touch-icon.png",
+  "/apple-touch-icon-precomposed.png",
+  "/icon.svg",
+];
+
+// A generous but bounded cap on how many image URLs we probe, so a domain with
+// no icon can't blow past the route's maxDuration on many sequential 404s.
+const MAX_IMAGE_ATTEMPTS = 12;
+
 export async function fetchFavicon(domain: string): Promise<Favicon | null> {
   const parsed = validateUrlInput(domain);
   if (!parsed.ok) return null;
   const origin = `${parsed.url.protocol}//${parsed.url.host}`;
 
+  // Probe several origins: the given host, the post-redirect host (an apex that
+  // redirects to www should have its icon fetched from www), and the explicit
+  // www variant (some sites serve the icon only there).
+  const origins = new Set<string>([origin]);
+  const wwwHost = parsed.url.host.startsWith("www.") ? null : `www.${parsed.url.host}`;
+  if (wwwHost) origins.add(`${parsed.url.protocol}//${wwwHost}`);
+
+  // Homepage-declared icons first (best quality), from wherever the homepage
+  // actually resolves to after redirects.
   const candidates: string[] = [];
   const page = await safeFetch(origin);
-  if (page.ok) candidates.push(...iconHrefsFromHtml(page.html, page.finalUrl));
-  candidates.push(`${origin}/favicon.ico`, `${origin}/apple-touch-icon.png`);
+  if (page.ok) {
+    candidates.push(...iconHrefsFromHtml(page.html, page.finalUrl));
+    try {
+      origins.add(new URL(page.finalUrl).origin);
+    } catch {
+      /* keep the origins we have */
+    }
+  }
+
+  // Then the conventional paths on each origin.
+  for (const o of origins) {
+    for (const path of CONVENTIONAL_PATHS) candidates.push(`${o}${path}`);
+  }
 
   const seen = new Set<string>();
+  let attempts = 0;
   for (const url of candidates) {
     if (seen.has(url)) continue;
     seen.add(url);
+    if (attempts++ >= MAX_IMAGE_ATTEMPTS) break;
     const icon = await fetchImage(url);
     if (icon) return icon;
   }

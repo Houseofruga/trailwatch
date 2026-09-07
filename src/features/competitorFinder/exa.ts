@@ -20,16 +20,23 @@ function bareDomain(url: string | undefined): string {
 
 type ExaResult = { title?: string; url?: string; text?: string };
 
+// A real competitor candidate from live search — used both as model grounding
+// (the text block) and to correct the model's guessed homepage URLs in runFind.
+export type ExaCandidate = { title: string; domain: string };
+
+export type ExaContext = { text: string; candidates: ExaCandidate[] };
+
 /**
  * Ask Exa for current competitor candidates. Returns a compact text block for
- * the model to ground on, or null (no key, error, or no results) so the caller
- * degrades to the offline model.
+ * the model to ground on PLUS the structured domains (real, from live search),
+ * or null (no key, error, or no results) so the caller degrades to the offline
+ * model.
  */
 export async function fetchCompetitorContext(
   company: string,
   isUrl: boolean,
   apiKey: string,
-): Promise<string | null> {
+): Promise<ExaContext | null> {
   const query = isUrl
     ? `Direct competitors of and alternatives to the company at ${company}`
     : `Direct competitors of and alternatives to ${company}`;
@@ -53,20 +60,23 @@ export async function fetchCompetitorContext(
       : [];
     if (results.length === 0) return null;
 
+    const candidates: ExaCandidate[] = [];
     const lines = results
       .map((r) => {
         const domain = bareDomain(r.url);
         if (!domain) return null;
+        const title = (r.title ?? domain).trim();
+        candidates.push({ title, domain });
         const snippet = (r.text ?? "").replace(/\s+/g, " ").trim().slice(0, 160);
-        return `- ${(r.title ?? domain).trim()} (${domain})${snippet ? `: ${snippet}` : ""}`;
+        return `- ${title} (${domain})${snippet ? `: ${snippet}` : ""}`;
       })
       .filter((l): l is string => l !== null);
     if (lines.length === 0) return null;
 
-    return (
+    const text =
       "Live web search results — current candidate competitors (may include recent or niche companies; use these as your primary source):\n" +
-      lines.join("\n")
-    );
+      lines.join("\n");
+    return { text, candidates };
   } catch {
     return null;
   }
