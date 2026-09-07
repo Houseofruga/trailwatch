@@ -133,7 +133,7 @@ export function WelcomeOnboarding({
     }
     return (
       <div className={styles.wrap}>
-        <StepIndicator step={1} label="Build your watchlist" />
+        {plan === "free" ? <StepIndicator step={1} label="Build your watchlist" /> : null}
         <h1 className={styles.title}>What do you want to keep an eye on?</h1>
         <p className={styles.sub}>
           Tell us your website and we’ll suggest the competitors worth watching. You can
@@ -274,7 +274,7 @@ export function WelcomeOnboarding({
 
   return (
     <div className={styles.wrap}>
-      <StepIndicator step={1} label="Build your watchlist" />
+      {plan === "free" ? <StepIndicator step={1} label="Build your watchlist" /> : null}
       {cameFromDomain && (
         <button
           type="button"
@@ -428,10 +428,18 @@ export function WelcomeOnboarding({
         <Button
           type="button"
           variant={proIntent ? "primary" : "secondary"}
-          onClick={() => setStep("plan")}
+          // Existing Pro users have no plan to choose — seed their picks and go
+          // straight to the dashboard, skipping the Free/Pro step entirely.
+          onClick={() => (plan === "free" ? setStep("plan") : void start())}
           disabled={!canContinue || busy}
         >
-          {proIntent ? "Upgrade to Pro to continue" : "Continue"}
+          {plan !== "free"
+            ? busy
+              ? "Setting up…"
+              : "Start watching"
+            : proIntent
+              ? "Upgrade to Pro to continue"
+              : "Continue"}
         </Button>
       </div>
     </div>
