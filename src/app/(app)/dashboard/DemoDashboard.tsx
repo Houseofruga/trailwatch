@@ -102,6 +102,17 @@ export function DemoDashboard({ now }: { now: number }) {
                           </span>
                           <div className={styles.pageChangeMeta}>{timeAgo(change.detectedAt, now)}</div>
                         </div>
+                        <span className={styles.arrowBox} aria-hidden="true">
+                          <svg width="7" height="12" viewBox="0 0 7 12" fill="none">
+                            <path
+                              d="M1 1l4.5 5L1 11"
+                              stroke="currentColor"
+                              strokeWidth="1.7"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </span>
                       </Link>
                     );
                   }

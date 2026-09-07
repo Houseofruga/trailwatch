@@ -226,7 +226,7 @@ export function ManageBoard({
                             });
                           }}
                         >
-                          Edit page
+                          Edit URL
                         </button>
                         <button
                           type="button"

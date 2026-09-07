@@ -77,7 +77,7 @@ export function EditPageDialog({
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.title}>Edit page</div>
+        <div className={styles.title}>Edit URL</div>
 
         <label className={styles.label} htmlFor="edit-page-url">
           Page URL

@@ -519,6 +519,21 @@ a.pageRowQuietLink:hover {
   text-decoration: underline;
 }
 
+/* Button variant (opens the Edit URL modal in place) — same look as the link,
+   with the native button chrome reset. */
+.pageErrorFixBtn {
+  composes: pageErrorFix;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pageErrorFixBtn:hover {
+  text-decoration: underline;
+}
+
 .skelLine {
   height: 11px;
   background: linear-gradient(

@@ -8,6 +8,8 @@ import { getAccount } from "@/features/account/queries";
 import { getCompetitorsWithPages, type CompetitorRow } from "@/features/competitors/queries";
 import { getDemoFeed } from "@/features/demo/demoFeed";
 import { LIMITS } from "@/features/plan/limits";
+import { originOf } from "@/features/competitors/domain";
+import { DashboardEditUrl } from "./DashboardEditUrl";
 import { DemoDashboard } from "./DemoDashboard";
 import { PendingSeedRedirect } from "./PendingSeedRedirect";
 import { domainOf, formatFullDate, timeAgo, withinWeek } from "./dashboardFeed";
@@ -171,7 +173,7 @@ export default async function DashboardPage() {
 
       <div className={styles.metaRow}>
         <span>We capture each page the moment you add it, then check daily</span>
-        <span>Digests go out Mondays at 8am</span>
+        <span>Digests go out Mondays at 8am UTC</span>
       </div>
 
       {account.plan === "free" && (overComp || overPages) ? (
@@ -258,6 +260,7 @@ export default async function DashboardPage() {
                 // (a 4xx is almost always a wrong URL) with a link to fix it.
                 if (p.lastCheckStatus === "broken" || p.lastCheckStatus === "error") {
                   const broken = p.lastCheckStatus === "broken";
+                  const sibling = c.pages.find((other) => other.id !== p.id);
                   return (
                     <div key={p.id} className={styles.pageRowError}>
                       <div className={styles.pageMeta}>
@@ -269,9 +272,12 @@ export default async function DashboardPage() {
                           {p.lastCheckError ??
                             (broken ? "This page couldn’t be reached." : "The last check didn’t complete.")}
                         </span>
-                        <Link href={`/competitors/${c.id}/edit`} className={styles.pageErrorFix}>
-                          Edit URL
-                        </Link>
+                        <DashboardEditUrl
+                          pageId={p.id}
+                          url={p.url}
+                          label={p.label}
+                          siblingDomain={sibling ? originOf(sibling.url) : null}
+                        />
                       </div>
                     </div>
                   );
