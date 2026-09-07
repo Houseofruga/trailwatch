@@ -33,12 +33,19 @@ function activeChange(page: Page, now: number): Change | null {
 
 // For a quiet page, the most notable change to link to: the newest meaningful
 // change of any age (necessarily older than this week here) or the archive
-// backfill — whichever is more recent. The dashboard only ever links to it.
-function lastNotable(page: Page): Change | null {
+// backfill — whichever is more recent. Also reports whether the pick is an
+// archive-reconstructed change so the card can badge it "Web archive".
+function lastNotable(page: Page): { change: Change; isArchive: boolean } | null {
   const live = page.changes.find((c) => c.isMeaningful) ?? null;
   const arch = page.lastArchived;
-  if (live && arch) return live.detectedAt >= arch.detectedAt ? live : arch;
-  return live ?? arch;
+  if (live && arch) {
+    return live.detectedAt >= arch.detectedAt
+      ? { change: live, isArchive: false }
+      : { change: arch, isArchive: true };
+  }
+  if (live) return { change: live, isArchive: false };
+  if (arch) return { change: arch, isArchive: true };
+  return null;
 }
 
 export default async function DashboardPage() {
@@ -290,17 +297,18 @@ export default async function DashboardPage() {
                 const notable = lastNotable(p);
                 if (notable) {
                   return (
-                    <Link key={p.id} href={`/changes/${notable.id}`} className={styles.pageRowQuietLink}>
+                    <Link key={p.id} href={`/changes/${notable.change.id}`} className={styles.pageRowQuietLink}>
                       <div className={styles.pageMeta}>
                         <div className={styles.pageLabel}>{p.label}</div>
                         <div className={styles.pageQuietSub}>Quiet</div>
                       </div>
                       <div className={styles.pageValue}>
-                        {notable.summary ? (
-                          <span className={styles.quietSummary}>{notable.summary}</span>
+                        {notable.change.summary ? (
+                          <span className={styles.quietSummary}>{notable.change.summary}</span>
                         ) : null}
                         <div className={styles.quietNotableMeta}>
-                          Last notable change · {formatFullDate(notable.detectedAt)} ({timeAgo(notable.detectedAt, now)})
+                          Last notable change · {formatFullDate(notable.change.detectedAt)} ({timeAgo(notable.change.detectedAt, now)})
+                          {notable.isArchive ? <span className={styles.quietArchiveTag}>Web archive</span> : null}
                         </div>
                       </div>
                       <span className={styles.arrowBox} aria-hidden="true">

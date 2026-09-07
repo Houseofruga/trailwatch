@@ -480,6 +480,21 @@ a.pageRowQuietLink:hover {
   margin-top: 5px;
 }
 
+/* "Web archive" tag when the last notable change is archive-reconstructed (not
+   live-detected) — matches the tag inside the Competitors "Recent history". */
+.quietArchiveTag {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8a6d2b;
+  background: #f6efdd;
+  border: 1px solid #e7d9b8;
+  padding: 1px 6px;
+  vertical-align: middle;
+}
+
 /* ---- Broken / unreachable page row (can't reach / 404) ---- */
 .pageRowError {
   composes: pageRow;
