@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-08 (fixed a robots.txt parser bug that silently blocked every check on sites using Cloudflare's default managed robots.txt — see Recent work; shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
+_Last updated: 2026-09-08 (page-architecture re-think is in the DESIGN stage — dashboard by page-type, competitors index + a new competitors/[id] detail route — see Suggested next steps; no code yet, will land on a new branch. Also fixed a robots.txt parser bug that silently blocked every check on sites using Cloudflare's default managed robots.txt — see Recent work; shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
 
 ## Product in one line
 
@@ -808,6 +808,24 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
   simplest approach, stay in scope (`SPEC.md` §6 is off-limits).
 
 ## Suggested next steps for whoever picks this up
+
+**IN FLIGHT — page-architecture re-think (design stage, NOT yet built).** The owner is
+re-organizing three authed screens and has taken a design brief to Claude Design; **no code
+exists yet** and it will land on a **new branch**, not `main`. Heads-up so you don't start
+conflicting work on `dashboard/` or `competitors/`. The locked shape:
+- **Dashboard** regroups from one-card-per-competitor to **one card per page-type** (a new fixed
+  `page_type`: homepage/pricing/product/blog/changelog/other, picked at add-time — replaces the
+  free-text `label` as the grouping key). Card metric = **"N this week · M since watching"** (the
+  all-time count is a new query — today only the trailing week is computed).
+- **Competitors** becomes a competitor **index** (avatar, domain, "Checked Nm ago", "Tracking X of
+  N pages", changes this week + all-time), each card tapping through to a **new `competitors/[id]`
+  detail route** that hosts the current per-page block (lift the inline ⋮ menu + `PageIntel` +
+  badges out of `ManageBoard`).
+- Unchanged: dialogs/popups, the change-detail modal, left nav, settings.
+- **Open question for build:** the competitor-detail "summary line" has no obvious source — decide
+  between latest change `summary`, homepage `page_insights.profile.summary`, or a new synthesized line.
+- The full design brief is in the plan file `~/.claude/plans/well-just-one-more-merry-duckling.md`
+  (local, not in the repo).
 
 **OPEN DECISION — dashboard multi-change row cap (owner).** The multi-change expandable row is
 shipped (see Deviations), but its design file (`dashboard multi-change/Dashboard Multi-Change Row.dc.html`)
