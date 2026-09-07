@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { BackLink } from "@/components/BackLink";
+import Link from "next/link";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbJsonLd } from "@/components/breadcrumbJsonLd";
 import styles from "../legal.module.css";
 
 export const metadata: Metadata = {
@@ -14,7 +16,23 @@ const CONTACT = "trailwatch@houseofruga.com";
 export default function TermsPage() {
   return (
     <>
-      <BackLink href="/">Back to home</BackLink>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Terms of Service", path: "/terms" },
+        ])}
+      />
+      <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+        <Link href="/">Home</Link>
+        <span className={styles.sep} aria-hidden="true">
+          ›
+        </span>
+        <span>Legal</span>
+        <span className={styles.sep} aria-hidden="true">
+          ›
+        </span>
+        <span className={styles.current}>Terms of Service</span>
+      </nav>
 
       <h1 className={styles.title}>Terms of Service</h1>
       <p className={styles.updated}>Last updated: August 26, 2026</p>

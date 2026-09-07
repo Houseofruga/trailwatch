@@ -120,3 +120,30 @@
     font-size: 28px;
   }
 }
+
+/* Breadcrumb (matches the tools/compare pages). */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 24px;
+  font-size: 13px;
+  color: var(--ink-4);
+}
+
+.breadcrumb a {
+  color: var(--ink-4);
+}
+
+.breadcrumb a:hover {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.sep {
+  color: var(--ink-hint);
+}
+
+.current {
+  color: var(--ink-2);
+}

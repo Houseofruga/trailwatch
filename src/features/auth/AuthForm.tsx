@@ -159,6 +159,18 @@ export function AuthForm({ initialMode }: { initialMode: Mode }) {
 
           <SubmitButton label={copy.cta} />
         </form>
+
+        <p className={styles.legal}>
+          By continuing, you agree to our{" "}
+          <Link href="/terms" target="_blank" rel="noopener noreferrer" className={styles.legalLink}>
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" target="_blank" rel="noopener noreferrer" className={styles.legalLink}>
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </div>
 
       <div className={styles.switch}>

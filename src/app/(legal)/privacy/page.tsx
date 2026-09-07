@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { BackLink } from "@/components/BackLink";
+import Link from "next/link";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbJsonLd } from "@/components/breadcrumbJsonLd";
 import styles from "../legal.module.css";
 
 export const metadata: Metadata = {
@@ -14,7 +16,23 @@ const CONTACT = "trailwatch@houseofruga.com";
 export default function PrivacyPage() {
   return (
     <>
-      <BackLink href="/">Back to home</BackLink>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Home", path: "/" },
+          { name: "Privacy Policy", path: "/privacy" },
+        ])}
+      />
+      <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+        <Link href="/">Home</Link>
+        <span className={styles.sep} aria-hidden="true">
+          ›
+        </span>
+        <span>Legal</span>
+        <span className={styles.sep} aria-hidden="true">
+          ›
+        </span>
+        <span className={styles.current}>Privacy Policy</span>
+      </nav>
 
       <h1 className={styles.title}>Privacy Policy</h1>
       <p className={styles.updated}>Last updated: August 26, 2026</p>
@@ -132,10 +150,12 @@ export default function PrivacyPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>6. Cookies</h2>
         <p className={styles.para}>
-          We use only the cookies needed to keep you signed in and to operate the service
-          securely. We do not use third-party advertising or cross-site tracking cookies.
-          Our payment provider may set its own cookies during checkout, governed by its
-          privacy policy.
+          We use only essential cookies and similar local storage — to keep you signed in,
+          to remember the competitors you pick during setup, and to operate the service
+          securely. We do not use analytics, third-party advertising, or cross-site
+          tracking cookies, so we do not need a cookie-consent banner. Our payment provider
+          (Paddle) may set its own cookies during checkout, governed by its own privacy
+          policy.
         </p>
       </section>
 

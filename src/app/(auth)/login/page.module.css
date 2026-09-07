@@ -133,6 +133,24 @@
   line-height: 1.5;
 }
 
+/* Consent line at the bottom of the card — covers Google + email, both modes. */
+.legal {
+  margin: 16px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-faint);
+  text-align: center;
+}
+
+.legalLink {
+  color: var(--ink-3);
+  text-decoration: underline;
+}
+
+.legalLink:hover {
+  color: var(--ink);
+}
+
 .switch {
   text-align: center;
   margin-top: 18px;
