@@ -73,7 +73,18 @@ export function PageIntel({ pageId }: { pageId: string }) {
     );
   }
 
-  // No provider / not owned / error — stay out of the way.
+  // Captured, but the AI couldn't profile this page (declined, thin content, or a
+  // transient error). Say so quietly instead of vanishing — a future edit or the
+  // daily sweep will retry — so the row doesn't look broken after a URL change.
+  if (insight.status === "unavailable") {
+    return (
+      <div className={styles.intel}>
+        <div className={styles.capturing}>We couldn&rsquo;t profile this page yet — we&rsquo;ll try again.</div>
+      </div>
+    );
+  }
+
+  // Not owned / missing — stay out of the way.
   if (insight.status !== "ready") return null;
 
   const profile = insight.profile;

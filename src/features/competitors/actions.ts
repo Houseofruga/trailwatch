@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { LIMITS, type Plan } from "@/features/plan/limits";
 import { resolvePlan } from "@/features/plan/comp";
 import { runCheckForPage } from "@/features/checks/runCheck";
@@ -317,7 +318,7 @@ export async function updatePage(
 
   const { data: page } = await supabase
     .from("pages")
-    .select("id, competitor_id")
+    .select("id, competitor_id, url")
     .eq("id", pageId)
     .single();
   if (!page) return { error: "That page no longer exists." };
@@ -337,11 +338,45 @@ export async function updatePage(
     };
   }
 
+  const urlChanged = page.url !== rowResult.data.url;
+
   const { error } = await supabase
     .from("pages")
     .update({ url: rowResult.data.url, label: rowResult.data.label })
     .eq("id", pageId);
   if (error) return { error: "Couldn't save that page. Try again." };
+
+  // Changing the URL points the page at different content, so everything tied to
+  // the old URL is now stale — the baseline snapshot, its change history, the
+  // cached "what we're now watching" profile, and (crucially) the last check
+  // status/error that would otherwise keep showing a "can't reach" the user just
+  // fixed. Reset it all and re-capture the new URL as a clean first-check, so the
+  // row reflects reality immediately instead of at the next daily cron. A
+  // label-only edit leaves all of that untouched.
+  if (urlChanged) {
+    const service = createServiceClient();
+    // Delete history first; snapshots' FK is `on delete set null`, which also
+    // clears pages.latest_snapshot_id when they go.
+    await service.from("changes").delete().eq("page_id", pageId);
+    await service.from("snapshots").delete().eq("page_id", pageId);
+    await service.from("page_insights").delete().eq("page_id", pageId);
+    await service
+      .from("pages")
+      .update({
+        latest_snapshot_id: null,
+        last_check_status: null,
+        last_check_error: null,
+        last_checked_at: null,
+        backfilled_at: null,
+      })
+      .eq("id", pageId);
+
+    // With no prior snapshot, this is a clean baseline (no spurious change) and
+    // stamps a real status — 'ok', or 'broken' if the NEW url is also bad.
+    await captureBaselines([{ id: pageId, label: rowResult.data.label }]);
+    // Rebuild the profile + Wayback history for the new URL post-response.
+    warmPages([pageId]);
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/competitors");
