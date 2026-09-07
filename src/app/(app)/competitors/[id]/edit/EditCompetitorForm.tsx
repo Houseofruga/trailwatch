@@ -126,7 +126,7 @@ export function EditCompetitorForm({
 
   return (
     <div className={styles.wrap}>
-      <BackLink href="/competitors">Competitors</BackLink>
+      <BackLink href="/competitors" />
       <h1 className={styles.title}>Edit {competitor.name}</h1>
 
       <form action={formAction}>

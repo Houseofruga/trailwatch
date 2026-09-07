@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BackLink } from "@/components/BackLink";
 import { CompetitorAvatar } from "@/components/CompetitorAvatar";
@@ -21,7 +20,7 @@ export default async function ChangeDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className={styles.wrap}>
-      <BackLink href="/dashboard">This week</BackLink>
+      <BackLink href="/dashboard" />
 
       <div className={styles.crumb}>
         <CompetitorAvatar url={detail.url} name={detail.competitorName} className={styles.crumbAvatar} />
@@ -73,9 +72,6 @@ export default async function ChangeDetailPage({ params }: { params: Promise<{ i
       </div>
 
       <div className={styles.foot}>
-        <Link href="/dashboard" className={styles.footBack}>
-          Back to this week
-        </Link>
         <a href={detail.url} target="_blank" rel="noopener noreferrer" className={styles.footOpen}>
           Open {detail.domain} ↗
         </a>

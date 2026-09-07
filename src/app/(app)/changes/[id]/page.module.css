@@ -129,14 +129,6 @@
   align-items: center;
   gap: 16px;
 }
-.footBack {
-  font-size: 13.5px;
-  color: var(--ink-3);
-  text-decoration: none;
-}
-.footBack:hover {
-  color: var(--accent-ink);
-}
 .footOpen {
   font-size: 13.5px;
   color: var(--accent-ink);

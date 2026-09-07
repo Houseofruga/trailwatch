@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import Link from "next/link";
+import { BackLink } from "@/components/BackLink";
 import { Button } from "@/components/Button";
 import { requestPasswordReset, type ForgotState } from "./actions";
 import styles from "@/app/(auth)/login/page.module.css";
@@ -30,9 +30,7 @@ export function ForgotPasswordForm() {
           </p>
         </div>
         <div className={styles.switch}>
-          <Link href="/login" className={styles.switchCta}>
-            Back to log in
-          </Link>
+          <BackLink href="/login" mode="link" />
         </div>
       </>
     );
@@ -65,9 +63,7 @@ export function ForgotPasswordForm() {
       </div>
 
       <div className={styles.switch}>
-        <Link href="/login" className={styles.switchCta}>
-          Back to log in
-        </Link>
+        <BackLink href="/login" mode="link" />
       </div>
     </>
   );

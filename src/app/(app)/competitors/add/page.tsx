@@ -41,7 +41,7 @@ export default async function AddCompetitorPage({
 
     return (
       <div className={styles.wrap}>
-        <BackLink href="/competitors">Competitors</BackLink>
+        <BackLink href="/competitors" />
 
         <BlockedUpsell
           title={`${competitor.name} is at its page limit`}
@@ -62,7 +62,7 @@ export default async function AddCompetitorPage({
 
   return (
     <div className={styles.wrap}>
-      <BackLink href="/dashboard">Dashboard</BackLink>
+      <BackLink href="/dashboard" />
 
       {blocked ? (
         <BlockedUpsell
