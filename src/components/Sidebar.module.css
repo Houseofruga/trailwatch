@@ -121,8 +121,8 @@
 
 .badge {
   font-size: 11.5px;
-  color: var(--accent-ink);
-  background: var(--surface);
+  color: var(--surface);
+  background: var(--ink);
   padding: 2px 7px;
   font-variant-numeric: tabular-nums;
 }
