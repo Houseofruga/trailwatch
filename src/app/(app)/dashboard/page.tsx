@@ -142,6 +142,8 @@ export default async function DashboardPage() {
         </ButtonLink>
       </div>
 
+      <p className={styles.digestLine}>You&rsquo;ll get a digest email every Monday at 8:00 UTC.</p>
+
       <div className={styles.stats}>
         <div className={styles.stat}>
           <div className={styles.statLabelRow}>
@@ -171,11 +173,6 @@ export default async function DashboardPage() {
           </div>
           <div className={styles.statValue}>{trivialFiltered}</div>
         </div>
-      </div>
-
-      <div className={styles.metaRow}>
-        <span>We capture each page the moment you add it, then check daily</span>
-        <span>Digests go out Mondays at 8am UTC</span>
       </div>
 
       {account.plan === "free" && (overComp || overPages) ? (
