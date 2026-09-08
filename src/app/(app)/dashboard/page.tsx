@@ -14,12 +14,6 @@ import { PendingSeedRedirect } from "./PendingSeedRedirect";
 import { activeChanges, withinWeek } from "./dashboardFeed";
 import styles from "./page.module.css";
 
-const SUGGESTIONS = [
-  { n: "01", text: "Their pricing page — the change that matters most" },
-  { n: "02", text: "Their changelog — what they’re shipping" },
-  { n: "03", text: "Their homepage — how the positioning moves" },
-];
-
 // How many meaningful changes this week sit in a type group — used to float the
 // most active cards to the top.
 function weekCountOf(rows: TypeCardRow[], now: number): number {
@@ -51,29 +45,24 @@ export default async function DashboardPage() {
     return (
       <div className={styles.empty}>
         <PendingSeedRedirect />
-        <div className={styles.mark}>
-          <div className={styles.markDot} />
-        </div>
+        <div className={styles.emptyCard}>
+          <svg className={styles.emptyIcon} width="64" height="64" viewBox="0 0 72 72" fill="none" aria-hidden="true">
+            <rect x="14" y="10" width="34" height="44" stroke="#c9c4ba" strokeWidth="1.5" />
+            <line x1="20" y1="20" x2="38" y2="20" stroke="#e0dcd3" strokeWidth="1.5" />
+            <line x1="20" y1="27" x2="42" y2="27" stroke="#e0dcd3" strokeWidth="1.5" />
+            <line x1="20" y1="34" x2="34" y2="34" stroke="#e0dcd3" strokeWidth="1.5" />
+            <circle cx="44" cy="44" r="13" fill="#f6fbea" stroke="#8ad800" strokeWidth="1.5" />
+            <line x1="53" y1="53" x2="62" y2="62" stroke="#557a00" strokeWidth="2" strokeLinecap="round" />
+          </svg>
 
-        <h1 className={styles.title}>Nothing on the radar yet</h1>
-        <p className={styles.body}>
-          Add a competitor and the pages you care about. Cards appear here grouped by page type.
-        </p>
+          <h1 className={styles.title}>Nothing on the radar yet</h1>
+          <p className={styles.body}>
+            Add a competitor and the pages you care about. Cards appear here grouped by page type.
+          </p>
 
-        <ButtonLink href="/competitors/add" className={styles.cta}>
-          Add your first competitor
-        </ButtonLink>
-
-        <div className={styles.suggestions}>
-          <div className={styles.suggestionsLabel}>Most people start with</div>
-          <div className={styles.suggestionList}>
-            {SUGGESTIONS.map((s) => (
-              <div key={s.n} className={styles.suggestion}>
-                <span className={styles.suggestionNum}>{s.n}</span>
-                <span>{s.text}</span>
-              </div>
-            ))}
-          </div>
+          <ButtonLink href="/competitors/add" className={styles.cta}>
+            Add your first competitor
+          </ButtonLink>
         </div>
 
         <Suspense fallback={null}>
@@ -102,6 +91,7 @@ export default async function DashboardPage() {
       const sibling = c.pages.find((other) => other.id !== p.id);
       return {
         page: p,
+        competitorId: c.id,
         competitorName: c.name,
         competitorUrl: c.pages[0]?.url ?? p.url,
         siblingDomain: sibling ? originOf(sibling.url) : null,

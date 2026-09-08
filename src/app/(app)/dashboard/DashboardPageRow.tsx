@@ -7,7 +7,6 @@ import { PageActionsMenu } from "@/components/PageActionsMenu";
 import { ExternalLinkIcon } from "@/components/icons";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { DashboardEditUrl } from "./DashboardEditUrl";
-import { DashboardRecentHistory } from "./DashboardRecentHistory";
 import { activeChanges, formatFullDate, timeAgo } from "./dashboardFeed";
 import styles from "./page.module.css";
 
@@ -16,7 +15,16 @@ type Change = Page["changes"][number];
 
 const FALLBACK = "Meaningful change detected (summary unavailable).";
 
-function Chevron({ up }: { up?: boolean }) {
+// The small "›" chevron between the competitor name and its URL.
+function NameChevron() {
+  return (
+    <svg width="6" height="9" viewBox="0 0 6 9" fill="none" aria-hidden="true" className={styles.dashSep}>
+      <path d="M1 1l3.5 3.5L1 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ExpChevron({ up }: { up?: boolean }) {
   return (
     <svg width="9" height="6" viewBox="0 0 9 6" fill="none" aria-hidden="true" style={{ transform: up ? "rotate(180deg)" : undefined }}>
       <path d="M1 1l3.5 3.5L8 1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
@@ -24,16 +32,19 @@ function Chevron({ up }: { up?: boolean }) {
   );
 }
 
-function ViewChange({ id }: { id: string }) {
+// "See what changed before this week → Recent history" — links to the competitor
+// detail page, where the full reconstructed history lives.
+function RecentHistoryLink({ competitorId }: { competitorId: string }) {
   return (
-    <Link href={`/changes/${id}`} className={styles.viewChangeInline}>
-      View change ›
-    </Link>
+    <div className={styles.recentLine}>
+      See what changed before this week <span className={styles.recentArrow}>→</span>{" "}
+      <Link href={`/competitors/${competitorId}`} className={styles.recentLabel}>
+        Recent history
+      </Link>
+    </div>
   );
 }
 
-// The most notable change to surface on a quiet page: newest meaningful (any age)
-// or the archive backfill, whichever is more recent.
 function lastNotable(page: Page): { change: Change; isArchive: boolean } | null {
   const live = page.changes.find((c) => c.isMeaningful) ?? null;
   const arch = page.lastArchived;
@@ -48,19 +59,21 @@ function lastNotable(page: Page): { change: Change; isArchive: boolean } | null 
 }
 
 /**
- * One competitor's page inside a page-type card. Renders all row states from the
- * IA design: active (live change this week, with a "N more this week" expander +
- * nested Recent history), quiet-with-notable (incl. a "From web archive" variant),
+ * One competitor's page inside a page-type card. Covers every row state from the
+ * IA design: active (with a "N more this week" expander + a Recent-history link),
+ * quiet-with-notable (incl. a "From web archive" variant), no-history quiet,
  * paused (muted, inline), and broken ("Can't reach" + Edit URL).
  */
 export function DashboardPageRow({
   page,
+  competitorId,
   competitorName,
   competitorUrl,
   siblingDomain,
   now,
 }: {
   page: Page;
+  competitorId: string;
   competitorName: string;
   competitorUrl: string;
   siblingDomain: string | null;
@@ -77,10 +90,10 @@ export function DashboardPageRow({
   const identity = (
     <div className={styles.dashIdentity}>
       <CompetitorAvatar url={competitorUrl} name={competitorName} className={styles.compAvatar} />
-      <span className={styles.dashCompName}>{competitorName}</span>
-      <span className={styles.dashSep} aria-hidden="true">
-        ›
-      </span>
+      <Link href={`/competitors/${competitorId}`} className={styles.dashNameLink}>
+        <span className={styles.dashCompName}>{competitorName}</span>
+        <NameChevron />
+      </Link>
       <a href={page.url} target="_blank" rel="noreferrer" className={styles.dashUrl}>
         <span className={styles.dashUrlText}>{page.url.replace(/^https?:\/\//, "")}</span>
         {!paused ? (
@@ -122,7 +135,7 @@ export function DashboardPageRow({
   // --- Broken: identity + "Can't reach", then the error line + Edit URL. ---
   if (broken) {
     return (
-      <div className={`${styles.dashRow} ${styles.dashRowBroken}`}>
+      <div className={`${styles.dashRow} ${styles.dashRowQuiet}`}>
         <div className={styles.dashHead}>
           {identity}
           <div className={styles.dashStatus}>
@@ -152,7 +165,7 @@ export function DashboardPageRow({
   );
 
   return (
-    <div className={`${styles.dashRow} ${notable?.isArchive ? styles.dashRowArchive : ""}`}>
+    <div className={`${styles.dashRow} ${active.length === 0 ? styles.dashRowQuiet : ""}`}>
       <div className={styles.dashHead}>
         {identity}
         <div className={styles.dashStatus}>
@@ -162,67 +175,74 @@ export function DashboardPageRow({
       </div>
 
       <div className={styles.dashBody}>
-      {active.length > 0 ? (
-        <>
-          <p className={styles.dashSummary}>
-            {newest.summary ?? FALLBACK} <ViewChange id={newest.id} />
-          </p>
-          <div className={styles.dashTime}>{timeAgo(newest.detectedAt, now)}</div>
+        {active.length > 0 ? (
+          <>
+            <p className={styles.dashSummary}>
+              {newest.summary ?? FALLBACK}{" "}
+              <Link href={`/changes/${newest.id}`} className={styles.viewChangeInline}>
+                View change ›
+              </Link>
+            </p>
+            <div className={styles.dashTime}>{timeAgo(newest.detectedAt, now)}</div>
 
-          {rest.length > 0 ? (
-            <button
-              type="button"
-              className={`${styles.morePill} ${expanded ? styles.morePillOpen : ""}`}
-              aria-expanded={expanded}
-              onClick={() => setExpanded((v) => !v)}
-            >
-              <span>{expanded ? "Show less" : `${rest.length} more this week`}</span>
-              <Chevron up={expanded} />
-            </button>
-          ) : null}
+            {rest.length > 0 ? (
+              <button
+                type="button"
+                className={`${styles.morePill} ${expanded ? styles.morePillOpen : ""}`}
+                aria-expanded={expanded}
+                onClick={() => setExpanded((v) => !v)}
+              >
+                <span>{expanded ? "Show less" : `${rest.length} more this week`}</span>
+                <ExpChevron up={expanded} />
+              </button>
+            ) : null}
 
-          {rest.length > 0 && expanded ? (
-            <>
+            {rest.length > 0 && expanded ? (
               <div className={styles.subList}>
                 {rest.map((c) => (
                   <div key={c.id} className={styles.subChange}>
                     <p className={styles.subChangeSummary}>
-                      {c.summary ?? FALLBACK} <ViewChange id={c.id} />
+                      {c.summary ?? FALLBACK}{" "}
+                      <Link href={`/changes/${c.id}`} className={styles.viewChangeInline}>
+                        View change
+                      </Link>
                     </p>
                     <div className={styles.subChangeWhen}>{timeAgo(c.detectedAt, now)}</div>
                   </div>
                 ))}
+                <RecentHistoryLink competitorId={competitorId} />
               </div>
-              <DashboardRecentHistory pageId={page.id} />
-            </>
-          ) : null}
-        </>
-      ) : notable ? (
-        <>
-          {notable.isArchive ? (
-            <div className={styles.archiveTagRow}>
-              <span className={styles.archiveTag}>From web archive</span>
+            ) : null}
+          </>
+        ) : notable ? (
+          <>
+            {notable.isArchive ? (
+              <div className={styles.archiveTagRow}>
+                <span className={styles.archiveTag}>From web archive</span>
+              </div>
+            ) : null}
+            <p className={styles.dashSummaryQuiet}>
+              {notable.change.summary ?? FALLBACK}{" "}
+              <Link href={`/changes/${notable.change.id}`} className={styles.viewChangeInline}>
+                View change ›
+              </Link>
+            </p>
+            <div className={styles.dashTime}>
+              Last notable change · {formatFullDate(notable.change.detectedAt)} ({timeAgo(notable.change.detectedAt, now)})
             </div>
-          ) : null}
-          <p className={styles.dashSummaryQuiet}>
-            {notable.change.summary ?? FALLBACK} <ViewChange id={notable.change.id} />
-          </p>
-          <div className={styles.dashTime}>
-            Last notable change · {formatFullDate(notable.change.detectedAt)} ({timeAgo(notable.change.detectedAt, now)})
-          </div>
-          {notable.isArchive ? (
-            <div className={styles.archiveNote}>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" className={styles.archiveNoteIcon}>
-                <circle cx="6" cy="6" r="4.6" stroke="currentColor" strokeWidth="1.1" />
-                <path d="M4 6h4M6 4v4" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
-              </svg>
-              No weekly change count — this page is sourced via Web Archive.
-            </div>
-          ) : null}
-        </>
-      ) : (
-        <div className={styles.dashQuiet}>No changes yet since we started watching.</div>
-      )}
+            {notable.isArchive ? (
+              <div className={styles.archiveNote}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" className={styles.archiveNoteIcon}>
+                  <circle cx="6" cy="6" r="4.6" stroke="currentColor" strokeWidth="1.1" />
+                  <path d="M4 6h4M6 4v4" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+                </svg>
+                No weekly change count — this page is sourced via Web Archive.
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <div className={styles.dashQuiet}>No changes yet since we started watching.</div>
+        )}
       </div>
     </div>
   );
