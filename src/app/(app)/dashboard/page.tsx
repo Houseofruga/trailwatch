@@ -9,7 +9,6 @@ import { LIMITS } from "@/features/plan/limits";
 import { PAGE_TYPE_VALUES } from "@/features/competitors/pageTypes";
 import { originOf } from "@/features/competitors/domain";
 import { DashboardTypeCard, type TypeCardRow } from "./DashboardTypeCard";
-import { DashboardQuietCard } from "./DashboardQuietCard";
 import { DemoDashboard } from "./DemoDashboard";
 import { PendingSeedRedirect } from "./PendingSeedRedirect";
 import { activeChanges, withinWeek } from "./dashboardFeed";
@@ -185,13 +184,9 @@ export default async function DashboardPage() {
       ) : null}
 
       <div className={styles.compList}>
-        {groups.map((g) =>
-          quiet ? (
-            <DashboardQuietCard key={g.type} pageType={g.type} rows={g.rows} now={now} />
-          ) : (
-            <DashboardTypeCard key={g.type} pageType={g.type} rows={g.rows} now={now} />
-          ),
-        )}
+        {groups.map((g) => (
+          <DashboardTypeCard key={g.type} pageType={g.type} rows={g.rows} now={now} />
+        ))}
       </div>
 
       <Suspense fallback={null}>
