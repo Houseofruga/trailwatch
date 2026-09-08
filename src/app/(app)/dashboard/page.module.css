@@ -131,7 +131,7 @@
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 14px;
   margin: 24px 0 30px 0;
 }
@@ -168,6 +168,12 @@
   composes: statIcon;
   background: var(--amber-wash);
   color: var(--amber-ink);
+}
+
+.statIconInk {
+  composes: statIcon;
+  background: var(--surface-sunken);
+  color: var(--ink-3);
 }
 
 .statLabelRow {
@@ -797,6 +803,190 @@ a.pageRowQuietLink:hover {
   margin: 0;
 }
 
+/* ---------------------------------------- page-type card (inverted dashboard) */
+/* One card per page type, holding every competitor's page of that type. Reuses
+   the card frame (.compCard) look; the header shows the type + the metric. */
+.typeCard {
+  composes: compCard;
+}
+
+.typeHead {
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.typeHeadLeft {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.typeSquare {
+  width: 11px;
+  height: 11px;
+  background: var(--accent);
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+.typeName {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.typeCount {
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+.typeMetric {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- one competitor's page inside a type card ---- */
+.dashRow {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-softer);
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.dashRow:last-child {
+  border-bottom: none;
+}
+
+.dashHead {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.dashIdentity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.dashCompName {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+}
+
+.dashUrl {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  color: var(--ink-4);
+  text-decoration: none;
+}
+.dashUrl:hover {
+  color: var(--link);
+}
+.dashUrlText {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dashUrlIcon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  opacity: 0.7;
+}
+
+.dashStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.stBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.stBadgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-hover);
+  flex: 0 0 auto;
+}
+.stBadgePaused {
+  font-size: 11.5px;
+  color: var(--ink-4);
+  border: 1px solid var(--border);
+  padding: 2px 9px;
+}
+.stBadgeError {
+  font-size: 11.5px;
+  color: var(--amber-ink);
+  border: 1px solid var(--warn-border);
+  padding: 2px 9px;
+  white-space: nowrap;
+}
+
+/* Body: the change text on the left, a "View change" button on the right. */
+.dashBody {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+.dashBodyText {
+  flex: 1;
+  min-width: 0;
+}
+
+.viewChangeBtn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12.5px;
+  color: var(--ink-2);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.viewChangeBtn:hover {
+  border-color: var(--accent-hover);
+  color: var(--accent-ink);
+}
+
+.dashQuiet {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.dashBroken {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 /* ------------------------------------------------------------------ mobile */
 @media (max-width: 640px) {
   .wrap,
@@ -859,5 +1049,29 @@ a.pageRowQuietLink:hover {
   }
   .subWhen {
     font-size: 11px;
+  }
+
+  /* Type-card rows: header wraps, the View-change button drops below the text. */
+  .typeHead {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .dashRow {
+    padding: 15px 16px;
+  }
+  .dashHead {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .dashStatus {
+    margin-left: 0;
+  }
+  .dashBody {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .viewChangeBtn {
+    align-self: flex-start;
   }
 }

@@ -1,19 +1,17 @@
 import { Suspense } from "react";
-import Link from "next/link";
 import { ButtonLink } from "@/components/Button";
-import { CompetitorAvatar } from "@/components/CompetitorAvatar";
 import { PlusIcon } from "@/components/icons";
 import { FlashToast } from "@/components/FlashToast";
 import { getAccount } from "@/features/account/queries";
-import { getCompetitorsWithPages, type CompetitorRow } from "@/features/competitors/queries";
+import { getCompetitorsWithPages } from "@/features/competitors/queries";
 import { getDemoFeed } from "@/features/demo/demoFeed";
 import { LIMITS } from "@/features/plan/limits";
+import { PAGE_TYPE_VALUES } from "@/features/competitors/pageTypes";
 import { originOf } from "@/features/competitors/domain";
-import { DashboardActiveRow } from "./DashboardActiveRow";
-import { DashboardEditUrl } from "./DashboardEditUrl";
+import { DashboardTypeCard, type TypeCardRow } from "./DashboardTypeCard";
 import { DemoDashboard } from "./DemoDashboard";
 import { PendingSeedRedirect } from "./PendingSeedRedirect";
-import { activeChanges, domainOf, formatFullDate, timeAgo, withinWeek } from "./dashboardFeed";
+import { activeChanges, withinWeek } from "./dashboardFeed";
 import styles from "./page.module.css";
 
 const SUGGESTIONS = [
@@ -22,31 +20,10 @@ const SUGGESTIONS = [
   { n: "03", text: "Their homepage — how the positioning moves" },
 ];
 
-type Page = CompetitorRow["pages"][number];
-type Change = Page["changes"][number];
-
-// The most recent meaningful change from this week — the page is "active" and
-// keeps its change link. `withinWeek` decides active vs quiet, per the adaptive
-// design (value-forward when quiet, feed-forward when active).
-function activeChange(page: Page, now: number): Change | null {
-  return page.changes.find((c) => c.isMeaningful && withinWeek(c.detectedAt, now)) ?? null;
-}
-
-// For a quiet page, the most notable change to link to: the newest meaningful
-// change of any age (necessarily older than this week here) or the archive
-// backfill — whichever is more recent. Also reports whether the pick is an
-// archive-reconstructed change so the card can badge it "Web archive".
-function lastNotable(page: Page): { change: Change; isArchive: boolean } | null {
-  const live = page.changes.find((c) => c.isMeaningful) ?? null;
-  const arch = page.lastArchived;
-  if (live && arch) {
-    return live.detectedAt >= arch.detectedAt
-      ? { change: live, isArchive: false }
-      : { change: arch, isArchive: true };
-  }
-  if (live) return { change: live, isArchive: false };
-  if (arch) return { change: arch, isArchive: true };
-  return null;
+// How many meaningful changes this week sit in a type group — used to float the
+// most active cards to the top.
+function weekCountOf(rows: TypeCardRow[], now: number): number {
+  return rows.reduce((n, r) => n + activeChanges(r.page, now).length, 0);
 }
 
 export default async function DashboardPage() {
@@ -80,8 +57,7 @@ export default async function DashboardPage() {
 
         <h1 className={styles.title}>Nothing on the radar yet</h1>
         <p className={styles.body}>
-          Add one competitor and the pages you care about. We check them every day and email you a
-          digest each Monday.
+          Add a competitor and the pages you care about. Cards appear here grouped by page type.
         </p>
 
         <ButtonLink href="/competitors/add" className={styles.cta}>
@@ -112,32 +88,43 @@ export default async function DashboardPage() {
   const overComp = competitors.length > limits.competitors;
   const overPages = competitors.some((c) => c.pages.length > limits.pagesPerCompetitor);
 
-  // Every change from this week, flattened, so the three stats are one pass.
+  // Every change from this week, flattened, for the header stats.
   const weekChanges = competitors.flatMap((c) =>
     c.pages.flatMap((p) => p.changes.filter((ch) => withinWeek(ch.detectedAt, now))),
   );
   const changesThisWeek = weekChanges.filter((ch) => ch.isMeaningful).length;
   const trivialFiltered = weekChanges.filter((ch) => !ch.isMeaningful).length;
 
-  // Per competitor: how many meaningful changes landed this week.
-  const meaningfulThisWeek = (c: CompetitorRow) =>
-    c.pages.reduce(
-      (n, p) => n + p.changes.filter((ch) => ch.isMeaningful && withinWeek(ch.detectedAt, now)).length,
-      0,
-    );
+  // Flatten pages into rows carrying their competitor identity, then group by
+  // page type across competitors — the inverted dashboard.
+  const entries: TypeCardRow[] = competitors.flatMap((c) =>
+    c.pages.map((p) => {
+      const sibling = c.pages.find((other) => other.id !== p.id);
+      return {
+        page: p,
+        competitorName: c.name,
+        competitorUrl: c.pages[0]?.url ?? p.url,
+        siblingDomain: sibling ? originOf(sibling.url) : null,
+      };
+    }),
+  );
 
-  // Adaptive header: feed-forward when something moved, value-forward when quiet.
-  // A quiet week is the product working, not a dead screen — say so.
+  const groups = PAGE_TYPE_VALUES.map((type) => ({
+    type,
+    // Changed-this-week pages first within the card; ties keep query order.
+    rows: [...entries.filter((e) => e.page.pageType === type)].sort(
+      (a, b) => activeChanges(b.page, now).length - activeChanges(a.page, now).length,
+    ),
+  }))
+    .filter((g) => g.rows.length > 0)
+    // Cards with the most movement this week float to the top.
+    .sort((a, b) => weekCountOf(b.rows, now) - weekCountOf(a.rows, now));
+
   const quiet = changesThisWeek === 0;
   const heading = quiet ? "All quiet" : "This week";
   const headSub = quiet
-    ? "Exactly the point — here's what we're watching for you."
-    : `${changesThisWeek} meaningful ${changesThisWeek === 1 ? "change" : "changes"} across your tracked pages.`;
-
-  // Competitors with the most movement this week float to the top; ties keep the
-  // query's newest-first order (Array.sort is stable). Within a competitor, pages
-  // that changed this week come before quiet ones.
-  const orderedCompetitors = [...competitors].sort((a, b) => meaningfulThisWeek(b) - meaningfulThisWeek(a));
+    ? `No meaningful changes this week. We’re still checking all ${pageCount} page${pageCount === 1 ? "" : "s"} daily.`
+    : `${changesThisWeek} meaningful ${changesThisWeek === 1 ? "change" : "changes"} across your watchlist.`;
 
   return (
     <div className={styles.wrap}>
@@ -172,6 +159,13 @@ export default async function DashboardPage() {
         </div>
         <div className={styles.stat}>
           <div className={styles.statLabelRow}>
+            <div className={styles.statIconInk}>&#9673;</div>
+            <span className={styles.statLabel}>Competitors</span>
+          </div>
+          <div className={styles.statValue}>{competitors.length}</div>
+        </div>
+        <div className={styles.stat}>
+          <div className={styles.statLabelRow}>
             <div className={styles.statIconWarn}>&#9673;</div>
             <span className={styles.statLabel}>Trivial edits filtered</span>
           </div>
@@ -197,132 +191,9 @@ export default async function DashboardPage() {
       ) : null}
 
       <div className={styles.compList}>
-        {orderedCompetitors.map((c) => {
-          const meaningful = meaningfulThisWeek(c);
-          // Changed-this-week pages first; ties keep the query's page order.
-          const orderedPages = [...c.pages].sort(
-            (a, b) => (activeChange(b, now) ? 1 : 0) - (activeChange(a, now) ? 1 : 0),
-          );
-          return (
-            <section key={c.id} className={styles.compCard}>
-              <div className={styles.compHead}>
-                <div className={styles.compHeadLeft}>
-                  <CompetitorAvatar url={c.pages[0]?.url} name={c.name} className={styles.compAvatar} />
-                  <div className={styles.compName}>{c.name}</div>
-                  {c.pages[0] ? <div className={styles.compDomain}>{domainOf(c.pages[0].url)}</div> : null}
-                </div>
-                <div className={styles.compMeta}>
-                  {meaningful > 0
-                    ? `${meaningful} ${meaningful === 1 ? "change" : "changes"} this week`
-                    : "Quiet this week"}
-                </div>
-              </div>
-
-              {orderedPages.map((p) => {
-                // Active page: meaningful change(s) landed this week — show the
-                // newest inline; the row expands to the rest when there are more.
-                const changes = activeChanges(p, now);
-                if (changes.length) {
-                  return <DashboardActiveRow key={p.id} changes={changes} label={p.label} now={now} />;
-                }
-
-                // Paused pages aren't being watched — no value card, just the state.
-                if (!p.isActive) {
-                  return (
-                    <div key={p.id} className={styles.pageRowPaused}>
-                      <div className={styles.pageMeta}>
-                        <div className={styles.pageLabelMuted}>{p.label}</div>
-                      </div>
-                      <div className={styles.pausedLine}>
-                        <span className={styles.pagePausedTag}>Paused</span>
-                        <span className={styles.pageQuiet}>Not being checked</span>
-                      </div>
-                    </div>
-                  );
-                }
-
-                // Broken/unreachable page: we can't watch it — surface that plainly
-                // (a 4xx is almost always a wrong URL) with a link to fix it.
-                if (p.lastCheckStatus === "broken" || p.lastCheckStatus === "error") {
-                  const broken = p.lastCheckStatus === "broken";
-                  const sibling = c.pages.find((other) => other.id !== p.id);
-                  return (
-                    <div key={p.id} className={styles.pageRowError}>
-                      <div className={styles.pageMeta}>
-                        <div className={styles.pageLabel}>{p.label}</div>
-                        <div className={styles.pageErrorTag}>{broken ? "Can’t reach" : "Check failed"}</div>
-                      </div>
-                      <div className={styles.pageErrorBody}>
-                        <span className={styles.pageErrorText}>
-                          {p.lastCheckError ??
-                            (broken ? "This page couldn’t be reached." : "The last check didn’t complete.")}
-                        </span>
-                        <DashboardEditUrl
-                          pageId={p.id}
-                          url={p.url}
-                          label={p.label}
-                          siblingDomain={sibling ? originOf(sibling.url) : null}
-                        />
-                      </div>
-                    </div>
-                  );
-                }
-
-                // Quiet, active page: surface the last notable change — its summary
-                // (calmer than an active change row) with the date beneath, the whole
-                // card linking to the diff. When we have no notable change, a plain
-                // "none in the last 180 days" once history has been reconstructed.
-                const notable = lastNotable(p);
-                if (notable) {
-                  return (
-                    <Link key={p.id} href={`/changes/${notable.change.id}`} className={styles.pageRowQuietLink}>
-                      <div className={styles.pageMeta}>
-                        <div className={styles.pageLabel}>{p.label}</div>
-                        <div className={styles.pageQuietSub}>Quiet</div>
-                      </div>
-                      <div className={styles.pageValue}>
-                        {notable.change.summary ? (
-                          <span className={styles.quietSummary}>{notable.change.summary}</span>
-                        ) : null}
-                        <div className={styles.quietNotableMeta}>
-                          Last notable change · {formatFullDate(notable.change.detectedAt)} ({timeAgo(notable.change.detectedAt, now)})
-                          {notable.isArchive ? <span className={styles.quietArchiveTag}>Web archive</span> : null}
-                        </div>
-                      </div>
-                      <span className={styles.arrowBox} aria-hidden="true">
-                        <svg width="15" height="12" viewBox="0 0 15 12" fill="none">
-                          <path
-                            d="M1 6h11.4M8.8 2l4.2 4-4.2 4"
-                            stroke="currentColor"
-                            strokeWidth="1.6"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </span>
-                    </Link>
-                  );
-                }
-
-                return (
-                  <div key={p.id} className={styles.pageRowQuiet}>
-                    <div className={styles.pageMeta}>
-                      <div className={styles.pageLabel}>{p.label}</div>
-                      <div className={styles.pageQuietSub}>Quiet</div>
-                    </div>
-                    <div className={styles.pageValue}>
-                      {p.backfilledAt ? (
-                        <span className={styles.quietNote}>No notable change in the last 180 days</span>
-                      ) : (
-                        <span className={styles.quietNote}>Checking history&hellip;</span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </section>
-          );
-        })}
+        {groups.map((g) => (
+          <DashboardTypeCard key={g.type} pageType={g.type} rows={g.rows} now={now} />
+        ))}
       </div>
 
       <Suspense fallback={null}>
