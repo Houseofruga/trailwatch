@@ -8,29 +8,22 @@ import { ExternalLinkIcon } from "@/components/icons";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { DashboardEditUrl } from "./DashboardEditUrl";
 import { DashboardRecentHistory } from "./DashboardRecentHistory";
-import { activeChanges, timeAgo } from "./dashboardFeed";
+import { activeChanges, formatFullDate, timeAgo } from "./dashboardFeed";
 import styles from "./page.module.css";
 
 type Page = CompetitorRow["pages"][number];
+type Change = Page["changes"][number];
 
 const FALLBACK = "Meaningful change detected (summary unavailable).";
 
 function Chevron({ up }: { up?: boolean }) {
   return (
-    <svg
-      width="9"
-      height="6"
-      viewBox="0 0 9 6"
-      fill="none"
-      aria-hidden="true"
-      style={{ transform: up ? "rotate(180deg)" : undefined }}
-    >
+    <svg width="9" height="6" viewBox="0 0 9 6" fill="none" aria-hidden="true" style={{ transform: up ? "rotate(180deg)" : undefined }}>
       <path d="M1 1l3.5 3.5L8 1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-// "View change ›" — an inline blue link at the end of a change summary.
 function ViewChange({ id }: { id: string }) {
   return (
     <Link href={`/changes/${id}`} className={styles.viewChangeInline}>
@@ -39,13 +32,26 @@ function ViewChange({ id }: { id: string }) {
   );
 }
 
+// The most notable change to surface on a quiet page: newest meaningful (any age)
+// or the archive backfill, whichever is more recent.
+function lastNotable(page: Page): { change: Change; isArchive: boolean } | null {
+  const live = page.changes.find((c) => c.isMeaningful) ?? null;
+  const arch = page.lastArchived;
+  if (live && arch) {
+    return live.detectedAt >= arch.detectedAt
+      ? { change: live, isArchive: false }
+      : { change: arch, isArchive: true };
+  }
+  if (live) return { change: live, isArchive: false };
+  if (arch) return { change: arch, isArchive: true };
+  return null;
+}
+
 /**
- * One competitor's page inside a page-type card. Header: avatar + name + URL +
- * status badge + ⋮ menu. Body follows the IA design: the newest change summary
- * with an inline "View change ›", the time, a "N more this week" expander that
- * reveals the week's other changes, and a "See what changed before this week →
- * Recent history" disclosure. (The "What we're watching now" panel lives on the
- * competitor-detail page, not here.)
+ * One competitor's page inside a page-type card. Renders all row states from the
+ * IA design: active (live change this week, with a "N more this week" expander +
+ * nested Recent history), quiet-with-notable (incl. a "From web archive" variant),
+ * paused (muted, inline), and broken ("Can't reach" + Edit URL).
  */
 export function DashboardPageRow({
   page,
@@ -62,17 +68,83 @@ export function DashboardPageRow({
 }) {
   const [expanded, setExpanded] = useState(false);
 
-  const broken = page.isActive && (page.lastCheckStatus === "broken" || page.lastCheckStatus === "error");
   const paused = !page.isActive;
-  const active = activeChanges(page, now);
+  const broken = page.isActive && (page.lastCheckStatus === "broken" || page.lastCheckStatus === "error");
+  const active = paused || broken ? [] : activeChanges(page, now);
   const [newest, ...rest] = active;
-  const hasHistory = page.meaningfulTotal > 0;
+  const notable = !paused && !broken && active.length === 0 ? lastNotable(page) : null;
 
-  const badge = paused ? (
-    <span className={styles.stBadgePaused}>Paused</span>
-  ) : broken ? (
-    <span className={styles.stBadgeError}>{page.lastCheckStatus === "broken" ? "Can’t reach" : "Check failed"}</span>
-  ) : (
+  const identity = (
+    <div className={styles.dashIdentity}>
+      <CompetitorAvatar url={competitorUrl} name={competitorName} className={styles.compAvatar} />
+      <span className={styles.dashCompName}>{competitorName}</span>
+      <span className={styles.dashSep} aria-hidden="true">
+        ›
+      </span>
+      <a href={page.url} target="_blank" rel="noreferrer" className={styles.dashUrl}>
+        <span className={styles.dashUrlText}>{page.url.replace(/^https?:\/\//, "")}</span>
+        {!paused ? (
+          <span className={styles.dashUrlIcon}>
+            <ExternalLinkIcon />
+          </span>
+        ) : null}
+      </a>
+    </div>
+  );
+
+  const menu = (
+    <PageActionsMenu
+      pageId={page.id}
+      label={page.label}
+      url={page.url}
+      siblingDomain={siblingDomain}
+      isActive={page.isActive}
+      competitorName={competitorName}
+    />
+  );
+
+  // --- Paused: a single muted line, no body. ---
+  if (paused) {
+    return (
+      <div className={`${styles.dashRow} ${styles.dashRowPaused}`}>
+        <div className={styles.dashHead}>
+          {identity}
+          <div className={styles.dashStatus}>
+            <span className={styles.stBadgePaused}>Paused</span>
+            <span className={styles.dashPausedNote}>Not being checked</span>
+            {menu}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Broken: identity + "Can't reach", then the error line + Edit URL. ---
+  if (broken) {
+    return (
+      <div className={`${styles.dashRow} ${styles.dashRowBroken}`}>
+        <div className={styles.dashHead}>
+          {identity}
+          <div className={styles.dashStatus}>
+            <span className={styles.stBadgeError}>
+              <span className={styles.stBadgeSquare} aria-hidden="true" />
+              {page.lastCheckStatus === "broken" ? "Can’t reach" : "Check failed"}
+            </span>
+            {menu}
+          </div>
+        </div>
+        <div className={styles.brokenMeta}>
+          <span className={styles.brokenText}>
+            {page.lastCheckError ?? "This page couldn’t be reached on the last check."}
+            {page.lastCheckedAt ? ` · last checked ${timeAgo(page.lastCheckedAt, now)}` : null}
+          </span>
+          <DashboardEditUrl pageId={page.id} url={page.url} label={page.label} siblingDomain={siblingDomain} />
+        </div>
+      </div>
+    );
+  }
+
+  const badge = (
     <span className={styles.stBadge}>
       <span className={styles.stBadgeDot} aria-hidden="true" />
       Checking daily
@@ -80,44 +152,16 @@ export function DashboardPageRow({
   );
 
   return (
-    <div className={styles.dashRow}>
+    <div className={`${styles.dashRow} ${notable?.isArchive ? styles.dashRowArchive : ""}`}>
       <div className={styles.dashHead}>
-        <div className={styles.dashIdentity}>
-          <CompetitorAvatar url={competitorUrl} name={competitorName} className={styles.compAvatar} />
-          <span className={styles.dashCompName}>{competitorName}</span>
-          <span className={styles.dashSep} aria-hidden="true">
-            ›
-          </span>
-          <a href={page.url} target="_blank" rel="noreferrer" className={styles.dashUrl}>
-            <span className={styles.dashUrlText}>{page.url.replace(/^https?:\/\//, "")}</span>
-            <span className={styles.dashUrlIcon}>
-              <ExternalLinkIcon />
-            </span>
-          </a>
-        </div>
+        {identity}
         <div className={styles.dashStatus}>
           {badge}
-          <PageActionsMenu
-            pageId={page.id}
-            label={page.label}
-            url={page.url}
-            siblingDomain={siblingDomain}
-            isActive={page.isActive}
-            competitorName={competitorName}
-          />
+          {menu}
         </div>
       </div>
 
-      {broken ? (
-        <div className={styles.dashBroken}>
-          <span className={styles.pageErrorText}>
-            {page.lastCheckError ?? "This page couldn’t be reached on the last check."}
-          </span>
-          <DashboardEditUrl pageId={page.id} url={page.url} label={page.label} siblingDomain={siblingDomain} />
-        </div>
-      ) : paused ? (
-        <div className={styles.dashQuiet}>Not being checked</div>
-      ) : active.length > 0 ? (
+      {active.length > 0 ? (
         <>
           <p className={styles.dashSummary}>
             {newest.summary ?? FALLBACK} <ViewChange id={newest.id} />
@@ -136,8 +180,6 @@ export function DashboardPageRow({
             </button>
           ) : null}
 
-          {/* The week's other changes and the "before this week" history live
-              together inside the expander — hidden until it's opened. */}
           {rest.length > 0 && expanded ? (
             <>
               <div className={styles.subList}>
@@ -154,12 +196,31 @@ export function DashboardPageRow({
             </>
           ) : null}
         </>
+      ) : notable ? (
+        <>
+          {notable.isArchive ? (
+            <div className={styles.archiveTagRow}>
+              <span className={styles.archiveTag}>From web archive</span>
+            </div>
+          ) : null}
+          <p className={styles.dashSummaryQuiet}>
+            {notable.change.summary ?? FALLBACK} <ViewChange id={notable.change.id} />
+          </p>
+          <div className={styles.dashTime}>
+            Last notable change · {formatFullDate(notable.change.detectedAt)} ({timeAgo(notable.change.detectedAt, now)})
+          </div>
+          {notable.isArchive ? (
+            <div className={styles.archiveNote}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" className={styles.archiveNoteIcon}>
+                <circle cx="6" cy="6" r="4.6" stroke="currentColor" strokeWidth="1.1" />
+                <path d="M4 6h4M6 4v4" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+              </svg>
+              No weekly change count — this page is sourced via Web Archive.
+            </div>
+          ) : null}
+        </>
       ) : (
-        // Quiet this week — a single muted line. (The "Recent history" disclosure
-        // lives only inside an active row's expander, never on a quiet row.)
-        <div className={styles.dashQuiet}>
-          {hasHistory ? "No changes this week." : "No changes yet since we started watching."}
-        </div>
+        <div className={styles.dashQuiet}>No changes yet since we started watching.</div>
       )}
     </div>
   );
