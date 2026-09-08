@@ -809,6 +809,17 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
 
 ## Suggested next steps for whoever picks this up
 
+> 🚩 **WORKING RULE FOR EVERY REMAINING SLICE (owner is firm on this).** Before building a slice,
+> **read the relevant `.dc.html` design artboard in full and match it to the pixel — every state,
+> color, size, spacing, icon, copy string, and interaction.** Do NOT build from memory, from the
+> `screenshots/` folder, or from a quick glance. Enumerate the states in that slice's artboard and
+> implement ALL of them (active / quiet / web-archive / paused / broken / empty / plan-limit / error
+> variants, etc.) in one pass, then self-audit against the artboard BEFORE handing it back. The owner
+> should NOT have to point out mismatches one at a time — that already happened on Slice 1 and it is
+> not acceptable going forward. If a design detail is genuinely ambiguous, ask ONE consolidated
+> question; don't guess and don't ship a half-match. (The owner has said they'll switch to Codex if
+> this keeps happening — take the fidelity bar seriously.)
+
 **IA REDESIGN — build status (branch `wip/ia-redesign`, local only, NOT pushed).**
 Same-computer account switch: the branch and all its commits are already on disk. Just
 `git checkout wip/ia-redesign` and continue. Do NOT branch off main again. Full plan +
