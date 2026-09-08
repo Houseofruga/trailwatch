@@ -72,3 +72,30 @@ export async function getOrCreatePageInsight(pageId: string): Promise<PageInsigh
     return { status: "unavailable" };
   }
 }
+
+/**
+ * Cache-only read of a page's baseline profile — returns it if one is already
+ * cached, otherwise null. Never generates (no AI call, no snapshot read), so
+ * surfaces that only want an existing summary — e.g. the competitor-detail
+ * summary line — can read it cheaply without paying for or triggering
+ * generation. RLS-scoped; any error resolves to null.
+ */
+export async function readCachedPageInsight(pageId: string): Promise<PageProfile | null> {
+  try {
+    const user = await createClient();
+    const { data } = await user
+      .from("page_insights")
+      .select("profile")
+      .eq("page_id", pageId)
+      .maybeSingle();
+    // Tolerate the legacy `{ title, positioning, ... }` shape (pre-`071af13`, and
+    // what the sandbox seed still writes via the teardown provider) as well as the
+    // current `{ summary, pricingTiers }` shape.
+    const raw = data?.profile as (PageProfile & { positioning?: string }) | null;
+    if (!raw) return null;
+    const summary = raw.summary ?? raw.positioning ?? "";
+    return { summary, pricingTiers: raw.pricingTiers ?? null };
+  } catch {
+    return null;
+  }
+}

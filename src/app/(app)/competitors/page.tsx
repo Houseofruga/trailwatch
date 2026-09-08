@@ -3,29 +3,29 @@ import { ButtonLink } from "@/components/Button";
 import { PlusIcon } from "@/components/icons";
 import { FlashToast } from "@/components/FlashToast";
 import { getCompetitorsWithPages } from "@/features/competitors/queries";
-import { getAccount } from "@/features/account/queries";
-import { LIMITS } from "@/features/plan/limits";
 import { ManageBoard } from "./ManageBoard";
 import styles from "./page.module.css";
 
-// The Wayback backfill (HistoryPanel's loadPageHistory action) fetches several
-// archived pages + summarizes them; give it headroom over the default so a first
-// expand can't hit the function timeout.
-export const maxDuration = 60;
-
 export default async function CompetitorsPage() {
-  const [competitors, account] = await Promise.all([getCompetitorsWithPages(), getAccount()]);
-  const pagesPerCompetitor = LIMITS[account?.plan ?? "free"].pagesPerCompetitor;
+  const competitors = await getCompetitorsWithPages();
+  // Server Component: one deterministic clock read per request (not a client
+  // render impurity) — powers "Checked Nm ago" on each card.
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
+
+  const pageCount = competitors.reduce((n, c) => n + c.pages.length, 0);
 
   return (
     <div className={styles.wrap}>
       <div className={styles.head}>
         <div>
           <h1 className={styles.title}>Competitors</h1>
-          <p className={styles.sub}>
-            Expand a page for the baseline we captured and its history. Pause to stop checks
-            without losing anything.
-          </p>
+          {competitors.length > 0 ? (
+            <p className={styles.sub}>
+              {competitors.length} competitor{competitors.length === 1 ? "" : "s"} · {pageCount} page
+              {pageCount === 1 ? "" : "s"} tracked
+            </p>
+          ) : null}
         </div>
         <ButtonLink href="/competitors/add">
           <PlusIcon />
@@ -33,7 +33,7 @@ export default async function CompetitorsPage() {
         </ButtonLink>
       </div>
 
-      <ManageBoard competitors={competitors} pagesPerCompetitor={pagesPerCompetitor} />
+      <ManageBoard competitors={competitors} now={now} />
 
       <Suspense fallback={null}>
         <FlashToast />

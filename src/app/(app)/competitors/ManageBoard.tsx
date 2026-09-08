@@ -1,65 +1,39 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { AddPageDialog } from "@/components/AddPageDialog";
-import { EditPageDialog } from "@/components/EditPageDialog";
 import { ButtonLink } from "@/components/Button";
 import { CompetitorAvatar } from "@/components/CompetitorAvatar";
-import { PageIntel } from "./PageIntel"; // per-page baseline + history panels (v3)
-import { ExternalLinkIcon, PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
+import { PlusIcon } from "@/components/icons";
 import type { CompetitorRow } from "@/features/competitors/queries";
-import { deleteCompetitor, deletePage, togglePageActive } from "@/features/competitors/actions";
 import { originOf } from "@/features/competitors/domain";
-import { checkPageNow } from "@/features/checks/actions";
-import toastStyles from "@/components/Toast.module.css";
+import { activeChanges, timeAgo } from "@/app/(app)/dashboard/dashboardFeed";
 import styles from "./page.module.css";
 
-type PendingDelete =
-  | { kind: "competitor"; id: string; name: string; pageCount: number }
-  | { kind: "page"; id: string; competitorName: string; label: string };
+// The little external-link glyph after a competitor's domain.
+function ExtIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M4.5 2.5h5v5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9.5 2.5l-7 7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
-type AddingPageFor = { competitorId: string; competitorName: string; existingDomain: string; slotsLeft: number };
+// The ">" affordance box on the right of a card (whole card taps to detail).
+function ChevronBox() {
+  return (
+    <svg width="7" height="11" viewBox="0 0 6 9" fill="none" aria-hidden="true">
+      <path d="M1 1l3.5 3.5L1 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
-type EditingPage = { id: string; url: string; label: string; siblingDomain: string | null };
-
-export function ManageBoard({
-  competitors,
-  pagesPerCompetitor,
-}: {
-  competitors: CompetitorRow[];
-  pagesPerCompetitor: number;
-}) {
-  const [openMenuPageId, setOpenMenuPageId] = useState<string | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
-  const [addingPageFor, setAddingPageFor] = useState<AddingPageFor | null>(null);
-  const [editingPage, setEditingPage] = useState<EditingPage | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!toast) return;
-    const timer = setTimeout(() => setToast(null), 2200);
-    return () => clearTimeout(timer);
-  }, [toast]);
-
-  // Close the open row menu on an outside click or Escape.
-  useEffect(() => {
-    if (!openMenuPageId) return;
-    function onDown(event: MouseEvent) {
-      if (!(event.target as HTMLElement).closest("[data-page-menu]")) setOpenMenuPageId(null);
-    }
-    function onEsc(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpenMenuPageId(null);
-    }
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onEsc);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onEsc);
-    };
-  }, [openMenuPageId]);
-
+/**
+ * The Competitors index (IA redesign §2): one health-metric card per competitor.
+ * The whole card taps through to its detail page; the domain opens the external
+ * site. Per-page management (add/edit/pause/delete, baseline + history) lives on
+ * the detail page now, so this is a read-only overview and can render on the
+ * server. Cards with movement this week float to the top.
+ */
+export function ManageBoard({ competitors, now }: { competitors: CompetitorRow[]; now: number }) {
   if (competitors.length === 0) {
     return (
       <div className={styles.empty}>
@@ -71,38 +45,13 @@ export function ManageBoard({
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
         >
-          {/* the page */}
           <rect x="26" y="14" width="60" height="82" stroke="currentColor" strokeWidth="2" />
-          {/* content lines */}
           <line x1="36" y1="32" x2="76" y2="32" stroke="currentColor" strokeWidth="2" />
           <line x1="36" y1="44" x2="76" y2="44" stroke="currentColor" strokeWidth="2" />
           <line x1="36" y1="56" x2="62" y2="56" stroke="currentColor" strokeWidth="2" />
-          {/* the "changed" line the digest would flag */}
-          <line
-            x1="36"
-            y1="68"
-            x2="70"
-            y2="68"
-            className={styles.emptyArtAccent}
-            strokeWidth="2"
-          />
-          {/* magnifier watching the page */}
-          <circle
-            cx="94"
-            cy="76"
-            r="22"
-            className={styles.emptyArtAccent}
-            strokeWidth="2.5"
-          />
-          <line
-            x1="110"
-            y1="92"
-            x2="126"
-            y2="108"
-            className={styles.emptyArtAccent}
-            strokeWidth="3"
-            strokeLinecap="round"
-          />
+          <line x1="36" y1="68" x2="70" y2="68" className={styles.emptyArtAccent} strokeWidth="2" />
+          <circle cx="94" cy="76" r="22" className={styles.emptyArtAccent} strokeWidth="2.5" />
+          <line x1="110" y1="92" x2="126" y2="108" className={styles.emptyArtAccent} strokeWidth="3" strokeLinecap="round" />
         </svg>
 
         <h2 className={styles.emptyTitle}>No competitors yet</h2>
@@ -118,201 +67,84 @@ export function ManageBoard({
     );
   }
 
+  const cards = competitors
+    .map((c) => {
+      const weekCount = c.pages.reduce((n, p) => n + activeChanges(p, now).length, 0);
+      const allTime = c.pages.reduce((n, p) => n + p.meaningfulTotal, 0);
+      const brokenCount = c.pages.filter(
+        (p) => p.isActive && (p.lastCheckStatus === "broken" || p.lastCheckStatus === "error"),
+      ).length;
+      const checkedTimes = c.pages.map((p) => p.lastCheckedAt).filter((t): t is string => Boolean(t));
+      const lastChecked = checkedTimes.length
+        ? checkedTimes.reduce((a, b) => (new Date(a) > new Date(b) ? a : b))
+        : null;
+      return { c, weekCount, allTime, brokenCount, lastChecked };
+    })
+    // Most movement this week floats up; ties keep query order (newest first).
+    .sort((a, b) => b.weekCount - a.weekCount);
+
   return (
     <div className={styles.list}>
-      {competitors.map((c) => {
-        const canAddPage = c.pages.length < pagesPerCompetitor;
-
+      {cards.map(({ c, weekCount, allTime, brokenCount, lastChecked }) => {
+        const firstUrl = c.pages[0]?.url ?? "";
+        const domain = originOf(firstUrl);
         return (
-          <section key={c.id} className={styles.card}>
-            <div className={styles.cardHead}>
-              <div className={styles.cardHeadLeft}>
-                <CompetitorAvatar url={c.pages[0]?.url} name={c.name} className={styles.avatar} />
-                <span className={styles.compName}>{c.name}</span>
-                <span className={styles.pageCount}>
-                  {c.pages.length} of {pagesPerCompetitor} pages
-                </span>
-              </div>
-              <div className={styles.cardHeadRight}>
-                {canAddPage ? (
-                  <button
-                    type="button"
-                    className={styles.addPage}
-                    onClick={() =>
-                      setAddingPageFor({
-                        competitorId: c.id,
-                        competitorName: c.name,
-                        existingDomain: originOf(c.pages[0]?.url ?? "") ?? "",
-                        slotsLeft: pagesPerCompetitor - c.pages.length,
-                      })
-                    }
-                  >
-                    <PlusIcon size={13} />
-                    Add page
-                  </button>
-                ) : (
-                  <Link href={`/competitors/add?for=${c.id}`} className={styles.atLimit}>
-                    Upgrade to add more pages
-                  </Link>
-                )}
-                <Link href={`/competitors/${c.id}/edit`} className={styles.editComp}>
-                  <PencilIcon />
-                  Edit
-                </Link>
-                <button
-                  type="button"
-                  className={styles.deleteComp}
-                  onClick={() =>
-                    setPendingDelete({ kind: "competitor", id: c.id, name: c.name, pageCount: c.pages.length })
-                  }
-                >
-                  <TrashIcon />
-                  Delete competitor
-                </button>
-              </div>
-            </div>
+          <div key={c.id} className={styles.idxCard}>
+            {/* Stretched link makes the whole card the click target without nesting
+                anchors — the domain link sits above it (z-index). */}
+            <Link href={`/competitors/${c.id}`} className={styles.idxCardLink} aria-label={`${c.name} — view detail`} />
 
-            {c.pages.map((p) => (
-              <div key={p.id} className={styles.pageBlock}>
-              <div className={styles.row}>
-                <div className={styles.rowLabel}>{p.label}</div>
-                <a href={p.url} target="_blank" rel="noreferrer" className={styles.rowUrl}>
-                  <span className={styles.rowUrlText}>{p.url}</span>
-                  <span className={styles.rowUrlIcon}>
-                    <ExternalLinkIcon />
-                  </span>
-                </a>
-                <div className={styles.rowActions}>
-                  {!p.isActive ? (
-                    <span className={styles.badgePaused}>Paused</span>
-                  ) : p.lastCheckStatus === "broken" || p.lastCheckStatus === "error" ? (
-                    <span className={styles.badgeError}>
-                      {p.lastCheckStatus === "broken" ? "Can’t reach" : "Check failed"}
-                    </span>
-                  ) : (
-                    <span className={styles.badgeActive}>Checking daily</span>
-                  )}
-                  <div className={styles.menuWrap} data-page-menu>
-                    <button
-                      type="button"
-                      className={styles.menuBtn}
-                      onClick={() => setOpenMenuPageId((cur) => (cur === p.id ? null : p.id))}
-                    >
-                      &#8942;
-                    </button>
-                    {openMenuPageId === p.id ? (
-                      <div className={styles.menu} role="menu">
-                        <button
-                          type="button"
-                          className={styles.menuItem}
-                          onClick={() => {
-                            setOpenMenuPageId(null);
-                            void checkPageNow(p.id).then((message) => setToast(message));
-                          }}
-                        >
-                          Check now
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.menuItem}
-                          onClick={() => {
-                            setOpenMenuPageId(null);
-                            const sibling = c.pages.find((other) => other.id !== p.id);
-                            setEditingPage({
-                              id: p.id,
-                              url: p.url,
-                              label: p.label,
-                              siblingDomain: sibling ? originOf(sibling.url) : null,
-                            });
-                          }}
-                        >
-                          Edit URL
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.menuItem}
-                          onClick={() => {
-                            setOpenMenuPageId(null);
-                            const nextActive = !p.isActive;
-                            void togglePageActive(p.id, nextActive).then(() =>
-                              setToast(`${c.name} ${p.label.toLowerCase()} ${nextActive ? "resumed" : "paused"}`),
-                            );
-                          }}
-                        >
-                          {p.isActive ? "Pause checking" : "Resume checking"}
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.menuItemDanger}
-                          onClick={() => {
-                            setOpenMenuPageId(null);
-                            setPendingDelete({ kind: "page", id: p.id, competitorName: c.name, label: p.label });
-                          }}
-                        >
-                          Delete page
-                        </button>
-                      </div>
+            <div className={styles.idxTop}>
+              <div className={styles.idxIdentity}>
+                <CompetitorAvatar url={firstUrl} name={c.name} className={styles.idxAvatar} />
+                <div className={styles.idxNameWrap}>
+                  <div className={styles.idxNameRow}>
+                    <span className={styles.idxName}>{c.name}</span>
+                    {brokenCount > 0 ? (
+                      <span className={styles.idxBrokenPill}>
+                        {brokenCount} page{brokenCount === 1 ? "" : "s"} can’t be reached
+                      </span>
                     ) : null}
                   </div>
+                  {domain ? (
+                    <a href={firstUrl} target="_blank" rel="noreferrer" className={styles.idxDomain}>
+                      <span className={styles.idxDomainText}>{domain}</span>
+                      <span className={styles.idxDomainIcon}>
+                        <ExtIcon />
+                      </span>
+                    </a>
+                  ) : null}
                 </div>
               </div>
-              {p.isActive && (p.lastCheckStatus === "broken" || p.lastCheckStatus === "error") ? (
-                <div className={styles.rowError}>
-                  {p.lastCheckError ?? "This page couldn’t be reached on the last check."} Edit the URL to fix it.
-                </div>
-              ) : null}
-              {p.isActive && p.lastCheckStatus !== "broken" && p.lastCheckStatus !== "error" ? (
-                <PageIntel pageId={p.id} />
-              ) : null}
+              <span className={styles.idxChevron} aria-hidden="true">
+                <ChevronBox />
+              </span>
+            </div>
+
+            <div className={styles.idxMeta}>
+              <div className={styles.idxMetaLeft}>
+                <span>
+                  Checked <span className={styles.idxMetaStrong}>{lastChecked ? timeAgo(lastChecked, now) : "not yet"}</span>
+                </span>
+                <span>
+                  Tracking <span className={styles.idxMetaStrong}>{c.pages.length} page{c.pages.length === 1 ? "" : "s"}</span>
+                </span>
+                {weekCount > 0 ? (
+                  <span className={styles.idxChanges}>
+                    <span className={styles.idxSquare} aria-hidden="true" />
+                    {weekCount} change{weekCount === 1 ? "" : "s"} this week
+                  </span>
+                ) : (
+                  <span className={styles.idxNoChanges}>No changes yet</span>
+                )}
               </div>
-            ))}
-          </section>
+              <span className={styles.idxAllTime}>
+                {allTime} change{allTime === 1 ? "" : "s"} since we started watching
+              </span>
+            </div>
+          </div>
         );
       })}
-
-      {pendingDelete?.kind === "competitor" ? (
-        <ConfirmDialog
-          title={`Delete ${pendingDelete.name}?`}
-          body={`This removes ${pendingDelete.pageCount} tracked page${pendingDelete.pageCount === 1 ? "" : "s"} and everything we've recorded about them. Pausing keeps the history if you only need a break.`}
-          cta={`Delete ${pendingDelete.name}`}
-          onConfirm={() => deleteCompetitor(pendingDelete.id)}
-          onClose={() => setPendingDelete(null)}
-        />
-      ) : null}
-
-      {pendingDelete?.kind === "page" ? (
-        <ConfirmDialog
-          title="Delete this page?"
-          body={`We'll stop checking ${pendingDelete.competitorName}'s ${pendingDelete.label.toLowerCase()} page and its recorded changes go with it. You can add the URL again later.`}
-          cta="Delete page"
-          onConfirm={() => deletePage(pendingDelete.id).then(() => setToast("Page deleted"))}
-          onClose={() => setPendingDelete(null)}
-        />
-      ) : null}
-
-      {addingPageFor ? (
-        <AddPageDialog
-          competitorId={addingPageFor.competitorId}
-          competitorName={addingPageFor.competitorName}
-          existingDomain={addingPageFor.existingDomain}
-          slotsLeft={addingPageFor.slotsLeft}
-          pagesPerCompetitor={pagesPerCompetitor}
-          onClose={() => setAddingPageFor(null)}
-        />
-      ) : null}
-
-      {editingPage ? (
-        <EditPageDialog
-          pageId={editingPage.id}
-          initialUrl={editingPage.url}
-          initialLabel={editingPage.label}
-          siblingDomain={editingPage.siblingDomain}
-          onClose={() => setEditingPage(null)}
-          onSaved={() => setToast("Page updated")}
-        />
-      ) : null}
-
-      {toast ? <div className={toastStyles.toast}>{toast}</div> : null}
     </div>
   );
 }

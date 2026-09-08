@@ -20,11 +20,15 @@ import styles from "./page.module.css";
  */
 type Which = "baseline" | "history";
 
-export function PageIntel({ pageId }: { pageId: string }) {
+export function PageIntel({ pageId, flush = false }: { pageId: string; flush?: boolean }) {
   const [insight, setInsight] = useState<PageInsightState | null>(null);
   const [open, setOpen] = useState<Which | null>(null);
   const [history, setHistory] = useState<PageHistoryState | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
+
+  // The manage board indents the panels under the URL (`.intel`); the competitor
+  // detail card gives them the card body's own padding (`.intelFlush`).
+  const wrap = flush ? styles.intelFlush : styles.intel;
 
   useEffect(() => {
     let live = true;
@@ -52,7 +56,7 @@ export function PageIntel({ pageId }: { pageId: string }) {
   // Still determining baseline state — a quiet placeholder so the row doesn't jump.
   if (insight === null) {
     return (
-      <div className={styles.intel}>
+      <div className={wrap}>
         <div className={styles.intelPills}>
           <span className={`${styles.pill} ${styles.pillSkel}`} />
           <span className={`${styles.pill} ${styles.pillSkel}`} />
@@ -64,7 +68,7 @@ export function PageIntel({ pageId }: { pageId: string }) {
   // No baseline snapshot yet — first check hasn't captured text.
   if (insight.status === "pending") {
     return (
-      <div className={styles.intel}>
+      <div className={wrap}>
         <div className={styles.capturing}>
           <span className={styles.spinner} aria-hidden="true" />
           We&rsquo;ll profile this page as soon as we&rsquo;ve captured it
@@ -78,7 +82,7 @@ export function PageIntel({ pageId }: { pageId: string }) {
   // daily sweep will retry — so the row doesn't look broken after a URL change.
   if (insight.status === "unavailable") {
     return (
-      <div className={styles.intel}>
+      <div className={wrap}>
         <div className={styles.capturing}>We couldn&rsquo;t profile this page yet — we&rsquo;ll try again.</div>
       </div>
     );
@@ -91,7 +95,7 @@ export function PageIntel({ pageId }: { pageId: string }) {
   const historyCount = history?.status === "ready" ? history.items.length : null;
 
   return (
-    <div className={styles.intel}>
+    <div className={wrap}>
       <div className={styles.intelPills}>
         <button
           type="button"

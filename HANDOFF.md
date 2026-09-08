@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-08 (IA REDESIGN IS NOW IN PROGRESS on branch **`wip/ia-redesign`** (local only, NOT pushed — same-computer account switch, so the branch + its commits are already on disk; just `git checkout wip/ia-redesign`). Slice 0 (page_type foundation) + Slice 1 (dashboard grouped by page type) are DONE and design-matched; Slice 1's compact "quiet week" layout is PARKED (owner will design a proper version — a first attempt was built then reverted, see the Slice 1 bullet); NEXT is Slice 2, then Slices 3–5. See "IA REDESIGN — build status" under Suggested next steps for the full slice plan and gotchas. Earlier: fixed a robots.txt parser bug that silently blocked every check on sites using Cloudflare's default managed robots.txt — see Recent work; shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
+_Last updated: 2026-09-08 (IA REDESIGN IS NOW IN PROGRESS on branch **`wip/ia-redesign`** (local only, NOT pushed — same-computer account switch, so the branch + its commits are already on disk; just `git checkout wip/ia-redesign`). Slice 0 (page_type foundation) + Slice 1 (dashboard grouped by page type) + Slice 2 (Competitors index + competitor detail) are DONE and design-matched; Slice 1's compact "quiet week" layout is PARKED (owner will design a proper version — a first attempt was built then reverted, see the Slice 1 bullet); NEXT is Slice 3 (Add Page modal), then Slices 4–5. See "IA REDESIGN — build status" under Suggested next steps for the full slice plan and gotchas. Earlier: fixed a robots.txt parser bug that silently blocked every check on sites using Cloudflare's default managed robots.txt — see Recent work; shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
 
 ## Product in one line
 
@@ -853,12 +853,39 @@ Slices (checkpoint after each; commit per slice; user reviews live before moving
   picking this back up: the owner will supply an updated artboard — do NOT rebuild from the old
   `1406551` attempt or the current artboard without confirming the new design. (Open question the
   owner flagged: the compact rows link to `/competitors/[id]`, a 404 until Slice 2.)
-- **Slice 2 — Competitors index + `competitors/[id]` detail — NOT STARTED.** Turn `ManageBoard` into a
-  competitor index (avatar, domain, "Checked Nm ago" = max lastCheckedAt, "Tracking N pages", changes
-  this week + all-time, "1 page can't be reached" warning; whole card → detail, URL → external). New
-  `competitors/[id]/page.tsx` (follow the `[id]/edit` server-fetch pattern) hosting the per-page block
-  + a **templated summary line** (user chose: compose from homepage `page_insights.profile.summary` +
-  this-week activity counts — NO new AI call).
+- **Slice 2 — Competitors index + `competitors/[id]` detail — DONE + design-matched** (this session,
+  verified live). `ManageBoard` is now a read-only **index** (server component): one health-metric card
+  per competitor — 32px avatar, name, `N page(s) can't be reached` amber pill, domain (mono) opening the
+  external site, a chevron box; a meta row `Checked <Nm> ago` (max `lastCheckedAt`) · `Tracking N pages`
+  · lime-square `N changes this week` (green) or `No changes yet` · right-aligned `N changes since we
+  started watching`. **Whole card → detail** via a stretched `<Link>` (absolute inset-0, z-index 0) so
+  the domain anchor (z-index 1) stays independently clickable — no nested `<a>`. Movement-first sort.
+  The 0-competitor empty state is unchanged. `competitors/page.tsx` now shows `N competitors · M pages
+  tracked` and passes a server `now`.
+  - New **`competitors/[id]/page.tsx`** (server, `maxDuration=60`, same fetch pattern as `[id]/edit`) →
+    renders `CompetitorDetail.tsx` (client). It composes the **templated summary line** in the server
+    component: `<homepage positioning> <N> page(s) tracked — <N changes this week | all quiet this week>.
+    Checked <Nm> ago.` — the positioning clause reads the homepage page's **cached** insight via the new
+    `readCachedPageInsight()` in `insights/generate.ts` (cache-only, **no AI call / no generation**; drops
+    the clause if none cached). `readCachedPageInsight` tolerates BOTH the current `{summary,pricingTiers}`
+    and the legacy `{title,positioning}` insight shapes (the sandbox seed still writes the old shape via
+    the teardown provider — see the check below).
+  - `CompetitorDetail.tsx` (client) = the old per-competitor board block on its own page: §3 header
+    (40px avatar + name + domain) with **Add page** (opens `AddPageDialog`) / **Edit** (→ `[id]/edit`) /
+    **Delete competitor** (`ConfirmDialog` → `deleteCompetitor` then `router.push('/competitors')`, since
+    that action only revalidates); then one **page card** per page — a header (type tag + mono URL +
+    `Checking daily`/`Can't reach`/`Paused` + ⋮ menu: Check now / Edit URL / Pause-Resume / Delete page),
+    a `Tracking since <date · time> · N changes since adding` meta strip, and the body: broken → a pale-
+    amber `Not tracking — <error> · last reached <ago>  Edit URL` strip; paused → nothing; else →
+    `<PageIntel flush />`. `PageIntel` gained a `flush` prop (drops the manage-board's 128px indent so it
+    sits in the card body).
+  - This also makes the **dashboard links to `/competitors/[id]` resolve** (they 404'd before).
+  - CSS: new `.idx*` (index card), `.dtl*` (detail header/summary), `.pg*` (page card) + `.intelFlush`
+    in `competitors/page.module.css`.
+  - ⚠️ **Sandbox seed writes legacy-shaped `page_insights`** (`{title, positioning}` via
+    `getTeardownProvider` in `scripts/seed-sandbox.ts`) — that's why `readCachedPageInsight` reads
+    `positioning` as a fallback. Real app data is `{summary, pricingTiers}` (insights provider). If you
+    ever reshape insights again, update the fallback.
 - **Slice 3 — Add Page modal**, **Slice 4 — Add Competitor takeover (Search=finder + Manual)**,
   **Slice 5 — Edit competitor + Edit URL modal** — NOT STARTED. See the plan file + `TrailWatch Add
   Flows.dc.html`. Reuse `runFind`/`findCompetitorsAction`, `createCompetitor`, `addPages`,
