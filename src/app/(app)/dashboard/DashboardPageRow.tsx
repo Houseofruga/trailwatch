@@ -161,6 +161,7 @@ export function DashboardPageRow({
         </div>
       </div>
 
+      <div className={styles.dashBody}>
       {active.length > 0 ? (
         <>
           <p className={styles.dashSummary}>
@@ -222,6 +223,7 @@ export function DashboardPageRow({
       ) : (
         <div className={styles.dashQuiet}>No changes yet since we started watching.</div>
       )}
+      </div>
     </div>
   );
 }

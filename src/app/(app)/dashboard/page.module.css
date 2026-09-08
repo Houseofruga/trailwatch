@@ -989,6 +989,15 @@ a.pageRowQuietLink:hover {
   font-size: 14px;
 }
 
+/* Body content is indented to line up with the competitor name (past the avatar),
+   matching the design's 54px content offset (20px row padding + 34px here). */
+.dashBody {
+  padding-left: 34px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 /* Change summary — the newest change, with an inline "View change ›". */
 .dashSummary {
   font-size: 16px;
