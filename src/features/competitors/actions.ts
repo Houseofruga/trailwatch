@@ -154,11 +154,15 @@ function captureFlash(outcomes: CaptureOutcome[]): string {
 function readPageRows(formData: FormData) {
   const urls = formData.getAll("url");
   const labels = formData.getAll("label");
-  const rows: { url: string; label: string }[] = [];
+  const types = formData.getAll("pageType");
+  const rows: { url: string; label: string; pageType?: string }[] = [];
   for (let i = 0; i < urls.length; i++) {
     const url = String(urls[i] ?? "").trim();
     if (!url) continue; // blank rows are just unused slots in the form
-    rows.push({ url, label: String(labels[i] ?? "").trim() || "Page" });
+    // Omit an empty/absent page type so pageRow's enum default ('other') applies;
+    // an invalid value would fail the enum parse (caught below).
+    const pt = String(types[i] ?? "").trim();
+    rows.push({ url, label: String(labels[i] ?? "").trim() || "Page", ...(pt ? { pageType: pt } : {}) });
   }
   return rows;
 }
@@ -278,7 +282,9 @@ export async function addPages(_prev: FormState, formData: FormData): Promise<Fo
 
   const { data: newPages, error } = await supabase
     .from("pages")
-    .insert(rowsResult.data.map((r) => ({ competitor_id: competitorId, url: r.url, label: r.label })))
+    .insert(
+      rowsResult.data.map((r) => ({ competitor_id: competitorId, url: r.url, label: r.label, page_type: r.pageType })),
+    )
     .select("id, label");
   if (error || !newPages) return { error: "Couldn't add those pages. Try again." };
 
@@ -287,7 +293,9 @@ export async function addPages(_prev: FormState, formData: FormData): Promise<Fo
 
   revalidatePath("/dashboard");
   revalidatePath("/competitors");
-  redirect(flashUrl("/competitors", captureFlash(outcomes)));
+  // Land back on the competitor's own detail page (where Add page opens now), so
+  // the new page appears in place instead of bouncing to the index.
+  redirect(flashUrl(`/competitors/${competitorId}`, captureFlash(outcomes)));
 }
 
 export async function togglePageActive(pageId: string, nextActive: boolean) {

@@ -40,11 +40,13 @@ function trackingSince(iso: string): string {
 export function CompetitorDetail({
   competitor,
   pagesPerCompetitor,
+  plan,
   summaryLine,
   now,
 }: {
   competitor: CompetitorRow;
   pagesPerCompetitor: number;
+  plan: "free" | "paid";
   summaryLine: string;
   now: number;
 }) {
@@ -79,7 +81,6 @@ export function CompetitorDetail({
 
   const firstUrl = competitor.pages[0]?.url ?? "";
   const domain = originOf(firstUrl);
-  const canAddPage = competitor.pages.length < pagesPerCompetitor;
 
   function openEdit(p: Page) {
     const sibling = competitor.pages.find((other) => other.id !== p.id);
@@ -107,16 +108,10 @@ export function CompetitorDetail({
         </div>
 
         <div className={styles.dtlActions}>
-          {canAddPage ? (
-            <button type="button" className={styles.dtlAddPage} onClick={() => setAddingPage(true)}>
-              <PlusIcon size={13} />
-              Add page
-            </button>
-          ) : (
-            <Link href={`/competitors/add?for=${competitor.id}`} className={styles.dtlAddPage}>
-              Upgrade to add more pages
-            </Link>
-          )}
+          <button type="button" className={styles.dtlAddPage} onClick={() => setAddingPage(true)}>
+            <PlusIcon size={13} />
+            Add page
+          </button>
           <Link href={`/competitors/${competitor.id}/edit`} className={styles.dtlBtn}>
             <PencilIcon />
             Edit
@@ -285,9 +280,12 @@ export function CompetitorDetail({
         <AddPageDialog
           competitorId={competitor.id}
           competitorName={competitor.name}
+          competitorUrl={firstUrl}
           existingDomain={originOf(firstUrl) ?? ""}
-          slotsLeft={pagesPerCompetitor - competitor.pages.length}
+          existingUrls={competitor.pages.map((p) => p.url)}
+          currentCount={competitor.pages.length}
           pagesPerCompetitor={pagesPerCompetitor}
+          plan={plan}
           onClose={() => setAddingPage(false)}
         />
       ) : null}

@@ -57,12 +57,10 @@ export async function getCompetitorsWithPages(): Promise<CompetitorRow[]> {
   const { data, error } = await supabase
     .from("competitors")
     .select(
-      // NOTE: page_type (migration 0008) is intentionally NOT selected yet — until
-      // the migration is applied to the hosted DB and the new add/edit forms write
-      // it, we derive the type from the label below so this query can't break on a
-      // missing column. Switch to selecting page_type (with label as fallback) once
-      // 0008 is live and forms populate it.
-      "id, name, created_at, pages ( id, url, label, is_active, last_checked_at, last_check_status, last_check_error, backfilled_at, created_at, changes ( id, summary, is_meaningful, detected_at, source ) )",
+      // page_type (migration 0008) is the dashboard grouping key, written by the
+      // add/edit forms. Requires 0008 applied to the DB; falls back to the label-
+      // derived type below for any row still on the default.
+      "id, name, created_at, pages ( id, url, label, page_type, is_active, last_checked_at, last_check_status, last_check_error, backfilled_at, created_at, changes ( id, summary, is_meaningful, detected_at, source ) )",
     )
     .order("created_at", { ascending: false })
     .order("created_at", { ascending: true, referencedTable: "pages" })
@@ -78,9 +76,13 @@ export async function getCompetitorsWithPages(): Promise<CompetitorRow[]> {
       id: p.id,
       url: p.url,
       label: p.label,
-      // Until 0008's page_type column is read (see the select note above), derive
-      // the grouping type from the free-text label.
-      pageType: labelToType(p.label),
+      // The stored type (0008); older rows on the 'other' default fall back to the
+      // label-derived type so grouping stays sensible until they're re-typed.
+      pageType:
+        ((p as { page_type?: string }).page_type as PageType | undefined) &&
+        (p as { page_type?: string }).page_type !== "other"
+          ? ((p as { page_type: string }).page_type as PageType)
+          : labelToType(p.label),
       createdAt: p.created_at,
       // Every meaningful change ever recorded for this page (live + archive).
       meaningfulTotal: (p.changes ?? []).filter((ch) => ch.is_meaningful).length,

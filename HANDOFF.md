@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-08 (IA REDESIGN IS NOW IN PROGRESS on branch **`wip/ia-redesign`** (local only, NOT pushed — same-computer account switch, so the branch + its commits are already on disk; just `git checkout wip/ia-redesign`). Slice 0 (page_type foundation) + Slice 1 (dashboard grouped by page type) + Slice 2 (Competitors index + competitor detail) are DONE and design-matched; Slice 1's compact "quiet week" layout is PARKED (owner will design a proper version — a first attempt was built then reverted, see the Slice 1 bullet); NEXT is Slice 3 (Add Page modal), then Slices 4–5. See "IA REDESIGN — build status" under Suggested next steps for the full slice plan and gotchas. Earlier: fixed a robots.txt parser bug that silently blocked every check on sites using Cloudflare's default managed robots.txt — see Recent work; shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
+_Last updated: 2026-09-08 (IA REDESIGN IS NOW IN PROGRESS on branch **`wip/ia-redesign`** (local only, NOT pushed — same-computer account switch, so the branch + its commits are already on disk; just `git checkout wip/ia-redesign`). Slices 0–3 are DONE and design-matched (0 page_type foundation, 1 dashboard grouped by page type, 2 Competitors index + competitor detail, 3 Add Page modal); Slice 1's compact "quiet week" layout is PARKED (owner will design a proper version — a first attempt was built then reverted, see the Slice 1 bullet); NEXT is Slice 4 (Add Competitor takeover), then Slice 5. **Migration `0008` (pages.page_type) IS NOW APPLIED to the hosted DB** (owner ran it this session) and the add form + queries now write/read it. See "IA REDESIGN — build status" under Suggested next steps for the full slice plan and gotchas. Earlier: fixed a robots.txt parser bug that silently blocked every check on sites using Cloudflare's default managed robots.txt — see Recent work; shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
 
 ## Product in one line
 
@@ -886,10 +886,32 @@ Slices (checkpoint after each; commit per slice; user reviews live before moving
     `getTeardownProvider` in `scripts/seed-sandbox.ts`) — that's why `readCachedPageInsight` reads
     `positioning` as a fallback. Real app data is `{summary, pricingTiers}` (insights provider). If you
     ever reshape insights again, update the fallback.
-- **Slice 3 — Add Page modal**, **Slice 4 — Add Competitor takeover (Search=finder + Manual)**,
-  **Slice 5 — Edit competitor + Edit URL modal** — NOT STARTED. See the plan file + `TrailWatch Add
-  Flows.dc.html`. Reuse `runFind`/`findCompetitorsAction`, `createCompetitor`, `addPages`,
-  `updateCompetitorDetails`. Add account-wide duplicate-URL check (does NOT exist yet). NOTE: user
+- **Slice 3 — Add Page modal — DONE + design-matched** (this session, verified live incl. a real add
+  persisting `page_type`). `AddPageDialog.tsx` was reworked from the old multi-row form into the
+  focused single-page modal (IA "Add flows" §2, contextual variant): fixed competitor (avatar + name,
+  no picker — it only opens from a competitor's detail page), one **Page URL** field with live
+  validation (bare domains normalized to `https://`; format + domain-match via `rowValidation`, plus a
+  **duplicate-within-this-competitor** check → "You're already tracking this page"; ✓/⚠ affordance +
+  ok/err note), a **Page name** field, and a **Page type** segmented picker (the six `PAGE_TYPE_VALUES`;
+  selected = dark pill + lime check; **auto-follows the name via `labelToType` until the user picks**).
+  Footer shows `{plan} · will be N of M` + Cancel + **Start tracking** (disabled with reason until a
+  valid URL + name). At the per-competitor page cap the form is swapped for a **plan-limit block** —
+  Free gets an "Upgrade to Pro" (→ `/billing`) + "Maybe later"; **Pro-at-cap** gets a plan-aware
+  "that's the most pages we track… Remove one" + "Got it" (no bogus upgrade CTA). CSS rewritten in
+  `AddPageDialog.module.css`. Wiring: `readPageRows` + `addPages` now persist `page_type`; `addPages`
+  redirects back to `/competitors/[id]` (the detail) so the new page appears in place; `queries.ts`
+  selects `page_type` (0008) with a label-derived fallback for rows still on the `'other'` default.
+  `CompetitorDetail` now **always** shows "+ Add page" (the at-limit case lives in the modal, per the
+  design — the earlier Slice-2 upgrade-link branch was removed). **Live-unreachable (404) pre-submit is
+  intentionally NOT built** — it needs a server round-trip and the design says you can track anyway;
+  the 404 state surfaces post-add on the page card (Slice 2). `PageIntel` gained the `flush` prop used
+  here (added in Slice 2). NOTE: a stale dev-server bundle caused a transient CSS-module hydration
+  mismatch mid-build — fixed by clearing `.next` + restarting; not a code issue.
+- **Slice 4 — Add Competitor takeover (Search=finder + Manual)** and **Slice 5 — Edit competitor +
+  Edit URL modal** — NOT STARTED. See the plan file + `TrailWatch Add Flows.dc.html` (§03 Search, §04
+  shared edit view, §05 plan-limit, §06 edit competitor, §07 edit URL). Reuse
+  `runFind`/`findCompetitorsAction`, `createCompetitor`, `addPages`, `updateCompetitorDetails`. Add an
+  **account-wide** duplicate-URL check (Slice 3 only does duplicate-within-a-competitor). NOTE: user
   chose to **keep `updatePage`'s current wipe-on-URL-change** (do not preserve change history), so the
   Edit-URL modal microcopy must not claim history is kept.
 

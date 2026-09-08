@@ -50,6 +50,7 @@ export default async function CompetitorDetailPage({ params }: { params: Promise
     <CompetitorDetail
       competitor={competitor}
       pagesPerCompetitor={LIMITS[account.plan].pagesPerCompetitor}
+      plan={account.plan}
       summaryLine={summaryLine}
       now={now}
     />
