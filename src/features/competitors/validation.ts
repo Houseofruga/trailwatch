@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PAGE_TYPE_VALUES } from "./pageTypes";
 
 // A registrable public domain: the hostname must end in a dot + a ≥2-letter TLD.
 // Rejects dotless hosts ("asdf", "localhost"), raw IPs (192.168.0.1 → last label
@@ -30,4 +31,8 @@ export const competitorName = z
   .min(1, "Give the competitor a name.")
   .max(80, "Keep the name under 80 characters.");
 
-export const pageRow = z.object({ url: pageUrl, label: pageLabel });
+// The page's type — the dashboard grouping key. Defaults to "other" so callers
+// that don't yet collect a type (older forms, onboarding pre-seed) still parse.
+export const pageType = z.enum(PAGE_TYPE_VALUES).default("other");
+
+export const pageRow = z.object({ url: pageUrl, label: pageLabel, pageType });

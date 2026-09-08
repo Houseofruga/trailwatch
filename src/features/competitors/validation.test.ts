@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { formatUrlError } from "./rowValidation";
+import { pageRow } from "./validation";
 
 // formatUrlError is the shared client surface over the pageUrl schema. The point
 // of interest here is the domain rule: a watched URL must be a real public domain,
@@ -26,5 +27,27 @@ describe("formatUrlError — domain validation", () => {
   it("treats blank as an unused slot, not an error", () => {
     expect(formatUrlError("")).toBeNull();
     expect(formatUrlError("   ")).toBeNull();
+  });
+});
+
+// pageRow now carries a page type. Callers that don't supply one (older forms,
+// onboarding pre-seed) must still parse, defaulting to "other"; a bad type is
+// rejected.
+describe("pageRow — page type", () => {
+  it("defaults pageType to 'other' when omitted", () => {
+    const r = pageRow.safeParse({ url: "https://example.com", label: "Homepage" });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.pageType).toBe("other");
+  });
+
+  it("accepts a valid page type", () => {
+    const r = pageRow.safeParse({ url: "https://example.com/pricing", label: "Pricing", pageType: "pricing" });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.pageType).toBe("pricing");
+  });
+
+  it("rejects an unknown page type", () => {
+    const r = pageRow.safeParse({ url: "https://example.com", label: "Homepage", pageType: "bogus" });
+    expect(r.success).toBe(false);
   });
 });

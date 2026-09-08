@@ -1,5 +1,6 @@
 import type { CompetitorRow } from "@/features/competitors/queries";
 import type { ChangeDetail } from "@/features/changes/queries";
+import { labelToType } from "@/features/competitors/pageTypes";
 import { domainOf, formatFullDate, formatShortDate } from "@/app/(app)/dashboard/dashboardFeed";
 
 // Curated, display-only demo content for the Seeded Demo Dashboard (SPEC Fix 2).
@@ -146,6 +147,9 @@ export function getDemoFeed(now: number): CompetitorRow[] {
       id: `demo-${ci}-${pi}`,
       url: p.url,
       label: p.label,
+      pageType: labelToType(p.label),
+      createdAt: new Date(now).toISOString(),
+      meaningfulTotal: p.changes.filter((ch) => ch.meaningful ?? true).length,
       isActive: p.active ?? true,
       lastCheckedAt: new Date(now - 3 * 60 * 60 * 1000).toISOString(),
       lastCheckStatus: "ok" as const, // demo pages are always reachable

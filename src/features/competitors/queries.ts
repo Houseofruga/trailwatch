@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { labelToType, type PageType } from "./pageTypes";
 
 export type ChangeRow = {
   id: string;
@@ -11,6 +12,15 @@ export type PageRow = {
   id: string;
   url: string;
   label: string;
+  // The dashboard grouping key — pages of the same type across competitors share
+  // a card. Distinct from `label` (the free-text page name).
+  pageType: PageType;
+  // When the page was first added — the "Tracking since" line on the detail view.
+  createdAt: string;
+  // All-time meaningful changes for this page (live + archive-backfilled) — the
+  // "N changes since adding" / "since watching" metric. Derived from the fetched
+  // rows, so no extra query.
+  meaningfulTotal: number;
   isActive: boolean;
   lastCheckedAt: string | null;
   // Last check outcome — 'broken' (a 4xx, usually a wrong/404 URL), 'error' (a
@@ -47,6 +57,11 @@ export async function getCompetitorsWithPages(): Promise<CompetitorRow[]> {
   const { data, error } = await supabase
     .from("competitors")
     .select(
+      // NOTE: page_type (migration 0008) is intentionally NOT selected yet — until
+      // the migration is applied to the hosted DB and the new add/edit forms write
+      // it, we derive the type from the label below so this query can't break on a
+      // missing column. Switch to selecting page_type (with label as fallback) once
+      // 0008 is live and forms populate it.
       "id, name, created_at, pages ( id, url, label, is_active, last_checked_at, last_check_status, last_check_error, backfilled_at, created_at, changes ( id, summary, is_meaningful, detected_at, source ) )",
     )
     .order("created_at", { ascending: false })
@@ -63,6 +78,12 @@ export async function getCompetitorsWithPages(): Promise<CompetitorRow[]> {
       id: p.id,
       url: p.url,
       label: p.label,
+      // Until 0008's page_type column is read (see the select note above), derive
+      // the grouping type from the free-text label.
+      pageType: labelToType(p.label),
+      createdAt: p.created_at,
+      // Every meaningful change ever recorded for this page (live + archive).
+      meaningfulTotal: (p.changes ?? []).filter((ch) => ch.is_meaningful).length,
       isActive: p.is_active,
       lastCheckedAt: p.last_checked_at,
       lastCheckStatus: (p.last_check_status as PageRow["lastCheckStatus"]) ?? null,
