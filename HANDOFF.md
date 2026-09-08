@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-08 (IA REDESIGN IS NOW IN PROGRESS on branch **`wip/ia-redesign`** (local only, NOT pushed — same-computer account switch, so the branch + its commits are already on disk; just `git checkout wip/ia-redesign`). Slice 0 (page_type foundation) + Slice 1 (dashboard grouped by page type) are DONE and design-matched; NEXT is finishing Slice 1's compact "quiet week" layout (user said BUILD it), then Slices 2–5. See "IA REDESIGN — build status" under Suggested next steps for the full slice plan and gotchas. Earlier: fixed a robots.txt parser bug that silently blocked every check on sites using Cloudflare's default managed robots.txt — see Recent work; shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
+_Last updated: 2026-09-08 (IA REDESIGN IS NOW IN PROGRESS on branch **`wip/ia-redesign`** (local only, NOT pushed — same-computer account switch, so the branch + its commits are already on disk; just `git checkout wip/ia-redesign`). Slice 0 (page_type foundation) + Slice 1 (dashboard grouped by page type, INCLUDING the compact "quiet week" layout) are DONE and design-matched; NEXT is Slice 2 (Competitors index + `competitors/[id]` detail). See "IA REDESIGN — build status" under Suggested next steps for the full slice plan and gotchas. Earlier: fixed a robots.txt parser bug that silently blocked every check on sites using Cloudflare's default managed robots.txt — see Recent work; shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
 
 ## Product in one line
 
@@ -842,11 +842,20 @@ Slices (checkpoint after each; commit per slice; user reviews live before moving
   fidelity fixes). One card per page type; rows reuse a shared `PageActionsMenu` (`src/components/`);
   covers active (inline "View change ›" + "N more this week" pill + nested "Recent history" link to
   detail), quiet, web-archive, paused, broken. `DashboardActiveRow`/`DashboardRecentHistory` were
-  retired. **REMAINING in Slice 1: the compact "quiet week" layout** — when the WHOLE week has 0
-  changes, the design (`TrailWatch IA Redesign.dc.html`, "Quiet week" artboard) shows compact cards
-  (small header, one "· quiet" row per page linking to detail + a "Recent history" link, no change
-  body / no ⋮). **User decided: BUILD this.** Currently the code just shows the normal type cards
-  with the heading "All quiet". This is the immediate next task.
+  retired.
+- **Slice 1 compact "quiet week" layout — DONE** (this session, verified live). When the WHOLE week
+  has 0 meaningful changes (`changesThisWeek === 0`), `dashboard/page.tsx` now renders the new
+  `DashboardQuietCard.tsx` per page-type group instead of `DashboardTypeCard` — the compact "Quiet
+  week" artboard: a small header (12.5px uppercase type name · N pages / "0 this week · N since
+  watching") + one collapsed row per page. Each genuinely-quiet page is a two-line link to
+  `/competitors/[id]` (Slice 2): line 1 = 20px avatar + competitor name + "· quiet" + chevron; line 2
+  = green "See what changed before this week → Recent history" when the page has prior history
+  (`meaningfulTotal > 0`), else a muted "No changes yet since we started watching." **Owner decisions
+  (asked, not guessed):** (a) paused + broken pages KEEP their full-fidelity row (reuse
+  `DashboardPageRow`) — a silently-hidden broken page would undermine trust; (b) zero-history quiet
+  pages get the muted note, not the history link. CSS in `page.module.css` (`.quiet*` classes). Stats
+  grid + digest bar are unchanged (the compact treatment is card-level only). Verified live in the
+  sandbox with injected states (has-history / paused / broken all render correctly in one card).
 - **Slice 2 — Competitors index + `competitors/[id]` detail — NOT STARTED.** Turn `ManageBoard` into a
   competitor index (avatar, domain, "Checked Nm ago" = max lastCheckedAt, "Tracking N pages", changes
   this week + all-time, "1 page can't be reached" warning; whole card → detail, URL → external). New
@@ -860,10 +869,13 @@ Slices (checkpoint after each; commit per slice; user reviews live before moving
   chose to **keep `updatePage`'s current wipe-on-URL-change** (do not preserve change history), so the
   Edit-URL modal microcopy must not claim history is kept.
 
-⚠️ **Sandbox `pro-test@` data was hand-modified this session to demo the row states** (injected
-this-week `changes` on Linear/Notion pricing; Figma homepage paused; Notion homepage broken 404;
-Linear homepage given an archive change). Re-run `npx tsx --env-file=.env.local scripts/seed-sandbox.ts`
-to reset to clean seed. Login: `pro-test@trailwatch.test` / `Sandbox-Pro-2026!`.
+⚠️ **Sandbox `pro-test@` was reseeded then hand-modified this session to demo the compact
+quiet-week variants.** The account is now QUIET (0 changes this week) with three injected states on
+its HOMEPAGE group: Figma homepage given an OLD archive meaningful change (→ "has history" green
+line), Notion homepage paused, Linear homepage marked broken (HTTP 404). Re-run
+`npx tsx --env-file=.env.local scripts/seed-sandbox.ts` to reset to clean seed (which is fully quiet,
+all "No changes yet"). Login: `pro-test@trailwatch.test` / `Sandbox-Pro-2026!`. (To see the NON-quiet
+grouped dashboard again, inject a recent non-archive `changes` row on any page.)
 
 **OPEN DECISION — dashboard multi-change row cap (owner).** The multi-change expandable row is
 shipped (see Deviations), but its design file (`dashboard multi-change/Dashboard Multi-Change Row.dc.html`)
