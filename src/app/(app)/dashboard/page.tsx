@@ -142,7 +142,13 @@ export default async function DashboardPage() {
         </ButtonLink>
       </div>
 
-      <p className={styles.digestLine}>You&rsquo;ll get a digest email every Monday at 8:00 UTC.</p>
+      <div className={styles.digestBar}>
+        <svg width="13" height="13" viewBox="0 0 12 12" fill="none" aria-hidden="true" className={styles.digestIcon}>
+          <circle cx="6" cy="6" r="4.6" stroke="currentColor" strokeWidth="1.1" />
+          <path d="M6 3.4V6l1.9 1.1" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <span>You&rsquo;ll get a digest email every Monday at 8:00&nbsp;UTC.</span>
+      </div>
 
       <div className={styles.stats}>
         <div className={styles.stat}>

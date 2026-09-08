@@ -28,12 +28,9 @@ export function DashboardTypeCard({
   const weekCount = rows.reduce((n, r) => n + activeChanges(r.page, now).length, 0);
   const allTime = rows.reduce((n, r) => n + r.page.meaningfulTotal, 0);
 
-  const metric =
-    weekCount > 0
-      ? `${weekCount} change${weekCount === 1 ? "" : "s"} this week · ${allTime} since watching`
-      : allTime > 0
-        ? `0 this week · ${allTime} since watching`
-        : "No changes yet";
+  // Two-tone metric: the "this week" part leads (green when something moved),
+  // the all-time count trails in muted grey — matching the design.
+  const lead = weekCount > 0 ? `${weekCount} change${weekCount === 1 ? "" : "s"} this week` : "0 this week";
 
   return (
     <section className={styles.typeCard}>
@@ -45,7 +42,16 @@ export function DashboardTypeCard({
             · {rows.length} page{rows.length === 1 ? "" : "s"}
           </span>
         </div>
-        <div className={styles.typeMetric}>{metric}</div>
+        <div className={styles.typeMetric}>
+          {weekCount === 0 && allTime === 0 ? (
+            <span className={styles.typeMetricRest}>No changes yet</span>
+          ) : (
+            <>
+              <span className={weekCount > 0 ? styles.typeMetricLead : styles.typeMetricLeadQuiet}>{lead}</span>
+              <span className={styles.typeMetricRest}> · {allTime} since watching</span>
+            </>
+          )}
+        </div>
       </div>
 
       {rows.map((r) => (

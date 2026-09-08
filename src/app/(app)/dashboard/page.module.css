@@ -194,12 +194,22 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* A single muted reassurance line under the header (design), replacing the old
-   bordered two-span meta strip. */
-.digestLine {
-  font-size: 13px;
-  color: var(--ink-4);
-  margin: 14px 0 0 0;
+/* Digest reassurance bar under the header — a bordered strip with a clock icon
+   (design), replacing the old two-span meta strip. */
+.digestBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-alt);
+  padding: 9px 14px;
+  margin: 16px 0 0 0;
+  font-size: 12.5px;
+  color: var(--ink-3);
+}
+.digestIcon {
+  flex: 0 0 auto;
+  color: var(--ink-faint);
 }
 
 .upgradeBanner {
@@ -813,39 +823,51 @@ a.pageRowQuietLink:hover {
   justify-content: space-between;
   gap: 16px;
   border-bottom: 1px solid var(--border-soft);
+  background: var(--surface-alt);
 }
 
 .typeHeadLeft {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
   min-width: 0;
 }
 
+/* Lime dot with a wash ring — the "live" mark (matches the quiet-state dot). */
 .typeSquare {
-  width: 11px;
-  height: 11px;
+  width: 8px;
+  height: 8px;
   background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-wash);
   flex: 0 0 auto;
-  align-self: center;
 }
 
 .typeName {
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .typeCount {
   font-size: 12.5px;
   color: var(--ink-faint);
+  font-weight: 500;
 }
 
 .typeMetric {
   font-size: 12.5px;
-  color: var(--ink-3);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+}
+.typeMetricLead {
+  color: var(--accent-ink);
+}
+.typeMetricLeadQuiet {
+  color: var(--ink-4);
+}
+.typeMetricRest {
+  color: var(--ink-faint);
 }
 
 /* ---- one competitor's page inside a type card ---- */
