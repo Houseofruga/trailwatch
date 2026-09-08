@@ -136,20 +136,23 @@ export function DashboardPageRow({
             </button>
           ) : null}
 
-          {expanded ? (
-            <div className={styles.subList}>
-              {rest.map((c) => (
-                <div key={c.id} className={styles.subChange}>
-                  <p className={styles.subChangeSummary}>
-                    {c.summary ?? FALLBACK} <ViewChange id={c.id} />
-                  </p>
-                  <div className={styles.subChangeWhen}>{timeAgo(c.detectedAt, now)}</div>
-                </div>
-              ))}
-            </div>
+          {/* The week's other changes and the "before this week" history live
+              together inside the expander — hidden until it's opened. */}
+          {rest.length > 0 && expanded ? (
+            <>
+              <div className={styles.subList}>
+                {rest.map((c) => (
+                  <div key={c.id} className={styles.subChange}>
+                    <p className={styles.subChangeSummary}>
+                      {c.summary ?? FALLBACK} <ViewChange id={c.id} />
+                    </p>
+                    <div className={styles.subChangeWhen}>{timeAgo(c.detectedAt, now)}</div>
+                  </div>
+                ))}
+              </div>
+              <DashboardRecentHistory pageId={page.id} />
+            </>
           ) : null}
-
-          <DashboardRecentHistory pageId={page.id} />
         </>
       ) : hasHistory ? (
         // Quiet this week, but there's earlier history to look back on.
