@@ -154,11 +154,12 @@ export function DashboardPageRow({
             </>
           ) : null}
         </>
-      ) : hasHistory ? (
-        // Quiet this week, but there's earlier history to look back on.
-        <DashboardRecentHistory pageId={page.id} />
       ) : (
-        <div className={styles.dashQuiet}>No changes yet since we started watching.</div>
+        // Quiet this week — a single muted line. (The "Recent history" disclosure
+        // lives only inside an active row's expander, never on a quiet row.)
+        <div className={styles.dashQuiet}>
+          {hasHistory ? "No changes this week." : "No changes yet since we started watching."}
+        </div>
       )}
     </div>
   );

@@ -814,6 +814,9 @@ a.pageRowQuietLink:hover {
    the card frame (.compCard) look; the header shows the type + the metric. */
 .typeCard {
   composes: compCard;
+  /* Let the ⋮ row menu (absolutely positioned) escape the card instead of being
+     clipped — compCard sets overflow:hidden. */
+  overflow: visible;
 }
 
 .typeHead {
