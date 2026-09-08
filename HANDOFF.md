@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-08 (page-architecture re-think is in the DESIGN stage — dashboard by page-type, competitors index + a new competitors/[id] detail route — see Suggested next steps; no code yet, will land on a new branch. Also fixed a robots.txt parser bug that silently blocked every check on sites using Cloudflare's default managed robots.txt — see Recent work; shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
+_Last updated: 2026-09-08 (IA REDESIGN IS NOW IN PROGRESS on branch **`wip/ia-redesign`** (local only, NOT pushed — same-computer account switch, so the branch + its commits are already on disk; just `git checkout wip/ia-redesign`). Slice 0 (page_type foundation) + Slice 1 (dashboard grouped by page type) are DONE and design-matched; NEXT is finishing Slice 1's compact "quiet week" layout (user said BUILD it), then Slices 2–5. See "IA REDESIGN — build status" under Suggested next steps for the full slice plan and gotchas. Earlier: fixed a robots.txt parser bug that silently blocked every check on sites using Cloudflare's default managed robots.txt — see Recent work; shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
 
 ## Product in one line
 
@@ -809,23 +809,50 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
 
 ## Suggested next steps for whoever picks this up
 
-**IN FLIGHT — page-architecture re-think (design stage, NOT yet built).** The owner is
-re-organizing three authed screens and has taken a design brief to Claude Design; **no code
-exists yet** and it will land on a **new branch**, not `main`. Heads-up so you don't start
-conflicting work on `dashboard/` or `competitors/`. The locked shape:
-- **Dashboard** regroups from one-card-per-competitor to **one card per page-type** (a new fixed
-  `page_type`: homepage/pricing/product/blog/changelog/other, picked at add-time — replaces the
-  free-text `label` as the grouping key). Card metric = **"N this week · M since watching"** (the
-  all-time count is a new query — today only the trailing week is computed).
-- **Competitors** becomes a competitor **index** (avatar, domain, "Checked Nm ago", "Tracking X of
-  N pages", changes this week + all-time), each card tapping through to a **new `competitors/[id]`
-  detail route** that hosts the current per-page block (lift the inline ⋮ menu + `PageIntel` +
-  badges out of `ManageBoard`).
-- Unchanged: dialogs/popups, the change-detail modal, left nav, settings.
-- **Open question for build:** the competitor-detail "summary line" has no obvious source — decide
-  between latest change `summary`, homepage `page_insights.profile.summary`, or a new synthesized line.
-- The full design brief is in the plan file `~/.claude/plans/well-just-one-more-merry-duckling.md`
-  (local, not in the repo).
+**IA REDESIGN — build status (branch `wip/ia-redesign`, local only, NOT pushed).**
+Same-computer account switch: the branch and all its commits are already on disk. Just
+`git checkout wip/ia-redesign` and continue. Do NOT branch off main again. Full plan +
+paste-ready notes in `~/.claude/plans/well-just-one-more-merry-duckling.md`. The design canvases
+are the SOURCE OF TRUTH (repo-root folder `IA redesign, add plan, competitor/`, files
+`TrailWatch IA Redesign.dc.html` + `TrailWatch Add Flows.dc.html`) — the `screenshots/` subfolder is
+OLDER iterations, do NOT build from those. `.dc.html` renders `{{ placeholders }}` because it's an
+unbound canvas — read those as the dynamic data slots.
+
+Slices (checkpoint after each; commit per slice; user reviews live before moving on):
+- **Slice 0 — page_type foundation — DONE** (`fee52f6`). Migration `0008_page_type.sql` adds
+  `pages.page_type` (homepage/pricing/product/blog/changelog/other) + label backfill; `pageTypes.ts`
+  is the source of truth (`labelToType`); `pageRow` validation carries `pageType`; `queries.ts`
+  `PageRow` gained `pageType` (currently DERIVED from label via `labelToType`, NOT read from the DB
+  column yet — see note), `createdAt`, `meaningfulTotal` (all-time meaningful count = live + archive).
+  ⚠️ **Migration 0008 is NOT applied to hosted Supabase** (no DB password here; owner applies it in
+  the SQL editor like 0005–0007). Until applied + the add/edit forms write page_type, the dashboard
+  groups by label-derived type — fine for existing data.
+- **Slice 1 — dashboard grouped by page type — DONE + design-matched** (`16ee890`…`c41b013`, many
+  fidelity fixes). One card per page type; rows reuse a shared `PageActionsMenu` (`src/components/`);
+  covers active (inline "View change ›" + "N more this week" pill + nested "Recent history" link to
+  detail), quiet, web-archive, paused, broken. `DashboardActiveRow`/`DashboardRecentHistory` were
+  retired. **REMAINING in Slice 1: the compact "quiet week" layout** — when the WHOLE week has 0
+  changes, the design (`TrailWatch IA Redesign.dc.html`, "Quiet week" artboard) shows compact cards
+  (small header, one "· quiet" row per page linking to detail + a "Recent history" link, no change
+  body / no ⋮). **User decided: BUILD this.** Currently the code just shows the normal type cards
+  with the heading "All quiet". This is the immediate next task.
+- **Slice 2 — Competitors index + `competitors/[id]` detail — NOT STARTED.** Turn `ManageBoard` into a
+  competitor index (avatar, domain, "Checked Nm ago" = max lastCheckedAt, "Tracking N pages", changes
+  this week + all-time, "1 page can't be reached" warning; whole card → detail, URL → external). New
+  `competitors/[id]/page.tsx` (follow the `[id]/edit` server-fetch pattern) hosting the per-page block
+  + a **templated summary line** (user chose: compose from homepage `page_insights.profile.summary` +
+  this-week activity counts — NO new AI call).
+- **Slice 3 — Add Page modal**, **Slice 4 — Add Competitor takeover (Search=finder + Manual)**,
+  **Slice 5 — Edit competitor + Edit URL modal** — NOT STARTED. See the plan file + `TrailWatch Add
+  Flows.dc.html`. Reuse `runFind`/`findCompetitorsAction`, `createCompetitor`, `addPages`,
+  `updateCompetitorDetails`. Add account-wide duplicate-URL check (does NOT exist yet). NOTE: user
+  chose to **keep `updatePage`'s current wipe-on-URL-change** (do not preserve change history), so the
+  Edit-URL modal microcopy must not claim history is kept.
+
+⚠️ **Sandbox `pro-test@` data was hand-modified this session to demo the row states** (injected
+this-week `changes` on Linear/Notion pricing; Figma homepage paused; Notion homepage broken 404;
+Linear homepage given an archive change). Re-run `npx tsx --env-file=.env.local scripts/seed-sandbox.ts`
+to reset to clean seed. Login: `pro-test@trailwatch.test` / `Sandbox-Pro-2026!`.
 
 **OPEN DECISION — dashboard multi-change row cap (owner).** The multi-change expandable row is
 shipped (see Deviations), but its design file (`dashboard multi-change/Dashboard Multi-Change Row.dc.html`)
