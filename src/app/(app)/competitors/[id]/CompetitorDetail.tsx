@@ -9,6 +9,8 @@ import { EditPageDialog } from "@/components/EditPageDialog";
 import { CompetitorAvatar } from "@/components/CompetitorAvatar";
 import { ExternalLinkIcon, PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import type { CompetitorRow } from "@/features/competitors/queries";
+import type { PageProfile } from "@/features/insights/types";
+import type { InitialHistory } from "@/features/backfill/types";
 import { deleteCompetitor, deletePage, togglePageActive } from "@/features/competitors/actions";
 import { originOf } from "@/features/competitors/domain";
 import { checkPageNow } from "@/features/checks/actions";
@@ -43,6 +45,8 @@ export function CompetitorDetail({
   plan,
   otherUrls,
   summaryLine,
+  initialProfiles,
+  initialHistories,
   now,
 }: {
   competitor: CompetitorRow;
@@ -50,6 +54,8 @@ export function CompetitorDetail({
   plan: "free" | "paid";
   otherUrls: { url: string; competitor: string }[];
   summaryLine: string;
+  initialProfiles: Record<string, PageProfile | null>;
+  initialHistories: Record<string, InitialHistory>;
   now: number;
 }) {
   const router = useRouter();
@@ -248,7 +254,12 @@ export function CompetitorDetail({
                 </div>
               ) : paused ? null : (
                 <div className={styles.pgBody}>
-                  <PageIntel pageId={p.id} flush />
+                  <PageIntel
+                    pageId={p.id}
+                    flush
+                    initialProfile={initialProfiles[p.id] ?? null}
+                    initialHistory={initialHistories[p.id] ?? null}
+                  />
                 </div>
               )}
             </div>

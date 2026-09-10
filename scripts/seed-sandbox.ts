@@ -282,6 +282,17 @@ async function applyState(pageId: string, state: SeedState) {
       }),
     });
   }
+  // A page carrying archive-sourced changes has, by definition, been backfilled.
+  // Stamp backfilled_at so the detail view hydrates its Recent-history panel from
+  // these stored rows (as it does in production) instead of firing a live Wayback
+  // fetch on every first expand — which is what made the panel "load every time".
+  if ((state.changes ?? []).some((c) => c.archive)) {
+    await fetch(rest(`pages?id=eq.${pageId}`), {
+      method: "PATCH",
+      headers: H,
+      body: JSON.stringify({ backfilled_at: new Date().toISOString() }),
+    });
+  }
 }
 
 async function main() {

@@ -3,6 +3,8 @@ import { getAccount } from "@/features/account/queries";
 import { getCompetitorsWithPages } from "@/features/competitors/queries";
 import { LIMITS } from "@/features/plan/limits";
 import { readCachedPageInsight } from "@/features/insights/generate";
+import { getPageHistory } from "@/features/backfill/queries";
+import type { InitialHistory } from "@/features/backfill/types";
 import { activeChanges, timeAgo } from "@/app/(app)/dashboard/dashboardFeed";
 import { CompetitorDetail } from "./CompetitorDetail";
 
@@ -21,11 +23,30 @@ export default async function CompetitorDetailPage({ params }: { params: Promise
   // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
 
+  // Cache-only read of every page's baseline profile (no AI call), keyed by page
+  // id. Passed to each PageIntel so a revisit hydrates instantly instead of
+  // re-fetching and flashing a skeleton. The homepage's profile also feeds the
+  // templated summary line below.
+  const profiles = await Promise.all(competitor.pages.map((p) => readCachedPageInsight(p.id)));
+  const initialProfiles = Object.fromEntries(competitor.pages.map((p, i) => [p.id, profiles[i]]));
+
+  // Recent-history hydration for the second pill: read every page's stored change
+  // rows up front (a cheap query — live-detected + already-archived changes, no
+  // Wayback fetch). This lets the pill show its count and open instantly on every
+  // visit, for live changes as well as archived ones. `backfilled` tells the pill
+  // whether the heavy Wayback reconstruction has ever run: if not, the first
+  // expand still kicks it off — but in the background, over the rows we already
+  // show, instead of a blocking load.
+  const histories = await Promise.all(competitor.pages.map((p) => getPageHistory(p.id)));
+  const initialHistories: Record<string, InitialHistory> = Object.fromEntries(
+    competitor.pages.map((p, i) => [p.id, { items: histories[i], backfilled: Boolean(p.backfilledAt) }]),
+  );
+
   // Templated summary line — composed, NOT a new AI call. Reads the homepage's
   // already-cached baseline positioning (if any) and layers this-week activity +
   // freshness on top. If nothing is cached, the positioning clause is dropped.
   const homepage = competitor.pages.find((p) => p.pageType === "homepage") ?? competitor.pages[0];
-  const insight = homepage ? await readCachedPageInsight(homepage.id) : null;
+  const insight = homepage ? initialProfiles[homepage.id] : null;
 
   const weekCount = competitor.pages.reduce((n, p) => n + activeChanges(p, now).length, 0);
   const checkedTimes = competitor.pages
@@ -59,6 +80,8 @@ export default async function CompetitorDetailPage({ params }: { params: Promise
       plan={account.plan}
       otherUrls={otherUrls}
       summaryLine={summaryLine}
+      initialProfiles={initialProfiles}
+      initialHistories={initialHistories}
       now={now}
     />
   );
