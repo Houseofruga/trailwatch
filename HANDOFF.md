@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-10 (IA REDESIGN on branch **`wip/ia-redesign`** (local only, NOT pushed — same-computer account switch, so the branch + its commits are already on disk; just `git checkout wip/ia-redesign`). **ALL IA REDESIGN SLICES 0–5 ARE DONE and design-matched, INCLUDING the quiet-week treatment** (0 page_type foundation, 1 dashboard grouped by page type + quiet-week, 2 Competitors index + competitor detail, 3 Add Page modal, 4 Add Competitor takeover, 5 Edit competitor + Edit URL). **Quiet-week resolution (owner decision, this session):** NO separate compact layout — a quiet week uses the normal "This week" page-type-card layout; and a quiet page (no live change yet) shows its most-recent notable change (reconstructed from the Web Archive after it was added) rendered **exactly like a this-week row** — same summary + "View change ›" + age — with just a small "WEB ARCHIVE" provenance tag and no tinted/muted styling. Once a live meaningful change is detected, the active row takes over. See the Slice 1 bullet. Remaining: push/merge `wip/ia-redesign` and a real end-to-end pass. **Migration `0008` (pages.page_type) IS APPLIED to the hosted DB** and the add/edit forms + queries write/read it. See "IA REDESIGN — build status" under Suggested next steps for the full slice plan and gotchas. Earlier: fixed a robots.txt parser bug that silently blocked every check on sites using Cloudflare's default managed robots.txt — see Recent work; shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
+_Last updated: 2026-09-10 (**IA REDESIGN IS NOW MERGED TO `main` AND PUSHED** — `main` is at `ace0b2b` = `origin/main`. The old pre-redesign `main` (`0ff20f7`) is saved on a **local-only** backup branch **`main-pre-ia-redesign`** (not pushed); the `wip/ia-redesign` branch has been deleted (it was a clean fast-forward, so no work lost). **ALL IA REDESIGN SLICES 0–5 ARE DONE and design-matched** (0 page_type foundation, 1 dashboard grouped by page type + quiet-week, 2 Competitors index + competitor detail, 3 Add Page modal, 4 Add Competitor takeover, 5 Edit competitor + Edit URL). **This session (post-merge polish, all on `main`):** (a) **Recent-history pill hydration** — the competitor-detail "Recent history" + "What we're now watching" pills now render from server-provided stored rows so they show their count and open instantly on every visit instead of re-fetching (a never-backfilled page still enriches from Wayback in the background on first expand); seed now stamps `backfilled_at` on archive-seeded pages. (b) **Dashboard "Add page"** — new button in the dashboard header opens `AddPageDialog` in **picker mode** (Add flows §A): choose the competitor first, everything below gated until then; the detail-page Add Page (fixed competitor) is unchanged — one component, two entry points. (c) **UI polish batch** — all overlay modals centered both axes (margin:auto), competitor Search row full-width + copy reframed to "your company/site → find competitors", removed the "esc to close" hint, black/white mobile nav badge, lime active-tab indicator, pills swapped (Recent history first). **Quiet-week (owner decision):** NO separate compact layout — a quiet week uses the normal "This week" page-type-card layout; a quiet page shows its most-recent notable change (Web-Archive reconstructed) rendered exactly like a this-week row with a small "WEB ARCHIVE" tag. **Migration `0008` (pages.page_type) IS APPLIED to the hosted DB.** Remaining: a real §9 end-to-end pass in production; Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: robots.txt parser bug fixed (silently blocked Cloudflare-default sites); change-detail overlay @modal route; dashboard multi-change expandable row; edit-URL re-checks/re-profiles; finder logo robustness; onboarding rework; auth Terms/Privacy.)_
 
 ## Product in one line
 
@@ -13,6 +13,14 @@ drops trivial changes → an LLM summarizes meaningful ones → a weekly digest 
 goes out. Free tier + one paid tier. The edge is **low noise**.
 
 ## Current status
+
+**IA REDESIGN SHIPPED TO `main` (2026-09-10, this session).** The full IA redesign
+(dashboard grouped by page type, Competitors health index, competitor-detail route, new
+add/edit modal flows) plus this session's post-merge polish is merged to `main` and pushed
+(`ace0b2b` = `origin/main`). Old `main` is on the local-only backup `main-pre-ia-redesign`;
+`wip/ia-redesign` deleted. Details in the `_Last updated_` note, Recent work, and the "IA
+REDESIGN — build status" section. Still owed: a real `SPEC.md` §9 end-to-end pass in
+production, and the Pro price raise on the Paddle dashboard (code is display-only).
 
 All eight vertical slices in `SPEC.md` §7 are implemented in the codebase (auth,
 competitor/page CRUD with limits, check engine + noise filter, LLM summaries,
@@ -387,6 +395,33 @@ convenient:
   `public/logo.svg` is the only logo in use (the branded variant was retired).
 
 ## Recent work (all pushed to `main`)
+
+**IA redesign merged to `main` + post-merge polish (2026-09-10, this session, commits `fac1676`,
+`402ef3b`, `ace0b2b`; all pushed).** The whole IA redesign (slices 0–5, previously on the local
+`wip/ia-redesign` branch) was fast-forwarded onto `main` and pushed to `origin`; the old `main`
+(`0ff20f7`) is preserved on a **local-only** backup branch `main-pre-ia-redesign`, and `wip/ia-redesign`
+was deleted. Three commits of polish landed first:
+- **Recent-history pill hydration** (`fac1676`): `PageIntel` (competitor detail) now hydrates both pills
+  from server-provided data — `competitors/[id]/page.tsx` reads each page's cached baseline profile
+  (`readCachedPageInsight`) and stored change rows (`getPageHistory`) and passes them in, so the pills
+  show their count and open instantly on every visit rather than re-fetching + flashing a skeleton. A
+  page that has never been backfilled still runs the heavy Wayback reconstruction on first expand, but
+  in the background over the rows already shown (`InitialHistory` type in `features/backfill/types.ts`).
+  The seed now stamps `backfilled_at` on pages that carry archive-seeded changes so sandbox data mirrors
+  production. Pills reordered: **Recent history** first, then "What we're now watching".
+- **Modal centering + Add-competitor & nav polish** (`402ef3b`): all overlay modals (add page, edit URL,
+  edit competitor, add competitor) centered on both axes via `margin:auto` (tall cards pin to the top
+  gutter and scroll); the competitor **Search** row stretched to full card width (dropped the 560px cap);
+  Search copy reframed to match the finder ("Your company or website" → "we'll find companies competing
+  with you") since it takes YOUR site and returns competitors; removed the "esc to close" hint (esc still
+  works); mobile nav count badge is now black/white (matches desktop); a lime top indicator bar marks the
+  active mobile tab.
+- **Dashboard "Add page"** (`ace0b2b`): see the Slice 3 follow-up under Suggested next steps — new header
+  button opens `AddPageDialog` in picker mode (choose competitor first), one component now serves both the
+  dashboard (picker) and detail-page (fixed) entry points.
+
+All three: ✓ typecheck/lint, 154 tests. Verified live in the sandbox (Pro account) across the gated /
+valid / domain-mismatch / plan-cap add-page states and the centering.
 
 **robots.txt parser fix — pages on Cloudflare-default robots were silently un-watchable (2026-09-08).**
 `isPathAllowed` ([src/features/checks/robots.ts](src/features/checks/robots.ts)) only started a new
@@ -803,7 +838,7 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
 
 - `npm run dev` / `npm run test` / `npm run lint` / `npm run typecheck`.
 - A pre-commit hook runs the tests and blocks the commit if they fail (currently
-  137 passing).
+  154 passing).
 - TypeScript strict; validate all external input. Keep functions small and pure,
   simplest approach, stay in scope (`SPEC.md` §6 is off-limits).
 
@@ -820,10 +855,10 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
 > question; don't guess and don't ship a half-match. (The owner has said they'll switch to Codex if
 > this keeps happening — take the fidelity bar seriously.)
 
-**IA REDESIGN — build status (branch `wip/ia-redesign`, local only, NOT pushed).**
-Same-computer account switch: the branch and all its commits are already on disk. Just
-`git checkout wip/ia-redesign` and continue. Do NOT branch off main again. Full plan +
-paste-ready notes in `~/.claude/plans/well-just-one-more-merry-duckling.md`. The design canvases
+**IA REDESIGN — build status (MERGED TO `main` + PUSHED; `wip/ia-redesign` deleted).**
+All slices below are on `main` (`ace0b2b`). The old pre-redesign `main` is on the local-only
+backup branch `main-pre-ia-redesign`. Full plan + paste-ready notes in
+`~/.claude/plans/well-just-one-more-merry-duckling.md`. The design canvases
 are the SOURCE OF TRUTH (repo-root folder `IA redesign, add plan, competitor/`, files
 `TrailWatch IA Redesign.dc.html` + `TrailWatch Add Flows.dc.html`) — the `screenshots/` subfolder is
 OLDER iterations, do NOT build from those. `.dc.html` renders `{{ placeholders }}` because it's an
@@ -910,6 +945,13 @@ Slices (checkpoint after each; commit per slice; user reviews live before moving
   the 404 state surfaces post-add on the page card (Slice 2). `PageIntel` gained the `flush` prop used
   here (added in Slice 2). NOTE: a stale dev-server bundle caused a transient CSS-module hydration
   mismatch mid-build — fixed by clearing `.next` + restarting; not a code issue.
+  - **Slice 3 follow-up — Add Page now also opens from the dashboard (post-merge, `ace0b2b`).**
+    `AddPageDialog` gained a **picker mode**: pass a `competitors` list (from the dashboard header's
+    new `DashboardAddPage.tsx`) instead of a fixed competitor and step 1 becomes a competitor dropdown
+    with everything below gated ("Select a competitor first.") until one is chosen — Add flows §A–E,
+    built to the artboard (gated / valid / domain-mismatch / plan-cap states). The detail-page call is
+    unchanged (fixed competitor, no picker); the `existingDomain` prop was dropped (derived from the
+    competitor URL). One component serves both entry points.
 - **Slice 4 — Add Competitor takeover — DONE + design-matched** (this session, verified live incl. a
   real create persisting `page_type`, both error precedences, and all plan-limit states). Mounted as an
   **intercepting `@modal` overlay** (`@modal/(.)competitors/add/page.tsx`) — the "Add competitor" link
