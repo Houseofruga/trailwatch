@@ -31,8 +31,27 @@ function percent(used: number, allowed: number): string {
   return `${Math.min(100, (used / allowed) * 100)}%`;
 }
 
+// Which nav section a path belongs to — or null if the path is a sub-route that
+// should NOT move the nav. A competitor detail page (`/competitors/[id]`) and the
+// add-competitor modal (`/competitors/add`) are reachable from either Dashboard or
+// Competitors; the nav should keep reflecting where the user came from, so those
+// return null and the last real section stays highlighted. `/competitors` itself
+// (the index) is a real section.
+function sectionFromPath(path: string): string | null {
+  if (path.startsWith("/competitors/")) return null;
+  const item = NAV.find((n) => path === n.href || path.startsWith(`${n.href}/`));
+  return item ? item.href : null;
+}
+
 export function Sidebar({ account }: { account: Account }) {
   const pathname = usePathname();
+  // The highlighted nav section. It only advances when the user lands on a real
+  // top-level section; sub-routes (competitor detail, add-competitor modal) leave
+  // it where it was, so the nav reflects the section they navigated in from. The
+  // Sidebar lives in the persistent app layout, so this state survives navigation.
+  const [activeSection, setActiveSection] = useState<string>(
+    () => sectionFromPath(pathname) ?? "/competitors",
+  );
   const [menuOpen, setMenuOpen] = useState(false);
   // Mobile only: the account sheet raised from the top-bar avatar.
   const [accountOpen, setAccountOpen] = useState(false);
@@ -52,6 +71,14 @@ export function Sidebar({ account }: { account: Account }) {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setAccountOpen(false);
+  }, [pathname]);
+
+  // Advance the highlighted section only when the path is a real section (a
+  // sub-route returns null and leaves the previous section in place).
+  useEffect(() => {
+    const section = sectionFromPath(pathname);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (section) setActiveSection(section);
   }, [pathname]);
 
   const limits = LIMITS[account.plan];
@@ -76,7 +103,7 @@ export function Sidebar({ account }: { account: Account }) {
       {/* ---- Mobile bottom tab bar: primary navigation (hidden on desktop) ---- */}
       <nav className={styles.tabbar} aria-label="Primary">
         {NAV.map((item) => {
-          const active = pathname.startsWith(item.href);
+          const active = activeSection === item.href;
           return (
             <Link
               key={item.href}
@@ -145,7 +172,7 @@ export function Sidebar({ account }: { account: Account }) {
 
       <nav className={styles.nav}>
         {NAV.map((item) => {
-          const active = pathname.startsWith(item.href);
+          const active = activeSection === item.href;
           return (
             <Link
               key={item.href}
