@@ -5,7 +5,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 56px 20px 48px;
+  padding: 48px 20px;
   overflow-y: auto;
   z-index: 60;
 }
@@ -19,11 +19,14 @@
 .center {
   width: 100%;
   max-width: 680px;
+  /* Center in the viewport on both axes; taller-than-screen content pins to the
+     top gutter and scrolls rather than overflowing off-screen. */
+  margin: auto;
 }
 
 @media (max-width: 640px) {
   .overlay {
-    padding: 20px 12px 40px;
+    padding: 20px 12px;
   }
   .pageWrap {
     padding: 24px 14px 56px;

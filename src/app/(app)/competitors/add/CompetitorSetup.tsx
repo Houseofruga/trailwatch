@@ -294,7 +294,6 @@ export function CompetitorSetup({
             </div>
           </div>
           <div className={styles.cheadRight}>
-            <span className={styles.escHint}>esc to close</span>
             <button type="button" className={styles.close} onClick={onClose} aria-label="Close">&#10005;</button>
           </div>
         </div>
@@ -314,7 +313,7 @@ export function CompetitorSetup({
       {searchHeader("search")}
       <div className={styles.searchBody}>
         <form action={searchAction} className={styles.searchForm}>
-          <span className={styles.flabel}>What&rsquo;s the company called?</span>
+          <span className={styles.flabel}>Your company or website</span>
           <div className={styles.searchRow}>
             <div className={styles.fld} style={{ flex: 1 }}>
               <input
@@ -322,7 +321,7 @@ export function CompetitorSetup({
                 name="company"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="e.g. Retool"
+                placeholder="e.g. yourcompany.com"
                 autoFocus
               />
             </div>
@@ -330,7 +329,7 @@ export function CompetitorSetup({
           </div>
           {!searching && results.length === 0 && !noMatches ? (
             <div className={styles.sub} style={{ marginTop: 10 }}>
-              We&rsquo;ll search the web and pull the logo, domain and a short description.
+              We&rsquo;ll find companies competing with you — pick any to start tracking.
             </div>
           ) : null}
         </form>
