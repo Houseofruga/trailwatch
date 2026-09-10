@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-08 (IA REDESIGN IS NOW IN PROGRESS on branch **`wip/ia-redesign`** (local only, NOT pushed — same-computer account switch, so the branch + its commits are already on disk; just `git checkout wip/ia-redesign`). **ALL IA REDESIGN SLICES 0–5 ARE DONE and design-matched** (0 page_type foundation, 1 dashboard grouped by page type, 2 Competitors index + competitor detail, 3 Add Page modal, 4 Add Competitor takeover, 5 Edit competitor + Edit URL). The ONLY remaining redesign item is Slice 1's compact "quiet week" layout, which is PARKED (owner is designing a proper version — a first attempt was built then reverted, see the Slice 1 bullet). Remaining after that: the owner's quiet-week redesign, then push/merge `wip/ia-redesign` and a real end-to-end pass. **Migration `0008` (pages.page_type) IS APPLIED to the hosted DB** and the add/edit forms + queries write/read it. See "IA REDESIGN — build status" under Suggested next steps for the full slice plan and gotchas. Earlier: fixed a robots.txt parser bug that silently blocked every check on sites using Cloudflare's default managed robots.txt — see Recent work; shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
+_Last updated: 2026-09-08 (IA REDESIGN IS NOW IN PROGRESS on branch **`wip/ia-redesign`** (local only, NOT pushed — same-computer account switch, so the branch + its commits are already on disk; just `git checkout wip/ia-redesign`). **ALL IA REDESIGN SLICES 0–5 ARE DONE and design-matched, INCLUDING the quiet-week treatment** (0 page_type foundation, 1 dashboard grouped by page type + quiet-week, 2 Competitors index + competitor detail, 3 Add Page modal, 4 Add Competitor takeover, 5 Edit competitor + Edit URL). **Quiet-week resolution (owner decision, this session):** NO separate compact layout — a quiet week uses the normal "This week" page-type-card layout; and a quiet page (no live change yet) shows its most-recent notable change (reconstructed from the Web Archive after it was added) rendered **exactly like a this-week row** — same summary + "View change ›" + age — with just a small "WEB ARCHIVE" provenance tag and no tinted/muted styling. Once a live meaningful change is detected, the active row takes over. See the Slice 1 bullet. Remaining: push/merge `wip/ia-redesign` and a real end-to-end pass. **Migration `0008` (pages.page_type) IS APPLIED to the hosted DB** and the add/edit forms + queries write/read it. See "IA REDESIGN — build status" under Suggested next steps for the full slice plan and gotchas. Earlier: fixed a robots.txt parser bug that silently blocked every check on sites using Cloudflare's default managed robots.txt — see Recent work; shipped: change-detail is now an overlay modal via an intercepting @modal route; dashboard multi-change expandable row (v3); editing a page URL now re-checks + re-profiles it (was leaving a stale "can't reach"); finder shows more competitor logos (favicon robustness + real Exa URLs); plus dashboard/modal UI polish. Still owed: Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: back-nav real browser-back; watched URLs require a real public domain; onboarding rework; auth Terms/Privacy + legal breadcrumbs)._
 
 ## Product in one line
 
@@ -844,15 +844,18 @@ Slices (checkpoint after each; commit per slice; user reviews live before moving
   detail), quiet, web-archive, paused, broken. `DashboardActiveRow`/`DashboardRecentHistory` were
   retired. The whole-week-quiet dashboard currently just reuses these normal type cards with the
   heading "All quiet" — a fine, non-broken fallback.
-- **Slice 1 compact "quiet week" layout — PARKED (owner is redesigning it).** The
-  `TrailWatch IA Redesign.dc.html` "Quiet week" artboard shows compact cards (small header, one
-  "· quiet" row per page + a "Recent history" link, no change body / no ⋮). A first implementation
-  was built and verified live (`DashboardQuietCard.tsx`, commit `1406551`) but the owner found the
-  layout/spacing wrong and decided to **design a proper version first**, so it was **reverted**
-  (`5004159`). Until the owner brings the new design, All quiet = the normal type cards (above). When
-  picking this back up: the owner will supply an updated artboard — do NOT rebuild from the old
-  `1406551` attempt or the current artboard without confirming the new design. (Open question the
-  owner flagged: the compact rows link to `/competitors/[id]`, a 404 until Slice 2.)
+- **Slice 1 quiet-week treatment — DONE (owner decision, this session; verified live).** The compact
+  "Quiet week" artboard was abandoned: the owner decided there is **no separate quiet layout** — a quiet
+  week just uses the normal "This week" page-type-card layout ("no difference"), and a quiet page shows
+  **web-archive data** until a live change is detected. Implemented in `DashboardPageRow.tsx`: when a
+  page has no live meaningful change this week but has a `notable` change (its newest live-meaningful or
+  `lastArchived`), it now renders with the **same active-row treatment** (`dashSummary` + "View change ›"
+  + `timeAgo`) instead of the old calmer "Last notable change · <date> / No weekly change count" styling,
+  with a small `.archiveInlineTag` "WEB ARCHIVE" tag beside the age when archive-sourced. The tinted
+  `dashRowQuiet` background is now applied **only** when there's no notable at all (the bare "No changes
+  yet since we started watching." case). An earlier compact attempt (`DashboardQuietCard.tsx`, `1406551`)
+  was reverted (`5004159`) and is NOT used. The old calmer classes (`dashSummaryQuiet`, `archiveTagRow`,
+  `archiveTag`, `archiveNote`) are now unused but left in the CSS.
 - **Slice 2 — Competitors index + `competitors/[id]` detail — DONE + design-matched** (this session,
   verified live). `ManageBoard` is now a read-only **index** (server component): one health-metric card
   per competitor — 32px avatar, name, `N page(s) can't be reached` amber pill, domain (mono) opening the

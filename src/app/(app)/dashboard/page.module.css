@@ -1039,6 +1039,20 @@ a.pageRowQuietLink:hover {
   color: var(--ink-5);
 }
 
+/* Small provenance tag beside the time when a row's change is Web-Archive
+   sourced (a quiet page's reconstructed history), rendered like a this-week row. */
+.archiveInlineTag {
+  margin-left: 8px;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8a6d2b;
+  background: #f6efdd;
+  border: 1px solid #e7d9b8;
+  padding: 1px 6px;
+  vertical-align: middle;
+}
+
 /* "N more this week" — a bordered pill toggle (matches the design's expander). */
 .morePill {
   align-self: flex-start;

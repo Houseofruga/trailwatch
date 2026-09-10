@@ -7,7 +7,7 @@ import { PageActionsMenu } from "@/components/PageActionsMenu";
 import { ExternalLinkIcon } from "@/components/icons";
 import type { CompetitorRow } from "@/features/competitors/queries";
 import { DashboardEditUrl } from "./DashboardEditUrl";
-import { activeChanges, formatFullDate, timeAgo } from "./dashboardFeed";
+import { activeChanges, timeAgo } from "./dashboardFeed";
 import styles from "./page.module.css";
 
 type Page = CompetitorRow["pages"][number];
@@ -165,7 +165,7 @@ export function DashboardPageRow({
   );
 
   return (
-    <div className={`${styles.dashRow} ${active.length === 0 ? styles.dashRowQuiet : ""}`}>
+    <div className={`${styles.dashRow} ${active.length === 0 && !notable ? styles.dashRowQuiet : ""}`}>
       <div className={styles.dashHead}>
         {identity}
         <div className={styles.dashStatus}>
@@ -215,30 +215,21 @@ export function DashboardPageRow({
             ) : null}
           </>
         ) : notable ? (
+          // A page with no live change this week shows its most recent notable
+          // change (usually reconstructed from the Web Archive after it was added)
+          // rendered exactly like a this-week row — just with a small provenance
+          // tag when it's archive-sourced, since the date can be months old.
           <>
-            {notable.isArchive ? (
-              <div className={styles.archiveTagRow}>
-                <span className={styles.archiveTag}>From web archive</span>
-              </div>
-            ) : null}
-            <p className={styles.dashSummaryQuiet}>
+            <p className={styles.dashSummary}>
               {notable.change.summary ?? FALLBACK}{" "}
               <Link href={`/changes/${notable.change.id}`} className={styles.viewChangeInline}>
                 View change ›
               </Link>
             </p>
             <div className={styles.dashTime}>
-              Last notable change · {formatFullDate(notable.change.detectedAt)} ({timeAgo(notable.change.detectedAt, now)})
+              {timeAgo(notable.change.detectedAt, now)}
+              {notable.isArchive ? <span className={styles.archiveInlineTag}>Web archive</span> : null}
             </div>
-            {notable.isArchive ? (
-              <div className={styles.archiveNote}>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true" className={styles.archiveNoteIcon}>
-                  <circle cx="6" cy="6" r="4.6" stroke="currentColor" strokeWidth="1.1" />
-                  <path d="M4 6h4M6 4v4" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
-                </svg>
-                No weekly change count — this page is sourced via Web Archive.
-              </div>
-            ) : null}
           </>
         ) : (
           <div className={styles.dashQuiet}>No changes yet since we started watching.</div>
