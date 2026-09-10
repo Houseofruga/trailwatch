@@ -18,11 +18,28 @@ const rest = (p: string) => `${base}/rest/v1/${p}`;
 const auth = (p: string) => `${base}/auth/v1/${p}`;
 const teardown = process.argv.includes("--teardown");
 
+// A synthetic change to inject on a page. `hoursAgo` (recent) counts toward the
+// "this week" feed; `daysAgo` (old) is for archive/last-notable rows. `archive`
+// marks it Web-Archive-sourced (kept out of the weekly feed). A non-meaningful
+// change with no summary is a "trivial edit filtered" for the dashboard stat.
+type SeedChange = {
+  meaningful: boolean;
+  summary?: string | null;
+  before?: string;
+  after?: string;
+  hoursAgo?: number;
+  daysAgo?: number;
+  archive?: boolean;
+  filterReason?: string;
+};
+// Optional per-page state so the seed can exercise every dashboard/app case.
+type SeedState = { paused?: boolean; broken?: { error: string; daysAgo: number }; changes?: SeedChange[] };
+
 type Seed = {
   email: string;
   password: string;
   plan: "free" | "paid";
-  competitors: Array<{ name: string; pages: Array<{ label: string; url: string; text: string }> }>;
+  competitors: Array<{ name: string; pages: Array<{ label: string; url: string; text: string; state?: SeedState }> }>;
 };
 
 const LINEAR_HOME = `Linear is the issue tracking tool you'll enjoy using. Streamline issues, sprints, and product roadmaps. Built for high-performance teams that ship. Purpose-built for modern software development. Manage issues, cycles, and projects with a fast, keyboard-first interface. Trusted by thousands of the world's best product teams.`;
@@ -42,23 +59,94 @@ const SEEDS: Seed[] = [
     plan: "paid",
     competitors: [
       {
+        // Home = one change this week; Pricing = paused; Changelog = quiet/no history.
         name: "Linear",
         pages: [
-          { label: "Home", url: "https://linear.app", text: LINEAR_HOME },
-          { label: "Pricing", url: "https://linear.app/pricing", text: LINEAR_PRICING },
+          {
+            label: "Home",
+            url: "https://linear.app",
+            text: LINEAR_HOME,
+            state: {
+              changes: [
+                {
+                  meaningful: true,
+                  hoursAgo: 12,
+                  summary:
+                    "Homepage headline changed to “Linear is a purpose-built tool for planning and building products,” with a new Linear for Agents section.",
+                  before: "The issue tracking tool you'll enjoy using.",
+                  after:
+                    "Linear is a purpose-built tool for planning and building products. Meet the system for modern software development.",
+                },
+              ],
+            },
+          },
+          { label: "Pricing", url: "https://linear.app/pricing", text: LINEAR_PRICING, state: { paused: true } },
           { label: "Changelog", url: "https://linear.app/changelog", text: LINEAR_CHANGELOG },
         ],
       },
       {
+        // Home = quiet with Web-Archive history; Pricing = multiple changes this week + a trivial (filtered) edit.
         name: "Notion",
         pages: [
-          { label: "Home", url: "https://www.notion.so", text: NOTION_HOME },
-          { label: "Pricing", url: "https://www.notion.so/pricing", text: NOTION_PRICING },
+          {
+            label: "Home",
+            url: "https://www.notion.so",
+            text: NOTION_HOME,
+            state: {
+              changes: [
+                {
+                  meaningful: true,
+                  archive: true,
+                  daysAgo: 41,
+                  summary:
+                    "Notion reframed the hero from “connected workspace” to “the AI workspace,” leading with Notion AI above the product grid.",
+                  before: "The happier, more organized workspace. Write, plan, and get organized.",
+                  after:
+                    "The AI workspace that works for you. One place where teams find answers, automate the busywork, and get projects done.",
+                },
+              ],
+            },
+          },
+          {
+            label: "Pricing",
+            url: "https://www.notion.so/pricing",
+            text: NOTION_PRICING,
+            state: {
+              changes: [
+                {
+                  meaningful: true,
+                  hoursAgo: 6,
+                  summary:
+                    "Plus plan rose from $10 to $12 per seat/month; the free Notion AI trial was removed and folded into paid plans.",
+                  before: "Plus — $10 per seat / month. Notion AI free trial included.",
+                  after: "Plus — $12 per seat / month. Notion AI now included on Business and above.",
+                },
+                {
+                  meaningful: true,
+                  hoursAgo: 28,
+                  summary:
+                    "Added a new “Enterprise” column with SAML SSO, audit log and unlimited version history; “Contact sales” CTA added.",
+                  before: "Business — $15 per seat / month. Advanced controls.",
+                  after:
+                    "Business — $15 per seat / month. Enterprise — Contact sales. SAML SSO, audit log, unlimited version history.",
+                },
+                { meaningful: false, hoursAgo: 10, filterReason: "Only cosmetic/whitespace differences" },
+              ],
+            },
+          },
         ],
       },
       {
+        // Home = broken / can't reach (404).
         name: "Figma",
-        pages: [{ label: "Home", url: "https://www.figma.com", text: FIGMA_HOME }],
+        pages: [
+          {
+            label: "Home",
+            url: "https://www.figma.com",
+            text: FIGMA_HOME,
+            state: { broken: { error: "Returned HTTP 404 Not Found", daysAgo: 3 } },
+          },
+        ],
       },
     ],
   },
@@ -158,6 +246,44 @@ async function prewarmBaseline(pageId: string, url: string, label: string, text:
   }
 }
 
+// Apply a page's optional test state (paused / broken / injected changes) after
+// it and its baseline snapshot exist. Timestamps are relative to run time so
+// "this week" changes stay recent on every reseed.
+async function applyState(pageId: string, state: SeedState) {
+  if (state.paused) {
+    await fetch(rest(`pages?id=eq.${pageId}`), { method: "PATCH", headers: H, body: JSON.stringify({ is_active: false }) });
+  }
+  if (state.broken) {
+    await fetch(rest(`pages?id=eq.${pageId}`), {
+      method: "PATCH",
+      headers: H,
+      body: JSON.stringify({
+        last_check_status: "broken",
+        last_check_error: state.broken.error,
+        last_checked_at: new Date(Date.now() - state.broken.daysAgo * 864e5).toISOString(),
+      }),
+    });
+  }
+  for (const c of state.changes ?? []) {
+    const when = c.daysAgo != null ? Date.now() - c.daysAgo * 864e5 : Date.now() - (c.hoursAgo ?? 1) * 36e5;
+    await fetch(rest("changes"), {
+      method: "POST",
+      headers: H,
+      body: JSON.stringify({
+        page_id: pageId,
+        is_meaningful: c.meaningful,
+        summary: c.summary ?? null,
+        excerpt_before: c.before ?? null,
+        excerpt_after: c.after ?? null,
+        detected_at: new Date(when).toISOString(),
+        compared_from_at: new Date(when - 24 * 36e5).toISOString(),
+        ...(c.archive ? { source: "archive" } : {}),
+        ...(c.filterReason ? { filter_reason: c.filterReason } : {}),
+      }),
+    });
+  }
+}
+
 async function main() {
   if (teardown) {
     for (const s of SEEDS) {
@@ -221,6 +347,7 @@ async function main() {
           if (!ok) console.log(`   · baseline for ${comp.name}/${pg.label} deferred (will generate on view)`);
           await sleep(2500); // stay under Groq's free-tier TPM limit
         }
+        if (pg.state) await applyState(page.id, pg.state);
         pageCount++;
       }
     }
