@@ -44,7 +44,9 @@ export async function runDailyChecks(): Promise<DailyCheckResult> {
   // backfilled, so the dashboard's "Last notable change" fills in across all pages
   // over time — not just ones the user has added since, or clicked into. Guarded by
   // backfilled_at (stamped before the work → runs at most once per page) and bounded
-  // per run; sequential to avoid hammering the archive.
+  // per run; sequential to avoid hammering the archive. If the archive was merely
+  // unreachable, clear the stamp again so a later run retries instead of caching a
+  // false "no history".
   let backfilled = 0;
   const needsBackfill = (pages ?? [])
     .filter((p) => !p.backfilled_at)
@@ -52,9 +54,15 @@ export async function runDailyChecks(): Promise<DailyCheckResult> {
   for (const page of needsBackfill) {
     try {
       await service.from("pages").update({ backfilled_at: new Date().toISOString() }).eq("id", page.id);
-      const n = await backfillPage(page.id, { url: page.url, label: page.label });
-      if (n > 0) backfilled += 1;
+      const result = await backfillPage(page.id, { url: page.url, label: page.label });
+      if (!result.ok) {
+        await service.from("pages").update({ backfilled_at: null }).eq("id", page.id);
+      } else if (result.rows > 0) {
+        backfilled += 1;
+      }
     } catch (err) {
+      // Unknown failure mid-backfill — clear the guard so the next run can retry.
+      await service.from("pages").update({ backfilled_at: null }).eq("id", page.id);
       console.error(`Backfill warming failed for page ${page.id}:`, err);
     }
   }

@@ -32,16 +32,23 @@ type ArchiveChange = {
  * extractor/normalizer (in wayback.ts), the same pure noise filter, and the same
  * summarizer seam. Writes with the service client, mirroring runCheck.ts.
  *
- * Idempotent by design: the caller sets pages.backfilled_at before invoking this
- * and only invokes it when that was null, so it runs at most once per page.
- * Returns the number of history rows created (0 on a thin/empty archive).
+ * The caller sets pages.backfilled_at before invoking this (double-run guard) and
+ * only invokes it when that was null, so it runs at most once per page — but it
+ * must clear that stamp when this returns `ok:false`, so a page whose archive was
+ * merely unreachable is retried later rather than cached as "no history".
+ *
+ * Returns `ok:false` when the archive fetch itself failed (CDX unreachable /
+ * rate-limited) — retryable; `ok:true` otherwise, with `rows` = history rows
+ * created (0 on a genuinely thin/empty archive, which is a real "done" result).
  */
 export async function backfillPage(
   pageId: string,
   page: { url: string; label: string },
-): Promise<number> {
-  const captures = await listCaptures(page.url, MAX_CAPTURES);
-  if (captures.length < 2) return 0; // nothing to diff
+): Promise<{ ok: boolean; rows: number }> {
+  const list = await listCaptures(page.url, MAX_CAPTURES);
+  if (!list.ok) return { ok: false, rows: 0 }; // couldn't reach the archive — retryable
+  const captures = list.captures;
+  if (captures.length < 2) return { ok: true, rows: 0 }; // reached, but nothing to diff
 
   // Fetch each capture's text in order; a failed capture just drops out.
   const texts = await sequential(captures, (c) => fetchArchivedText(c, page.url));
@@ -73,12 +80,12 @@ export async function backfillPage(
     });
   }
 
-  if (rows.length === 0) return 0;
+  if (rows.length === 0) return { ok: true, rows: 0 };
 
   const service = createServiceClient();
   const { error } = await service.from("changes").insert(rows);
   if (error) throw new Error(error.message);
-  return rows.length;
+  return { ok: true, rows: rows.length };
 }
 
 // A meaningful diff always yields a row. The noise filter has already judged this

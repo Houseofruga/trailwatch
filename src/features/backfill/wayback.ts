@@ -70,8 +70,14 @@ function monthsAgoStamp(months: number): string {
   return d.toISOString().slice(0, 10).replace(/-/g, "");
 }
 
-/** List up to `cap` recent distinct-content captures for a URL (metadata only). */
-export async function listCaptures(url: string, cap: number): Promise<Capture[]> {
+/**
+ * List up to `cap` recent distinct-content captures for a URL (metadata only).
+ * `ok:false` means the CDX request itself failed (timeout, rate-limit, network) so
+ * the caller can retry later instead of caching a wrong "no history"; `ok:true`
+ * with an empty list means the archive genuinely has no captures in the window.
+ * (Same contract as `latestCaptureDate`.)
+ */
+export async function listCaptures(url: string, cap: number): Promise<{ ok: boolean; captures: Capture[] }> {
   const params = new URLSearchParams({
     url,
     output: "json",
@@ -87,8 +93,8 @@ export async function listCaptures(url: string, cap: number): Promise<Capture[]>
     maxBytes: 512_000,
     timeoutMs: 25_000,
   });
-  if (!res.ok) return [];
-  return parseCaptures(res.html, cap);
+  if (!res.ok) return { ok: false, captures: [] };
+  return { ok: true, captures: parseCaptures(res.html, cap) };
 }
 
 /**
