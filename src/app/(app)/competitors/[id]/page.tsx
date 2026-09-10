@@ -35,6 +35,12 @@ export default async function CompetitorDetailPage({ params }: { params: Promise
     ? checkedTimes.reduce((a, b) => (new Date(a) > new Date(b) ? a : b))
     : null;
 
+  // Other competitors' page URLs — the account-wide duplicate check in the Edit
+  // dialog (this competitor's own pages are being edited, so they're excluded).
+  const otherUrls = competitors
+    .filter((c) => c.id !== id)
+    .flatMap((c) => c.pages.map((p) => ({ url: p.url, competitor: c.name })));
+
   const pageCount = competitor.pages.length;
   const parts: string[] = [];
   if (insight?.summary?.trim()) {
@@ -51,6 +57,7 @@ export default async function CompetitorDetailPage({ params }: { params: Promise
       competitor={competitor}
       pagesPerCompetitor={LIMITS[account.plan].pagesPerCompetitor}
       plan={account.plan}
+      otherUrls={otherUrls}
       summaryLine={summaryLine}
       now={now}
     />

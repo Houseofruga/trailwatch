@@ -448,15 +448,16 @@ export async function updateCompetitorDetails(
   const nameResult = competitorName.safeParse(formData.get("name"));
   if (!nameResult.success) return { error: nameResult.error.issues[0].message };
 
-  // The form posts each page's full URL and label; the domain field is a
+  // The form posts each page's full URL, label and type; the domain field is a
   // client-side convenience for rewriting them all, so it isn't submitted.
   // A blank pageId means a row added on this screen — insert, don't update.
   const ids = formData.getAll("pageId").map(String);
   const urls = formData.getAll("url").map((v) => String(v).trim());
   const labels = formData.getAll("label").map((v) => String(v).trim());
+  const types = formData.getAll("pageType").map((v) => String(v).trim());
 
   const rows = ids
-    .map((id, i) => ({ id, url: urls[i] ?? "", label: labels[i] ?? "" }))
+    .map((id, i) => ({ id, url: urls[i] ?? "", label: labels[i] ?? "", pageType: types[i] || undefined }))
     .filter((row) => row.id || row.url || row.label); // drop untouched new slots
   if (rows.length === 0) return { error: "A competitor needs at least one page." };
 
@@ -469,11 +470,28 @@ export async function updateCompetitorDetails(
     };
   }
 
-  const rowsResult = z.array(pageRow).safeParse(rows.map(({ url, label }) => ({ url, label })));
+  const rowsResult = z.array(pageRow).safeParse(rows.map(({ url, label, pageType }) => ({ url, label, pageType })));
   if (!rowsResult.success) return { error: rowsResult.error.issues[0].message };
 
   const domainError = findDomainMismatch(rowsResult.data[0].url, rowsResult.data);
   if (domainError) return { error: domainError };
+
+  // Account-wide unique-URL check, excluding this competitor's own pages (they're
+  // being edited here).
+  const { data: otherPages } = await supabase
+    .from("pages")
+    .select("url, competitors!inner(name)")
+    .neq("competitor_id", competitorId);
+  const owner = new Map<string, string>();
+  for (const p of otherPages ?? []) {
+    const rel = p.competitors as { name?: string } | { name?: string }[] | null;
+    const cName = (Array.isArray(rel) ? rel[0]?.name : rel?.name) ?? "another competitor";
+    owner.set(canonicalUrl(p.url), cName);
+  }
+  for (const r of rowsResult.data) {
+    const name = owner.get(canonicalUrl(r.url));
+    if (name) return { error: `You're already tracking that page under ${name}. URLs are unique across your account.` };
+  }
 
   const { error: nameError } = await supabase
     .from("competitors")
@@ -481,11 +499,20 @@ export async function updateCompetitorDetails(
     .eq("id", competitorId);
   if (nameError) return { error: "Couldn't save that name. Try again." };
 
+  // Delete pages removed on this screen (present in the DB but not resubmitted).
+  const keptIds = rows.map((r) => r.id).filter(Boolean);
+  const { data: currentPages } = await supabase.from("pages").select("id").eq("competitor_id", competitorId);
+  const removed = (currentPages ?? []).map((p) => p.id).filter((id) => !keptIds.includes(id));
+  if (removed.length > 0) {
+    const { error: delError } = await supabase.from("pages").delete().in("id", removed);
+    if (delError) return { error: "Couldn't remove a page. Try again." };
+  }
+
   for (const [i, row] of rows.entries()) {
-    const { url, label } = rowsResult.data[i];
+    const { url, label, pageType } = rowsResult.data[i];
     const { error: pageError } = row.id
-      ? await supabase.from("pages").update({ url, label }).eq("id", row.id)
-      : await supabase.from("pages").insert({ competitor_id: competitorId, url, label });
+      ? await supabase.from("pages").update({ url, label, page_type: pageType }).eq("id", row.id)
+      : await supabase.from("pages").insert({ competitor_id: competitorId, url, label, page_type: pageType });
     if (pageError) return { error: "Updated the name, but couldn't save every page. Try again." };
   }
 

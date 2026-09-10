@@ -7,27 +7,12 @@ import { CompetitorAvatar } from "@/components/CompetitorAvatar";
 import { PageTypeSelect } from "@/components/PageTypeSelect";
 import { findCompetitorsAction, type FinderState } from "@/app/(marketing)/actions";
 import { createCompetitor, type FormState } from "@/features/competitors/actions";
-import { formatUrlError, domainMismatchError } from "@/features/competitors/rowValidation";
+import { canonUrl as canon, toFullUrl as toFull, hostname as hostOf, rowUrlError } from "@/features/competitors/rowRules";
 import { type PageType } from "@/features/competitors/pageTypes";
 import styles from "./CompetitorSetup.module.css";
 
 type ExistingUrl = { url: string; competitor: string };
 type Row = { key: string; url: string; label: string; pageType: PageType; locked: boolean };
-
-function canon(u: string): string {
-  return u.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/+$/, "");
-}
-function toFull(u: string): string {
-  const t = u.trim();
-  return t ? (/^https?:\/\//i.test(t) ? t : `https://${t}`) : "";
-}
-function hostOf(u: string): string | null {
-  try {
-    return new URL(toFull(u)).hostname.replace(/^www\./, "");
-  } catch {
-    return null;
-  }
-}
 function newRow(partial?: Partial<Row>): Row {
   return {
     key: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -116,18 +101,7 @@ export function CompetitorSetup({
   // --- row validation ---
   const row0Full = toFull(rows[0]?.url ?? "");
   function rowError(r: Row): string | null {
-    const full = toFull(r.url);
-    if (!full) return null;
-    const fmt = formatUrlError(full);
-    if (fmt) return fmt;
-    // Duplicate takes precedence over a domain mismatch (design §4 C): a URL
-    // already tracked elsewhere reads as "already tracked under X", even when it's
-    // also on a different domain than this competitor.
-    const owner = dupOwner.get(canon(full));
-    if (owner) return `Already tracked under ${owner}. URLs are unique across your whole account.`;
-    const mismatch = r.locked ? null : domainMismatchError(full, row0Full || full);
-    if (mismatch) return mismatch;
-    return null;
+    return rowUrlError(r.url, { row0Full, locked: r.locked, dupOwner });
   }
   const rowErrors = rows.map(rowError);
   const filledRows = rows.filter((r) => r.url.trim());

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BackLink } from "@/components/BackLink";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -15,6 +14,7 @@ import { originOf } from "@/features/competitors/domain";
 import { checkPageNow } from "@/features/checks/actions";
 import { formatFullDate, timeAgo } from "@/app/(app)/dashboard/dashboardFeed";
 import { PageIntel } from "../PageIntel";
+import { EditCompetitorDialog } from "./EditCompetitorDialog";
 import toastStyles from "@/components/Toast.module.css";
 import styles from "../page.module.css";
 
@@ -41,12 +41,14 @@ export function CompetitorDetail({
   competitor,
   pagesPerCompetitor,
   plan,
+  otherUrls,
   summaryLine,
   now,
 }: {
   competitor: CompetitorRow;
   pagesPerCompetitor: number;
   plan: "free" | "paid";
+  otherUrls: { url: string; competitor: string }[];
   summaryLine: string;
   now: number;
 }) {
@@ -54,6 +56,7 @@ export function CompetitorDetail({
   const [openMenuPageId, setOpenMenuPageId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
   const [addingPage, setAddingPage] = useState(false);
+  const [editingCompetitor, setEditingCompetitor] = useState(false);
   const [editingPage, setEditingPage] = useState<EditingPage | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -112,10 +115,10 @@ export function CompetitorDetail({
             <PlusIcon size={13} />
             Add page
           </button>
-          <Link href={`/competitors/${competitor.id}/edit`} className={styles.dtlBtn}>
+          <button type="button" className={styles.dtlBtn} onClick={() => setEditingCompetitor(true)}>
             <PencilIcon />
             Edit
-          </Link>
+          </button>
           <button type="button" className={styles.dtlBtnDanger} onClick={() => setPendingDelete({ kind: "competitor" })}>
             <TrashIcon />
             Delete competitor
@@ -287,6 +290,18 @@ export function CompetitorDetail({
           pagesPerCompetitor={pagesPerCompetitor}
           plan={plan}
           onClose={() => setAddingPage(false)}
+        />
+      ) : null}
+
+      {editingCompetitor ? (
+        <EditCompetitorDialog
+          competitorId={competitor.id}
+          initialName={competitor.name}
+          initialPages={competitor.pages.map((p) => ({ id: p.id, url: p.url, label: p.label, pageType: p.pageType }))}
+          otherUrls={otherUrls}
+          pagesPerCompetitor={pagesPerCompetitor}
+          plan={plan}
+          onClose={() => setEditingCompetitor(false)}
         />
       ) : null}
 

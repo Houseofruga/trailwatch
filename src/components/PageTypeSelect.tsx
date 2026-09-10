@@ -6,25 +6,24 @@ import styles from "./PageTypeSelect.module.css";
 /**
  * The per-row page-type control in the Add/Edit competitor edit view — a compact
  * dropdown styled as a `.fld` box with a chevron (design "Add flows" §4). A native
- * <select> keeps it accessible and lets it post its value inside the form
- * (`name="pageType"`, read by readPageRows via getAll).
+ * <select> keeps it accessible. It is a pure controlled control with NO form
+ * `name`, so it never submits on its own — callers carry the chosen type in their
+ * own hidden `pageType` input (alongside the normalized URL), avoiding a duplicate
+ * `pageType` field in the form.
  */
 export function PageTypeSelect({
   value,
   onChange,
-  name = "pageType",
   disabled = false,
 }: {
   value: PageType;
   onChange: (t: PageType) => void;
-  name?: string;
   disabled?: boolean;
 }) {
   return (
     <div className={styles.wrap}>
       <select
         className={styles.select}
-        name={name}
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value as PageType)}
