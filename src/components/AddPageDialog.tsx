@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { CompetitorAvatar } from "./CompetitorAvatar";
@@ -30,59 +30,122 @@ function StartButton({ disabled }: { disabled: boolean }) {
   );
 }
 
-type AddPageDialogProps = {
-  competitorId: string;
-  competitorName: string;
-  competitorUrl: string;
-  existingDomain: string;
+// One competitor the modal can add a page to. In picker mode the modal is handed
+// the whole list and the user chooses; in fixed mode the caller passes a single
+// one it already knows (its own detail page).
+export type AddPageCompetitor = {
+  id: string;
+  name: string;
+  url: string;
   existingUrls: string[];
   currentCount: number;
+};
+
+function Chevron() {
+  return (
+    <svg width="9" height="6" viewBox="0 0 9 6" fill="none" aria-hidden="true" className={styles.compChevron}>
+      <path d="M1 1l3.5 3.5L8 1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+type AddPageDialogProps = {
+  // Picker mode (opened from the dashboard): the user picks the competitor first.
+  competitors?: AddPageCompetitor[];
+  // Fixed mode (opened from a competitor's detail page): competitor is known.
+  competitorId?: string;
+  competitorName?: string;
+  competitorUrl?: string;
+  existingUrls?: string[];
+  currentCount?: number;
   pagesPerCompetitor: number;
   plan: "free" | "paid";
   onClose: () => void;
 };
 
 /**
- * Add Page — a focused modal (IA "Add flows" §2). Competitor is fixed (opened
- * from its detail page); URL is validated against the competitor's domain and
- * against pages already tracked; a page-type picker sets the dashboard grouping
- * key. At the plan's per-competitor page cap the form is replaced by an upgrade
- * prompt.
+ * Add Page — a focused modal (IA "Add flows" §A–E). URL is validated against the
+ * chosen competitor's domain and against pages already tracked; a page-type
+ * picker sets the dashboard grouping key. At the competitor's per-plan page cap
+ * the form is replaced by an upgrade prompt.
+ *
+ * Two entry points share this one modal. From a competitor's detail page the
+ * competitor is fixed and shown as a static row. From the dashboard there is no
+ * competitor context, so step 1 is a picker and everything below stays inert
+ * (§A "nothing below is active yet") until one is chosen.
  */
 export function AddPageDialog({
+  competitors,
   competitorId,
   competitorName,
   competitorUrl,
-  existingDomain,
   existingUrls,
   currentCount,
   pagesPerCompetitor,
   plan,
   onClose,
 }: AddPageDialogProps) {
+  const isPicker = Array.isArray(competitors);
+  const fixed: AddPageCompetitor | null = competitorId
+    ? {
+        id: competitorId,
+        name: competitorName ?? "",
+        url: competitorUrl ?? "",
+        existingUrls: existingUrls ?? [],
+        currentCount: currentCount ?? 0,
+      }
+    : null;
+
   const [state, formAction] = useActionState<FormState, FormData>(addPages, null);
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [url, setUrl] = useState("");
   const [name, setName] = useState("");
   const [pickedType, setPickedType] = useState<PageType | null>(null);
+  const pickerRef = useRef<HTMLDivElement>(null);
 
-  const atLimit = currentCount >= pagesPerCompetitor;
-  const domain = existingDomain || originOf(competitorUrl) || "";
+  // Close the competitor menu on an outside click / Escape.
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onDown(e: MouseEvent) {
+      if (!pickerRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    }
+    function onEsc(e: KeyboardEvent) {
+      if (e.key === "Escape") setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onEsc);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onEsc);
+    };
+  }, [menuOpen]);
+
+  const selected: AddPageCompetitor | null = isPicker
+    ? competitors!.find((c) => c.id === pickedId) ?? null
+    : fixed;
+
+  // Nothing below step 1 is usable until a competitor is chosen (picker mode).
+  const gated = isPicker && !selected;
+
+  const domain = selected ? originOf(selected.url) || "" : "";
   const trimmed = url.trim();
   // Accept bare domains (design shows "stripe.com/customers" as valid) by
-  // normalizing to https:// before validating and submitting — same as the
-  // onboarding add-competitor modal.
+  // normalizing to https:// before validating and submitting.
   const full = trimmed ? (/^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`) : "";
-  const dup = Boolean(full) && existingUrls.some((u) => normalize(u) === normalize(full));
-  const urlError = full
-    ? formatUrlError(full) ??
-      domainMismatchError(full, domain) ??
-      (dup ? "You’re already tracking this page." : null)
-    : null;
+  const dup = Boolean(full) && Boolean(selected) && selected!.existingUrls.some((u) => normalize(u) === normalize(full));
+  const urlError =
+    full && selected
+      ? formatUrlError(full) ??
+        domainMismatchError(full, domain) ??
+        (dup ? "You’re already tracking this page." : null)
+      : null;
   const urlValid = Boolean(full) && !urlError;
   // The picked type wins; until the user picks, follow the name (labelToType).
   const effectiveType: PageType = pickedType ?? labelToType(name || "");
-  const canSubmit = urlValid && name.trim().length > 0;
+  const canSubmit = Boolean(selected) && urlValid && name.trim().length > 0;
   const planLabel = plan === "free" ? "Free" : "Pro";
+  const atLimit = Boolean(selected) && selected!.currentCount >= pagesPerCompetitor;
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -98,7 +161,7 @@ export function AddPageDialog({
         </div>
 
         <form action={formAction}>
-          <input type="hidden" name="competitorId" value={competitorId} />
+          <input type="hidden" name="competitorId" value={selected?.id ?? ""} />
           <input type="hidden" name="url" value={full} />
           <input type="hidden" name="label" value={name.trim()} />
           <input type="hidden" name="pageType" value={effectiveType} />
@@ -106,26 +169,74 @@ export function AddPageDialog({
           <div className={styles.body}>
             <div className={styles.field}>
               <span className={styles.flabel}>Competitor</span>
-              <div className={styles.compRow}>
-                <CompetitorAvatar url={competitorUrl} name={competitorName} className={styles.compAvatar} />
-                <span className={styles.compName}>{competitorName}</span>
-              </div>
+              {isPicker ? (
+                <div className={styles.compPicker} ref={pickerRef}>
+                  <button
+                    type="button"
+                    className={styles.compSelect}
+                    onClick={() => setMenuOpen((o) => !o)}
+                    aria-haspopup="listbox"
+                    aria-expanded={menuOpen}
+                  >
+                    {selected ? (
+                      <span className={styles.compSelectVal}>
+                        <CompetitorAvatar url={selected.url} name={selected.name} className={styles.compAvatar} />
+                        {selected.name}
+                      </span>
+                    ) : (
+                      <span className={styles.compPlaceholder}>Choose a competitor</span>
+                    )}
+                    <Chevron />
+                  </button>
+                  {menuOpen ? (
+                    <div className={styles.compMenu} role="listbox">
+                      {competitors!.map((c) => (
+                        <button
+                          type="button"
+                          key={c.id}
+                          role="option"
+                          aria-selected={c.id === selected?.id}
+                          className={c.id === selected?.id ? styles.compMenuItemActive : styles.compMenuItem}
+                          onClick={() => {
+                            setPickedId(c.id);
+                            setMenuOpen(false);
+                          }}
+                        >
+                          <CompetitorAvatar url={c.url} name={c.name} className={styles.compAvatar} />
+                          <span className={styles.compMenuName}>{c.name}</span>
+                          {c.id === selected?.id ? (
+                            <span className={styles.compMenuCheck} aria-hidden="true">
+                              &#10003;
+                            </span>
+                          ) : null}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <div className={styles.compRow}>
+                  <CompetitorAvatar url={selected!.url} name={selected!.name} className={styles.compAvatar} />
+                  <span className={styles.compName}>{selected!.name}</span>
+                </div>
+              )}
             </div>
 
             {!atLimit ? (
               <>
                 <div className={styles.field}>
                   <span className={styles.flabel}>Page URL</span>
-                  <div className={urlError ? styles.fldErr : styles.fld}>
+                  <div className={gated ? styles.fldDisabled : urlError ? styles.fldErr : styles.fld}>
                     <input
                       className={styles.urlInput}
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
                       placeholder="competitor.com/pricing"
                       inputMode="url"
-                      autoFocus
+                      disabled={gated}
+                      autoFocus={!isPicker}
                     />
-                    {trimmed ? (
+                    {!gated && trimmed ? (
                       urlError ? (
                         <span className={styles.warnIcon} aria-hidden="true">
                           &#9888;
@@ -137,7 +248,9 @@ export function AddPageDialog({
                       )
                     ) : null}
                   </div>
-                  {urlError ? (
+                  {gated ? (
+                    <div className={styles.gateHint}>Select a competitor first.</div>
+                  ) : urlError ? (
                     <div className={styles.errNote}>
                       <span aria-hidden="true">&#9888;</span>
                       <span>{urlError}</span>
@@ -152,12 +265,13 @@ export function AddPageDialog({
 
                 <div className={styles.field}>
                   <span className={styles.flabel}>Page name</span>
-                  <div className={styles.fld}>
+                  <div className={gated ? styles.fldDisabled : styles.fld}>
                     <input
                       className={styles.nameInput}
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Pricing"
+                      disabled={gated}
                     />
                   </div>
                 </div>
@@ -169,11 +283,12 @@ export function AddPageDialog({
                       <button
                         type="button"
                         key={t}
-                        className={t === effectiveType ? styles.pillOn : styles.pill}
+                        className={gated ? styles.pillDisabled : t === effectiveType ? styles.pillOn : styles.pill}
                         onClick={() => setPickedType(t)}
-                        aria-pressed={t === effectiveType}
+                        aria-pressed={!gated && t === effectiveType}
+                        disabled={gated}
                       >
-                        {t === effectiveType ? (
+                        {!gated && t === effectiveType ? (
                           <svg width="10" height="8" viewBox="0 0 11 9" fill="none" aria-hidden="true">
                             <path d="M1 4.5L4 7.5L10 1.5" stroke="#9ff50a" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
@@ -200,7 +315,7 @@ export function AddPageDialog({
                 </span>
                 <div>
                   <div className={styles.limitTitle}>
-                    {competitorName} is at {currentCount} of {pagesPerCompetitor} page
+                    {selected!.name} is at {selected!.currentCount} of {pagesPerCompetitor} page
                     {pagesPerCompetitor === 1 ? "" : "s"} on {planLabel}
                   </div>
                   <div className={styles.sub}>
@@ -230,7 +345,9 @@ export function AddPageDialog({
           ) : (
             <div className={styles.footer}>
               <span className={styles.sub}>
-                {planLabel} · will be {currentCount + 1} of {pagesPerCompetitor}
+                {selected
+                  ? `${planLabel} · will be ${selected.currentCount + 1} of ${pagesPerCompetitor}`
+                  : `${planLabel} · pick a competitor first`}
               </span>
               <div className={styles.footActions}>
                 <button type="button" className={styles.cancel} onClick={onClose}>

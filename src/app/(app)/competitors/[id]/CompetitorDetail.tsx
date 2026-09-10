@@ -295,7 +295,6 @@ export function CompetitorDetail({
           competitorId={competitor.id}
           competitorName={competitor.name}
           competitorUrl={firstUrl}
-          existingDomain={originOf(firstUrl) ?? ""}
           existingUrls={competitor.pages.map((p) => p.url)}
           currentCount={competitor.pages.length}
           pagesPerCompetitor={pagesPerCompetitor}

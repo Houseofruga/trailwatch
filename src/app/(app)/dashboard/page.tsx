@@ -9,6 +9,7 @@ import { LIMITS } from "@/features/plan/limits";
 import { PAGE_TYPE_VALUES } from "@/features/competitors/pageTypes";
 import { originOf } from "@/features/competitors/domain";
 import { DashboardTypeCard, type TypeCardRow } from "./DashboardTypeCard";
+import { DashboardAddPage } from "./DashboardAddPage";
 import { DemoDashboard } from "./DemoDashboard";
 import { PendingSeedRedirect } from "./PendingSeedRedirect";
 import { activeChanges, withinWeek } from "./dashboardFeed";
@@ -126,10 +127,23 @@ export default async function DashboardPage() {
           </div>
           <p className={styles.headSub}>{headSub}</p>
         </div>
-        <ButtonLink href="/competitors/add">
-          <PlusIcon />
-          Add competitor
-        </ButtonLink>
+        <div className={styles.headActions}>
+          <DashboardAddPage
+            competitors={competitors.map((c) => ({
+              id: c.id,
+              name: c.name,
+              url: c.pages[0]?.url ?? "",
+              existingUrls: c.pages.map((p) => p.url),
+              currentCount: c.pages.length,
+            }))}
+            pagesPerCompetitor={limits.pagesPerCompetitor}
+            plan={account.plan}
+          />
+          <ButtonLink href="/competitors/add">
+            <PlusIcon />
+            Add competitor
+          </ButtonLink>
+        </div>
       </div>
 
       <div className={styles.digestBar}>

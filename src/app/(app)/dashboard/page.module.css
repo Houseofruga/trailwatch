@@ -91,6 +91,12 @@
   gap: 24px;
   margin-bottom: 8px;
 }
+.headActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
 
 .headingRow {
   display: flex;
