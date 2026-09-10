@@ -383,6 +383,14 @@ export async function updatePage(
     };
   }
 
+  // Account-wide unique-URL rule (design §7 D): the new URL can't already be
+  // tracked on any other page in the account. RLS scopes this to the caller.
+  const { data: allPages } = await supabase.from("pages").select("id, url").neq("id", pageId);
+  const target = canonicalUrl(rowResult.data.url);
+  if ((allPages ?? []).some((p) => canonicalUrl(p.url) === target)) {
+    return { error: "Another tracked page already uses this URL." };
+  }
+
   const urlChanged = page.url !== rowResult.data.url;
 
   const { error } = await supabase

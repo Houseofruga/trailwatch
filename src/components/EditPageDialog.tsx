@@ -1,23 +1,18 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
-import { Button } from "./Button";
+import { useState, useTransition } from "react";
 import { updatePage } from "@/features/competitors/actions";
-import { originOf } from "@/features/competitors/domain";
-import { formatUrlError } from "@/features/competitors/rowValidation";
-import { pageLabel } from "@/features/competitors/validation";
+import { domainMismatchError, formatUrlError } from "@/features/competitors/rowValidation";
+import { siteOf } from "@/features/competitors/domain";
 import styles from "./EditPageDialog.module.css";
 
-const LABEL_OPTIONS = [
-  "Pricing",
-  "Homepage",
-  "Changelog",
-  "Blog",
-  "Docs",
-  "Careers",
-  "Features",
-  "Integrations",
-];
+function toFull(u: string): string {
+  const t = u.trim();
+  return t ? (/^https?:\/\//i.test(t) ? t : `https://${t}`) : "";
+}
+function canon(u: string): string {
+  return u.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/+$/, "");
+}
 
 type EditPageDialogProps = {
   pageId: string;
@@ -29,6 +24,13 @@ type EditPageDialogProps = {
   onSaved: () => void;
 };
 
+/**
+ * Edit URL (IA "Add flows" §7) — a URL-only correction. The current URL is shown
+ * locked; a new URL is validated (format + same-site) and, on save, `updatePage`
+ * re-points the page and re-checks it. The page name/label is unchanged. URL-only
+ * by design; changing the URL re-captures the page (history does NOT carry over —
+ * so the copy never claims it does).
+ */
 export function EditPageDialog({
   pageId,
   initialUrl,
@@ -37,34 +39,26 @@ export function EditPageDialog({
   onClose,
   onSaved,
 }: EditPageDialogProps) {
-  const listId = useId();
-  const [url, setUrl] = useState(initialUrl);
-  const [label, setLabel] = useState(initialLabel);
+  const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  function urlErrorFor(value: string): string | null {
-    if (!value.trim()) return "Enter a URL.";
-    const format = formatUrlError(value);
-    if (format) return format;
-    if (siblingDomain && originOf(value) !== siblingDomain) {
-      return `Must be on ${siblingDomain.replace(/^https?:\/\//, "")} — use Edit to move every page to a new domain.`;
-    }
-    return null;
-  }
+  const full = toFull(url);
+  const urlError = full
+    ? formatUrlError(full) ?? (siblingDomain ? domainMismatchError(full, siblingDomain) : null)
+    : null;
+  const changed = Boolean(full) && canon(full) !== canon(initialUrl);
+  const valid = Boolean(full) && !urlError;
+  const canSave = valid && changed;
 
-  function labelErrorFor(value: string): string | null {
-    const result = pageLabel.safeParse(value);
-    return result.success ? null : result.error.issues[0].message;
-  }
-
-  const urlError = urlErrorFor(url);
-  const labelError = labelErrorFor(label);
-  const canSubmit = !urlError && !labelError;
+  const domainDisplay = siblingDomain
+    ? siblingDomain.replace(/^https?:\/\//, "").replace(/^www\./, "")
+    : siteOf(full);
 
   function save() {
+    if (!canSave) return;
     startTransition(async () => {
-      const result = await updatePage(pageId, url, label);
+      const result = await updatePage(pageId, full, initialLabel);
       if (result.error) {
         setError(result.error);
         return;
@@ -76,49 +70,71 @@ export function EditPageDialog({
 
   return (
     <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.card} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.title}>Edit URL</div>
+      <div className={styles.card} role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+        <div className={styles.header}>
+          <div>
+            <div className={styles.title}>Edit URL</div>
+            <div className={styles.sub}>Point this page at a corrected address.</div>
+          </div>
+          <button type="button" className={styles.close} onClick={onClose} aria-label="Close">
+            &#10005;
+          </button>
+        </div>
 
-        <label className={styles.label} htmlFor="edit-page-url">
-          Page URL
-        </label>
-        <input
-          id="edit-page-url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="https://competitor.com/pricing"
-          className={urlError ? styles.urlInputError : styles.urlInput}
-          autoFocus
-        />
-        {urlError ? <div className={styles.fieldError}>{urlError}</div> : <div className={styles.spacer} />}
+        <div className={styles.body}>
+          <div className={styles.field}>
+            <span className={styles.flabel}>Current URL</span>
+            <div className={styles.fldDis}>
+              <span className={styles.mono}>{initialUrl.replace(/^https?:\/\//, "")}</span>
+              <span className={styles.lock} aria-hidden="true">&#128274;</span>
+            </div>
+          </div>
 
-        <label className={styles.label} htmlFor="edit-page-name">
-          Page name
-        </label>
-        <datalist id={listId}>
-          {LABEL_OPTIONS.map((opt) => (
-            <option key={opt} value={opt} />
-          ))}
-        </datalist>
-        <input
-          id="edit-page-name"
-          list={listId}
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          placeholder="e.g. Pricing"
-          className={labelError ? styles.nameInputError : styles.nameInput}
-        />
-        {labelError ? <div className={styles.fieldError}>{labelError}</div> : null}
+          <div className={styles.fieldLast}>
+            <span className={styles.flabel}>New URL</span>
+            <div className={urlError ? styles.fldErr : styles.fld}>
+              <input
+                className={styles.input}
+                value={url}
+                onChange={(e) => {
+                  setUrl(e.target.value);
+                  setError(null);
+                }}
+                placeholder="https://…"
+                inputMode="url"
+                autoFocus
+              />
+              {full ? (
+                urlError ? (
+                  <span className={styles.warnIcon} aria-hidden="true">&#9888;</span>
+                ) : changed ? (
+                  <span className={styles.okIcon} aria-hidden="true">&#10003;</span>
+                ) : null
+              ) : null}
+            </div>
+            {urlError ? (
+              <div className={styles.errNote}>
+                <span aria-hidden="true">&#9888;</span>
+                <span>{urlError}</span>
+              </div>
+            ) : valid && changed ? (
+              <div className={styles.okNote}>
+                <span aria-hidden="true">&#10003;</span> Looks good{domainDisplay ? ` — part of ${domainDisplay}` : ""}
+              </div>
+            ) : (
+              <div className={styles.hint}>Enter a new URL to save.</div>
+            )}
+            {error ? <div className={styles.formError}>{error}</div> : null}
+          </div>
+        </div>
 
-        {error ? <div className={styles.error}>{error}</div> : null}
-
-        <div className={styles.actions}>
-          <Button variant="secondary" onClick={onClose} disabled={pending}>
+        <div className={styles.footer}>
+          <button type="button" className={styles.cancel} onClick={onClose} disabled={pending}>
             Cancel
-          </Button>
-          <Button onClick={save} disabled={pending || !canSubmit}>
+          </button>
+          <button type="button" className={styles.save} onClick={save} disabled={!canSave || pending}>
             {pending ? "Saving…" : "Save"}
-          </Button>
+          </button>
         </div>
       </div>
     </div>
