@@ -94,7 +94,7 @@ async function insertCompetitorWithPages(
   supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string,
   name: string,
-  rows: { url: string; label: string }[],
+  rows: { url: string; label: string; pageType?: string }[],
 ): Promise<{ ok: true; outcomes: CaptureOutcome[]; pageIds: string[] } | { ok: false; error: string }> {
   const { data: competitor, error: competitorError } = await supabase
     .from("competitors")
@@ -107,7 +107,7 @@ async function insertCompetitorWithPages(
 
   const { data: newPages, error: pagesError } = await supabase
     .from("pages")
-    .insert(rows.map((r) => ({ competitor_id: competitor.id, url: r.url, label: r.label })))
+    .insert(rows.map((r) => ({ competitor_id: competitor.id, url: r.url, label: r.label, page_type: r.pageType })))
     .select("id, label");
   if (pagesError || !newPages) {
     return { ok: false, error: "Competitor was created, but adding pages failed. Try again from Competitors." };
@@ -167,6 +167,38 @@ function readPageRows(formData: FormData) {
   return rows;
 }
 
+// Loose URL identity for duplicate detection — protocol / www / trailing slash /
+// case shouldn't make the same page look distinct. Kept in sync with the client
+// check in CompetitorSetup / AddPageDialog.
+function canonicalUrl(u: string): string {
+  return u
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/+$/, "");
+}
+
+// Server backstop for the account-wide unique-URL rule: is any submitted URL
+// already tracked on another (or the same) competitor in this account? Returns a
+// user-facing error naming the owning competitor, or null. RLS scopes the read to
+// the caller's own rows.
+async function findAccountDuplicate(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  rows: { url: string }[],
+): Promise<string | null> {
+  const { data } = await supabase.from("competitors").select("name, pages(url)");
+  const owner = new Map<string, string>();
+  for (const c of data ?? []) {
+    for (const p of (c.pages as { url: string }[] | null) ?? []) owner.set(canonicalUrl(p.url), c.name);
+  }
+  for (const r of rows) {
+    const name = owner.get(canonicalUrl(r.url));
+    if (name) return `You're already tracking that page under ${name}. URLs are unique across your account.`;
+  }
+  return null;
+}
+
 export async function createCompetitor(_prev: FormState, formData: FormData): Promise<FormState> {
   const supabase = await createClient();
   const { userId, plan, competitorCount } = await loadPlanAndUsage(supabase);
@@ -190,6 +222,11 @@ export async function createCompetitor(_prev: FormState, formData: FormData): Pr
 
   const domainError = findDomainMismatch(rowsResult.data[0].url, rowsResult.data);
   if (domainError) return { error: domainError };
+
+  // Account-wide duplicate URL check — a URL is tracked at most once across the
+  // whole account (design: "URLs are unique across your whole account").
+  const dupError = await findAccountDuplicate(supabase, rowsResult.data);
+  if (dupError) return { error: dupError };
 
   const result = await insertCompetitorWithPages(supabase, userId, nameResult.data, rowsResult.data);
   if (!result.ok) return { error: result.error };

@@ -1,0 +1,44 @@
+.wrap {
+  position: relative;
+  width: 180px;
+  flex: 0 0 auto;
+}
+
+/* Native select styled as the design's `.fld` box; the chevron is a sibling SVG. */
+.select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--border-input);
+  background: var(--surface);
+  padding: 11px 30px 11px 13px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 0;
+}
+.select:focus {
+  outline: none;
+  border-color: var(--ink-4);
+}
+.select:disabled {
+  background: var(--surface-sunken);
+  color: var(--ink-faint);
+  cursor: not-allowed;
+}
+
+.chev {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-4);
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    width: 140px;
+  }
+}

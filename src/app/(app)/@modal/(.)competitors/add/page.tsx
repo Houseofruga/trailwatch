@@ -2,15 +2,13 @@ import { redirect } from "next/navigation";
 import { getAccount } from "@/features/account/queries";
 import { getCompetitorsWithPages } from "@/features/competitors/queries";
 import { LIMITS } from "@/features/plan/limits";
-import { AddCompetitorTakeover } from "./AddCompetitorTakeover";
+import { AddCompetitorTakeover } from "@/app/(app)/competitors/add/AddCompetitorTakeover";
 
-// createCompetitor warms baseline + Wayback history via after() (post-response);
-// give that work room under the function budget, matching the competitors route.
-export const maxDuration = 60;
-
-// Direct visit / refresh of /competitors/add (not intercepted) — the full-page
-// fallback for the same Add Competitor takeover the @modal route overlays.
-export default async function AddCompetitorPage() {
+// Intercepts in-app navigation to /competitors/add and shows the Add Competitor
+// flow as a full-screen takeover over the current page (dashboard / competitors),
+// scrimmed behind. A hard visit / refresh isn't intercepted and renders the full
+// page (competitors/add/page.tsx) instead.
+export default async function AddCompetitorModal() {
   const [account, competitors] = await Promise.all([getAccount(), getCompetitorsWithPages()]);
   if (!account) redirect("/login");
 
@@ -19,7 +17,7 @@ export default async function AddCompetitorPage() {
 
   return (
     <AddCompetitorTakeover
-      variant="page"
+      variant="overlay"
       plan={account.plan}
       competitorCount={competitors.length}
       competitorCap={limits.competitors}

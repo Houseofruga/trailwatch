@@ -1,0 +1,31 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 26, 23, 0.4);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 56px 20px 48px;
+  overflow-y: auto;
+  z-index: 60;
+}
+
+.pageWrap {
+  padding: 48px 24px 80px;
+  display: flex;
+  justify-content: center;
+}
+
+.center {
+  width: 100%;
+  max-width: 680px;
+}
+
+@media (max-width: 640px) {
+  .overlay {
+    padding: 20px 12px 40px;
+  }
+  .pageWrap {
+    padding: 24px 14px 56px;
+  }
+}
