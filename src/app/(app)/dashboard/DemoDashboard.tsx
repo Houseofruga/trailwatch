@@ -135,7 +135,7 @@ export function DemoDashboard({ now }: { now: number }) {
           <PlusIcon />
           Add your first competitor
         </ButtonLink>
-          <p className={styles.allowanceLine}>Your free plan tracks up to 2 competitors and 6 pages.</p>
+          <p className={styles.allowanceLine}>Your free plan tracks up to 2 competitors with 1 page each.</p>
         </div>
       </div>
     </div>

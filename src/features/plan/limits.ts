@@ -2,8 +2,8 @@ export type Plan = "free" | "paid";
 
 /** SPEC.md §4. Enforced in application logic — never trusted from the client. */
 export const LIMITS: Record<Plan, { competitors: number; pagesPerCompetitor: number }> = {
-  free: { competitors: 2, pagesPerCompetitor: 3 },
-  paid: { competitors: 10, pagesPerCompetitor: 10 },
+  free: { competitors: 2, pagesPerCompetitor: 1 },
+  paid: { competitors: 5, pagesPerCompetitor: 5 },
 };
 
 export const PLAN_LABEL: Record<Plan, string> = { free: "Free", paid: "Pro" };

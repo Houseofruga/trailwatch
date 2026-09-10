@@ -94,7 +94,7 @@ export function MarketingSections() {
             <div className={styles.planPrice}>$0</div>
             <div className={styles.planFeatures}>
               <div>2 competitors</div>
-              <div>6 pages</div>
+              <div>1 page each</div>
               <div>Weekly digest</div>
               <div>AI summaries included</div>
             </div>
@@ -118,8 +118,8 @@ export function MarketingSections() {
               </div>
             </div>
             <div className={styles.planFeatures}>
-              <div>10 competitors</div>
-              <div>100 pages</div>
+              <div>5 competitors</div>
+              <div>5 pages each</div>
               <div>Daily checks</div>
             </div>
             <Link

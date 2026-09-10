@@ -11,7 +11,9 @@ import styles from "./page.module.css";
 function planFeatures(comp: number, pages: number): string[] {
   return [
     `${comp} competitor${comp === 1 ? "" : "s"}`,
-    comp === 1 ? `${pages} pages on that competitor` : `${pages} pages per competitor`,
+    comp === 1
+      ? `${pages} page${pages === 1 ? "" : "s"} on that competitor`
+      : `${pages} page${pages === 1 ? "" : "s"} per competitor`,
     "Daily checks, noise filtered",
     "Weekly email digest",
   ];
@@ -157,8 +159,9 @@ export default async function BillingPage() {
 
       <p className={styles.footNote}>
         One paid plan, no add-ons. Cancel any time — you keep Pro through the end of your current
-        billing period; we don&rsquo;t prorate or refund unused time. If you cancel you keep your
-        first competitor and three pages on Free.
+        billing period; we don&rsquo;t prorate or refund unused time. If you cancel you keep the Free
+        plan&rsquo;s {LIMITS.free.competitors} competitors and {LIMITS.free.pagesPerCompetitor} page
+        {LIMITS.free.pagesPerCompetitor === 1 ? "" : "s"} each.
       </p>
     </div>
   );

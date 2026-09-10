@@ -16,11 +16,11 @@ export const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "Is there a free plan?",
-    a: "Yes. The free plan covers 2 competitors and 6 pages, with AI summaries included — the AI is never behind a paywall. No card required to start.",
+    a: "Yes. The free plan covers 2 competitors with 1 page each, with AI summaries included — the AI is never behind a paywall. No card required to start.",
   },
   {
     q: "How much is Pro, and what do I get?",
-    a: "Pro is $29/month, or $290/year (two months free). It raises your limits to 10 competitors and 100 pages, with daily checks and the same weekly digest.",
+    a: "Pro is $29/month, or $290/year (two months free). It raises your limits to 5 competitors with 5 pages each, with daily checks and the same weekly digest.",
   },
   {
     q: "How often are pages checked?",

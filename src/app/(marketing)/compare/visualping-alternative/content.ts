@@ -54,7 +54,7 @@ export const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "Are the AI summaries free?",
-    a: "Yes. TrailWatch includes AI summaries on every plan, including the free tier — they're the core of the product, not an upsell. The free plan covers 2 competitors and 6 pages with a weekly digest.",
+    a: "Yes. TrailWatch includes AI summaries on every plan, including the free tier — they're the core of the product, not an upsell. The free plan covers 2 competitors with 1 page each and a weekly digest.",
   },
   {
     q: "How much does TrailWatch cost?",
