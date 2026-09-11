@@ -1207,13 +1207,32 @@ a.pageRowQuietLink:hover {
     align-items: flex-start;
     gap: 14px;
   }
+  /* Design §05 mobile: four stats as a 2×2 grid with compact internals. */
   .stats {
-    grid-template-columns: 1fr;
-    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
     margin: 18px 0 24px;
   }
+  .stat {
+    padding: 11px 12px;
+  }
+  .statIcon {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 7px;
+  }
+  .statLabelRow {
+    gap: 7px;
+    margin-bottom: 7px;
+  }
+  .statLabel {
+    font-size: 11px;
+  }
+  .statValue {
+    font-size: 18px;
+  }
   .heading {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   /* All page rows drop the 96px label column — the label sits on its own line
@@ -1256,20 +1275,40 @@ a.pageRowQuietLink:hover {
     font-size: 11px;
   }
 
-  /* Type-card rows: header wraps, the View-change button drops below the text. */
+  /* Type-card header stays one row (label · pages … metric), wrapping if tight. */
   .typeHead {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    padding: 12px 14px;
   }
+
+  /* Rows stack (design §05): the competitor name line + status stay on top, and
+     the URL drops to its own line beneath, then the change treatment. Achieved by
+     letting the identity wrap — the URL takes a full row within it — so the
+     paused/broken variants keep their inline status safely too. */
   .dashRow {
-    padding: 15px 16px;
+    padding: 13px 14px;
   }
   .dashHead {
+    align-items: flex-start;
     flex-wrap: wrap;
     gap: 8px;
   }
-  .dashStatus {
-    margin-left: 0;
+  .dashIdentity {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+  .dashCompName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 52vw;
+  }
+  .dashUrl {
+    flex-basis: 100%;
+  }
+  /* No name-aligned indent on mobile — the change text runs to the card's left
+     edge like the name/URL above it (design §05). */
+  .dashBody {
+    padding-left: 0;
   }
 }

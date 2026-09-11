@@ -1105,65 +1105,89 @@
   padding: 16px 20px;
 }
 
-@media (max-width: 640px) {
-  .wrap {
-    padding: 24px 18px 56px;
-  }
-}
-
 /* ------------------------------------------------------------------ mobile */
 @media (max-width: 640px) {
   .wrap {
     padding: 24px 18px 56px;
   }
 
-  /* Competitor card head stacks; its actions become full tap targets. */
-  .cardHead {
-    flex-direction: column;
-    align-items: stretch;
+  /* ---- Competitors index cards (design §05 mobile) ---- */
+  .idxCard {
+    padding: 16px;
+  }
+  .idxIdentity {
+    gap: 10px;
+  }
+  .idxAvatar {
+    width: 30px;
+    height: 30px;
+  }
+  .idxName {
+    font-size: 15px;
+  }
+  .idxChevron {
+    width: 28px;
+    height: 28px;
+  }
+  .idxMeta {
+    margin-top: 14px;
+    padding-top: 12px;
+    row-gap: 8px;
+  }
+  .idxMetaLeft {
+    gap: 14px;
+    font-size: 12px;
+  }
+  .idxAllTime {
+    font-size: 12px;
+  }
+
+  /* ---- Competitor detail (design §05 mobile) ---- */
+  .dtlHeader {
+    margin-top: 20px;
     gap: 12px;
   }
-  .cardHeadRight {
-    gap: 8px;
-    justify-content: flex-start;
-    flex-wrap: wrap;
+  .dtlIdentity {
+    gap: 12px;
   }
-  .addPage,
-  .editComp,
-  .deleteComp,
-  .atLimit {
-    border: 1px solid var(--border);
-    padding: 9px 12px;
-    font-size: 13px;
-    min-height: 38px;
+  .dtlAvatar {
+    width: 34px;
+    height: 34px;
+  }
+  .dtlName {
+    font-size: 22px;
+  }
+  /* Header actions drop to their own full-width row under the identity. */
+  .dtlActions {
+    width: 100%;
+    padding-top: 0;
+  }
+  .dtlSummary {
+    margin-bottom: 20px;
+  }
+  /* Page card: the type label stacks above the URL; tighter padding. */
+  .pgHead {
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+  .pgHeadLeft {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+  }
+  .pgMeta {
+    padding: 8px 14px;
+  }
+  .pgBody {
+    padding: 12px 14px;
+  }
+  .pgErrorStrip {
+    padding: 11px 14px;
   }
 
-  /* Page row wraps: label on its own line, then URL + the actions menu. */
-  .row {
-    flex-wrap: wrap;
-    gap: 8px 12px;
-    padding: 12px 16px;
-  }
-  .rowLabel {
-    flex: 1 0 100%;
-  }
-  .rowUrl {
-    flex: 1 1 auto;
-    font-size: 13px;
-  }
-  .rowActions {
-    flex: 0 0 auto;
-  }
-  .menuBtn {
-    width: 36px;
-    height: 36px;
-  }
-
-  /* Full-width panels on mobile — no room for the desktop URL-aligned indent. */
+  /* Full-width intel panels — no room for the desktop URL-aligned indent. */
   .intel {
-    padding: 0 16px 14px;
-  }
-  .rowError {
     padding: 0 16px 14px;
   }
 }
