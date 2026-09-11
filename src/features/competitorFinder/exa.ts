@@ -7,6 +7,8 @@
 // Free tier: monthly credits with no card on file, so a bill is impossible — when
 // the credits run out, /search errors and we return null, and the finder falls
 // back to the offline model. Enabled only when EXA_API_KEY is set.
+import { isDirectoryDomain } from "./directoryDomains";
+
 const ENDPOINT = "https://api.exa.ai/search";
 
 function bareDomain(url: string | undefined): string {
@@ -64,7 +66,10 @@ export async function fetchCompetitorContext(
     const lines = results
       .map((r) => {
         const domain = bareDomain(r.url);
-        if (!domain) return null;
+        // Drop directory/aggregator hits (LinkedIn, Crunchbase, G2, …): they rank
+        // high for "competitors of X" but are never a competitor's own homepage,
+        // so they must not seed the grounding text or the URL-correction set.
+        if (!domain || isDirectoryDomain(domain)) return null;
         const title = (r.title ?? domain).trim();
         candidates.push({ title, domain });
         const snippet = (r.text ?? "").replace(/\s+/g, " ").trim().slice(0, 160);

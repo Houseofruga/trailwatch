@@ -6,6 +6,7 @@
 import { lookup } from "node:dns/promises";
 import { extractSite } from "../competitorTeardown/extract";
 import { fetchCompetitorContext, type ExaCandidate } from "./exa";
+import { isDirectoryDomain } from "./directoryDomains";
 import { getFinderProvider } from "./index";
 import type { Competitor, FinderResult } from "./types";
 
@@ -39,9 +40,13 @@ async function domainResolves(url: string): Promise<boolean> {
 
 async function verifyUrls(competitors: Competitor[]): Promise<Competitor[]> {
   return Promise.all(
-    competitors.map(async (c) =>
-      c.url && (await domainResolves(c.url)) ? c : { ...c, url: "" },
-    ),
+    competitors.map(async (c) => {
+      // Blank a directory/aggregator URL the model emitted directly (e.g. a
+      // LinkedIn company page) — even with Exa off, so it isn't caught by the
+      // candidate filter — keeping the name so the user can supply the real site.
+      if (!c.url || isDirectoryDomain(bareDomain(c.url) ?? "")) return { ...c, url: "" };
+      return (await domainResolves(c.url)) ? c : { ...c, url: "" };
+    }),
   );
 }
 
