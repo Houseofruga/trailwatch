@@ -409,7 +409,8 @@ fixed (`871e1e6`, see the Open-items note): new `competitorFinder/directoryDomai
 directory/aggregator domains (LinkedIn, Crunchbase, G2, Wikipedia, …) out of the Exa candidate set
 and blanks any the model emits directly, keeping the competitor name. Test count 154 → 160;
 typecheck/lint clean; no new migrations. Owner-only items unchanged (§9 Paddle/digest/cron,
-production login, Paddle price raise, migration `0008`).
+production login, Paddle price raise). **Migration `0008` is now applied to hosted Supabase**
+(2026-09-11).
 
 **Design-copy deviations, detail-header host + last-page-deletes-competitor (2026-09-11, this
 session, commits `0633cc3`, `8078582`, `180bd79`; all pushed).**
@@ -936,8 +937,8 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
 - **Owner-only / production (can't be done in this workspace):** the real `SPEC.md` §9 pass — Paddle
   checkout → plan-flip → cancel → revert, the weekly digest send/no-send, the daily cron in prod, and
   an authed walkthrough on gettrailwatch.com; plus the Pro price raise on the Paddle dashboard
-  ($29/$290 — code is display-only). Migration `0008_page_type.sql` also still needs applying to
-  hosted Supabase (see Slice 0 below).
+  ($29/$290 — code is display-only). (Migration `0008_page_type.sql` is now applied to hosted
+  Supabase — done 2026-09-11.)
 
 > 🚩 **WORKING RULE FOR EVERY REMAINING SLICE (owner is firm on this).** Before building a slice,
 > **read the relevant `.dc.html` design artboard in full and match it to the pixel — every state,
@@ -965,9 +966,14 @@ Slices (checkpoint after each; commit per slice; user reviews live before moving
   is the source of truth (`labelToType`); `pageRow` validation carries `pageType`; `queries.ts`
   `PageRow` gained `pageType` (currently DERIVED from label via `labelToType`, NOT read from the DB
   column yet — see note), `createdAt`, `meaningfulTotal` (all-time meaningful count = live + archive).
-  ⚠️ **Migration 0008 is NOT applied to hosted Supabase** (no DB password here; owner applies it in
-  the SQL editor like 0005–0007). Until applied + the add/edit forms write page_type, the dashboard
-  groups by label-derived type — fine for existing data.
+  ✅ **Migration 0008 IS applied to hosted Supabase** (owner ran it in the SQL editor, 2026-09-11;
+  column + label backfill verified — Home→homepage, Pricing→pricing, Changelog→changelog, free-text
+  labels→other). `queries.ts` `PageRow.pageType` now **reads the DB `page_type`**, preferring the
+  stored value and falling back to `labelToType(label)` only when it's absent or `'other'` (see
+  [queries.ts:81](src/features/competitors/queries.ts)) — so with the backfill done, real stored
+  types are authoritative and junk-labelled `'other'` rows still group sensibly by label. NOTE the
+  add/edit forms still don't *write* page_type on create/edit (new pages land as `'other'` and fall
+  back to label) — wiring the forms to persist the picked type is the remaining future work.
 - **Slice 1 — dashboard grouped by page type — DONE + design-matched** (`16ee890`…`c41b013`, many
   fidelity fixes). One card per page type; rows reuse a shared `PageActionsMenu` (`src/components/`);
   covers active (inline "View change ›" + "N more this week" pill + nested "Recent history" link to
