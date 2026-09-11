@@ -2,6 +2,7 @@
 
 import { useActionState, useState, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
+import { useRouter } from "next/navigation";
 import { UpgradeCta } from "@/components/UpgradeCta";
 import { CompetitorAvatar } from "@/components/CompetitorAvatar";
 import { PageTypeSelect } from "@/components/PageTypeSelect";
@@ -66,6 +67,8 @@ export function CompetitorSetup({
 }) {
   const atCompetitorCap = competitorCount >= competitorCap;
   const planLabel = plan === "free" ? "Free" : "Pro";
+  const router = useRouter();
+  const manageCompetitors = () => router.push("/competitors");
 
   const [phase, setPhase] = useState<"search" | "manual" | "edit">("search");
   const [query, setQuery] = useState("");
@@ -143,7 +146,7 @@ export function CompetitorSetup({
                 its pages and history go with it.
               </p>
               <div className={styles.limitActions}>
-                <button type="button" className={styles.start} onClick={onClose}>Manage competitors</button>
+                <button type="button" className={styles.start} onClick={manageCompetitors}>Manage competitors</button>
               </div>
             </>
           ) : (
@@ -154,7 +157,7 @@ export function CompetitorSetup({
               </p>
               <div className={styles.limitActions}>
                 <UpgradeCta />
-                <button type="button" className={styles.secBtn} onClick={onClose}>Manage competitors</button>
+                <button type="button" className={styles.secBtn} onClick={manageCompetitors}>Manage competitors</button>
               </div>
             </>
           )}
