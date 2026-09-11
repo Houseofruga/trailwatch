@@ -191,8 +191,8 @@ export default async function DashboardPage() {
           <div>
             <div className={styles.upgradeBannerTitle}>You&rsquo;re over the Free plan limit</div>
             <div className={styles.upgradeBannerBody}>
-              Free tracks {limits.competitors} competitors and {limits.pagesPerCompetitor} pages each.
-              The extras are read-only until you upgrade.
+              Free tracks {limits.competitors} competitors and {limits.pagesPerCompetitor} page
+              {limits.pagesPerCompetitor === 1 ? "" : "s"} each. The extras are read-only until you upgrade.
             </div>
           </div>
         </div>

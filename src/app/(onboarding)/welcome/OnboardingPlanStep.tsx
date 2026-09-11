@@ -25,7 +25,7 @@ function features(kind: "free" | "paid"): string[] {
   const l = LIMITS[kind];
   return [
     `${l.competitors} competitors`,
-    `${l.pagesPerCompetitor} pages per competitor`,
+    `${l.pagesPerCompetitor} page${l.pagesPerCompetitor === 1 ? "" : "s"} per competitor`,
     "Daily checks, noise filtered",
     "Weekly email digest",
     "AI summaries included",

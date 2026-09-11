@@ -240,8 +240,8 @@ export function WelcomeOnboarding({
       <h1 className={styles.title}>Set up your watchlist</h1>
       <p className={styles.sub}>
         We start by watching each competitor’s <strong>homepage</strong> and email you a
-        plain-English digest when something changes. You can add up to {pagesPerCompetitor}{" "}
-        pages per competitor once you’re in.
+        plain-English digest when something changes. You can add up to {pagesPerCompetitor} page
+        {pagesPerCompetitor === 1 ? "" : "s"} per competitor once you’re in.
       </p>
 
       {/* Same finder as the homepage — search your company to suggest competitors,
