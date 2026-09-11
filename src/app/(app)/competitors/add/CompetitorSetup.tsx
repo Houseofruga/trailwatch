@@ -8,7 +8,7 @@ import { PageTypeSelect } from "@/components/PageTypeSelect";
 import { findCompetitorsAction, type FinderState } from "@/app/(marketing)/actions";
 import { createCompetitor, type FormState } from "@/features/competitors/actions";
 import { canonUrl as canon, toFullUrl as toFull, hostname as hostOf, rowUrlError } from "@/features/competitors/rowRules";
-import { type PageType } from "@/features/competitors/pageTypes";
+import { pageTypeLabel, type PageType } from "@/features/competitors/pageTypes";
 import styles from "./CompetitorSetup.module.css";
 
 type ExistingUrl = { url: string; competitor: string };
@@ -173,7 +173,8 @@ export function CompetitorSetup({
             {/* Submit the normalized URL (bare domains → https://) — the client
                 validates the normalized form, so the server must receive it too. */}
             <input type="hidden" name="url" value={toFull(r.url)} />
-            <input type="hidden" name="label" value={r.label.trim() || "Page"} />
+            {/* No free-text page name — the label is the page type's display name. */}
+            <input type="hidden" name="label" value={pageTypeLabel(r.pageType)} />
             <input type="hidden" name="pageType" value={r.pageType} />
           </span>
         ))}

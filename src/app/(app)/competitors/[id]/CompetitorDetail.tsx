@@ -9,6 +9,7 @@ import { EditPageDialog } from "@/components/EditPageDialog";
 import { CompetitorAvatar } from "@/components/CompetitorAvatar";
 import { ExternalLinkIcon, PencilIcon, PlusIcon, TrashIcon } from "@/components/icons";
 import type { CompetitorRow } from "@/features/competitors/queries";
+import { pageTypeLabel } from "@/features/competitors/pageTypes";
 import type { PageProfile } from "@/features/insights/types";
 import type { InitialHistory } from "@/features/backfill/types";
 import { deleteCompetitor, deletePage, togglePageActive } from "@/features/competitors/actions";
@@ -95,7 +96,7 @@ export function CompetitorDetail({
 
   function openEdit(p: Page) {
     const sibling = competitor.pages.find((other) => other.id !== p.id);
-    setEditingPage({ id: p.id, url: p.url, label: p.label, siblingDomain: sibling ? originOf(sibling.url) : null });
+    setEditingPage({ id: p.id, url: p.url, label: pageTypeLabel(p.pageType), siblingDomain: sibling ? originOf(sibling.url) : null });
   }
 
   return (
@@ -145,7 +146,7 @@ export function CompetitorDetail({
             <div key={p.id} className={broken ? `${styles.pgCard} ${styles.pgCardBroken}` : styles.pgCard}>
               <div className={styles.pgHead}>
                 <div className={styles.pgHeadLeft}>
-                  <span className={styles.pgType}>{p.label}</span>
+                  <span className={styles.pgType}>{pageTypeLabel(p.pageType)}</span>
                   <a href={p.url} target="_blank" rel="noreferrer" className={styles.pgUrl}>
                     <span className={styles.pgUrlText}>{p.url.replace(/^https?:\/\//, "")}</span>
                     <span className={styles.pgUrlIcon}>
@@ -205,7 +206,7 @@ export function CompetitorDetail({
                             setOpenMenuPageId(null);
                             const nextActive = !p.isActive;
                             void togglePageActive(p.id, nextActive).then(() =>
-                              setToast(`${competitor.name} ${p.label.toLowerCase()} ${nextActive ? "resumed" : "paused"}`),
+                              setToast(`${competitor.name} ${pageTypeLabel(p.pageType).toLowerCase()} ${nextActive ? "resumed" : "paused"}`),
                             );
                           }}
                         >
@@ -216,7 +217,7 @@ export function CompetitorDetail({
                           className={styles.menuItemDanger}
                           onClick={() => {
                             setOpenMenuPageId(null);
-                            setPendingDelete({ kind: "page", id: p.id, label: p.label });
+                            setPendingDelete({ kind: "page", id: p.id, label: pageTypeLabel(p.pageType) });
                           }}
                         >
                           Delete page

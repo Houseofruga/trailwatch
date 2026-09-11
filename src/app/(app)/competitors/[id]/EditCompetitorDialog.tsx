@@ -6,7 +6,7 @@ import Link from "next/link";
 import { PageTypeSelect } from "@/components/PageTypeSelect";
 import { updateCompetitorDetails, type EditFormState } from "@/features/competitors/actions";
 import { canonUrl, toFullUrl, hostname, rowUrlError } from "@/features/competitors/rowRules";
-import { type PageType } from "@/features/competitors/pageTypes";
+import { pageTypeLabel, type PageType } from "@/features/competitors/pageTypes";
 import s from "@/app/(app)/competitors/add/CompetitorSetup.module.css";
 import m from "./EditCompetitorDialog.module.css";
 
@@ -94,7 +94,7 @@ export function EditCompetitorDialog({
           <span key={`h-${r.key}`} hidden>
             <input type="hidden" name="pageId" value={r.pageId} />
             <input type="hidden" name="url" value={toFullUrl(r.url)} />
-            <input type="hidden" name="label" value={r.label.trim() || "Page"} />
+            <input type="hidden" name="label" value={pageTypeLabel(r.pageType)} />
             <input type="hidden" name="pageType" value={r.pageType} />
           </span>
         ))}

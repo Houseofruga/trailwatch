@@ -7,7 +7,7 @@ import { CompetitorAvatar } from "./CompetitorAvatar";
 import { addPages, type FormState } from "@/features/competitors/actions";
 import { originOf } from "@/features/competitors/domain";
 import { formatUrlError, domainMismatchError } from "@/features/competitors/rowValidation";
-import { PAGE_TYPE_VALUES, pageTypeLabel, labelToType, type PageType } from "@/features/competitors/pageTypes";
+import { PAGE_TYPE_VALUES, pageTypeLabel, type PageType } from "@/features/competitors/pageTypes";
 import { LIMITS } from "@/features/plan/limits";
 import styles from "./AddPageDialog.module.css";
 
@@ -102,7 +102,6 @@ export function AddPageDialog({
   const [pickedId, setPickedId] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [url, setUrl] = useState("");
-  const [name, setName] = useState("");
   const [pickedType, setPickedType] = useState<PageType | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
 
@@ -143,9 +142,9 @@ export function AddPageDialog({
         (dup ? "You’re already tracking this page." : null)
       : null;
   const urlValid = Boolean(full) && !urlError;
-  // The picked type wins; until the user picks, follow the name (labelToType).
-  const effectiveType: PageType = pickedType ?? labelToType(name || "");
-  const canSubmit = Boolean(selected) && urlValid && name.trim().length > 0;
+  // The page's name IS its type (a fixed set) — no free text. A type must be
+  // picked before tracking; its display name is derived from the type.
+  const canSubmit = Boolean(selected) && urlValid && pickedType !== null;
   const planLabel = plan === "free" ? "Free" : "Pro";
   const atLimit = Boolean(selected) && selected!.currentCount >= pagesPerCompetitor;
 
@@ -165,8 +164,8 @@ export function AddPageDialog({
         <form action={formAction}>
           <input type="hidden" name="competitorId" value={selected?.id ?? ""} />
           <input type="hidden" name="url" value={full} />
-          <input type="hidden" name="label" value={name.trim()} />
-          <input type="hidden" name="pageType" value={effectiveType} />
+          <input type="hidden" name="label" value={pickedType ? pageTypeLabel(pickedType) : ""} />
+          <input type="hidden" name="pageType" value={pickedType ?? ""} />
 
           <div className={styles.body}>
             <div className={styles.field}>
@@ -265,19 +264,6 @@ export function AddPageDialog({
                   ) : null}
                 </div>
 
-                <div className={styles.field}>
-                  <span className={styles.flabel}>Page name</span>
-                  <div className={gated ? styles.fldDisabled : styles.fld}>
-                    <input
-                      className={styles.nameInput}
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="e.g. Pricing"
-                      disabled={gated}
-                    />
-                  </div>
-                </div>
-
                 <div className={styles.fieldLast}>
                   <span className={styles.flabel}>Page type</span>
                   <div className={styles.pills}>
@@ -285,12 +271,12 @@ export function AddPageDialog({
                       <button
                         type="button"
                         key={t}
-                        className={gated ? styles.pillDisabled : t === effectiveType ? styles.pillOn : styles.pill}
+                        className={gated ? styles.pillDisabled : t === pickedType ? styles.pillOn : styles.pill}
                         onClick={() => setPickedType(t)}
-                        aria-pressed={!gated && t === effectiveType}
+                        aria-pressed={!gated && t === pickedType}
                         disabled={gated}
                       >
-                        {!gated && t === effectiveType ? (
+                        {!gated && t === pickedType ? (
                           <svg width="10" height="8" viewBox="0 0 11 9" fill="none" aria-hidden="true">
                             <path d="M1 4.5L4 7.5L10 1.5" stroke="#9ff50a" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>

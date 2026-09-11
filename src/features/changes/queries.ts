@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { domainOf, formatFullDate, formatShortDate } from "@/app/(app)/dashboard/dashboardFeed";
 import { getDemoChangeDetail } from "@/features/demo/demoFeed";
+import { labelToType, pageTypeLabel } from "@/features/competitors/pageTypes";
 
 // The view-model for the change-detail page. Both the real (DB) and demo (static)
 // sources resolve to this shape, so the page renders one way.
@@ -34,7 +35,7 @@ type ChangeRow = {
   source: string | null;
   compared_from_at: string | null;
   from_snapshot: { fetched_at: string } | null;
-  pages: { label: string; url: string; competitors: { name: string } | null } | null;
+  pages: { label: string; page_type: string | null; url: string; competitors: { name: string } | null } | null;
 };
 
 function realIgnoredNote(n: number): string {
@@ -57,7 +58,7 @@ export async function getRealChangeDetail(changeId: string): Promise<ChangeDetai
   const { data, error } = await supabase
     .from("changes")
     .select(
-      "summary, detected_at, excerpt_before, excerpt_after, page_id, source, compared_from_at, from_snapshot:snapshots!from_snapshot_id ( fetched_at ), pages ( label, url, competitors ( name ) )",
+      "summary, detected_at, excerpt_before, excerpt_after, page_id, source, compared_from_at, from_snapshot:snapshots!from_snapshot_id ( fetched_at ), pages ( label, page_type, url, competitors ( name ) )",
     )
     .eq("id", changeId)
     .eq("is_meaningful", true)
@@ -76,7 +77,11 @@ export async function getRealChangeDetail(changeId: string): Promise<ChangeDetai
 
   return {
     competitorName: row.pages.competitors?.name ?? "Competitor",
-    pageLabel: row.pages.label,
+    // The page's display name is its type (no free text) — mirror the
+    // dashboard/detail rule: prefer the stored type, fall back to label-derived.
+    pageLabel: pageTypeLabel(
+      row.pages.page_type && row.pages.page_type !== "other" ? row.pages.page_type : labelToType(row.pages.label),
+    ),
     url: row.pages.url,
     domain: domainOf(row.pages.url),
     summary: row.summary ?? "Meaningful change detected.",

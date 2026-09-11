@@ -6,6 +6,7 @@ import { CompetitorAvatar } from "@/components/CompetitorAvatar";
 import { PageActionsMenu } from "@/components/PageActionsMenu";
 import { ExternalLinkIcon } from "@/components/icons";
 import type { CompetitorRow } from "@/features/competitors/queries";
+import { pageTypeLabel } from "@/features/competitors/pageTypes";
 import { DashboardEditUrl } from "./DashboardEditUrl";
 import { activeChanges, timeAgo } from "./dashboardFeed";
 import styles from "./page.module.css";
@@ -110,7 +111,7 @@ export function DashboardPageRow({
   const menu = (
     <PageActionsMenu
       pageId={page.id}
-      label={page.label}
+      label={pageTypeLabel(page.pageType)}
       url={page.url}
       siblingDomain={siblingDomain}
       isActive={page.isActive}
@@ -155,7 +156,7 @@ export function DashboardPageRow({
             {page.lastCheckError ?? "This page couldn’t be reached on the last check."}
             {page.lastCheckedAt ? ` · last checked ${timeAgo(page.lastCheckedAt, now)}` : null}
           </span>
-          <DashboardEditUrl pageId={page.id} url={page.url} label={page.label} siblingDomain={siblingDomain} />
+          <DashboardEditUrl pageId={page.id} url={page.url} label={pageTypeLabel(page.pageType)} siblingDomain={siblingDomain} />
         </div>
       </div>
     );
