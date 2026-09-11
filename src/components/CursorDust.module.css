@@ -1,35 +1,28 @@
-/* A burst of small lime pixels that clusters at the pointer and follows it while
-   hovering a CTA. Rendered by useCursorDust; the host must be position:relative
-   with overflow:visible. */
+/* Lime pixels emitted at the pointer that fly outward and fade — a lively dust
+   trail as you move over a CTA. Rendered by useCursorDust; the host must be
+   position:relative with overflow:visible. */
 .dust {
   position: absolute;
-  width: 0;
-  height: 0;
+  inset: 0;
   pointer-events: none;
+  overflow: visible;
   z-index: 1;
 }
-.pixel {
+.particle {
   position: absolute;
-  left: 0;
-  top: 0;
-  width: 2px;
-  height: 2px;
   background: var(--accent);
-  transform: translate(calc(var(--dx) - 1px), calc(var(--dy) - 1px));
-  animation: cursorDustTwinkle 900ms ease-in-out infinite;
+  will-change: transform, opacity;
+  animation-name: cursorDustDrift;
+  animation-timing-function: cubic-bezier(0.2, 0.6, 0.2, 1);
+  animation-fill-mode: forwards;
 }
-@keyframes cursorDustTwinkle {
-  0%,
-  100% {
-    opacity: 0.25;
-  }
-  50% {
+@keyframes cursorDustDrift {
+  0% {
+    transform: translate(0, 0) scale(1);
     opacity: 1;
   }
-}
-@media (prefers-reduced-motion: reduce) {
-  .pixel {
-    animation: none;
-    opacity: 0.85;
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(0.4);
+    opacity: 0;
   }
 }

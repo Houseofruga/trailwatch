@@ -1,49 +1,88 @@
 "use client";
 
-import { useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
+import { useCallback, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import styles from "./CursorDust.module.css";
 
-// Pixel offsets (px) around the pointer — a small scatter so the dust reads as a
-// cluster "at and a bit around" the cursor rather than a single dot.
-const OFFSETS: ReadonlyArray<readonly [number, number]> = [
-  [0, 0], [7, -4], [-6, 3], [3, 8], [-9, -6], [11, 2], [-2, -10], [8, 9],
-  [-12, 1], [13, -8], [1, 12], [-7, -2], [10, -12], [-14, 7], [5, -6], [-4, 11],
-];
+type Particle = { id: number; x: number; y: number; dx: number; dy: number; size: number; dur: number };
+
+function prefersReducedMotion(): boolean {
+  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
 
 /**
  * Cursor-following lime pixel dust for a CTA. Spread `handlers` on the button/
  * link (which must be position:relative + overflow:visible) and render `dust`
- * inside it. The dust appears at the pointer and tracks it while hovering, and
- * disappears on leave.
+ * inside it. Moving over the button emits pixels that fly outward in random
+ * directions, vary in size, and fade — a lively trail rather than a fixed
+ * cluster. Particles remove themselves when their drift animation ends.
  */
 export function useCursorDust(): {
-  handlers: {
-    onMouseMove: (e: MouseEvent<HTMLElement>) => void;
-    onMouseLeave: () => void;
-  };
+  handlers: { onMouseMove: (e: MouseEvent<HTMLElement>) => void };
   dust: ReactNode;
 } {
-  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const idRef = useRef(0);
+  const lastRef = useRef(0);
+
+  const spawn = useCallback((x: number, y: number) => {
+    if (prefersReducedMotion()) return;
+    const now = performance.now();
+    if (now - lastRef.current < 28) return; // throttle emission rate
+    lastRef.current = now;
+
+    const count = 2 + Math.floor(Math.random() * 3); // 2–4 per emission
+    const batch: Particle[] = [];
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 12 + Math.random() * 40; // fly 12–52px outward
+      batch.push({
+        id: idRef.current++,
+        x,
+        y,
+        dx: Math.cos(angle) * radius,
+        dy: Math.sin(angle) * radius,
+        size: 1 + Math.floor(Math.random() * 3), // 1–3px
+        dur: 480 + Math.random() * 620, // 0.48–1.1s
+      });
+    }
+    // Cap the live set so a fast scrub can't pile up unbounded.
+    setParticles((prev) => (prev.length > 70 ? prev.slice(-70) : prev).concat(batch));
+  }, []);
+
+  const remove = useCallback((id: number) => {
+    setParticles((prev) => prev.filter((p) => p.id !== id));
+  }, []);
 
   const handlers = {
     onMouseMove: (e: MouseEvent<HTMLElement>) => {
       const rect = e.currentTarget.getBoundingClientRect();
-      setPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+      spawn(e.clientX - rect.left, e.clientY - rect.top);
     },
-    onMouseLeave: () => setPos(null),
   };
 
-  const dust = pos ? (
-    <span className={styles.dust} style={{ left: pos.x, top: pos.y }} aria-hidden="true">
-      {OFFSETS.map(([dx, dy], i) => (
-        <span
-          key={i}
-          className={styles.pixel}
-          style={{ "--dx": `${dx}px`, "--dy": `${dy}px`, animationDelay: `${(i % 6) * 45}ms` } as CSSProperties}
-        />
-      ))}
-    </span>
-  ) : null;
+  const dust =
+    particles.length > 0 ? (
+      <span className={styles.dust} aria-hidden="true">
+        {particles.map((p) => (
+          <span
+            key={p.id}
+            className={styles.particle}
+            style={
+              {
+                left: p.x,
+                top: p.y,
+                width: p.size,
+                height: p.size,
+                "--dx": `${p.dx}px`,
+                "--dy": `${p.dy}px`,
+                animationDuration: `${p.dur}ms`,
+              } as CSSProperties
+            }
+            onAnimationEnd={() => remove(p.id)}
+          />
+        ))}
+      </span>
+    ) : null;
 
   return { handlers, dust };
 }
