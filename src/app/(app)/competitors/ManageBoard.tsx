@@ -3,7 +3,7 @@ import { ButtonLink } from "@/components/Button";
 import { CompetitorAvatar } from "@/components/CompetitorAvatar";
 import { PlusIcon } from "@/components/icons";
 import type { CompetitorRow } from "@/features/competitors/queries";
-import { originOf } from "@/features/competitors/domain";
+import { originOf, siteOf } from "@/features/competitors/domain";
 import { activeChanges, timeAgo } from "@/app/(app)/dashboard/dashboardFeed";
 import styles from "./page.module.css";
 
@@ -87,7 +87,9 @@ export function ManageBoard({ competitors, now }: { competitors: CompetitorRow[]
     <div className={styles.list}>
       {cards.map(({ c, weekCount, allTime, brokenCount, lastChecked }) => {
         const firstUrl = c.pages[0]?.url ?? "";
-        const domain = originOf(firstUrl);
+        // Design shows the bare registrable host (stripe.com, notion.so) as the
+        // card's domain; the link still opens the actual tracked page URL.
+        const domain = siteOf(firstUrl) ?? originOf(firstUrl)?.replace(/^https?:\/\//, "") ?? null;
         return (
           <div key={c.id} className={styles.idxCard}>
             {/* Stretched link makes the whole card the click target without nesting

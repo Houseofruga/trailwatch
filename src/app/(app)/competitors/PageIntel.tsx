@@ -11,7 +11,7 @@ import styles from "./page.module.css";
 
 /**
  * The per-page intelligence panels (v3 design): two pills under a page row —
- * "What we're now watching" (Phase-1 baseline) and "Recent history" (Phase-2
+ * "What we're watching now" (Phase-1 baseline) and "Recent history" (Phase-2
  * Wayback backfill) — only one open at a time, each expanding a panel below.
  *
  * The baseline profile is hydrated from `initialProfile` when the server already
@@ -171,7 +171,7 @@ export function PageIntel({
           onClick={() => toggle("baseline")}
           aria-expanded={open === "baseline"}
         >
-          <span>What we&rsquo;re now watching</span>
+          <span>What we&rsquo;re watching now</span>
           <span className={styles.pillChevron} data-open={open === "baseline"}>
             <svg width="9" height="6" viewBox="0 0 9 6" fill="none" aria-hidden="true">
               <path d="M1 1l3.5 3.5L8 1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
