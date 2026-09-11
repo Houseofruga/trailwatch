@@ -169,7 +169,9 @@ export function OnboardingPlanStep({
       <p className={styles.sub}>
         {proIntent
           ? `You're watching all ${allRows.length}. Here's everything Pro unlocks — pick monthly or annual, then continue.`
-          : `Free tracks ${LIMITS.free.competitors} competitors. Go Pro to watch all ${allRows.length}.`}
+          : allRows.length > LIMITS.free.competitors
+            ? `Free tracks ${LIMITS.free.competitors} competitors. Go Pro to watch all ${allRows.length}.`
+            : `Start free, or go Pro for up to ${LIMITS.paid.competitors} competitors and ${LIMITS.paid.pagesPerCompetitor} pages each.`}
       </p>
 
       {proIntent ? (
