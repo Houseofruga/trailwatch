@@ -1,12 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import { BoltIcon } from "./icons";
+import { useCursorDust } from "./CursorDust";
 import styles from "./UpgradeCta.module.css";
 
 /**
  * The inline "Upgrade to Pro" nudge — a Link to /billing styled as the shared
- * upgrade CTA (black, green text, filled bolt prefix). Used by the at-cap
- * prompts and the sidebar. The real Paddle checkout button reuses the same
- * stylesheet directly (features/billing/UpgradeButton) so all upgrade CTAs match.
+ * upgrade CTA (black, green text, filled bolt prefix) with cursor-following lime
+ * pixel dust. Used by the at-cap prompts and the sidebar. The real Paddle
+ * checkout button reuses the same stylesheet + useCursorDust so all upgrade CTAs
+ * match.
  */
 export function UpgradeCta({
   href = "/billing",
@@ -19,13 +23,16 @@ export function UpgradeCta({
   full?: boolean;
   className?: string;
 }) {
+  const { handlers, dust } = useCursorDust();
   return (
     <Link
       href={href}
       className={`${styles.cta}${full ? ` ${styles.full}` : ""}${className ? ` ${className}` : ""}`}
+      {...handlers}
     >
       <BoltIcon size={14} />
       {label}
+      {dust}
     </Link>
   );
 }

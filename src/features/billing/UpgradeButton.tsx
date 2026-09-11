@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { initializePaddle, type Paddle } from "@paddle/paddle-js";
 import { Button } from "@/components/Button";
 import { BoltIcon } from "@/components/icons";
+import { useCursorDust } from "@/components/CursorDust";
 import ctaStyles from "@/components/UpgradeCta.module.css";
 import type { BillingPeriod } from "@/features/plan/limits";
 
@@ -34,6 +35,7 @@ export function UpgradeButton({
   const [paddle, setPaddle] = useState<Paddle>();
   const [finalizing, setFinalizing] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
+  const { handlers: dustHandlers, dust } = useCursorDust();
 
   const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
   const priceId = PRICE_ID_BY_PERIOD[period];
@@ -107,11 +109,13 @@ export function UpgradeButton({
       className={`${ctaStyles.cta} ${ctaStyles.full}`}
       onClick={openCheckout}
       disabled={!configured || !paddle}
+      {...(configured ? dustHandlers : {})}
     >
       {configured ? (
         <>
           <BoltIcon size={14} />
           Upgrade to Pro
+          {dust}
         </>
       ) : (
         "Upgrade unavailable — billing not configured"

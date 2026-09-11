@@ -17,62 +17,8 @@
   font-family: inherit;
   text-decoration: none;
   line-height: 1.2;
-  /* let the pixel dust spill just outside the button */
+  /* let the cursor pixel-dust spill just outside the button */
   overflow: visible;
-}
-
-/* Lime "pixel dust": two layers of tiny lime dots scattered across the button
-   and a bit around it (the pseudo extends 6px beyond every edge). Positions are
-   percentages so coverage holds at any button width. The two layers twinkle out
-   of phase so the field shimmers. Purely decorative. */
-.cta::before,
-.cta::after {
-  content: "";
-  position: absolute;
-  inset: -6px;
-  pointer-events: none;
-  z-index: 1;
-  background-repeat: no-repeat;
-  animation: upgradeDust 2.3s ease-in-out infinite;
-}
-.cta::before {
-  background-image:
-    radial-gradient(1.6px 1.6px at 3% 22%, var(--accent) 99%, transparent),
-    radial-gradient(1.6px 1.6px at 11% 82%, var(--accent) 99%, transparent),
-    radial-gradient(1.4px 1.4px at 26% 12%, var(--accent) 99%, transparent),
-    radial-gradient(1.6px 1.6px at 41% 90%, var(--accent) 99%, transparent),
-    radial-gradient(1.4px 1.4px at 58% 8%, var(--accent) 99%, transparent),
-    radial-gradient(1.6px 1.6px at 74% 88%, var(--accent) 99%, transparent),
-    radial-gradient(1.4px 1.4px at 89% 18%, var(--accent) 99%, transparent),
-    radial-gradient(1.6px 1.6px at 97% 78%, var(--accent) 99%, transparent);
-}
-.cta::after {
-  animation-delay: 1.15s;
-  background-image:
-    radial-gradient(1.4px 1.4px at 7% 62%, var(--accent) 99%, transparent),
-    radial-gradient(1.6px 1.6px at 19% 30%, var(--accent) 99%, transparent),
-    radial-gradient(1.4px 1.4px at 34% 70%, var(--accent) 99%, transparent),
-    radial-gradient(1.6px 1.6px at 49% 26%, var(--accent) 99%, transparent),
-    radial-gradient(1.4px 1.4px at 66% 72%, var(--accent) 99%, transparent),
-    radial-gradient(1.6px 1.6px at 81% 34%, var(--accent) 99%, transparent),
-    radial-gradient(1.4px 1.4px at 93% 58%, var(--accent) 99%, transparent),
-    radial-gradient(1.6px 1.6px at 100% 40%, var(--accent) 99%, transparent);
-}
-@keyframes upgradeDust {
-  0%,
-  100% {
-    opacity: 0.45;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .cta::before,
-  .cta::after {
-    animation: none;
-    opacity: 0.8;
-  }
 }
 .cta:hover {
   background: #000;
@@ -89,11 +35,4 @@
   background: var(--surface-sunken);
   color: var(--ink-faint);
   cursor: not-allowed;
-}
-/* No dust on the inert/unavailable state. */
-.cta:disabled::before,
-.cta:disabled::after,
-.disabled::before,
-.disabled::after {
-  display: none;
 }

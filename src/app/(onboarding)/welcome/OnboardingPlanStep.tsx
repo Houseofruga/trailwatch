@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { initializePaddle, type Paddle } from "@paddle/paddle-js";
 import { Button } from "@/components/Button";
 import { BoltIcon, ChevronLeftIcon } from "@/components/icons";
+import { useCursorDust } from "@/components/CursorDust";
 import ctaStyles from "@/components/UpgradeCta.module.css";
 import { ProPricingCard } from "@/features/billing/ProPricingCard";
 import { seedCompetitors, currentPlan } from "@/features/competitors/actions";
@@ -61,6 +62,7 @@ export function OnboardingPlanStep({
   const [paddle, setPaddle] = useState<Paddle>();
   const [finalizing, setFinalizing] = useState(false);
   const [slow, setSlow] = useState(false);
+  const { handlers: dustHandlers, dust } = useCursorDust();
 
   const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN;
   const environment =
@@ -229,11 +231,13 @@ export function OnboardingPlanStep({
                   className={`${ctaStyles.cta} ${ctaStyles.full}`}
                   onClick={() => openCheckout(period)}
                   disabled={!configured || !paddle || busy}
+                  {...(configured ? dustHandlers : {})}
                 >
                   {configured ? (
                     <>
                       <BoltIcon size={14} />
                       Upgrade to Pro
+                      {dust}
                     </>
                   ) : (
                     "Upgrade unavailable"
