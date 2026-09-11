@@ -30,7 +30,7 @@ export function UpgradeCta({
       className={`${styles.cta}${full ? ` ${styles.full}` : ""}${className ? ` ${className}` : ""}`}
       {...handlers}
     >
-      <BoltIcon size={14} />
+      <BoltIcon size={18} />
       {label}
       {dust}
     </Link>

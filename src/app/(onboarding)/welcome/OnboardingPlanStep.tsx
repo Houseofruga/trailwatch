@@ -235,7 +235,7 @@ export function OnboardingPlanStep({
                 >
                   {configured ? (
                     <>
-                      <BoltIcon size={14} />
+                      <BoltIcon size={18} />
                       Upgrade to Pro
                       {dust}
                     </>
