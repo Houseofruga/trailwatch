@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ButtonLink } from "@/components/Button";
+import { UpgradeCta } from "@/components/UpgradeCta";
 import { usePathname } from "next/navigation";
 import { logOut } from "@/features/auth/actions";
 import type { Account } from "@/features/account/queries";
@@ -142,11 +142,7 @@ export function Sidebar({ account }: { account: Account }) {
                 {account.competitorCount}/{limits.competitors} competitors · {account.pageCount}/{account.pageAllowance} pages
               </span>
             </div>
-            {isFree ? (
-              <ButtonLink href="/billing" full className={styles.sheetUpgrade}>
-                Upgrade to Pro
-              </ButtonLink>
-            ) : null}
+            {isFree ? <UpgradeCta full /> : null}
             <form action={logOut}>
               <button type="submit" className={styles.sheetLogout}>
                 <LogoutIcon />
@@ -226,11 +222,7 @@ export function Sidebar({ account }: { account: Account }) {
             </div>
           </div>
 
-          {isFree ? (
-            <ButtonLink href="/billing" full className={styles.upgradeBtn}>
-              Upgrade to Pro
-            </ButtonLink>
-          ) : null}
+          {isFree ? <UpgradeCta full className={styles.upgradeBtn} /> : null}
         </div>
 
         <div className={styles.profile} ref={profileRef}>

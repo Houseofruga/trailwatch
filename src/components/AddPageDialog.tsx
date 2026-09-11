@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
-import Link from "next/link";
+import { UpgradeCta } from "./UpgradeCta";
 import { CompetitorAvatar } from "./CompetitorAvatar";
 import { addPages, type FormState } from "@/features/competitors/actions";
 import { originOf } from "@/features/competitors/domain";
@@ -316,9 +316,7 @@ export function AddPageDialog({
               <div className={styles.limitActions}>
                 {plan === "free" ? (
                   <>
-                    <Link href="/billing" className={styles.upgrade}>
-                      Upgrade to Pro
-                    </Link>
+                    <UpgradeCta />
                     <button type="button" className={styles.maybe} onClick={onClose}>
                       Maybe later
                     </button>

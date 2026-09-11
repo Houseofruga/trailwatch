@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { initializePaddle, type Paddle } from "@paddle/paddle-js";
 import { Button } from "@/components/Button";
-import { ChevronLeftIcon } from "@/components/icons";
+import { BoltIcon, ChevronLeftIcon } from "@/components/icons";
+import ctaStyles from "@/components/UpgradeCta.module.css";
 import { ProPricingCard } from "@/features/billing/ProPricingCard";
 import { seedCompetitors, currentPlan } from "@/features/competitors/actions";
 import { LIMITS, type BillingPeriod } from "@/features/plan/limits";
@@ -223,14 +224,21 @@ export function OnboardingPlanStep({
             renderButton={(period) => {
               const configured = Boolean(token && PRICE_ID_BY_PERIOD[period]);
               return (
-                <Button
+                <button
                   type="button"
-                  full
+                  className={`${ctaStyles.cta} ${ctaStyles.full}`}
                   onClick={() => openCheckout(period)}
                   disabled={!configured || !paddle || busy}
                 >
-                  {configured ? "Upgrade to Pro" : "Upgrade unavailable"}
-                </Button>
+                  {configured ? (
+                    <>
+                      <BoltIcon size={14} />
+                      Upgrade to Pro
+                    </>
+                  ) : (
+                    "Upgrade unavailable"
+                  )}
+                </button>
               );
             }}
           />

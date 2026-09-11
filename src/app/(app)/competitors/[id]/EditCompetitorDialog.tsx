@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
-import Link from "next/link";
+import { UpgradeCta } from "@/components/UpgradeCta";
 import { PageTypeSelect } from "@/components/PageTypeSelect";
 import { updateCompetitorDetails, type EditFormState } from "@/features/competitors/actions";
 import { canonUrl, toFullUrl, hostname, rowUrlError } from "@/features/competitors/rowRules";
@@ -175,7 +175,7 @@ export function EditCompetitorDialog({
                   Free watches {pagesPerCompetitor} page{pagesPerCompetitor === 1 ? "" : "s"} per competitor. Pro adds more.
                 </div>
               </div>
-              <Link href="/billing" className={s.start}>Upgrade</Link>
+              <UpgradeCta />
             </div>
           ) : canAddRow ? (
             <div className={s.addRow}>

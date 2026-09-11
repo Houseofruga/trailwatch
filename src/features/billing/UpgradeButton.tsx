@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { initializePaddle, type Paddle } from "@paddle/paddle-js";
 import { Button } from "@/components/Button";
+import { BoltIcon } from "@/components/icons";
+import ctaStyles from "@/components/UpgradeCta.module.css";
 import type { BillingPeriod } from "@/features/plan/limits";
 
 // One env var per Pro price — set from the Paddle dashboard, never hardcoded.
@@ -100,8 +102,20 @@ export function UpgradeButton({
   }
 
   return (
-    <Button full onClick={openCheckout} disabled={!configured || !paddle}>
-      {configured ? "Upgrade to Pro" : "Upgrade unavailable — billing not configured"}
-    </Button>
+    <button
+      type="button"
+      className={`${ctaStyles.cta} ${ctaStyles.full}`}
+      onClick={openCheckout}
+      disabled={!configured || !paddle}
+    >
+      {configured ? (
+        <>
+          <BoltIcon size={14} />
+          Upgrade to Pro
+        </>
+      ) : (
+        "Upgrade unavailable — billing not configured"
+      )}
+    </button>
   );
 }

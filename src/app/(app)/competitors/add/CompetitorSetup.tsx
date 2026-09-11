@@ -2,7 +2,7 @@
 
 import { useActionState, useState, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
-import Link from "next/link";
+import { UpgradeCta } from "@/components/UpgradeCta";
 import { CompetitorAvatar } from "@/components/CompetitorAvatar";
 import { PageTypeSelect } from "@/components/PageTypeSelect";
 import { findCompetitorsAction, type FinderState } from "@/app/(marketing)/actions";
@@ -153,7 +153,7 @@ export function CompetitorSetup({
                 history stay exactly as they are.
               </p>
               <div className={styles.limitActions}>
-                <Link href="/billing" className={styles.start}>&#8593; Upgrade to Pro</Link>
+                <UpgradeCta />
                 <button type="button" className={styles.secBtn} onClick={onClose}>Manage competitors</button>
               </div>
             </>
@@ -251,7 +251,7 @@ export function CompetitorSetup({
                 <div className={styles.freeNudgeTitle}>Track more pages per competitor</div>
                 <div className={styles.sub}>Free watches {pagesPerCompetitor} page{pagesPerCompetitor === 1 ? "" : "s"} per competitor. Pro adds pricing, changelog, docs and more.</div>
               </div>
-              <Link href="/billing" className={styles.start}>Upgrade</Link>
+              <UpgradeCta />
             </div>
           ) : canAddRow ? (
             <div className={styles.addRow}>

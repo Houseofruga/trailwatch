@@ -136,3 +136,13 @@ export function SettingsIcon({ size = 16 }: IconProps) {
     </svg>
   );
 }
+
+// Filled lightning bolt — the prefix on "Upgrade to Pro" CTAs. Solid fill (not a
+// stroke icon) so it reads as a badge; inherits the button's text colour.
+export function BoltIcon({ size = 14 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M9.5 1.5 3 9h4l-.5 5.5L13 7H9l.5-5.5Z" fill="currentColor" />
+    </svg>
+  );
+}
