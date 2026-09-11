@@ -22,6 +22,15 @@ const STRIP_SELECTORS = [
 const BLOCK_SELECTORS =
   "p, br, div, li, h1, h2, h3, h4, h5, h6, tr, blockquote, section, article";
 
+// Inline elements get a *space* (not a newline) after them — otherwise adjacent
+// inline runs concatenate with nothing between, mashing distinct text together
+// (e.g. a plan name "Business" beside its "Recommended" badge -> "BusinessRecommended",
+// or side-by-side table cells). A space keeps them as separate words while staying
+// on the same line; normalize.ts collapses any resulting double spaces, so this is
+// safe for prose that was already whitespace-separated.
+const INLINE_SELECTORS =
+  "span, a, strong, em, b, i, small, label, button, abbr, mark, code, td, th";
+
 /**
  * HTML -> raw main-content text, one rough "line" per block element.
  * Not normalized yet — see normalize.ts for whitespace collapsing and
@@ -39,6 +48,9 @@ export function extractMainText(html: string): string {
 
   root.find(BLOCK_SELECTORS).each((_, el) => {
     $(el).after("\n");
+  });
+  root.find(INLINE_SELECTORS).each((_, el) => {
+    $(el).after(" ");
   });
 
   return root.text();

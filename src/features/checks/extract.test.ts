@@ -59,4 +59,24 @@ describe("extractMainText", () => {
 
     expect(lines).toEqual(["First paragraph.", "Second paragraph."]);
   });
+
+  it("separates adjacent inline elements so distinct text doesn't mash together", () => {
+    // A plan name beside its badge, with no whitespace between the spans.
+    const html = "<body><main><span>Business</span><span>Recommended</span></main></body>";
+    expect(extractMainText(html)).toContain("Business Recommended");
+    expect(extractMainText(html)).not.toContain("BusinessRecommended");
+  });
+
+  it("separates side-by-side table cells", () => {
+    const html = "<body><main><table><tr><td>Business</td><td>$20</td></tr></table></main></body>";
+    expect(extractMainText(html)).toContain("Business $20");
+    expect(extractMainText(html)).not.toContain("Business$20");
+  });
+
+  it("does not distort ordinary whitespace-separated prose", () => {
+    const html = '<body><main><p>Click <a href="#">here</a> to start now.</p></main></body>';
+    // Extra spaces from inline separators collapse in normalize; the raw text
+    // must still read as the same words in order (no lost or mid-word spaces).
+    expect(extractMainText(html).replace(/\s+/g, " ").trim()).toBe("Click here to start now.");
+  });
 });
