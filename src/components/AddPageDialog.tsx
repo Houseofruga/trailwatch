@@ -11,13 +11,15 @@ import { PAGE_TYPE_VALUES, pageTypeLabel, labelToType, type PageType } from "@/f
 import { LIMITS } from "@/features/plan/limits";
 import styles from "./AddPageDialog.module.css";
 
-// Loose URL equality for the "already tracking this" check — protocol/trailing
-// slash / case shouldn't make the same page look new.
+// Loose URL equality for the "already tracking this" check — protocol / www /
+// trailing slash / case shouldn't make the same page look new. Kept in sync with
+// the server's canonicalUrl (actions.ts) and rowRules' canonUrl.
 function normalize(u: string): string {
   return u
     .trim()
     .toLowerCase()
     .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
     .replace(/\/+$/, "");
 }
 
