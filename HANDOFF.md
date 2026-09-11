@@ -414,9 +414,12 @@ session, commits `a9ad2fd`, `9de6e14`; pushed).**
   it a **dedicated `AddCompetitorDialog.module.css`** (own copy of the modal chrome) so a sibling's
   CSS churn can't break it again, and rewrote the component (header + subtitle, `.field`/`.label`/
   `.fld` wrappers, footer Cancel/Add). Verified live — renders as a proper centered card.
-- **Known follow-ups (not done):** the step-2 sub-line reads "Go Pro to watch all 1" when only one
-  competitor is picked (odd grammar); and no audit yet of whether any other component still borrows
-  `EditPageDialog.module.css` and could break the same way.
+- **"Go Pro to watch all 1" — FIXED (`ebe2a4e`).** The step-2 sub-line assumed an over-cap
+  selection; it now branches on whether the picks exceed the Free cap — over-cap keeps "Go Pro to
+  watch all M", within-cap reads "Start free, or go Pro for up to 5 competitors and 5 pages each."
+  Verified live.
+- **Known follow-up (not done):** no audit yet of whether any other component still borrows
+  `EditPageDialog.module.css` and could break the same way the onboarding Add-competitor modal did.
 
 **Page names are predefined types only — free-text page names removed (2026-09-11, this session,
 commit `c1a590e`; pushed).** Owner decision: a page's name must be one of the fixed `page_type`
