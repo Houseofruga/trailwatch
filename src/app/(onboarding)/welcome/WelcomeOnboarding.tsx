@@ -365,7 +365,7 @@ export function WelcomeOnboarding({
       {plan === "free" && !proIntent && selectedCount >= limit && (
         <div className={styles.upgradeNudge}>
           <div>
-            <div className={styles.upgradeNudgeTitle}>Watching more than {limit}?</div>
+            <div className={styles.upgradeNudgeTitle}>Want to watch more than {limit}?</div>
             <div className={styles.upgradeNudgeBody}>
               Free watches {limit}. Go Pro to track up to {LIMITS.paid.competitors} — checkout
               happens right here, no redirect.
