@@ -8,6 +8,9 @@ export type DigestRunResult = {
   usersWithChanges: number;
   sent: number;
   failed: number;
+  // Distinct reasons any sends failed — surfaced so a manual run (curl) can see
+  // why (e.g. an unverified Resend domain) without digging through server logs.
+  reasons?: string[];
 };
 
 // The weekly digest job (SPEC.md F6). One user's failure — a bounce, a rate
@@ -21,6 +24,7 @@ export async function runWeeklyDigest(now: number = Date.now()): Promise<DigestR
 
   let sent = 0;
   let failed = 0;
+  const reasons = new Set<string>();
 
   for (const digest of digests) {
     try {
@@ -43,13 +47,20 @@ export async function runWeeklyDigest(now: number = Date.now()): Promise<DigestR
           .eq("id", digest.userId);
       } else {
         failed += 1;
+        reasons.add(result.reason);
         console.warn(`Digest not sent to ${digest.email}: ${result.reason}`);
       }
     } catch (err) {
       failed += 1;
+      reasons.add(err instanceof Error ? err.message : String(err));
       console.error(`Digest failed for ${digest.email}:`, err);
     }
   }
 
-  return { usersWithChanges: digests.length, sent, failed };
+  return {
+    usersWithChanges: digests.length,
+    sent,
+    failed,
+    ...(reasons.size > 0 ? { reasons: [...reasons] } : {}),
+  };
 }
