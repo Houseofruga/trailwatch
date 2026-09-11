@@ -398,6 +398,36 @@ convenient:
 
 ## Recent work (all pushed to `main`)
 
+**Onboarding + finder + extractor polish, and a full bug-hunt pass (2026-09-11, this session,
+commits `ebe2a4e`, `ab5fdf5`, `858091e`, `f7d12b5`, `af96565`; all pushed).**
+- **"Go Pro to watch all 1" fixed** (`ebe2a4e`): the step-2 plan sub-line now branches on whether the
+  picks exceed the Free cap — over-cap keeps "Go Pro to watch all M", within-cap reads "Start free,
+  or go Pro for up to 5 competitors and 5 pages each."
+- **Upsell copy** (`ab5fdf5`): the step-1 nudge (fires at the Free cap) read "Watching more than 2?"
+  — false at exactly 2 and impossible to exceed on Free; reworded to "Want to watch more than 2?".
+- **Onboarding search matches the Add-competitor modal** (`858091e`): uppercase field label +
+  non-mono input, skeleton loaders while the finder runs, and result rows restyled as the modal's
+  cards (36px avatar, 15px name, mono domain, the "why they compete" reason line — `why` threaded
+  through the onboarding `Row` type). Multi-select checkboxes / Pro badges / Free-cap counting
+  unchanged. NB: marketing-homepage **pre-seed still works** (`tw_pending_competitors` /
+  `tw_pending_company`); pre-seeded rows just carry no `why` (the homepage stash is `{name,url}` only)
+  so they show no reason line — only in-onboarding searches do.
+- **Add-competitor manual tab defaults first page to Homepage** (`f7d12b5`): the Search→Select flow
+  already fills the homepage; the Add-manually tab's first row defaulted to "Other" (so a hand-added
+  competitor showed "Other"). First manual row now defaults to Homepage (initial + goManual reset);
+  rows added via "Add page" still default to "Other". Editable either way.
+- **Extractor space-separates inline elements** (`af96565`): `checks/extract.ts` only newlined block
+  elements, so adjacent inline runs mashed ("BusinessRecommended", side-by-side table cells) and the
+  LLM echoed it into summaries. Now emits a space after inline elements (span/a/…/td/th); normalize
+  collapses doubles so prose is unaffected. Covers live checks + Wayback backfill. **One-time effect:
+  pages that had mashed tokens will show a single re-baseline diff on their next check.** 163 tests.
+- **Full bug-hunt E2E (both accounts)** — after reseed: Pro add-page validation (dup-www /
+  cross-domain / invalid-TLD / type-required gate), Check now (live re-check → change → summary),
+  settings display-name save + digest toggle, nav-highlight (Dashboard stays active from dashboard→
+  detail); Free "All quiet", last-page-delete cascade (counts drop, "1 page" plural), manual
+  add-competitor. All passed, no console errors / 404s. Also confirmed `/competitors/add` is an
+  intercepting `@modal` route (overlay in-app, standalone fallback on direct visit) — not a bug.
+
 **Onboarding polish: "1 page(s)" pluralization + broken Add-competitor modal (2026-09-11, this
 session, commits `a9ad2fd`, `9de6e14`; pushed).**
 - **Pluralization** (`a9ad2fd`): after the Free limit dropped to 1 page/competitor, several strings
