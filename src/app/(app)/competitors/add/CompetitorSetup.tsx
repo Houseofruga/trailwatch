@@ -72,7 +72,9 @@ export function CompetitorSetup({
   const [searchState, searchAction, searching] = useActionState<FinderState, FormData>(findCompetitorsAction, null);
 
   const [name, setName] = useState("");
-  const [rows, setRows] = useState<Row[]>([newRow()]);
+  // A competitor's first page is almost always its homepage — default the first
+  // (manual) row to that type. Additional rows (addRow) still default to "other".
+  const [rows, setRows] = useState<Row[]>([newRow({ pageType: "homepage" })]);
   const [createState, createAction] = useActionState<FormState, FormData>(createCompetitor, null);
 
   const dupOwner = new Map(existingUrls.map((e) => [canon(e.url), e.competitor]));
@@ -83,7 +85,7 @@ export function CompetitorSetup({
     setPhase("edit");
   }
   function goManual() {
-    if (rows.length === 1 && !rows[0].url) setRows([newRow()]);
+    if (rows.length === 1 && !rows[0].url) setRows([newRow({ pageType: "homepage" })]);
     if (!name && query) setName(query);
     setPhase("manual");
   }
