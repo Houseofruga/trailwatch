@@ -398,6 +398,25 @@ convenient:
 
 ## Recent work (all pushed to `main`)
 
+**Page names are predefined types only — free-text page names removed (2026-09-11, this session,
+commit `c1a590e`; pushed).** Owner decision: a page's name must be one of the fixed `page_type`
+values (homepage/pricing/product/blog/changelog/other), never free text — an intentional deviation
+from the Add-flows artboards' free-text "Page name" field (same class as the earlier Edit-URL
+microcopy override).
+- `AddPageDialog`: the "Page name" field is gone; the page-type picker is now the single required
+  input (Start tracking is disabled until a type is picked), and the submitted `label` =
+  `pageTypeLabel(type)`. **This also closed the "forms don't persist page_type" gap** — the picked
+  type is now reliably written.
+- `CompetitorSetup` + `EditCompetitorDialog`: the per-row `label` is now `pageTypeLabel(type)` (was a
+  hard-coded `"Page"` default).
+- Display derives the page name from `page_type` everywhere — competitor-detail heading, dashboard
+  toast / last-page-delete copy / Edit-URL prefill, and the change-detail header (`changes/queries.ts`
+  now selects `page_type` and maps via the same prefer-type-else-`labelToType(label)` rule) — so even
+  existing free-text rows normalize to their type in the UI, and `'other'` shows "Other".
+- The **competitor name** (legitimately free text) is unchanged.
+- Verified live end to end (Notion → Blog: no name field, type required; DB stored `label:"Blog"` /
+  `page_type:"blog"`; detail + change views show the type). Typecheck/lint clean, 160 tests.
+
 **Finder directory-domain denylist + full E2E pass (2026-09-11, this session, commit `871e1e6`;
 pushed).** After reseeding the sandbox, ran a full end-to-end pass across both accounts (Pro + Free):
 dashboard (active/all-quiet, every row state incl. paused/broken-404/web-archive), change-detail
@@ -971,9 +990,11 @@ Slices (checkpoint after each; commit per slice; user reviews live before moving
   labels→other). `queries.ts` `PageRow.pageType` now **reads the DB `page_type`**, preferring the
   stored value and falling back to `labelToType(label)` only when it's absent or `'other'` (see
   [queries.ts:81](src/features/competitors/queries.ts)) — so with the backfill done, real stored
-  types are authoritative and junk-labelled `'other'` rows still group sensibly by label. NOTE the
-  add/edit forms still don't *write* page_type on create/edit (new pages land as `'other'` and fall
-  back to label) — wiring the forms to persist the picked type is the remaining future work.
+  types are authoritative and junk-labelled `'other'` rows still group sensibly by label. The
+  add/edit forms **now persist `page_type`** (as of `c1a590e`, 2026-09-11 — see the no-free-text-page-
+  names entry in Recent work): AddPageDialog/CompetitorSetup/EditCompetitorDialog all write the picked
+  type, and the free-text page-name input was removed — a page's display name is now derived from its
+  type (`pageTypeLabel`). So new pages carry their real `page_type`, not `'other'`.
 - **Slice 1 — dashboard grouped by page type — DONE + design-matched** (`16ee890`…`c41b013`, many
   fidelity fixes). One card per page type; rows reuse a shared `PageActionsMenu` (`src/components/`);
   covers active (inline "View change ›" + "N more this week" pill + nested "Recent history" link to
