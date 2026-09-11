@@ -398,6 +398,19 @@ convenient:
 
 ## Recent work (all pushed to `main`)
 
+**Finder directory-domain denylist + full E2E pass (2026-09-11, this session, commit `871e1e6`;
+pushed).** After reseeding the sandbox, ran a full end-to-end pass across both accounts (Pro + Free):
+dashboard (active/all-quiet, every row state incl. paused/broken-404/web-archive), change-detail
+`@modal`, competitors index, competitor detail + hydrated pills, Add-competitor takeover with a LIVE
+in-app finder search, Add page (picker + Free 1/1 and Pro-at-cap), Add competitor at cap (Free +
+Pro), billing (Free 2/1 · Pro 5/5 complimentary), settings, and the last-page-deletes-competitor
+flow — all pass, no console errors. The pass surfaced the finder wrong-URL quirk, which was then
+fixed (`871e1e6`, see the Open-items note): new `competitorFinder/directoryDomains.ts` filters
+directory/aggregator domains (LinkedIn, Crunchbase, G2, Wikipedia, …) out of the Exa candidate set
+and blanks any the model emits directly, keeping the competitor name. Test count 154 → 160;
+typecheck/lint clean; no new migrations. Owner-only items unchanged (§9 Paddle/digest/cron,
+production login, Paddle price raise, migration `0008`).
+
 **Design-copy deviations, detail-header host + last-page-deletes-competitor (2026-09-11, this
 session, commits `0633cc3`, `8078582`, `180bd79`; all pushed).**
 - **Two flagged design deviations** (`0633cc3`): the competitor-detail baseline pill now reads
@@ -905,14 +918,15 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
   now strips a leading `www.` like the server `canonicalUrl` + `rowRules.canonUrl` already did, so the
   Add-page "already tracking" hint matches `notion.so/pricing` to a tracked `www.notion.so/pricing`.
   Verified live. (No change needed to `normalizeUrl` — that only prepends the scheme.)
-- **Finder occasionally returns a wrong homepage URL (known accuracy quirk, low priority).** During
-  the 2026-09-11 E2E pass, an in-app Add-competitor search for `vercel.com` returned 4 correct
-  competitor *names* (Netlify, Cloudflare Pages, Railway, Render) but Netlify's URL resolved to
-  `linkedin.com` — the Exa domain-correction in `competitorFinder` mis-mapped it. Not a broken
-  journey (the name is right; the user can still Select/edit or add manually, and `runFind`
-  DNS-verifies/blanks non-resolving URLs), but a candidate for tightening the name↔domain match in
-  `competitorFinder/find.ts` / `exa.ts`. Not a regression — finder accuracy has always been
-  best-effort.
+- **Finder wrong-homepage quirk — FIXED (`871e1e6`).** The 2026-09-11 E2E pass caught an
+  Add-competitor search for `vercel.com` returning Netlify with the URL `linkedin.com` — Exa's
+  "competitors of X" search surfaces directory/aggregator pages (LinkedIn, Crunchbase, G2, Wikipedia)
+  as candidate domains, and one got attached to a competitor and passed DNS. New
+  `competitorFinder/directoryDomains.ts` (`isDirectoryDomain`, matches a listed domain or any
+  subdomain) is filtered out of the Exa candidate/grounding set (`exa.ts`) and blanked if the model
+  emits one directly (`find.ts`, name kept — works even with Exa off). Unit-tested; verified live
+  (the same search now returns Netlify → `netlify.com`). Extend the list in `directoryDomains.ts` if
+  another aggregator surfaces. (General finder accuracy is still best-effort by design.)
 - **Two flagged design deviations — FIXED (`0633cc3`).** The competitor-detail baseline pill now
   reads "What we're watching now" (matching the §03 Competitor-detail artboard, lines 448/486 — the
   compact "Watching now" at 645 is only the pricing-history variant); the Competitors index card now
