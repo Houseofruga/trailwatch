@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/Button";
 import { formatUrlError } from "@/features/competitors/rowValidation";
 import { normalizeUrl } from "@/features/competitors/url";
-import styles from "@/components/EditPageDialog.module.css";
+import styles from "./AddCompetitorDialog.module.css";
 
 // Add a competitor by hand during onboarding — the same modal chrome as the
 // add/edit-page dialog, but it collects a competitor name + homepage URL and
@@ -35,47 +34,64 @@ export function AddCompetitorDialog({
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.card} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.title}>Add competitor</div>
+        <div className={styles.header}>
+          <div className={styles.title}>Add competitor</div>
+          <div className={styles.sub}>We&rsquo;ll watch its homepage and email you when it changes.</div>
+        </div>
 
-        <label className={styles.label} htmlFor="add-comp-name">
-          Competitor name
-        </label>
-        <input
-          id="add-comp-name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") save();
-          }}
-          placeholder="e.g. Linear"
-          className={styles.nameInput}
-          autoFocus
-        />
-        <div className={styles.spacer} />
+        <div className={styles.body}>
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="add-comp-name">
+              Competitor name
+            </label>
+            <div className={styles.fld}>
+              <input
+                id="add-comp-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") save();
+                }}
+                placeholder="e.g. Linear"
+                className={styles.input}
+                autoFocus
+              />
+            </div>
+          </div>
 
-        <label className={styles.label} htmlFor="add-comp-url">
-          Homepage URL
-        </label>
-        <input
-          id="add-comp-url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") save();
-          }}
-          placeholder="https://competitor.com"
-          inputMode="url"
-          className={urlError ? styles.urlInputError : styles.urlInput}
-        />
-        {urlError ? <div className={styles.fieldError}>{urlError}</div> : null}
+          <div className={styles.fieldLast}>
+            <label className={styles.label} htmlFor="add-comp-url">
+              Homepage URL
+            </label>
+            <div className={urlError ? styles.fldErr : styles.fld}>
+              <input
+                id="add-comp-url"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") save();
+                }}
+                placeholder="competitor.com"
+                inputMode="url"
+                className={`${styles.input} ${styles.inputMono}`}
+              />
+            </div>
+            {urlError ? (
+              <div className={styles.errNote}>
+                <span aria-hidden="true">&#9888;</span>
+                <span>{urlError}</span>
+              </div>
+            ) : null}
+          </div>
+        </div>
 
-        <div className={styles.actions}>
-          <Button variant="secondary" onClick={onClose}>
+        <div className={styles.footer}>
+          <button type="button" className={styles.cancel} onClick={onClose}>
             Cancel
-          </Button>
-          <Button onClick={save} disabled={!canSubmit}>
+          </button>
+          <button type="button" className={styles.add} onClick={save} disabled={!canSubmit}>
             Add
-          </Button>
+          </button>
         </div>
       </div>
     </div>
