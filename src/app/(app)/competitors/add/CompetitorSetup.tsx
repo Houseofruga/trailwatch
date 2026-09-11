@@ -131,18 +131,32 @@ export function CompetitorSetup({
           <button type="button" className={styles.close} onClick={onClose} aria-label="Close">&#10005;</button>
         </div>
         <div className={styles.limitBody}>
-          <span className={styles.limitBadgeLg} aria-hidden="true">&#8593;</span>
+          <span className={styles.limitBadgeLg} aria-hidden="true">{plan === "paid" ? "✓" : "↑"}</span>
           <div className={styles.limitTitle}>
             You&rsquo;re watching all {competitorCap} of your {planLabel} competitor{competitorCap === 1 ? "" : "s"}
           </div>
-          <p className={styles.limitText}>
-            Upgrade to Pro to track more competitors, each with more pages. Your current competitors and their
-            history stay exactly as they are.
-          </p>
-          <div className={styles.limitActions}>
-            <Link href="/billing" className={styles.start}>&#8593; Upgrade to Pro</Link>
-            <button type="button" className={styles.secBtn} onClick={onClose}>Manage competitors</button>
-          </div>
+          {plan === "paid" ? (
+            <>
+              <p className={styles.limitText}>
+                That&rsquo;s the most Pro tracks. To add a different one, remove a competitor you no longer need &mdash;
+                its pages and history go with it.
+              </p>
+              <div className={styles.limitActions}>
+                <button type="button" className={styles.start} onClick={onClose}>Manage competitors</button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className={styles.limitText}>
+                Upgrade to Pro to track more competitors, each with more pages. Your current competitors and their
+                history stay exactly as they are.
+              </p>
+              <div className={styles.limitActions}>
+                <Link href="/billing" className={styles.start}>&#8593; Upgrade to Pro</Link>
+                <button type="button" className={styles.secBtn} onClick={onClose}>Manage competitors</button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
