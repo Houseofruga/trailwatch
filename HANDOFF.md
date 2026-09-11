@@ -398,6 +398,38 @@ convenient:
 
 ## Recent work (all pushed to `main`)
 
+**Upgrade-CTA redesign + hover/perf polish (2026-09-11, this session, commits `91ba29c`, `cf4548c`,
+`c5ff4e7`, `366de84`→`fe6fc88`, `b6d798c`, `5acd824`, `2aa2ddf`; all pushed).**
+- **Distinct "Upgrade to Pro" CTA** (`cf4548c`): shared look — black button, green text, filled
+  lightning-bolt prefix — via a new `BoltIcon` and shared `components/UpgradeCta.{tsx,module.css}`;
+  the Paddle checkout `UpgradeButton` and the onboarding Pro button reuse the same `.cta` classes so
+  every upgrade CTA matches. Applied to the at-cap add-competitor/add-page/edit-competitor nudges,
+  the sidebar, billing checkout, and onboarding. (Owner rule: only buttons literally labelled
+  "Upgrade to Pro"; "Continue to checkout" and the step-1 flow button stay plain.) Bolt sized 14→18px
+  (`fe6fc88`). Also dropped the "+" badge from the Add-competitor takeover header (`91ba29c`).
+- **Cursor pixel-dust on the upgrade CTA** (`366de84`→`f01214c`→`e539b82`): a shared `useCursorDust`
+  hook (`components/CursorDust`) emits small lime pixels at the pointer that fly outward, vary in
+  size, and fade — a lively trail that follows the cursor while hovering (not a static field).
+  Throttled + capped; skipped under `prefers-reduced-motion`.
+- **Boxed buttons keep their text colour on hover** (`c5ff4e7`): boxed link-buttons (padding +
+  background rendered as `<a>`) inherited the global `a:hover` (tokens.css) → text turned link-blue +
+  underlined. Pinned the text colour + `text-decoration:none` on the boxed hovers (shared Button
+  `.secondary`, SiteHeader CTA, ErrorState, UpgradeCta, marketing tools/compare CTAs). Text-only
+  links (Log in, "View change ›", legal, footer) intentionally still recolor/underline. **Owner rule:
+  only fix buttons with padding + background; never text buttons.**
+- **Dead CSS cleanup** (`b6d798c`): removed unused module classes (orphaned by the above + pre-existing
+  onboarding/sidebar leftovers). All verified unreferenced.
+- **Faster navigations** (`5acd824`): the middleware (`proxy.ts`) ran `supabase.auth.getUser()` — a
+  Supabase round-trip (~250ms, up to ~750ms) — on **every** request incl. background prefetches and
+  the favicon-proxy calls. Now skips that round-trip for Next prefetch requests and excludes `/api/*`
+  from the matcher (those carry their own auth). Real navigations still run the full `getUser` check;
+  the deliberate "don't use getSession" choice is untouched. NB: the local dev preview has no route
+  prefetch + compiles routes on first visit, so nav feels slower there than in production. A further
+  ~250ms/nav could be reclaimed by switching the *middleware redirect* to `getSession` (pages still
+  re-validate via `getUser` + RLS) — left undone pending owner sign-off given the security comment.
+- **"Manage competitors" at-cap CTA now navigates to `/competitors`** (`2aa2ddf`) instead of the
+  takeover's default `router.back()` (which returned to the dashboard).
+
 **Onboarding + finder + extractor polish, and a full bug-hunt pass (2026-09-11, this session,
 commits `ebe2a4e`, `ab5fdf5`, `858091e`, `f7d12b5`, `af96565`; all pushed).**
 - **"Go Pro to watch all 1" fixed** (`ebe2a4e`): the step-2 plan sub-line now branches on whether the
