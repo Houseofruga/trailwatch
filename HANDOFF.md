@@ -905,6 +905,14 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
   now strips a leading `www.` like the server `canonicalUrl` + `rowRules.canonUrl` already did, so the
   Add-page "already tracking" hint matches `notion.so/pricing` to a tracked `www.notion.so/pricing`.
   Verified live. (No change needed to `normalizeUrl` — that only prepends the scheme.)
+- **Finder occasionally returns a wrong homepage URL (known accuracy quirk, low priority).** During
+  the 2026-09-11 E2E pass, an in-app Add-competitor search for `vercel.com` returned 4 correct
+  competitor *names* (Netlify, Cloudflare Pages, Railway, Render) but Netlify's URL resolved to
+  `linkedin.com` — the Exa domain-correction in `competitorFinder` mis-mapped it. Not a broken
+  journey (the name is right; the user can still Select/edit or add manually, and `runFind`
+  DNS-verifies/blanks non-resolving URLs), but a candidate for tightening the name↔domain match in
+  `competitorFinder/find.ts` / `exa.ts`. Not a regression — finder accuracy has always been
+  best-effort.
 - **Two flagged design deviations — FIXED (`0633cc3`).** The competitor-detail baseline pill now
   reads "What we're watching now" (matching the §03 Competitor-detail artboard, lines 448/486 — the
   compact "Watching now" at 645 is only the pricing-history variant); the Competitors index card now
