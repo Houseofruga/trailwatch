@@ -398,6 +398,26 @@ convenient:
 
 ## Recent work (all pushed to `main`)
 
+**Onboarding polish: "1 page(s)" pluralization + broken Add-competitor modal (2026-09-11, this
+session, commits `a9ad2fd`, `9de6e14`; pushed).**
+- **Pluralization** (`a9ad2fd`): after the Free limit dropped to 1 page/competitor, several strings
+  that interpolate the count still hardcoded "pages" → "1 pages". Guarded the dynamic ones with a
+  singular/plural switch: onboarding step-1 body (`WelcomeOnboarding`), the step-2 plan feature list
+  (`OnboardingPlanStep`), the dashboard over-limit banner (`dashboard/page.tsx`), and three
+  server-side page-cap error messages (`competitors/actions.ts`). Static "1 page each"/"5 pages each"
+  marketing/billing strings already hardcode the right number; billing's downgrade footnote was
+  already guarded. Verified live — onboarding now reads "1 page per competitor" on both steps.
+- **Broken Add-competitor modal** (`9de6e14`): the onboarding "Add one yourself instead" modal
+  (`welcome/AddCompetitorDialog.tsx`) borrowed `EditPageDialog.module.css`, but the IA redesign
+  rewrote that file and dropped the classes it used (`label`, `nameInput`, `urlInput`, `spacer`,
+  `fieldError`, `actions`) — so labels rendered inline against unstyled inputs with no padding. Gave
+  it a **dedicated `AddCompetitorDialog.module.css`** (own copy of the modal chrome) so a sibling's
+  CSS churn can't break it again, and rewrote the component (header + subtitle, `.field`/`.label`/
+  `.fld` wrappers, footer Cancel/Add). Verified live — renders as a proper centered card.
+- **Known follow-ups (not done):** the step-2 sub-line reads "Go Pro to watch all 1" when only one
+  competitor is picked (odd grammar); and no audit yet of whether any other component still borrows
+  `EditPageDialog.module.css` and could break the same way.
+
 **Page names are predefined types only — free-text page names removed (2026-09-11, this session,
 commit `c1a590e`; pushed).** Owner decision: a page's name must be one of the fixed `page_type`
 values (homepage/pricing/product/blog/changelog/other), never free text — an intentional deviation
