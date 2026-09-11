@@ -96,18 +96,6 @@
   );
 }
 
-/* Slice 1: routes not built yet. Flip these to real links as slices land. */
-.navItemPending {
-  composes: navItem;
-  color: var(--ink-faint);
-  cursor: default;
-}
-
-.navItemPending:hover {
-  background: transparent;
-  color: var(--ink-faint);
-}
-
 .navBar {
   position: absolute;
   top: 8px;
@@ -155,11 +143,6 @@
 .usagePlan {
   font-size: 12.5px;
   font-weight: 500;
-}
-
-.usagePrice {
-  font-size: 11.5px;
-  color: var(--ink-4);
 }
 
 .meters {
@@ -269,11 +252,6 @@
   transition: transform 0.15s ease;
 }
 
-.chevronOpen {
-  composes: chevron;
-  transform: rotate(180deg);
-}
-
 .menu {
   position: absolute;
   bottom: calc(100% + 8px);
@@ -304,16 +282,6 @@
 
 .menuItem:hover {
   background: var(--bg);
-}
-
-.menuItemDisabled {
-  composes: menuItem;
-  color: var(--ink-faint);
-  cursor: default;
-}
-
-.menuItemDisabled:hover {
-  background: transparent;
 }
 
 .menuItemDanger {
@@ -526,10 +494,6 @@
     border-bottom: 1px solid var(--border-soft);
     font-size: 12.5px;
     color: var(--ink-3);
-  }
-
-  .sheetUpgrade {
-    margin-top: 16px;
   }
 
   .sheetLogout {

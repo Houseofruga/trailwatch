@@ -30,8 +30,7 @@
 .full {
   width: 100%;
 }
-.cta:disabled,
-.disabled {
+.cta:disabled {
   background: var(--surface-sunken);
   color: var(--ink-faint);
   cursor: not-allowed;

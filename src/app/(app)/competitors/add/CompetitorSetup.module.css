@@ -26,18 +26,6 @@
   align-items: center;
   gap: 14px;
 }
-.plus {
-  width: 28px;
-  height: 28px;
-  background: var(--ink);
-  color: var(--accent);
-  font-size: 15px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-}
 .ctitle {
   font-size: 16px;
   font-weight: 600;

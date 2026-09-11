@@ -69,11 +69,6 @@
   text-wrap: pretty;
 }
 
-.limitNote {
-  font-size: 0.9rem;
-  color: var(--ink-2);
-  margin: 0 0 14px;
-}
 
 /* ------------------------------------------------ Step 1 · domain (suggest) */
 .domainForm {
@@ -143,34 +138,6 @@
   .domainRow {
     flex-direction: column;
   }
-}
-
-/* Column headers over the watchlist rows — mirrors the in-product add-competitor
-   form. The leading spacer aligns with the row checkbox. */
-.colLabels {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 10px;
-  padding: 0 12px;
-}
-
-.colLabelName {
-  flex: 0 0 34%;
-  padding-left: 30px;
-  font-size: 11.5px;
-  color: var(--ink-4);
-}
-
-.colLabelUrl {
-  flex: 1;
-  font-size: 11.5px;
-  color: var(--ink-4);
-}
-
-.colLabelSpacer {
-  flex: 0 0 auto;
-  width: 62px;
 }
 
 .list {
@@ -423,76 +390,6 @@
   padding: 12px;
   border: 1px solid var(--border);
   background: var(--surface);
-}
-
-/* Unchecked = won't be watched on the free plan. Muted but fully editable. */
-.rowUnselected {
-  background: var(--surface-alt);
-}
-
-.rowUnselected .name,
-.rowUnselected .url {
-  color: var(--ink-2);
-}
-
-.check {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-}
-
-.check input {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-
-.check input:disabled {
-  cursor: not-allowed;
-}
-
-.fields {
-  display: flex;
-  flex: 1;
-  gap: 10px;
-  min-width: 0;
-}
-
-.name,
-.url {
-  border: 1px solid var(--border-input);
-  border-radius: 0;
-  padding: 10px 12px;
-  font-size: 13.5px;
-  background: #fff;
-  color: var(--ink);
-  min-width: 0;
-}
-
-.name {
-  flex: 0 0 34%;
-}
-
-/* URLs render in the mono face across the product. */
-.url {
-  flex: 1;
-  font-family: var(--font-geist-mono), monospace;
-}
-
-.remove {
-  flex: 0 0 62px;
-  font-size: 13px;
-  color: var(--ink-faint);
-  background: none;
-  border: none;
-  text-align: right;
-  cursor: pointer;
-  font-family: inherit;
-}
-
-.remove:hover {
-  color: var(--danger);
 }
 
 /* "Add another competitor" — the in-product add-row control (accent-ink text

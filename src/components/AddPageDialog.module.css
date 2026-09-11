@@ -207,14 +207,12 @@
   background: var(--surface-sunken);
   color: var(--ink-faint);
 }
-.urlInput:disabled,
-.nameInput:disabled {
+.urlInput:disabled {
   color: var(--ink-faint);
   -webkit-text-fill-color: var(--ink-faint);
   cursor: not-allowed;
 }
-.urlInput,
-.nameInput {
+.urlInput {
   flex: 1;
   min-width: 0;
   border: none;
@@ -227,8 +225,7 @@
 .urlInput {
   font-family: var(--font-geist-mono), monospace;
 }
-.urlInput:focus,
-.nameInput:focus {
+.urlInput:focus {
   outline: none;
 }
 .okIcon {
@@ -398,19 +395,6 @@
   display: flex;
   gap: 10px;
   margin-top: 14px;
-}
-.upgrade {
-  flex: 1;
-  text-align: center;
-  background: var(--accent);
-  color: var(--ink);
-  padding: 11px 18px;
-  font-size: 13.5px;
-  font-weight: 600;
-  text-decoration: none;
-}
-.upgrade:hover {
-  background: var(--accent-hover);
 }
 .maybe {
   background: var(--surface);
