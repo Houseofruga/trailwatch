@@ -122,7 +122,6 @@ export function CompetitorSetup({
       <div className={styles.card}>
         <div className={styles.chead}>
           <div className={styles.cheadLeft}>
-            <span className={styles.plus} aria-hidden="true">+</span>
             <div>
               <div className={styles.ctitle}>Add a competitor</div>
               <div className={styles.sub}>
@@ -304,7 +303,6 @@ export function CompetitorSetup({
       <>
         <div className={styles.chead}>
           <div className={styles.cheadLeft}>
-            <span className={styles.plus} aria-hidden="true">+</span>
             <div>
               <div className={styles.ctitle}>Add a competitor</div>
               <div className={styles.sub}>{planLabel} · tracking {competitorCount} of {competitorCap} competitors</div>
