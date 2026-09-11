@@ -2,7 +2,7 @@ export type Plan = "free" | "paid";
 
 /** SPEC.md §4. Enforced in application logic — never trusted from the client. */
 export const LIMITS: Record<Plan, { competitors: number; pagesPerCompetitor: number }> = {
-  free: { competitors: 2, pagesPerCompetitor: 1 },
+  free: { competitors: 2, pagesPerCompetitor: 2 },
   paid: { competitors: 5, pagesPerCompetitor: 5 },
 };
 

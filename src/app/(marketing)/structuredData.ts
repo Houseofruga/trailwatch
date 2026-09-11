@@ -16,7 +16,7 @@ export const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "Is there a free plan?",
-    a: "Yes. The free plan covers 2 competitors with 1 page each, with AI summaries included — the AI is never behind a paywall. No card required to start.",
+    a: "Yes. The free plan covers 2 competitors with 2 pages each, with AI summaries included — the AI is never behind a paywall. No card required to start.",
   },
   {
     q: "How much is Pro, and what do I get?",
