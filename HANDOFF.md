@@ -887,10 +887,9 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
 - **Two flagged design deviations — FIXED (`0633cc3`).** The competitor-detail baseline pill now
   reads "What we're watching now" (matching the §03 Competitor-detail artboard, lines 448/486 — the
   compact "Watching now" at 645 is only the pricing-history variant); the Competitors index card now
-  shows the bare registrable host (`siteOf`, e.g. `notion.so`) instead of the full origin. Both
-  verified live. (Note: the **competitor-detail header** still shows the domain with protocol
-  `https://www.notion.so` — the design shows a bare host there too, line 408; not in the original two
-  flagged items, but a candidate for the same treatment if you want full consistency.)
+  shows the bare registrable host (`siteOf`, e.g. `notion.so`) instead of the full origin. The
+  **competitor-detail header** got the same bare-host treatment (`siteOf`) so it matches the index
+  card and design line 408. All three verified live.
 - **Owner-only / production (can't be done in this workspace):** the real `SPEC.md` §9 pass — Paddle
   checkout → plan-flip → cancel → revert, the weekly digest send/no-send, the daily cron in prod, and
   an authed walkthrough on gettrailwatch.com; plus the Pro price raise on the Paddle dashboard

@@ -12,7 +12,7 @@ import type { CompetitorRow } from "@/features/competitors/queries";
 import type { PageProfile } from "@/features/insights/types";
 import type { InitialHistory } from "@/features/backfill/types";
 import { deleteCompetitor, deletePage, togglePageActive } from "@/features/competitors/actions";
-import { originOf } from "@/features/competitors/domain";
+import { originOf, siteOf } from "@/features/competitors/domain";
 import { checkPageNow } from "@/features/checks/actions";
 import { formatFullDate, timeAgo } from "@/app/(app)/dashboard/dashboardFeed";
 import { PageIntel } from "../PageIntel";
@@ -89,7 +89,9 @@ export function CompetitorDetail({
   }, [openMenuPageId]);
 
   const firstUrl = competitor.pages[0]?.url ?? "";
-  const domain = originOf(firstUrl);
+  // Header shows the bare registrable host (design §03, matching the index card);
+  // the link still opens the actual tracked page URL.
+  const domain = siteOf(firstUrl) ?? originOf(firstUrl)?.replace(/^https?:\/\//, "") ?? null;
 
   function openEdit(p: Page) {
     const sibling = competitor.pages.find((other) => other.id !== p.id);
