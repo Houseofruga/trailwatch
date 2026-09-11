@@ -15,6 +15,15 @@ const SIGNED_OUT_ONLY = ["/", "/1", "/login"];
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  // Next prefetches routes in the background (hover / viewport). Those requests
+  // don't need the auth round-trip or the redirect — the real navigation still
+  // runs the full check (and the page's own getUser + RLS gate the data), so
+  // skipping getUser() here keeps prefetch cheap and makes prefetched clicks
+  // land instantly instead of paying the Supabase validation twice.
+  const isPrefetch =
+    request.headers.get("next-router-prefetch") === "1" || request.headers.get("purpose") === "prefetch";
+  if (isPrefetch) return response;
+
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
       getAll() {
@@ -62,5 +71,8 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
+  // Skip API routes (they carry their own auth — cron secret, Paddle signature,
+  // signed unsubscribe, the favicon proxy) and static assets, so navigations and
+  // those requests don't pay an unnecessary Supabase getUser() round-trip.
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 };
