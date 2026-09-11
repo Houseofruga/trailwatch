@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { EditPageDialog } from "@/components/EditPageDialog";
-import { deletePage, togglePageActive } from "@/features/competitors/actions";
+import { deleteCompetitor, deletePage, togglePageActive } from "@/features/competitors/actions";
 import { checkPageNow } from "@/features/checks/actions";
 import toastStyles from "@/components/Toast.module.css";
 import styles from "./PageActionsMenu.module.css";
@@ -23,7 +23,9 @@ export function PageActionsMenu({
   url,
   siblingDomain,
   isActive,
+  competitorId,
   competitorName,
+  isLastPage,
 }: {
   pageId: string;
   label: string;
@@ -31,7 +33,10 @@ export function PageActionsMenu({
   /** The competitor's other pages' domain (for the Edit-URL same-site check); null if this is the only page. */
   siblingDomain: string | null;
   isActive: boolean;
+  competitorId: string;
   competitorName: string;
+  /** True when this is the competitor's only page — deleting it deletes the competitor too. */
+  isLastPage: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -133,13 +138,23 @@ export function PageActionsMenu({
       ) : null}
 
       {confirmingDelete ? (
-        <ConfirmDialog
-          title="Delete this page?"
-          body={`We'll stop checking ${competitorName}'s ${label.toLowerCase()} page and its recorded changes go with it. You can add the URL again later.`}
-          cta="Delete page"
-          onConfirm={() => deletePage(pageId).then(() => setToast("Page deleted"))}
-          onClose={() => setConfirmingDelete(false)}
-        />
+        isLastPage ? (
+          <ConfirmDialog
+            title={`Delete ${competitorName}?`}
+            body={`${label} is the only page you track for ${competitorName}, so deleting it removes ${competitorName} from your watchlist too — along with everything we've recorded. You can add them again later.`}
+            cta={`Delete ${competitorName}`}
+            onConfirm={() => deleteCompetitor(competitorId).then(() => setToast(`${competitorName} deleted`))}
+            onClose={() => setConfirmingDelete(false)}
+          />
+        ) : (
+          <ConfirmDialog
+            title="Delete this page?"
+            body={`We'll stop checking ${competitorName}'s ${label.toLowerCase()} page and its recorded changes go with it. You can add the URL again later.`}
+            cta="Delete page"
+            onConfirm={() => deletePage(pageId).then(() => setToast("Page deleted"))}
+            onClose={() => setConfirmingDelete(false)}
+          />
+        )
       ) : null}
 
       {toast ? <div className={toastStyles.toast}>{toast}</div> : null}

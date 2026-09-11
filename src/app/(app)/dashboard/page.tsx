@@ -96,6 +96,7 @@ export default async function DashboardPage() {
         competitorName: c.name,
         competitorUrl: c.pages[0]?.url ?? p.url,
         siblingDomain: sibling ? originOf(sibling.url) : null,
+        isLastPage: !sibling,
       };
     }),
   );

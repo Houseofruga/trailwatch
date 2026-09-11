@@ -70,6 +70,7 @@ export function DashboardPageRow({
   competitorName,
   competitorUrl,
   siblingDomain,
+  isLastPage,
   now,
 }: {
   page: Page;
@@ -77,6 +78,7 @@ export function DashboardPageRow({
   competitorName: string;
   competitorUrl: string;
   siblingDomain: string | null;
+  isLastPage: boolean;
   now: number;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -112,7 +114,9 @@ export function DashboardPageRow({
       url={page.url}
       siblingDomain={siblingDomain}
       isActive={page.isActive}
+      competitorId={competitorId}
       competitorName={competitorName}
+      isLastPage={isLastPage}
     />
   );
 

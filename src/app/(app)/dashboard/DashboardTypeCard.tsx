@@ -12,6 +12,7 @@ export type TypeCardRow = {
   competitorName: string;
   competitorUrl: string;
   siblingDomain: string | null;
+  isLastPage: boolean;
 };
 
 // One dashboard card = one page type, holding every competitor's page of that
@@ -65,6 +66,7 @@ export function DashboardTypeCard({
           competitorName={r.competitorName}
           competitorUrl={r.competitorUrl}
           siblingDomain={r.siblingDomain}
+          isLastPage={r.isLastPage}
           now={now}
         />
       ))}

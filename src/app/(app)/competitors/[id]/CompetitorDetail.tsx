@@ -283,13 +283,26 @@ export function CompetitorDetail({
       ) : null}
 
       {pendingDelete?.kind === "page" ? (
-        <ConfirmDialog
-          title="Delete this page?"
-          body={`We'll stop checking ${competitor.name}'s ${pendingDelete.label.toLowerCase()} page and its recorded changes go with it. You can add the URL again later.`}
-          cta="Delete page"
-          onConfirm={() => deletePage(pendingDelete.id).then(() => setToast("Page deleted"))}
-          onClose={() => setPendingDelete(null)}
-        />
+        competitor.pages.length === 1 ? (
+          <ConfirmDialog
+            title={`Delete ${competitor.name}?`}
+            body={`${pendingDelete.label} is the only page you track for ${competitor.name}, so deleting it removes ${competitor.name} from your watchlist too — along with everything we've recorded. You can add them again later.`}
+            cta={`Delete ${competitor.name}`}
+            onConfirm={async () => {
+              await deleteCompetitor(competitor.id);
+              router.push("/competitors");
+            }}
+            onClose={() => setPendingDelete(null)}
+          />
+        ) : (
+          <ConfirmDialog
+            title="Delete this page?"
+            body={`We'll stop checking ${competitor.name}'s ${pendingDelete.label.toLowerCase()} page and its recorded changes go with it. You can add the URL again later.`}
+            cta="Delete page"
+            onConfirm={() => deletePage(pendingDelete.id).then(() => setToast("Page deleted"))}
+            onClose={() => setPendingDelete(null)}
+          />
+        )
       ) : null}
 
       {addingPage ? (
