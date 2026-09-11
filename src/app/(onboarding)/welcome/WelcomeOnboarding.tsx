@@ -15,7 +15,7 @@ import { OnboardingPlanStep } from "./OnboardingPlanStep";
 import { StepIndicator } from "./StepIndicator";
 import styles from "./welcome.module.css";
 
-type Row = { name: string; url: string; selected: boolean };
+type Row = { name: string; url: string; selected: boolean; why?: string };
 type Step = "watchlist" | "plan";
 
 function domainOf(url: string): string {
@@ -127,7 +127,7 @@ export function WelcomeOnboarding({
         seen.add(url);
         const canSelect = plan !== "free" || proIntent || selectedCount < limit;
         if (canSelect) selectedCount += 1;
-        additions.push({ name: c.name.trim(), url, selected: canSelect });
+        additions.push({ name: c.name.trim(), url, selected: canSelect, why: c.why?.trim() || undefined });
       }
       return [...cur, ...additions];
     });
@@ -293,7 +293,7 @@ export function WelcomeOnboarding({
       </p>
 
       <div className={styles.list}>
-        {rows.length === 0 ? (
+        {rows.length === 0 && !finding ? (
           <p className={styles.emptyHint}>
             Search above, or add a competitor yourself, to get started.
           </p>
@@ -321,6 +321,7 @@ export function WelcomeOnboarding({
                   <div className={styles.pickTextWrap}>
                     <div className={styles.pickName}>{row.name || "Untitled"}</div>
                     <div className={styles.pickDomain}>{domainOf(row.url)}</div>
+                    {row.why ? <div className={styles.pickWhy}>{row.why}</div> : null}
                   </div>
                 </div>
                 <div className={styles.pickRight}>
@@ -344,6 +345,18 @@ export function WelcomeOnboarding({
             );
           })
         )}
+        {finding
+          ? [0, 1, 2].map((i) => (
+              <div key={`skel-${i}`} className={styles.skelCard}>
+                <span className={styles.skelFav} />
+                <div className={styles.skelLines}>
+                  <span className={styles.skel} style={{ width: 130 }} />
+                  <span className={styles.skel} style={{ width: 90, opacity: 0.7 }} />
+                  <span className={styles.skel} style={{ width: 210, opacity: 0.55 }} />
+                </div>
+              </div>
+            ))
+          : null}
       </div>
 
       <button type="button" className={styles.addRow} onClick={() => setAddOpen(true)} disabled={busy}>
