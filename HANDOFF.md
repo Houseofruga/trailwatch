@@ -4,7 +4,7 @@ Cross-session build state, written so a fresh Claude Code session (or a differen
 account) can continue without prior chat memory. **Read `SPEC.md` for scope and
 `CLAUDE.md` for working rules first**, then this for "where things actually are".
 
-_Last updated: 2026-09-10 (**IA REDESIGN IS NOW MERGED TO `main` AND PUSHED** — `main` is at `ace0b2b` = `origin/main`. The old pre-redesign `main` (`0ff20f7`) is saved on a **local-only** backup branch **`main-pre-ia-redesign`** (not pushed); the `wip/ia-redesign` branch has been deleted (it was a clean fast-forward, so no work lost). **ALL IA REDESIGN SLICES 0–5 ARE DONE and design-matched** (0 page_type foundation, 1 dashboard grouped by page type + quiet-week, 2 Competitors index + competitor detail, 3 Add Page modal, 4 Add Competitor takeover, 5 Edit competitor + Edit URL). **This session (post-merge polish, all on `main`):** (a) **Recent-history pill hydration** — the competitor-detail "Recent history" + "What we're now watching" pills now render from server-provided stored rows so they show their count and open instantly on every visit instead of re-fetching (a never-backfilled page still enriches from Wayback in the background on first expand); seed now stamps `backfilled_at` on archive-seeded pages. (b) **Dashboard "Add page"** — new button in the dashboard header opens `AddPageDialog` in **picker mode** (Add flows §A): choose the competitor first, everything below gated until then; the detail-page Add Page (fixed competitor) is unchanged — one component, two entry points. (c) **UI polish batch** — all overlay modals centered both axes (margin:auto), competitor Search row full-width + copy reframed to "your company/site → find competitors", removed the "esc to close" hint, black/white mobile nav badge, lime active-tab indicator, pills swapped (Recent history first). **Quiet-week (owner decision):** NO separate compact layout — a quiet week uses the normal "This week" page-type-card layout; a quiet page shows its most-recent notable change (Web-Archive reconstructed) rendered exactly like a this-week row with a small "WEB ARCHIVE" tag. **Migration `0008` (pages.page_type) IS APPLIED to the hosted DB.** Remaining: a real §9 end-to-end pass in production; Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: robots.txt parser bug fixed (silently blocked Cloudflare-default sites); change-detail overlay @modal route; dashboard multi-change expandable row; edit-URL re-checks/re-profiles; finder logo robustness; onboarding rework; auth Terms/Privacy.)_
+_Last updated: 2026-09-11 (**THIS SESSION (2026-09-11), all on `main`, pushed to `9872b85`:** (1) **Plan limits changed** to Free **2 competitors × 1 page** each / Pro **5 × 5** (`63bd37c`) — `src/features/plan/limits.ts` + all UI/marketing copy; the old 2×3 / 10×10 numbers below are RETIRED. (2) **Nav keeps its active section on competitor sub-routes** (`212fa0d`) — a competitor detail reached from the dashboard keeps **Dashboard** highlighted (origin-based), and opening the Add-competitor takeover no longer flips the background nav to Competitors. (3) **Backfill no-retry gap fixed** (`0e351d6`) — `backfillPage`/`listCaptures` now return `{ok}`; an unreachable archive clears `backfilled_at` again (in `loadPageHistory` AND the cron) so it retries instead of caching a false "no history"; a genuinely thin archive keeps the stamp. (4) **Full mobile design pass** (`b6c2483`) matching IA-redesign §05 across dashboard (2×2 stats), Competitors index, and competitor detail; fixed a desktop `padding-left:34px` leaking into mobile. (5) **Add-competitor Pro-at-cap copy fix** (`9872b85`) — the takeover no longer offers "Upgrade to Pro" to a Pro user at 5/5; it now shows "that's the most Pro tracks — remove one" with a single Manage-competitors button (Free unchanged), mirroring the Add-page modal. **E2E TEST PASS run this session** (sandbox, both accounts): all core authed journeys verified working (dashboard active/quiet, change-detail @modal, competitor detail + pills, ⋮ menu, Edit URL, Add page picker + caps, Add competitor at cap, finder engine via `runFind`, billing, settings). **One open bug NOT yet fixed — Bug #2: the duplicate-URL check is `www`-insensitive** (`notion.so/pricing` passes though `www.notion.so/pricing` is tracked; exact match is caught) — `normalizeUrl` strips protocol/case/trailing-slash but not `www`. Owner-only items still owed: real §9 pass in production (Paddle checkout→flip→cancel→revert, digest send/no-send, cron), Pro price raise on the Paddle dashboard. Prior session: **IA REDESIGN IS MERGED TO `main` AND PUSHED** — `main` was at `ace0b2b`. The old pre-redesign `main` (`0ff20f7`) is saved on a **local-only** backup branch **`main-pre-ia-redesign`** (not pushed); the `wip/ia-redesign` branch has been deleted (it was a clean fast-forward, so no work lost). **ALL IA REDESIGN SLICES 0–5 ARE DONE and design-matched** (0 page_type foundation, 1 dashboard grouped by page type + quiet-week, 2 Competitors index + competitor detail, 3 Add Page modal, 4 Add Competitor takeover, 5 Edit competitor + Edit URL). **This session (post-merge polish, all on `main`):** (a) **Recent-history pill hydration** — the competitor-detail "Recent history" + "What we're now watching" pills now render from server-provided stored rows so they show their count and open instantly on every visit instead of re-fetching (a never-backfilled page still enriches from Wayback in the background on first expand); seed now stamps `backfilled_at` on archive-seeded pages. (b) **Dashboard "Add page"** — new button in the dashboard header opens `AddPageDialog` in **picker mode** (Add flows §A): choose the competitor first, everything below gated until then; the detail-page Add Page (fixed competitor) is unchanged — one component, two entry points. (c) **UI polish batch** — all overlay modals centered both axes (margin:auto), competitor Search row full-width + copy reframed to "your company/site → find competitors", removed the "esc to close" hint, black/white mobile nav badge, lime active-tab indicator, pills swapped (Recent history first). **Quiet-week (owner decision):** NO separate compact layout — a quiet week uses the normal "This week" page-type-card layout; a quiet page shows its most-recent notable change (Web-Archive reconstructed) rendered exactly like a this-week row with a small "WEB ARCHIVE" tag. **Migration `0008` (pages.page_type) IS APPLIED to the hosted DB.** Remaining: a real §9 end-to-end pass in production; Pro price raise on the Paddle dashboard ($29/$290) — code is display-only. Earlier: robots.txt parser bug fixed (silently blocked Cloudflare-default sites); change-detail overlay @modal route; dashboard multi-change expandable row; edit-URL re-checks/re-profiles; finder logo robustness; onboarding rework; auth Terms/Privacy.)_
 
 ## Product in one line
 
@@ -156,12 +156,14 @@ convenient:
   registrar is now Cloudflare. `NEXT_PUBLIC_SITE_URL=https://gettrailwatch.com` (Vercel)
   drives all canonicals/OG/sitemap/robots. Contact email stays `trailwatch@houseofruga.com`;
   sending is `weekly@gettrailwatch.com` (`EMAIL_FROM`).
-- **Plan limits** (`src/features/plan/limits.ts`): free = 2 competitors × 3 pages
-  each (6 total); paid = 10 competitors × 10 pages each (100 total). Pro pricing:
+- **Plan limits** (`src/features/plan/limits.ts`): **CHANGED 2026-09-11 (`63bd37c`)** to
+  free = **2 competitors × 1 page each** (2 total); paid = **5 competitors × 5 pages each**
+  (25 total) — down from the previous 2×3 / 10×10. All UI + marketing copy reads from `LIMITS`
+  or was updated to match (billing cards, demo dashboard, marketing sections, structured data,
+  the compare page). Pro pricing:
   `$29/mo` monthly or `$290/yr` annual (2 months free; per-month equiv `$24.17`), via
   `PRO_MONTHLY_USD` / `PRO_ANNUAL_USD` (**raised from $19/$190 on 2026-09-07, commit `518de7e`**).
-  Landing pricing copy now says Pro = "100 pages", matching the enforced 100-page limit
-  (owner-confirmed 2026-08-26). **These are DISPLAY-ONLY** — the actual charge is the Paddle
+  **These are DISPLAY-ONLY** — the actual charge is the Paddle
   price behind `NEXT_PUBLIC_PADDLE_PRICE_PRO_MONTHLY` / `_ANNUAL`. **Owner must set $29/$290 in
   the Paddle dashboard (new price IDs → repoint the env vars) for the raise to be real; until
   then checkout still charges the old amount while the site shows the new one.**
@@ -396,7 +398,40 @@ convenient:
 
 ## Recent work (all pushed to `main`)
 
-**IA redesign merged to `main` + post-merge polish (2026-09-10, this session, commits `fac1676`,
+**Plan limits + nav + backfill retry + mobile pass + Pro-cap copy (2026-09-11, this session,
+commits `63bd37c`, `212fa0d`, `0e351d6`, `b6c2483`, `9872b85`; all pushed).**
+- **Plan limits → Free 2×1 / Pro 5×5** (`63bd37c`): `src/features/plan/limits.ts` plus every
+  surface that shows the numbers (billing cards + dynamic downgrade footnote, `DemoDashboard`,
+  `MarketingSections`, `structuredData`, the visualping compare page). Enforced server-side as
+  before; UI reads `LIMITS`.
+- **Nav active section on competitor sub-routes** (`212fa0d`): `sectionFromPath()` returns null
+  for `/competitors/[id]` so an intercepted/detail URL doesn't force the Competitors tab active;
+  `Sidebar` tracks `activeSection` state advanced only on real sections, so reaching a competitor
+  from the dashboard keeps **Dashboard** lit and the Add-competitor takeover leaves the nav where
+  it was.
+- **Backfill no-retry gap** (`0e351d6`): `listCaptures` → `{ok, captures}` and `backfillPage` →
+  `{ok, rows}`; `ok:false` (archive unreachable) clears `backfilled_at` again in both
+  `loadPageHistory` and the cron warming loop so a later view/run retries; `ok:true rows:0`
+  (genuinely thin archive) keeps the stamp. Seed now stamps `backfilled_at` on archive-seeded
+  pages to mirror production.
+- **Mobile design pass** (`b6c2483`): matched IA-redesign §05 across dashboard (2×2 stat grid +
+  compact internals, wrapping identity row, removed the 34px body indent on mobile), Competitors
+  index (compact cards), and competitor detail (stacked page-row header, full-width actions).
+- **Add-competitor Pro-at-cap copy** (`9872b85`): `CompetitorSetup` now branches the at-cap body
+  on plan — Pro (5/5) gets "that's the most Pro tracks — remove one to add another" with a single
+  Manage-competitors button and no upgrade CTA; Free keeps "Upgrade to Pro". Verified live in the
+  sandbox as `pro-test@` at 5/5. Found during this session's E2E pass (below); the other bug that
+  pass surfaced (www-insensitive dup check) is left open — see Suggested next steps.
+
+**E2E test pass (2026-09-11, this session, no code changes beyond the fix above).** Drove both
+sandbox accounts through the authed journeys against hosted Supabase: dashboard (active + "All
+quiet"), change-detail `@modal`, competitor detail + both pills, ⋮ row menu, Edit URL modal, Add
+page (picker + Free 1/1 and Pro-at-cap variants), Add competitor at cap (Free + Pro), billing
+(Free 2/1 · Pro 5/5 · complimentary-Pro), settings, and the finder engine (`runFind("linear.app")`
+→ real competitors). All passed except Bug #2. Owner-only paths (Paddle loop, digest send, cron,
+production login) were not exercisable in this env.
+
+**IA redesign merged to `main` + post-merge polish (2026-09-10, prior session, commits `fac1676`,
 `402ef3b`, `ace0b2b`; all pushed).** The whole IA redesign (slices 0–5, previously on the local
 `wip/ia-redesign` branch) was fast-forwarded onto `main` and pushed to `origin`; the old `main`
 (`0ff20f7`) is preserved on a **local-only** backup branch `main-pre-ia-redesign`, and `wip/ia-redesign`
@@ -843,6 +878,22 @@ and the recovery/confirm email templates point at `/auth/confirm` (token_hash fl
   simplest approach, stay in scope (`SPEC.md` §6 is off-limits).
 
 ## Suggested next steps for whoever picks this up
+
+**Open items as of 2026-09-11 (top of the list):**
+- **Bug #2 — `www`-insensitive duplicate-URL check (open, not yet fixed).** Adding
+  `notion.so/pricing` passes the "Looks good" check even though `www.notion.so/pricing` is already
+  tracked (the exact form IS caught). `normalizeUrl` (`src/features/competitors/url.ts`) strips
+  protocol/case/trailing-slash but not a leading `www.`. Decide whether to canonicalize `www` away
+  in `normalizeUrl` (affects the account-wide dup check + domain-match everywhere) — small, but
+  touches a shared choke point, so re-run the validation tests.
+- **Two flagged design deviations (owner's call, not bugs):** the competitor-detail baseline pill
+  reads "What we're now watching" vs the design's "Watching now"; the Competitors index card shows
+  the domain with its protocol vs the design's bare host.
+- **Owner-only / production (can't be done in this workspace):** the real `SPEC.md` §9 pass — Paddle
+  checkout → plan-flip → cancel → revert, the weekly digest send/no-send, the daily cron in prod, and
+  an authed walkthrough on gettrailwatch.com; plus the Pro price raise on the Paddle dashboard
+  ($29/$290 — code is display-only). Migration `0008_page_type.sql` also still needs applying to
+  hosted Supabase (see Slice 0 below).
 
 > 🚩 **WORKING RULE FOR EVERY REMAINING SLICE (owner is firm on this).** Before building a slice,
 > **read the relevant `.dc.html` design artboard in full and match it to the pixel — every state,
