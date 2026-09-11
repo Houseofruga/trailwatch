@@ -59,6 +59,7 @@
 
 .cta:hover {
   background: var(--accent-hover);
+  color: var(--ink);
   text-decoration: none;
 }
 

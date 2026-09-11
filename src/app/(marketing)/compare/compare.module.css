@@ -190,6 +190,7 @@
 .ctaButton:hover {
   background: var(--accent-hover);
   border-color: var(--accent-hover);
+  color: var(--ink);
   text-decoration: none;
 }
 

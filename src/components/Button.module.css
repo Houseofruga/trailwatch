@@ -43,7 +43,7 @@
 
 .secondary:hover:not(:disabled) {
   border-color: var(--accent-ink);
-  color: var(--accent-ink);
+  color: var(--ink);
   text-decoration: none;
 }
 

@@ -19,6 +19,10 @@
 }
 .cta:hover {
   background: #000;
+  /* Keep the green text — without this the global a:hover (tokens.css) would
+     recolor it to link-blue and underline it, since these CTAs are <a> links. */
+  color: var(--accent);
+  text-decoration: none;
 }
 .full {
   width: 100%;
