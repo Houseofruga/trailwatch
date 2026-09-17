@@ -29,7 +29,7 @@ export async function runWeeklyDigest(now: number = Date.now()): Promise<DigestR
   for (const digest of digests) {
     try {
       const unsubUrl = unsubscribeUrl(siteUrl, digest.userId) ?? undefined;
-      const email = renderDigest(digest, siteUrl, unsubUrl);
+      const email = renderDigest(digest, siteUrl, unsubUrl, now);
       // One-click unsubscribe (RFC 8058) — required by Gmail/Yahoo bulk-sender
       // rules and what keeps us out of spam folders.
       const headers = unsubUrl
