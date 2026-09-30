@@ -177,7 +177,15 @@ onboarding status read. No surprises beyond §4.
 
 ---
 
-## 4. Decisions needed
+## 4. Decisions
+
+**Resolved 2026-09-30: all as recommended.**
+- D1 (a): black primary buttons, lime only in the logo.
+- D2 (a): one-line AI insight per high-priority move.
+- D3 (a): cards expand in place, up to 50.
+- D4: "since…" only once there's history.
+- D5: drop the password date.
+- D6: follow the design (Priority All, 10 per page).
 
 **D1. Accent colour.** The brief said primary buttons, the active nav item and focus rings should be lime
 (`#9ff50a`). The designs use **near-black primary buttons and black toggles**, and lime appears **only in the
