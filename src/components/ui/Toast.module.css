@@ -17,11 +17,11 @@
   color: #ffffff;
   font-size: 14px;
   font-weight: 500;
-  box-shadow: 0 8px 24px rgba(26, 26, 23, 0.22);
+  box-shadow: 0 8px 24px rgba(26, 26, 26, 0.22);
 }
 
 .error {
-  background: var(--ui-critical-ink);
+  background: var(--ui-critical);
 }
 
 .dismiss {

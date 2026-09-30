@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SpinnerIcon } from "./icons";
 import styles from "./Button.module.css";
 
-type Variant = "primary" | "secondary" | "plain" | "plainDark" | "critical";
+type Variant = "primary" | "secondary" | "grey" | "plain" | "plainDark" | "critical";
 
 type Common = {
   variant?: Variant;
@@ -25,9 +25,10 @@ type AsLink = Common & { href: string; external?: boolean; "aria-label"?: string
 const SPIN_TONE: Record<Variant, string> = {
   primary: "#ffffff",
   critical: "#ffffff",
-  secondary: "#1a1a17",
-  plain: "#1a1a17",
-  plainDark: "#1a1a17",
+  secondary: "#303030",
+  grey: "#303030",
+  plain: "#303030",
+  plainDark: "#303030",
 };
 
 function classes({ variant = "secondary", full, tall, iconOnly, loading, className }: Common) {

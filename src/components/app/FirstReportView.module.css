@@ -59,7 +59,7 @@
 
 .price {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 550;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -86,13 +86,13 @@
 }
 
 .vs {
-  font-weight: 400;
+  font-weight: 450;
   color: var(--ink-3);
 }
 
 .cheaper {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 550;
   color: var(--ui-attention-ink);
 }
 

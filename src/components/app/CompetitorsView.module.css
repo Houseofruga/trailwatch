@@ -14,7 +14,7 @@
 .storeName,
 .storeName:hover {
   color: var(--ink);
-  font-weight: 600;
+  font-weight: 550;
   font-size: 14px;
 }
 

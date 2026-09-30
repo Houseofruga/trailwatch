@@ -41,17 +41,17 @@
   align-items: center;
   gap: 4px;
   padding: 0 10px 0 12px;
-  border: 1px solid transparent;
-  background: transparent;
+  border: 0;
+  background: var(--ui-grey);
   border-radius: 8px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 550;
   color: var(--ink);
   cursor: pointer;
 }
 
 .moreDesktop:hover {
-  background: var(--surface-sunken);
+  background: var(--ui-grey-hover);
 }
 
 .moreMobile {

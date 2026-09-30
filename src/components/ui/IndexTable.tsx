@@ -1,5 +1,5 @@
 import { Button } from "./Button";
-import { IconChevronLeft, SpinnerIcon } from "./icons";
+import { IconChevronLeft, IconChevronRight, SpinnerIcon } from "./icons";
 import styles from "./IndexTable.module.css";
 
 export type Column = { label: string; width?: number; align?: "left" | "right" };
@@ -104,12 +104,22 @@ export function IndexTable({
             {pagination.from}–{pagination.to} of {pagination.total}
           </span>
           <div className={styles.pageButtons}>
-            <Button icon={<IconChevronLeft />} disabled={!pagination.onPrevious} onClick={pagination.onPrevious}>
-              Previous
-            </Button>
-            <Button disabled={!pagination.onNext} onClick={pagination.onNext}>
-              Next
-            </Button>
+            <Button
+              variant="grey"
+              iconOnly
+              aria-label="Previous page"
+              icon={<IconChevronLeft size={16} />}
+              disabled={!pagination.onPrevious}
+              onClick={pagination.onPrevious}
+            />
+            <Button
+              variant="grey"
+              iconOnly
+              aria-label="Next page"
+              icon={<IconChevronRight size={16} />}
+              disabled={!pagination.onNext}
+              onClick={pagination.onNext}
+            />
           </div>
         </nav>
       ) : null}

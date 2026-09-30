@@ -28,9 +28,17 @@ type Props = {
   children: React.ReactNode;
 };
 
-function Logo({ height = 22 }: { height?: number }) {
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src="/logo.svg" alt="TrailWatch" height={height} width={Math.round(height * 4.52)} className={styles.logo} />;
+function Logo({ height = 22, light = false }: { height?: number; light?: boolean }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={light ? "/logo-light.svg" : "/logo.svg"}
+      alt="TrailWatch"
+      height={height}
+      width={Math.round(height * 4.52)}
+      className={styles.logo}
+    />
+  );
 }
 
 function Sidebar({
@@ -117,13 +125,13 @@ export function AppFrame({ account, ownStore, competitorCount, navDisabled, chil
 
   return (
     <ToastProvider>
-      <div className={styles.frame}>
+      <div className={`ui ${styles.frame}`}>
         <header className={styles.top}>
           <button type="button" aria-label="Open menu" className={styles.menuButton} onClick={() => setDrawer(true)}>
             <IconMenu size={20} />
           </button>
           <Link href="/dashboard" className={styles.logoLink} aria-label="TrailWatch home">
-            <Logo />
+            <Logo light />
           </Link>
           <span className={styles.spacer} />
           {menu}

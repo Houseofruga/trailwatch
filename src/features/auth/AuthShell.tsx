@@ -4,7 +4,7 @@ import styles from "./AuthShell.module.css";
 /** 01-Sign up / log in: centred card on the grey background, logo above, legal links below. */
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className={styles.page}>
+    <div className={`ui ${styles.page}`}>
       <div className={styles.column}>
         <Link href="/" className={styles.logoLink} aria-label="TrailWatch home">
           {/* eslint-disable-next-line @next/next/no-img-element */}

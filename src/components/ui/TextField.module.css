@@ -22,21 +22,23 @@
   align-items: center;
   height: 36px;
   box-sizing: border-box;
-  border: 1px solid var(--border-input);
+  border: 0.66px solid var(--border-input);
+  border-top-color: var(--border-input-top);
   border-radius: 8px;
-  background: var(--surface);
+  background: var(--ui-input-bg);
   flex-grow: 1;
   min-width: 0;
 }
 
 .box:focus-within {
-  border-color: var(--ink);
+  border-color: var(--link);
   box-shadow: var(--ui-focus-ring);
 }
 
 .boxError,
 .boxError:focus-within {
   border-color: var(--ui-critical);
+  box-shadow: none;
 }
 
 .boxSunken {

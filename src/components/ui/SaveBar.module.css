@@ -11,7 +11,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 0 20px;
-  background: var(--ink);
+  background: var(--ui-topbar);
   color: #ffffff;
 }
 
@@ -30,7 +30,7 @@
 
 .message {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 550;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -50,7 +50,7 @@
   background: transparent;
   color: #ffffff;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 550;
   cursor: pointer;
 }
 
@@ -60,6 +60,7 @@
 
 .save,
 .save:hover {
+  padding: 0 16px;
   border-color: #ffffff;
   background: #ffffff;
   color: var(--ink);

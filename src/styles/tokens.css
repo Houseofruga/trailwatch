@@ -94,6 +94,78 @@
   --ui-avatar-5: #e0cfd8;
 }
 
+/* The signed-in app and auth screens (AppFrame, AuthShell): Inter and the
+   neutral greys from the owner's updated Claude Design canvas. Scoped so the
+   marketing site keeps DM Sans and the warm tokens above. */
+.ui {
+  --bg: #f1f1f1;
+  --surface: #ffffff;
+  --surface-sunken: #f3f3f3;
+  --border: #e3e3e3;
+  --border-soft: #ebebeb;
+  --border-softer: #f1f1f1;
+  --border-input: #8a8a8a;
+  --border-input-top: #898f94;
+  --border-input-hover: #616161;
+  --rule: #ebebeb;
+  --ink: #303030;
+  --ink-2: #4a4a4a;
+  --ink-3: #616161;
+  --ink-4: #8a8a8a;
+  --ink-faint: #b5b5b5;
+  --link: #005bd3;
+  --link-hover: #004299;
+
+  --ui-topbar: #1a1a1a;
+  --ui-sidebar: #ebebeb;
+  --ui-nav-current: #fafafa;
+  --ui-nav-hover: rgba(0, 0, 0, 0.05);
+  --ui-input-bg: #fdfdfd;
+  --ui-grey: #e3e3e3;
+  --ui-grey-hover: #d4d4d4;
+  --ui-count: #dedede;
+  --ui-subdued: #f7f7f7;
+  --ui-table-head: #f7f7f7;
+  --ui-avatar: #e3e3e3;
+  --ui-overlay: rgba(0, 0, 0, 0.5);
+  --ui-shadow-card: 0 1px 0 rgba(26, 26, 26, 0.07), inset 1px 0 0 rgba(0, 0, 0, 0.13), inset -1px 0 0 rgba(0, 0, 0, 0.13),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.17), inset 0 1px 0 rgba(204, 204, 204, 0.5);
+  --ui-shadow-pop: 0 10px 28px rgba(26, 26, 26, 0.16);
+  --ui-shadow-tip: 0 8px 16px -4px rgba(26, 26, 26, 0.22), inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --ui-shadow-toast: 0 8px 24px rgba(26, 26, 26, 0.22);
+  --ui-shadow-modal: 0 20px 20px -8px rgba(26, 26, 26, 0.28);
+  --ui-focus-ring: 0 0 0 1px var(--link);
+
+  /* Banners and highlights use the washes; badges have their own, stronger fills. */
+  --ui-info-ink: #003a5a;
+  --ui-info-icon: #0094d5;
+  --ui-info-wash: #eaf4ff;
+  --ui-info-line: #a8d8ff;
+  --ui-info-badge: #d5ebff;
+  --ui-success-ink: #014b40;
+  --ui-success-icon: #047b5d;
+  --ui-success-wash: #cdfed4;
+  --ui-success-line: #92fcac;
+  --ui-success-badge: #affebf;
+  --ui-attention-ink: #4f4700;
+  --ui-attention-icon: #b28400;
+  --ui-attention-wash: #fff1e3;
+  --ui-attention-line: #ffc879;
+  --ui-attention-badge: #ffeb78;
+  --ui-critical: #c70a24;
+  --ui-critical-line: rgba(142, 11, 33, 0.8);
+  --ui-critical-hover: #a30a20;
+  --ui-critical-ink: #8e0b21;
+  --ui-critical-icon: #e22c38;
+  --ui-critical-wash: #fee8eb;
+  --ui-critical-soft-line: #fec1c7;
+  --ui-critical-badge: #fed1d7;
+
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, "Helvetica Neue",
+    sans-serif;
+  color: var(--ink);
+}
+
 *,
 *::before,
 *::after {

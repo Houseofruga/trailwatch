@@ -8,7 +8,7 @@
   padding: 0 14px;
   border-radius: 8px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 550;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
@@ -49,23 +49,34 @@
 .primary {
   background: var(--ink);
   color: #ffffff;
-  border-color: #000000;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 1px 0 rgba(0, 0, 0, 0.18);
+  border: 0;
+  box-shadow: inset 0 -1px 0 1px rgba(0, 0, 0, 0.8), inset 0 0 0 1px var(--ink), inset 0 0.5px 0 1.5px rgba(255, 255, 255, 0.25);
 }
 .primary:hover {
   color: #ffffff;
-  background: #2c2c28;
+  background: #1a1a1a;
 }
 
 .secondary {
   background: var(--surface);
   color: var(--ink);
-  border-color: var(--border-input);
-  box-shadow: 0 1px 0 rgba(26, 26, 23, 0.05);
+  border: 0;
+  box-shadow: inset 0 -1px 0 #b5b5b5, inset 0 0 0 1px rgba(0, 0, 0, 0.1), inset 0 0.5px 0 1.5px #ffffff;
 }
 .secondary:hover {
   color: var(--ink);
   background: var(--ui-subdued);
+}
+
+/* Page-header and pagination actions (Visit store, More actions, View snapshot). */
+.grey {
+  background: var(--ui-grey);
+  color: var(--ink);
+  border: 0;
+}
+.grey:hover {
+  color: var(--ink);
+  background: var(--ui-grey-hover);
 }
 
 .plain {
@@ -78,7 +89,7 @@
 
 .plainDark {
   color: var(--ink);
-  padding: 0 6px;
+  padding: 0 8px;
 }
 .plainDark:hover {
   color: var(--ink);
@@ -88,11 +99,13 @@
 .critical {
   background: var(--ui-critical);
   color: #ffffff;
-  border-color: var(--ui-critical-line);
+  border: 0;
+  box-shadow: inset 0 -1px 0 1px var(--ui-critical-line), inset 0 0 0 1px var(--ui-critical),
+    inset 0 0.5px 0 1.5px rgba(255, 255, 255, 0.25);
 }
 .critical:hover {
   color: #ffffff;
-  background: var(--ui-critical-line);
+  background: var(--ui-critical-hover);
 }
 
 .button:disabled,
@@ -103,10 +116,11 @@
 
 .primary:disabled,
 .secondary:disabled,
+.grey:disabled,
 .critical:disabled {
   background: var(--surface-sunken);
   color: var(--ink-4);
-  border-color: var(--border-soft);
+  border: 1px solid var(--border-soft);
 }
 
 .plain:disabled,

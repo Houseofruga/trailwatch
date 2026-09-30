@@ -11,6 +11,7 @@ import { TextField } from "@/components/ui/TextField";
 import { SIGNUP_CAP_MESSAGE } from "@/features/usage/signupCap";
 import { logIn, resendConfirmation, signInWithGoogle, signUp, type AuthState } from "./actions";
 import { AuthCard, AuthHeading } from "./AuthShell";
+import styles from "./AuthShell.module.css";
 
 type Mode = "signup" | "login";
 
@@ -45,7 +46,7 @@ function GoogleLogo() {
 function GoogleButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" full tall disabled={disabled || pending} icon={<GoogleLogo />}>
+    <Button type="submit" full tall className={styles.google} disabled={disabled || pending} icon={<GoogleLogo />}>
       Continue with Google
     </Button>
   );

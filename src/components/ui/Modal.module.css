@@ -27,14 +27,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 16px 14px 20px;
+  padding: 12px 12px 12px 16px;
+  background: var(--surface-sunken);
   border-bottom: 1px solid var(--border-soft);
 }
 
 .title {
   margin: 0;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 650;
 }
 
 .close {

@@ -104,7 +104,7 @@ export function CompetitorDetailView({
           <button type="button" className={styles.moreDesktop} {...p}>
             More actions <IconChevronDown size={14} />
           </button>
-          <Button iconOnly aria-label="More actions" className={styles.moreMobile} icon={<IconDots />} {...p} />
+          <Button variant="grey" iconOnly aria-label="More actions" className={styles.moreMobile} icon={<IconDots />} {...p} />
         </>
       )}
     />
@@ -144,8 +144,10 @@ export function CompetitorDetailView({
         actions={
           <>
             {moreActions}
-            <Button href={`/competitors/${c.id}/report`}>View snapshot</Button>
-            <Button href={`https://${c.domain}`} external icon={<IconExternal />}>
+            <Button variant="grey" href={`/competitors/${c.id}/report`}>
+              View snapshot
+            </Button>
+            <Button variant="grey" href={`https://${c.domain}`} external icon={<IconExternal />}>
               Visit store
             </Button>
           </>

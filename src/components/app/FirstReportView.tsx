@@ -101,7 +101,7 @@ export function FirstReportView({ report, reading, error }: { report: FirstRepor
       leading={<Avatar name={c.name} size={32} />}
       actions={
         <>
-          <Button href={storeUrl} external icon={<IconExternal />}>
+          <Button variant="grey" href={storeUrl} external icon={<IconExternal />}>
             Visit store
           </Button>
           <Button variant="primary" href="/dashboard">

@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
-import { DM_Sans, Geist_Mono } from "next/font/google";
+import { DM_Sans, Geist_Mono, Inter } from "next/font/google";
 import "@/styles/tokens.css";
 
-// Two fonts: DM Sans for all UI text (headings, body, summaries — the v2
-// design dropped the serif entirely), Geist Mono for URLs and excerpts.
+// DM Sans for the marketing site, Inter for the signed-in app and auth
+// screens (the `.ui` scope in tokens.css), Geist Mono for URLs and excerpts.
 const dmSans = DM_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-dm-sans",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
 });
 
 const geistMono = Geist_Mono({
@@ -52,7 +57,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${dmSans.variable} ${geistMono.variable}`}>{children}</body>
+      <body className={`${dmSans.variable} ${inter.variable} ${geistMono.variable}`}>{children}</body>
     </html>
   );
 }
