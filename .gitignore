@@ -22,3 +22,7 @@ graphify-out/
 
 # Supabase CLI local cache
 supabase/.temp/
+
+# Owner design reference (Claude Design exports, email previews) — not source
+/IA redesign, add plan, competitor/
+/Scope decisions needed.zip
