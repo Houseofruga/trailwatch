@@ -45,7 +45,24 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
   - Phase 4's sender executes that plan.
   - The scheduler now checks pages, then the catalog, for each due store.
   - Classifier verified live through Groq (no Anthropic key locally): promo, policy, positioning and cosmetic all classified correctly, with code, % off and threshold extracted.
-- Next: Phase 4 (alerts + briefing). New UI waits on the owner's Claude Design artboards.
+- **Phase 4 done (backend + placeholder email layouts):**
+  - `features/alerts/`:
+    - plain-English sentences for every event type, and templated suggested moves (no AI per alert)
+    - instant alert email plus Slack blocks (bundled per store)
+    - the Slack URL allowlist
+    - the sender, which runs the Phase 3 planner: muted types, no channel, over-cap, repeats and send failures all fall back to the briefing
+    - settings server actions, with the Slack URL never returned to the client
+    - the "moves caught this month" counter
+  - `features/briefing/`:
+    - DST-aware US Eastern schedule: prepare from Sun 18:00, send from Mon 08:00, stop waiting at Mon 11:00
+    - Sonnet via the **Batch API** with the system prompt **cached**
+    - the model writes only the interpretation (top 3 moves, what it means, one move); the per-competitor lists are rendered from events so facts can't be invented
+    - no-AI fallback when there's no key or the batch is late
+    - each briefing's window starts where the last one ended
+    - a quiet week sends nothing
+  - `/api/cron/catalog` is now the heartbeat: alerts, then briefing, then store checks.
+  - **Email layouts are placeholders** on a shell taken from the shipped digest (`features/email/shell.ts`). They get rebuilt 1:1 when the email artboards land.
+- Next: Phase 5 (own store + matching). New UI waits on the owner's Claude Design artboards.
 
 **Log of new env vars and migrations:**
 - Phase 0: none.
@@ -60,6 +77,11 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
   - Migration **`0011_events.sql`** adds `events.severity` / `store_page_id` / `dedupe_key`, the page event types, page-check columns on `store_pages`, `stores.featured_handles`, and the `user_events` fan-out table. Apply it after 0010.
   - **Optional env:** `ALERTS_PER_USER_PER_DAY` (default 5).
   - `ANTHROPIC_API_KEY` must be funded for Haiku classification in production; without it, Groq is used.
+- Phase 4:
+  - Migration **`0012_alerts_briefings.sql`** adds `alert_settings` (RLS on, no policies, service role only) and `briefings`. Apply it after 0011.
+  - No new env vars. It reuses `RESEND_API_KEY`, `EMAIL_FROM`, `NEXT_PUBLIC_SITE_URL` and the unsubscribe secret.
+  - Without `ANTHROPIC_API_KEY`, briefings go out in their no-AI form.
+  - The legacy `/api/cron/digest` (page-change digest) still runs for legacy pages. Retire it with the legacy-table cleanup.
 
 ## 0. Git preservation (done 2026-09-30)
 
