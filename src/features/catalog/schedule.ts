@@ -38,11 +38,20 @@ export async function checkStoreIfDue(
 ): Promise<StoreCheckResult | null> {
   if (!(await claim(service, storeId))) return null;
 
+  // Pages are only watched for stores someone follows as a competitor; a store
+  // that's only someone's own store (Phase 5) needs its catalog, not page
+  // classification — that would spend AI calls on news nobody receives.
+  const { count: followers } = await service
+    .from("competitors")
+    .select("id", { count: "exact", head: true })
+    .eq("store_id", storeId);
   let pages: StorePagesResult | null = null;
-  try {
-    pages = await checkStorePages(service, storeId);
-  } catch (err) {
-    console.error(`Page checks failed for store ${storeId}:`, err);
+  if (followers) {
+    try {
+      pages = await checkStorePages(service, storeId);
+    } catch (err) {
+      console.error(`Page checks failed for store ${storeId}:`, err);
+    }
   }
 
   let catalog: CatalogCheckResult;
@@ -74,9 +83,36 @@ export type CatalogTickResult = {
 };
 
 /**
+ * Due stores, oldest first: ones someone follows, plus ones that are someone's
+ * own store (their catalog is the matching baseline). A store nobody uses is
+ * never crawled.
+ */
+async function dueStores(service: SupabaseClient): Promise<{ id: string; next_check_at: string }[]> {
+  const now = new Date().toISOString();
+  const due = (columns: string) =>
+    service
+      .from("stores")
+      .select(columns)
+      .lte("next_check_at", now)
+      .order("next_check_at", { ascending: true })
+      .limit(CATALOG_CONFIG.tickBatchSize)
+      .returns<{ id: string; next_check_at: string }[]>();
+  const [followed, owned] = await Promise.all([
+    due("id, next_check_at, competitors!inner(id)"),
+    due("id, next_check_at, users!inner(id)"),
+  ]);
+  if (followed.error) throw followed.error;
+  if (owned.error) throw owned.error;
+  const byId = new Map<string, { id: string; next_check_at: string }>();
+  for (const s of [...(followed.data ?? []), ...(owned.data ?? [])]) byId.set(s.id, { id: s.id, next_check_at: s.next_check_at });
+  return [...byId.values()]
+    .sort((a, b) => Date.parse(a.next_check_at) - Date.parse(b.next_check_at))
+    .slice(0, CATALOG_CONFIG.tickBatchSize);
+}
+
+/**
  * The frequent tick (pg_cron → /api/cron/catalog): check due stores, oldest
- * first, until the time budget runs out. Only stores someone follows are
- * crawled — an unfollowed store costs nothing.
+ * first, until the time budget runs out.
  */
 export async function runCatalogTick(budgetMs: number = CATALOG_CONFIG.tickBudgetMs): Promise<CatalogTickResult> {
   const service = createServiceClient();
@@ -84,14 +120,8 @@ export async function runCatalogTick(budgetMs: number = CATALOG_CONFIG.tickBudge
   const totals: CatalogTickResult = { checked: 0, changed: 0, events: 0, errors: 0, remaining: false };
 
   while (Date.now() < deadline) {
-    const { data: due, error } = await service
-      .from("stores")
-      .select("id, competitors!inner(id)")
-      .lte("next_check_at", new Date().toISOString())
-      .order("next_check_at", { ascending: true })
-      .limit(CATALOG_CONFIG.tickBatchSize);
-    if (error) throw error;
-    if (!due || due.length === 0) return totals;
+    const due = await dueStores(service);
+    if (due.length === 0) return totals;
 
     for (const { id } of due) {
       if (Date.now() >= deadline) return { ...totals, remaining: true };

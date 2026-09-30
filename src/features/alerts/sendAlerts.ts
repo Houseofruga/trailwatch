@@ -12,6 +12,7 @@ type PendingRow = {
   id: string;
   user_id: string;
   store_id: string;
+  context: { ownMatch?: { title: string; price: number | null } } | null;
   events: { type: EventType; payload: Record<string, unknown>; detected_at: string; dedupe_key: string | null } | null;
   stores: { name: string; domain: string } | null;
 };
@@ -35,7 +36,7 @@ export async function runAlertSender(service: SupabaseClient, now: Date = new Da
 
   const { data, error } = await service
     .from("user_events")
-    .select("id, user_id, store_id, events(type, payload, detected_at, dedupe_key), stores(name, domain)")
+    .select("id, user_id, store_id, context, events(type, payload, detected_at, dedupe_key), stores(name, domain)")
     .eq("delivery", "instant")
     .eq("status", "pending")
     .order("created_at", { ascending: true })
@@ -122,8 +123,9 @@ export async function runAlertSender(service: SupabaseClient, now: Date = new Da
         storeDomain: first.stores?.domain ?? "",
         competitorId: competitorByStore.get(first.store_id) ?? null,
         events: group.map((a) => {
-          const e = byId.get(a.userEventId)!.events!;
-          return { type: e.type, payload: e.payload, detectedAt: e.detected_at };
+          const row = byId.get(a.userEventId)!;
+          const e = row.events!;
+          return { type: e.type, payload: e.payload, detectedAt: e.detected_at, ownMatch: row.context?.ownMatch ?? null };
         }),
       };
 

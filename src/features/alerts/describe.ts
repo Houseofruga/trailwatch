@@ -56,6 +56,14 @@ export function describeEvent(type: EventType, payload: Payload, storeName: stri
       ].filter(Boolean);
       return `${storeName} is running a sitewide sale${parts.length ? `: ${parts.join(", ")}` : ""}.`;
     }
+    case "price_undercut": {
+      const theirs = num(payload.competitorPrice);
+      const ours = num(payload.ownPrice);
+      const pct = num(payload.pctBelow);
+      const own = str(payload.ownTitle, "your comparable product");
+      if (theirs === null || ours === null) return `${storeName}'s ${title} is now priced below your ${own}.`;
+      return `${storeName}'s ${title} is now ${money(theirs)}, ${pct !== null ? `${pct}% ` : ""}below your ${own} (${money(ours)}).`;
+    }
     default:
       // Page events: the classifier's one-sentence summary.
       return str(payload.summary, `${storeName} changed its ${str(payload.pageKind, "site").replace(/_/g, " ")}.`);
@@ -74,6 +82,7 @@ export const CATEGORY: Record<EventType, BriefingCategory | null> = {
   sale_ended: "pricing",
   sitewide_sale_detected: "pricing",
   promo_launched: "pricing",
+  price_undercut: "pricing",
   sold_out: "stock",
   restocked: "stock",
   positioning_shift: "positioning",
@@ -92,6 +101,7 @@ export const CATEGORY_LABEL: Record<BriefingCategory, string> = {
 const LEAD_ORDER: EventType[] = [
   "sitewide_sale_detected",
   "promo_launched",
+  "price_undercut",
   "sale_started",
   "sold_out",
   "product_launched",
@@ -117,6 +127,8 @@ export function suggestedAction(type: EventType, payload: Payload): string {
     case "sitewide_sale_detected":
     case "promo_launched":
       return `Their ${pct ? `${pct}%-off ` : ""}promotion is live now; consider a counter-offer to your email list before the weekend, or lean on bundles or free shipping if you'd rather not discount.`;
+    case "price_undercut":
+      return `Decide whether to match on ${str(payload.ownTitle, "your product")}, or defend the price with a bundle, a gift with purchase, or a sharper reason to pay more.`;
     case "sale_started":
       return `If ${title} competes with one of your products, decide now whether to match, bundle, or hold your price.`;
     case "sold_out":

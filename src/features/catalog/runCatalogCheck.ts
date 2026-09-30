@@ -9,6 +9,8 @@ import { downloadSnapshot, uploadSnapshot } from "./snapshots";
 import { fetchSitemapCatalog } from "./sitemapFallback";
 import { recordEvents } from "@/features/events/record";
 import { hasBestsellerTag, severityFor } from "@/features/events/severity.config";
+import type { NewEvent } from "@/features/events/types";
+import { annotateFollowers } from "@/features/matching/annotate";
 
 export type CatalogCheckResult =
   | { status: "skipped"; reason: string }
@@ -112,24 +114,33 @@ export async function runCatalogCheck(service: SupabaseClient, storeId: string):
   // repeat that reaches alerts is caught by the routing dedupe).
   const featured = new Set<string>(store.featured_handles ?? []);
   const byId = new Map(catalog.products.map((p) => [p.id, p]));
-  await recordEvents(
-    service,
-    storeId,
-    events.map((e) => {
-      const product = e.productId ? byId.get(e.productId) : undefined;
-      const isTopProduct =
-        !!product && (featured.has(product.handle.toLowerCase()) || hasBestsellerTag(product.tags));
-      return {
-        type: e.type,
-        severity: severityFor({ type: e.type, payload: e.payload, isTopProduct }),
-        source: "catalog",
-        productId: e.productId,
-        storePageId: null,
-        payload: e.payload,
-        snapshotId: snapshot.id,
-      };
-    }),
-  );
+
+  // Phase 5: for followers who've added their own store, tie each product
+  // event to their comparable product and flag new undercuts. Best-effort —
+  // matching trouble must never cost the store's own events.
+  let annotations: Awaited<ReturnType<typeof annotateFollowers>> = { undercuts: [], contextFor: () => null };
+  try {
+    annotations = await annotateFollowers(service, storeId, events, catalog.products);
+  } catch (err) {
+    console.error(`Own-store matching failed for store ${storeId}:`, err);
+  }
+
+  const catalogEvents: NewEvent[] = events.map((e) => {
+    const product = e.productId ? byId.get(e.productId) : undefined;
+    const isTopProduct = !!product && (featured.has(product.handle.toLowerCase()) || hasBestsellerTag(product.tags));
+    return {
+      type: e.type,
+      severity: severityFor({ type: e.type, payload: e.payload, isTopProduct }),
+      source: "catalog",
+      productId: e.productId,
+      storePageId: null,
+      payload: e.payload,
+      snapshotId: snapshot.id,
+    };
+  });
+  // Catalog events first, so contextFor's indexes line up with `events`.
+  const undercuts = annotations.undercuts.map((u) => ({ ...u, snapshotId: snapshot.id }));
+  await recordEvents(service, storeId, [...catalogEvents, ...undercuts], annotations.contextFor);
 
   await mark({
     check_status: "ok",
@@ -141,6 +152,6 @@ export async function runCatalogCheck(service: SupabaseClient, storeId: string):
   });
 
   return previous
-    ? { status: "changed", products: catalog.products.length, events: events.length }
+    ? { status: "changed", products: catalog.products.length, events: events.length + undercuts.length }
     : { status: "baseline", products: catalog.products.length };
 }

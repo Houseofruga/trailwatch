@@ -52,6 +52,7 @@ export async function runBriefingStep(service: SupabaseClient, now: Date = new D
 type EventRow = {
   user_id: string;
   created_at: string;
+  context: { ownMatch?: { title: string; price: number | null } } | null;
   events: { type: EventType; severity: Severity; payload: Record<string, unknown>; detected_at: string } | null;
   stores: { id: string; name: string } | null;
 };
@@ -61,7 +62,7 @@ async function prepare(service: SupabaseClient, week: string, now: Date): Promis
   const since = new Date(now.getTime() - WEEK_MS - 24 * 60 * 60 * 1000).toISOString();
   const { data, error } = await service
     .from("user_events")
-    .select("user_id, created_at, events(type, severity, payload, detected_at), stores(id, name)")
+    .select("user_id, created_at, context, events(type, severity, payload, detected_at), stores(id, name)")
     .gte("created_at", since)
     .lte("created_at", now.toISOString())
     .limit(20000);
@@ -103,6 +104,7 @@ async function prepare(service: SupabaseClient, week: string, now: Date): Promis
         severity: r.events!.severity,
         payload: r.events!.payload,
         detectedAt: r.events!.detected_at,
+        ownMatch: r.context?.ownMatch ? { title: r.context.ownMatch.title, price: r.context.ownMatch.price } : null,
       }));
     const input: BriefingInput = { weekOf: week, events };
     // A quiet week sends nothing (low noise) — the row still records the window.

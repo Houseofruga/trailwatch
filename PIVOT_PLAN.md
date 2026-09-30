@@ -62,7 +62,21 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
     - a quiet week sends nothing
   - `/api/cron/catalog` is now the heartbeat: alerts, then briefing, then store checks.
   - **Email layouts are placeholders** on a shell taken from the shipped digest (`features/email/shell.ts`). They get rebuilt 1:1 when the email artboards land.
-- Next: Phase 5 (own store + matching). New UI waits on the owner's Claude Design artboards.
+- **Phase 5 done (backend):**
+  - **Your own store is an ordinary shared store**, linked by `users.own_store_id`. It uses the same crawler and snapshots; the tick checks owned stores too, but skips their page checks, so no AI is spent on your own homepage.
+  - **`features/matching/`:** simple, explainable title/type matching.
+    - Base title only: "- Color" / "(Variant)" suffixes dropped.
+    - Brand, size, packaging words and plurals are normalized.
+    - An inverted index means only candidates sharing a token get scored.
+    - Only products that **just changed** are matched, per follower with an own store on a paid plan.
+  - **Per-user context:** `user_events.context.ownMatch` ("vs your X ($52)") appears in alerts and is marked for the briefing model. The system prompt ties "what this means" to your product.
+  - **`price_undercut`** is a high-severity event addressed to one user (`events.for_user_id`, fanned out only to them). It's raised only by a competitor-side price move: a launch, price cut or sale.
+    - It needs a match score of at least 0.75 (context needs 0.5), the **same packaging** (set/bundle/pack count, mini/travel) and a price at least 5% below yours.
+  - **Tuned on real catalogs** (Parachute vs Brooklinen): recall went from 43 to 203 matches, and false undercuts from 8 to 0 (liner vs curtain, single towel vs towel set, mini vs full were all caught).
+  - Known limit: context matches near 0.5 can be loose, but they never trigger alerts. Embeddings are a later upgrade, as the spec says.
+  - Not yet covered: an undercut caused by **you** raising your price (only the competitor's moves trigger).
+  - **Server actions (screen pending design):** `setOwnStore`, `getOwnStore`, `clearOwnStore`, gated to paid plans on the server.
+- Next: Phase 6 (plans, limits, cadence, beta). New UI waits on the owner's Claude Design artboards.
 
 **Log of new env vars and migrations:**
 - Phase 0: none.
@@ -82,6 +96,9 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
   - No new env vars. It reuses `RESEND_API_KEY`, `EMAIL_FROM`, `NEXT_PUBLIC_SITE_URL` and the unsubscribe secret.
   - Without `ANTHROPIC_API_KEY`, briefings go out in their no-AI form.
   - The legacy `/api/cron/digest` (page-change digest) still runs for legacy pages. Retire it with the legacy-table cleanup.
+- Phase 5:
+  - Migration **`0013_own_store.sql`** adds `users.own_store_id` and an owner read policy on `stores`, `events.for_user_id` plus `price_undercut` (with per-user RLS), and `user_events.context`. Apply it after 0012.
+  - No new env vars.
 
 ## 0. Git preservation (done 2026-09-30)
 

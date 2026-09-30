@@ -1,9 +1,21 @@
 import type { RenderedEmail } from "@/features/digest/email";
-import { button, escapeHtml, item, paragraph, plural, renderShell, section } from "@/features/email/shell";
+import { button, escapeHtml, item, money, paragraph, plural, renderShell, section } from "@/features/email/shell";
 import type { EventType } from "@/features/events/types";
 import { describeEvent, leadEvent, suggestedAction } from "./describe";
 
-export type AlertEvent = { type: EventType; payload: Record<string, unknown>; detectedAt: string };
+export type AlertEvent = {
+  type: EventType;
+  payload: Record<string, unknown>;
+  detectedAt: string;
+  // Phase 5: the reader's comparable product, when they've added their store.
+  ownMatch?: { title: string; price: number | null } | null;
+};
+
+// "vs your Overnight Recovery Balm ($52)" — appended to a line's timestamp.
+function vsYours(e: AlertEvent): string {
+  if (!e.ownMatch || e.type === "price_undercut") return ""; // undercut already says it
+  return ` · vs your ${e.ownMatch.title}${e.ownMatch.price !== null ? ` (${money(e.ownMatch.price)})` : ""}`;
+}
 
 export type AlertBundle = {
   storeName: string;
@@ -41,7 +53,10 @@ function subjectFor(b: AlertBundle): string {
  */
 export function renderAlertEmail(b: AlertBundle, siteUrl: string, movesThisMonth: number): RenderedEmail {
   const lead = leadEvent(b.events);
-  const lines = b.events.map((e) => ({ sentence: describeEvent(e.type, e.payload, b.storeName), when: when(e.detectedAt) }));
+  const lines = b.events.map((e) => ({
+    sentence: describeEvent(e.type, e.payload, b.storeName),
+    when: when(e.detectedAt) + vsYours(e),
+  }));
   const suggestion = suggestedAction(lead.type, lead.payload);
   const subject = subjectFor(b);
   const link = competitorUrl(siteUrl, b);

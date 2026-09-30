@@ -1,4 +1,5 @@
 import { describeEvent } from "@/features/alerts/describe";
+import { money } from "@/features/email/shell";
 import type { BriefingInput } from "./content";
 
 // Fixed for every user and every week, so it's sent as a cached system block
@@ -16,6 +17,7 @@ Write:
 3. suggestedMove — ONE concrete, doable action for this week, specific to the moves above (e.g. "Run a 48-hour early-access offer to your email list before Dewlane's sale peaks on Friday."). Not generic advice.
 
 Rules:
+- Some moves end with "[vs your <product> at $X]": that's the reader's own comparable product. When present, make whyItMatters, whatThisMeans and suggestedMove about that product specifically (e.g. "Their new cream is $4 under your Overnight Recovery Balm."). Never assume a comparison that isn't marked.
 - Use only the facts given. Never invent numbers, products, dates, or motives. If you're inferring, say "likely".
 - Plain English, confident, no hype, no emojis, no markdown, no bullet characters inside strings.
 - Refer to competitors by name. Refer to the reader as "you".
@@ -29,10 +31,12 @@ export function buildBriefingMessage(input: BriefingInput, maxEvents = 60): stri
   const events = [...input.events]
     .sort((a, b) => Number(b.severity === "high") - Number(a.severity === "high") || b.detectedAt.localeCompare(a.detectedAt))
     .slice(0, maxEvents);
-  const lines = events.map(
-    (e) =>
-      `- [${e.severity === "high" ? "HIGH" : "normal"}] ${e.detectedAt.slice(0, 10)} ${describeEvent(e.type, e.payload, e.storeName)}`,
-  );
+  const lines = events.map((e) => {
+    const vs = e.ownMatch
+      ? ` [vs your ${e.ownMatch.title}${e.ownMatch.price !== null ? ` at ${money(e.ownMatch.price)}` : ""}]`
+      : "";
+    return `- [${e.severity === "high" ? "HIGH" : "normal"}] ${e.detectedAt.slice(0, 10)} ${describeEvent(e.type, e.payload, e.storeName)}${vs}`;
+  });
   const extra = input.events.length - events.length;
   return `Week of ${input.weekOf}. ${input.events.length} competitor moves.\n\n${lines.join("\n")}${
     extra > 0 ? `\n(+${extra} lower-priority moves not listed)` : ""

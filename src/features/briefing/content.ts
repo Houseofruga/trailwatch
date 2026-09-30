@@ -11,6 +11,8 @@ export type BriefingEvent = {
   severity: Severity;
   payload: Record<string, unknown>;
   detectedAt: string;
+  // Phase 5: the reader's comparable product, when they've added their store.
+  ownMatch?: { title: string; price: number | null } | null;
 };
 
 export type BriefingInput = { weekOf: string; events: BriefingEvent[] };
