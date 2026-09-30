@@ -1,27 +1,19 @@
 import { Suspense } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { DevStateBar } from "@/components/ui/DevStateBar";
+import { previewState } from "@/features/appData/devState";
+import { AuthShell } from "@/features/auth/AuthShell";
 import { ResetPasswordForm } from "@/features/auth/ResetPasswordForm";
-import styles from "../login/page.module.css";
 
-export default function ResetPasswordPage() {
+const STATES = ["default", "link-expired"] as const;
+
+export default async function ResetPasswordPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
+  const preview = previewState((await searchParams).state, STATES, "default");
   return (
-    <div className={styles.wrap}>
-      <div className={styles.inner}>
-        <Link href="/" className={styles.logoLink}>
-          <Image
-            src="/logo.svg"
-            alt="Trailwatch"
-            width={217}
-            height={48}
-            className={styles.logo}
-            priority
-          />
-        </Link>
-        <Suspense fallback={null}>
-          <ResetPasswordForm />
-        </Suspense>
-      </div>
-    </div>
+    <AuthShell>
+      <ResetPasswordForm key={preview} preview={preview} />
+      <Suspense fallback={null}>
+        <DevStateBar states={STATES} current={preview} />
+      </Suspense>
+    </AuthShell>
   );
 }

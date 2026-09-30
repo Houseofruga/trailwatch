@@ -1,0 +1,44 @@
+.store {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.storeText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.storeName,
+.storeName:hover {
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.domain {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.muted {
+  color: var(--ink-3);
+}
+
+.mobileMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.footnote {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-3);
+}

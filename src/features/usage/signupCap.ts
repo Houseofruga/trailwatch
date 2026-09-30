@@ -5,8 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 // (app_settings.free_signups_per_day) because the database enforces it too;
 // see migration 0015.
 
-export const SIGNUP_CAP_MESSAGE =
-  "We're letting in a limited number of new accounts each day during the beta, and today's are gone. Please try again tomorrow.";
+export const SIGNUP_CAP_MESSAGE = "Today's beta spots are gone. Try again tomorrow.";
 
 const DEFAULT_CAP = 50;
 

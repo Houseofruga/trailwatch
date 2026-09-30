@@ -11,8 +11,10 @@ Every artboard labels its parts with `data-component="…"` (e.g. `Button/primar
 The open items are in §4: places where the design differs from the brief or spec, or needs data the backend
 doesn't have yet.
 
-Components live in `src/components/ui/`, one folder each (`Button/Button.tsx` +
-`Button.module.css`). Values come from the artboards' inline styles, moved into `tokens.css`.
+Components live in `src/components/ui/` as a `.tsx` + `.module.css` pair each (small relatives share
+a file: `Feedback.tsx` holds Stat/Spinner/ProgressBar/DividerWithLabel, `Guides.tsx` holds
+Stepper/SetupGuide, `Overlay.tsx` holds Tooltip/PopoverMenu). Screens are in `src/components/app/`.
+Values come from the artboards' inline styles, moved into `tokens.css` (`--ui-*`).
 
 ---
 

@@ -1,0 +1,182 @@
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.stepNow {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  box-sizing: border-box;
+  border: 1.5px solid var(--border-input);
+  color: var(--ink-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dotFilled {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #ffffff;
+}
+
+.connector {
+  flex-grow: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--border-input);
+  min-width: 24px;
+}
+
+.connectorDone {
+  background: var(--ink);
+}
+
+.guide {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 16px 6px 16px;
+}
+
+.guideHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.guideTitles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.guideTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.guideCount {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.guideDismiss {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.guideTrack {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+  margin: 12px 0 6px 0;
+}
+
+.guideFill {
+  height: 100%;
+  background: var(--ink);
+}
+
+.tasks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border-soft);
+}
+
+.taskDone {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.taskTodo {
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  border: 1.5px dashed var(--ink-4);
+  flex-shrink: 0;
+}
+
+.taskText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.taskLabel {
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.taskLabelDone {
+  font-size: 14px;
+  color: var(--ink-3);
+  text-decoration: line-through;
+}
+
+.taskDescription {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+@media (max-width: 768px) {
+  .guideDismiss {
+    width: 44px;
+    height: 44px;
+  }
+  .task {
+    flex-wrap: wrap;
+  }
+}

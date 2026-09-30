@@ -1,0 +1,252 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import type { WelcomeState } from "@/app/(onboarding)/welcome/page";
+import { Avatar } from "@/components/ui/Avatar";
+import { Badge } from "@/components/ui/Badge";
+import { Banner } from "@/components/ui/Banner";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { ProgressBar } from "@/components/ui/Feedback";
+import { Stepper } from "@/components/ui/Guides";
+import { IconCheck, IconClock, IconX, SpinnerIcon } from "@/components/ui/icons";
+import { PageBody } from "@/components/ui/Page";
+import { TextField } from "@/components/ui/TextField";
+import { ADD_MESSAGES, checkStoreInput } from "@/features/appData/mockAdd";
+import styles from "./WelcomeView.module.css";
+
+const LIMIT = 10;
+const LIST_PREVIEW = 5;
+
+type AddedStatus = "ready" | "reading" | "pages" | "failed";
+type Added = { name: string; domain: string; status: AddedStatus };
+
+const HP: Added = { name: "Hearth & Pine", domain: "hearthandpine.com", status: "ready" };
+const DW: Added = { name: "Dewlane", domain: "dewlane.com", status: "ready" };
+const NK: Added = { name: "Northwind Knits", domain: "northwindknits.com", status: "ready" };
+const OG: Added = { name: "Oakline Goods", domain: "oaklinegoods.com", status: "pages" };
+const PT: Added = { name: "Peak Tonic", domain: "peaktonic.com", status: "ready" };
+const MORE: Added[] = ["Linden Loom", "Harbor Hemp", "Tallgrass Home", "Birch & Bay", "Quietwood"].map((name) => ({
+  name,
+  domain: `${name.toLowerCase().replace(/[^a-z]/g, "")}.com`,
+  status: "ready",
+}));
+
+// Designed states (02-Onboarding): the list and field each one starts with.
+const PRESETS: Partial<Record<WelcomeState, { added: Added[]; value?: string; error?: string }>> = {
+  "step-2-empty": { added: [] },
+  "step-2-adding": { added: [HP], value: "dewlane.com" },
+  "step-2-with-stores": {
+    added: [HP, { ...DW, status: "reading" }, OG, { ...PT, status: "failed" }],
+  },
+  "step-2-invalid-address": { added: [HP], value: "dewlane", error: ADD_MESSAGES.invalid },
+  "step-2-marketplace": { added: [HP], value: "amazon.com/stores/Dewlane", error: ADD_MESSAGES.marketplace },
+  "step-2-cant-reach": { added: [HP], value: "dewlane.co", error: ADD_MESSAGES.unreachable },
+  "step-2-not-on-shopify": { added: [HP, OG] },
+  "step-2-already-added": { added: [HP, DW], value: "hearthandpine.com", error: ADD_MESSAGES.duplicate("Hearth & Pine") },
+  "step-2-own-store": { added: [HP], value: "glowfield.com", error: ADD_MESSAGES.own },
+  "step-2-limit-reached": { added: [HP, DW, NK, OG, PT, ...MORE] },
+};
+
+function StatusBadge({ status }: { status: AddedStatus }) {
+  if (status === "reading")
+    return (
+      <Badge tone="info" spinner>
+        Reading catalog…
+      </Badge>
+    );
+  if (status === "pages") return <Badge>Pages only</Badge>;
+  if (status === "failed") return <Badge tone="critical">Couldn&rsquo;t read</Badge>;
+  return <Badge tone="success">Ready</Badge>;
+}
+
+export function WelcomeView({ state }: { state: WelcomeState }) {
+  const router = useRouter();
+  const preset = PRESETS[state];
+  const [step, setStep] = useState<1 | 2 | 3>(state === "step-1-your-store" ? 1 : preset ? 2 : 3);
+  const [store, setStore] = useState("glowfield.com");
+  const [added, setAdded] = useState<Added[]>(preset?.added ?? [HP, { ...DW, status: "reading" }, OG]);
+  const [value, setValue] = useState(preset?.value ?? "");
+  const [error, setError] = useState<string | null>(preset?.error ?? null);
+  const [adding, setAdding] = useState(state === "step-2-adding");
+  const [showAll, setShowAll] = useState(false);
+  const [progress, setProgress] = useState(state === "slow" ? 410 : 250);
+
+  const full = added.length >= LIMIT;
+  const slow = state === "slow";
+
+  // Live flow (not a frozen review state): fill the bar, then open the report.
+  useEffect(() => {
+    if (step !== 3 || state === "building-report" || slow) return;
+    const t = setInterval(() => setProgress((p) => Math.min(313, p + 21)), 250);
+    return () => clearInterval(t);
+  }, [step, state, slow]);
+  useEffect(() => {
+    if (step === 3 && progress >= 313) router.push("/competitors/dewlane/report");
+  }, [step, progress, router]);
+
+  async function add(e: React.FormEvent) {
+    e.preventDefault();
+    const check = checkStoreInput(value, { ownDomain: store || null, existing: added });
+    if (!check.ok) return setError(check.error);
+    setError(null);
+    setAdding(true);
+    await new Promise((r) => setTimeout(r, 700)); // mock probe
+    setAdding(false);
+    setAdded((a) => [...a, { name: check.name, domain: check.host, status: "reading" }]);
+    setValue("");
+  }
+
+  const shown = showAll ? added : added.slice(0, LIST_PREVIEW);
+
+  return (
+    <PageBody narrow>
+      <Stepper steps={["Your store", "Competitors"]} current={step === 1 ? 0 : 1} />
+
+      {step === 1 ? (
+        <Card>
+          <form
+            className={styles.card}
+            onSubmit={(e) => {
+              e.preventDefault();
+              setStep(2);
+            }}
+          >
+            <h1 className={styles.title}>What&rsquo;s your store?</h1>
+            <p className={styles.lead}>We&rsquo;ll compare your competitors&rsquo; prices with yours.</p>
+            <div className={styles.spacer} />
+            <TextField
+              id="own-store"
+              label="Your store’s website"
+              prefix="https://"
+              placeholder="yourstore.com"
+              value={store}
+              onChange={(e) => setStore(e.target.value)}
+            />
+            <div className={styles.actions}>
+              <Button variant="primary" type="submit">
+                Continue
+              </Button>
+              <Button variant="plain" onClick={() => (setStore(""), setStep(2))}>
+                Skip for now
+              </Button>
+            </div>
+          </form>
+        </Card>
+      ) : step === 2 ? (
+        <Card>
+          <div className={styles.card}>
+            <h1 className={styles.title}>Who do you compete with?</h1>
+            <p className={styles.lead}>Add up to {LIMIT} stores during the beta. Use their own website, not an Amazon or Etsy page.</p>
+            <div className={styles.spacer} />
+            {full ? <Banner tone="info" title={`You've added ${LIMIT} stores`}>That&rsquo;s the beta limit. Remove one to add another.</Banner> : null}
+            <form onSubmit={add} noValidate>
+              <TextField
+                id="competitor-url"
+                label="Competitor’s website"
+                prefix="https://"
+                placeholder="dewlane.com"
+                inputMode="url"
+                autoComplete="off"
+                value={value}
+                disabled={full}
+                onChange={(e) => setValue(e.target.value)}
+                error={error}
+                trailing={
+                  <Button type="submit" loading={adding} disabled={full}>
+                    Add
+                  </Button>
+                }
+              />
+            </form>
+
+            {added.length > 0 ? (
+              <>
+                <p className={styles.addedCount}>
+                  Added · {added.length} of {LIMIT}
+                </p>
+                <ul className={styles.list}>
+                  {shown.map((a) => (
+                    <li key={a.domain} className={styles.item}>
+                      <Avatar name={a.name} size={32} />
+                      <div className={styles.itemText}>
+                        <span className={styles.itemName}>{a.name}</span>
+                        <span className={styles.itemSub}>{a.domain}</span>
+                        {a.status === "pages" ? (
+                          <span className={styles.itemNote}>Not on Shopify. We&rsquo;ll watch its pages, not its catalog.</span>
+                        ) : a.status === "failed" ? (
+                          <span className={styles.itemNote}>We couldn&rsquo;t open {a.domain}. Remove it or try again later.</span>
+                        ) : null}
+                      </div>
+                      <StatusBadge status={a.status} />
+                      <button
+                        type="button"
+                        aria-label={`Remove ${a.name}`}
+                        className={styles.remove}
+                        onClick={() => setAdded((list) => list.filter((x) => x.domain !== a.domain))}
+                      >
+                        <IconX />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                {!showAll && added.length > LIST_PREVIEW ? (
+                  <div className={styles.showAll}>
+                    <Button variant="plain" onClick={() => setShowAll(true)}>
+                      {`Show all ${added.length}`}
+                    </Button>
+                  </div>
+                ) : null}
+              </>
+            ) : null}
+
+            <div className={styles.spacer} />
+            <div className={styles.actions}>
+              <Button variant="primary" disabled={added.length === 0} onClick={() => (setProgress(0), setStep(3))}>
+                See your first report
+              </Button>
+              <Button variant="plainDark" onClick={() => setStep(1)}>
+                Back
+              </Button>
+            </div>
+          </div>
+        </Card>
+      ) : (
+        <Card>
+          <div className={styles.card}>
+            <h1 className={styles.title}>Building your first report</h1>
+            {!slow ? <p className={styles.lead}>This usually takes under a minute.</p> : null}
+            {slow ? (
+              <ProgressBar label="Reading Hearth & Pine’s catalog: 410 of 1,632 products" value={410} max={1632} />
+            ) : (
+              <ProgressBar label={`Reading Dewlane’s catalog: ${progress} of 313 products`} value={progress} max={313} />
+            )}
+            {slow ? (
+              <>
+                <Banner tone="info">Big catalogs take a minute. We&rsquo;ll email you when it&rsquo;s ready.</Banner>
+                <div className={styles.actions}>
+                  <Button variant="primary" href="/dashboard">
+                    Go to Home
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <ul className={styles.progressList}>
+                <li>
+                  <IconCheck /> Hearth &amp; Pine: 1,632 products read
+                </li>
+                <li>
+                  <SpinnerIcon tone="#4a4740" /> Dewlane: reading catalog
+                </li>
+                <li>
+                  <IconClock /> Oakline Goods: pages next
+                </li>
+              </ul>
+            )}
+          </div>
+        </Card>
+      )}
+    </PageBody>
+  );
+}

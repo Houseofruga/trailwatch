@@ -1,0 +1,157 @@
+.columns {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 336px;
+  flex-shrink: 0;
+}
+
+.filters {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 12px;
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.moreDesktop {
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px 0 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.moreDesktop:hover {
+  background: var(--surface-sunken);
+}
+
+.moreMobile {
+  display: none !important;
+}
+
+.catalog {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.checked {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
+
+.pages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pages li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border-soft);
+}
+
+.pages li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.pageLabel {
+  font-size: 13px;
+  font-weight: 500;
+  flex-grow: 1;
+}
+
+.pageDate {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.pageLink {
+  display: flex;
+  color: var(--ink-2);
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.pageLink:hover {
+  color: var(--ink);
+  background: var(--surface-sunken);
+}
+
+.compare {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.compareLink {
+  margin-left: -6px;
+}
+
+@media (max-width: 960px) {
+  .columns {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .side {
+    width: auto;
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .moreDesktop {
+    display: none;
+  }
+  .moreMobile {
+    display: inline-flex !important;
+  }
+  .pageLink {
+    width: 44px;
+    height: 44px;
+  }
+}

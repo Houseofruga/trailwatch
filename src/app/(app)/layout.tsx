@@ -1,25 +1,20 @@
 import { redirect } from "next/navigation";
-import { Sidebar } from "@/components/Sidebar";
+import { AppFrame } from "@/components/ui/AppFrame";
 import { getAccount } from "@/features/account/queries";
-import styles from "./layout.module.css";
+import { getOwnStore, listCompetitors, MOCK_ACCOUNT } from "@/features/appData/mock";
 
-export default async function AppLayout({
-  children,
-  modal,
-}: Readonly<{ children: React.ReactNode; modal: React.ReactNode }>) {
+export default async function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  // src/proxy.ts already guards these routes; this is the belt to its braces.
   const account = await getAccount();
-
-  // src/proxy.ts already guards these routes; this is the belt to its braces,
-  // and it narrows `account` for the sidebar.
   if (!account) redirect("/login");
 
+  // UI Step 5: screens run on mock data (src/features/appData/mock.ts); Step 6
+  // wires the real account, store and competitors.
+  const [ownStore, competitors] = await Promise.all([getOwnStore(), listCompetitors()]);
+
   return (
-    <div className={styles.shell}>
-      <Sidebar account={account} />
-      <main className={styles.main}>{children}</main>
-      {/* Intercepting-route overlay (e.g. change detail); position:fixed, so it
-          renders above the shell regardless of DOM order. */}
-      {modal}
-    </div>
+    <AppFrame account={MOCK_ACCOUNT} ownStore={ownStore} competitorCount={competitors.length}>
+      {children}
+    </AppFrame>
   );
 }

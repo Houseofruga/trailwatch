@@ -1,0 +1,35 @@
+.viewport {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%);
+  z-index: 60;
+  max-width: calc(100vw - 32px);
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px 12px 16px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(26, 26, 23, 0.22);
+}
+
+.error {
+  background: var(--ui-critical-ink);
+}
+
+.dismiss {
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  display: flex;
+  padding: 2px;
+  cursor: pointer;
+  border-radius: 4px;
+}

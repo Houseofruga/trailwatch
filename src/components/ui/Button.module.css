@@ -1,0 +1,143 @@
+.button {
+  position: relative;
+  height: 32px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  text-decoration: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink);
+}
+
+.button:hover {
+  text-decoration: none;
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow: var(--ui-focus-ring);
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.loading .label {
+  visibility: hidden;
+}
+
+.spinner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.primary {
+  background: var(--ink);
+  color: #ffffff;
+  border-color: #000000;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 1px 0 rgba(0, 0, 0, 0.18);
+}
+.primary:hover {
+  color: #ffffff;
+  background: #2c2c28;
+}
+
+.secondary {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--border-input);
+  box-shadow: 0 1px 0 rgba(26, 26, 23, 0.05);
+}
+.secondary:hover {
+  color: var(--ink);
+  background: var(--ui-subdued);
+}
+
+.plain {
+  color: var(--link);
+  padding: 0 6px;
+}
+.plain:hover {
+  color: var(--link-hover);
+}
+
+.plainDark {
+  color: var(--ink);
+  padding: 0 6px;
+}
+.plainDark:hover {
+  color: var(--ink);
+  background: var(--surface-sunken);
+}
+
+.critical {
+  background: var(--ui-critical);
+  color: #ffffff;
+  border-color: var(--ui-critical-line);
+}
+.critical:hover {
+  color: #ffffff;
+  background: var(--ui-critical-line);
+}
+
+.button:disabled,
+.button[aria-disabled="true"] {
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.primary:disabled,
+.secondary:disabled,
+.critical:disabled {
+  background: var(--surface-sunken);
+  color: var(--ink-4);
+  border-color: var(--border-soft);
+}
+
+.plain:disabled,
+.plainDark:disabled {
+  color: var(--ink-4);
+  background: transparent;
+}
+
+/* aria-busy buttons stay disabled-looking only if also disabled */
+.loading {
+  cursor: progress;
+}
+
+.full {
+  width: 100%;
+}
+
+.tall {
+  height: 44px;
+}
+
+.iconOnly {
+  width: 32px;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .button {
+    height: 44px;
+  }
+  .iconOnly {
+    width: 44px;
+  }
+}

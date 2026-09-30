@@ -2,45 +2,52 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { Button } from "@/components/Button";
+import { Banner } from "@/components/ui/Banner";
+import { Button } from "@/components/ui/Button";
+import { TextField } from "@/components/ui/TextField";
 import { updatePassword, type AuthState } from "./actions";
-import styles from "@/app/(auth)/login/page.module.css";
+import { AuthCard, AuthHeading } from "./AuthShell";
 
-function SubmitButton() {
+function Submit({ disabled }: { disabled: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" full disabled={pending} style={{ padding: "11px" }}>
-      {pending ? "Saving…" : "Set new password"}
+    <Button variant="primary" type="submit" full tall loading={pending} disabled={disabled}>
+      Save password
     </Button>
   );
 }
 
-export function ResetPasswordForm() {
-  const [state, formAction] = useActionState<AuthState, FormData>(updatePassword, null);
+export function ResetPasswordForm({ preview = "default" }: { preview?: "default" | "link-expired" }) {
+  const [state, formAction] = useActionState<AuthState, FormData>(
+    updatePassword,
+    preview === "link-expired" ? { expired: true } : null,
+  );
+  const expired = !!state?.expired;
 
   return (
-    <div className={styles.card}>
-      <h1 className={styles.title}>Set a new password</h1>
-      <p className={styles.sub}>Choose a new password for your account.</p>
-
-      <form action={formAction}>
-        <label className={styles.label} htmlFor="password">
-          New password
-        </label>
-        <input
+    <AuthCard>
+      <AuthHeading title="Set a new password" />
+      {expired ? (
+        <Banner tone="warning" title="This link has expired" actions={<Button href="/forgot-password">Send a new link</Button>}>
+          Reset links work for one hour. Get a new one below.
+        </Banner>
+      ) : null}
+      <form action={formAction} noValidate>
+        <TextField
           id="password"
           name="password"
           type="password"
+          label="New password"
           autoComplete="new-password"
-          required
-          placeholder="••••••••"
-          className={styles.inputLast}
+          help="At least 8 characters"
+          disabled={expired}
+          error={state?.fieldErrors?.password}
         />
-
-        {state?.error ? <p className={styles.error}>{state.error}</p> : null}
-
-        <SubmitButton />
+        {!expired ? (
+          <TextField id="confirm" name="confirm" type="password" label="Confirm password" autoComplete="new-password" />
+        ) : null}
+        <Submit disabled={expired} />
       </form>
-    </div>
+    </AuthCard>
   );
 }

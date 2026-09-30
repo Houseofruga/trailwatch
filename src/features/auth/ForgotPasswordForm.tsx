@@ -1,70 +1,51 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { BackLink } from "@/components/BackLink";
-import { Button } from "@/components/Button";
+import Link from "next/link";
+import { Banner } from "@/components/ui/Banner";
+import { Button } from "@/components/ui/Button";
+import { TextField } from "@/components/ui/TextField";
 import { requestPasswordReset, type ForgotState } from "./actions";
-import styles from "@/app/(auth)/login/page.module.css";
+import { AuthCard, AuthHeading } from "./AuthShell";
 
-function SubmitButton() {
+function Submit() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" full disabled={pending} style={{ padding: "11px" }}>
-      {pending ? "Sending…" : "Send reset link"}
+    <Button variant="primary" type="submit" full tall loading={pending}>
+      Send reset link
     </Button>
   );
 }
 
-export function ForgotPasswordForm() {
-  const [state, formAction] = useActionState<ForgotState, FormData>(requestPasswordReset, null);
-
-  if (state && "sent" in state) {
-    return (
-      <>
-        <div className={styles.card}>
-          <h1 className={styles.title}>Check your email</h1>
-          <p className={styles.sub}>
-            If an account exists for that address, we&rsquo;ve sent a link to reset your password.
-            It expires in an hour.
-          </p>
-        </div>
-        <div className={styles.switch}>
-          <BackLink href="/login" mode="link" />
-        </div>
-      </>
-    );
-  }
+export function ForgotPasswordForm({ preview = "default" }: { preview?: "default" | "link-sent" }) {
+  const [state, formAction] = useActionState<ForgotState, FormData>(
+    requestPasswordReset,
+    preview === "link-sent" ? { sent: true } : null,
+  );
+  const [email, setEmail] = useState(preview === "link-sent" ? "jo@glowfield.com" : "");
+  const sent = !!state && "sent" in state;
 
   return (
-    <>
-      <div className={styles.card}>
-        <h1 className={styles.title}>Reset your password</h1>
-        <p className={styles.sub}>Enter your email and we&rsquo;ll send you a reset link.</p>
-
-        <form action={formAction}>
-          <label className={styles.label} htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            placeholder="you@company.com"
-            className={styles.inputLast}
-          />
-
-          {state?.error ? <p className={styles.error}>{state.error}</p> : null}
-
-          <SubmitButton />
-        </form>
-      </div>
-
-      <div className={styles.switch}>
-        <BackLink href="/login" mode="link" />
-      </div>
-    </>
+    <AuthCard footer={<Link href="/login">Back to log in</Link>}>
+      <AuthHeading title="Reset your password" sub="Enter your email and we'll send you a link." />
+      {sent ? (
+        <Banner tone="success">If there&rsquo;s an account for {email || "that address"}, a reset link is on its way.</Banner>
+      ) : null}
+      <form action={formAction} noValidate>
+        <TextField
+          id="email"
+          name="email"
+          type="email"
+          label="Email"
+          autoComplete="email"
+          placeholder="you@yourstore.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          error={state && "error" in state ? state.error : undefined}
+        />
+        <Submit />
+      </form>
+    </AuthCard>
   );
 }

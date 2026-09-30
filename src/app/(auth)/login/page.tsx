@@ -1,27 +1,22 @@
 import { Suspense } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { AuthForm } from "@/features/auth/AuthForm";
-import styles from "./page.module.css";
+import { DevStateBar } from "@/components/ui/DevStateBar";
+import { previewState } from "@/features/appData/devState";
+import { AuthForm, type AuthPreview } from "@/features/auth/AuthForm";
+import { AuthShell } from "@/features/auth/AuthShell";
 
-export default function LoginPage() {
+const SIGNUP_STATES = ["default", "submitting", "field-errors", "sign-ups-full-today", "check-your-inbox"] as const;
+const LOGIN_STATES = ["default", "submitting", "wrong-password"] as const;
+
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ state?: string; mode?: string }> }) {
+  const sp = await searchParams;
+  const states = sp.mode === "signup" ? SIGNUP_STATES : LOGIN_STATES;
+  const preview: AuthPreview = previewState(sp.state, states, "default");
   return (
-    <div className={styles.wrap}>
-      <div className={styles.inner}>
-        <Link href="/" className={styles.logoLink}>
-          <Image
-            src="/logo.svg"
-            alt="Trailwatch"
-            width={217}
-            height={48}
-            className={styles.logo}
-            priority
-          />
-        </Link>
-        <Suspense fallback={null}>
-          <AuthForm initialMode="login" />
-        </Suspense>
-      </div>
-    </div>
+    <AuthShell>
+      <Suspense fallback={null}>
+        <AuthForm key={`${sp.mode}-${preview}`} initialMode="login" preview={preview} />
+        <DevStateBar states={states} current={preview} />
+      </Suspense>
+    </AuthShell>
   );
 }

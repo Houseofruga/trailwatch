@@ -1,0 +1,151 @@
+.filters {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 12px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.error {
+  padding: 12px;
+}
+
+.frame {
+  position: relative;
+}
+
+.loadingPill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 34px;
+  display: flex;
+  justify-content: center;
+  padding-top: 28px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.loadingPill span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--ink-2);
+  box-shadow: 0 4px 12px rgba(26, 26, 23, 0.08);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.th {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-3);
+  background: var(--ui-table-head);
+  border-bottom: 1px solid var(--border-soft);
+  white-space: nowrap;
+}
+
+.tr {
+  background: var(--surface);
+}
+
+.tr:hover {
+  background: var(--ui-subdued);
+}
+
+.td {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--ink);
+  vertical-align: top;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.td a {
+  color: inherit;
+}
+
+.detailRow {
+  background: var(--ui-subdued);
+}
+
+.detailCell {
+  padding: 0 12px 12px 48px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.emptyCell {
+  padding: 0;
+}
+
+.dimmed {
+  opacity: 0.4;
+}
+
+.stacked {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.stackedItem {
+  background: var(--surface);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stackedDetail {
+  margin-top: 4px;
+}
+
+.stackedEmpty {
+  list-style: none;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--ui-subdued);
+  border-radius: 0 0 12px 12px;
+}
+
+.range {
+  font-size: 13px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.pageButtons {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .table {
+    display: none;
+  }
+  .stacked {
+    display: block;
+  }
+  .loadingPill {
+    top: 0;
+  }
+}

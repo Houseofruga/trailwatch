@@ -8,12 +8,30 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { SIGNUP_CAP_MESSAGE, signupsLeftToday } from "@/features/usage/signupCap";
 
-export type AuthState = { error: string } | null;
+export type AuthState = {
+  error?: string;
+  fieldErrors?: { email?: string; password?: string };
+  /** Sign-up succeeded; the confirmation link went to this address. */
+  checkEmail?: string;
+  /** Daily sign-up cap reached (the form disables itself). */
+  capacity?: boolean;
+  /** The reset link's session is gone or expired. */
+  expired?: boolean;
+} | null;
 
 const credentials = z.object({
-  email: z.email("Enter a valid email address."),
-  password: z.string().min(8, "Password must be at least 8 characters."),
+  email: z.email("Enter an email like you@yourstore.com."),
+  password: z.string().min(8, "Use at least 8 characters."),
 });
+
+function fieldErrors(issues: z.core.$ZodIssue[]): NonNullable<AuthState>["fieldErrors"] {
+  const out: { email?: string; password?: string } = {};
+  for (const issue of issues) {
+    const key = issue.path[0];
+    if ((key === "email" || key === "password") && !out[key]) out[key] = issue.message;
+  }
+  return out;
+}
 
 function readCredentials(formData: FormData) {
   return credentials.safeParse({
@@ -25,13 +43,13 @@ function readCredentials(formData: FormData) {
 export async function signUp(_prev: AuthState, formData: FormData): Promise<AuthState> {
   const parsed = readCredentials(formData);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0].message };
+    return { fieldErrors: fieldErrors(parsed.error.issues) };
   }
 
   // Daily signup cap (Phase 7): say so plainly instead of the generic
   // database error the backstop trigger would produce.
   if ((await signupsLeftToday(createServiceClient())) <= 0) {
-    return { error: SIGNUP_CAP_MESSAGE };
+    return { error: SIGNUP_CAP_MESSAGE, capacity: true };
   }
 
   const supabase = await createClient();
@@ -51,7 +69,7 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   // With "Confirm email" enabled in Supabase, signUp returns no session — the
   // user has to click the emailed link before they can get in.
   if (!data.session) {
-    return { error: "Check your email for a confirmation link, then log in." };
+    return { checkEmail: parsed.data.email };
   }
 
   revalidatePath("/", "layout");
@@ -63,13 +81,13 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
 export async function logIn(_prev: AuthState, formData: FormData): Promise<AuthState> {
   const parsed = readCredentials(formData);
   if (!parsed.success) {
-    return { error: parsed.error.issues[0].message };
+    return { fieldErrors: fieldErrors(parsed.error.issues) };
   }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
-  if (error) return { error: "That email and password don't match an account." };
+  if (error) return { error: "That email and password don't match." };
 
   revalidatePath("/", "layout");
   redirect("/dashboard");
@@ -106,6 +124,23 @@ export async function signInWithGoogle(formData: FormData) {
   }
 
   redirect(data.url);
+}
+
+/** Sends the sign-up confirmation email again ("Check your inbox" → Resend). */
+export async function resendConfirmation(email: string): Promise<{ ok: boolean }> {
+  const parsed = z.email().safeParse(email);
+  if (!parsed.success) return { ok: false };
+  const supabase = await createClient();
+  const origin =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (await headers()).get("origin") ??
+    "http://localhost:3000";
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: parsed.data,
+    options: { emailRedirectTo: `${origin}/auth/confirm?next=/welcome` },
+  });
+  return { ok: !error };
 }
 
 export async function logOut() {
@@ -147,14 +182,17 @@ export async function requestPasswordReset(
 // callback. Requires that session — an expired/absent link surfaces as an error.
 export async function updatePassword(_prev: AuthState, formData: FormData): Promise<AuthState> {
   const parsed = z
-    .object({ password: z.string().min(8, "Password must be at least 8 characters.") })
+    .object({ password: z.string().min(8, "Use at least 8 characters.") })
     .safeParse({ password: formData.get("password") });
-  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  if (!parsed.success) return { fieldErrors: { password: parsed.error.issues[0].message } };
+  if (formData.get("confirm") !== null && formData.get("confirm") !== parsed.data.password) {
+    return { fieldErrors: { password: "The two passwords don't match." } };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
   if (error) {
-    return { error: "Couldn't update your password — the reset link may have expired. Request a new one." };
+    return { expired: true };
   }
 
   revalidatePath("/", "layout");

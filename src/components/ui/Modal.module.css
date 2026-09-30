@@ -1,0 +1,84 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--ui-overlay);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 140px 16px 16px 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.modal {
+  width: 480px;
+  max-width: 100%;
+  box-sizing: border-box;
+  background: var(--surface);
+  border-radius: 14px;
+  box-shadow: var(--ui-shadow-modal);
+  overflow: hidden;
+  outline: none;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 14px 20px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.close {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--ink-2);
+}
+
+.body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 14px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.body p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-soft);
+}
+
+@media (max-width: 768px) {
+  .overlay {
+    padding-top: 72px;
+  }
+  .close {
+    width: 44px;
+    height: 44px;
+  }
+}

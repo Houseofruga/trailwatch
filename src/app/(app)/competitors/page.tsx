@@ -1,43 +1,26 @@
-import { Suspense } from "react";
-import { ButtonLink } from "@/components/Button";
-import { PlusIcon } from "@/components/icons";
-import { FlashToast } from "@/components/FlashToast";
-import { getCompetitorsWithPages } from "@/features/competitors/queries";
-import { ManageBoard } from "./ManageBoard";
-import styles from "./page.module.css";
+import type { Metadata } from "next";
+import { CompetitorsView } from "@/components/app/CompetitorsView";
+import { DevStateBar } from "@/components/ui/DevStateBar";
+import { previewState } from "@/features/appData/devState";
+import { getOwnStore, listCompetitors } from "@/features/appData/mock";
 
-export default async function CompetitorsPage() {
-  const competitors = await getCompetitorsWithPages();
-  // Server Component: one deterministic clock read per request (not a client
-  // render impurity) — powers "Checked Nm ago" on each card.
-  // eslint-disable-next-line react-hooks/purity
-  const now = Date.now();
+export const metadata: Metadata = { title: "Competitors" };
 
-  const pageCount = competitors.reduce((n, c) => n + c.pages.length, 0);
+const STATES = ["populated", "empty", "loading", "error"] as const;
 
+export default async function CompetitorsPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
+  const state = previewState((await searchParams).state, STATES, "populated");
+  const [competitors, ownStore] = await Promise.all([listCompetitors(), getOwnStore()]);
   return (
-    <div className={styles.wrap}>
-      <div className={styles.head}>
-        <div>
-          <h1 className={styles.title}>Competitors</h1>
-          {competitors.length > 0 ? (
-            <p className={styles.sub}>
-              {competitors.length} competitor{competitors.length === 1 ? "" : "s"} · {pageCount} page
-              {pageCount === 1 ? "" : "s"} tracked
-            </p>
-          ) : null}
-        </div>
-        <ButtonLink href="/competitors/add">
-          <PlusIcon />
-          Add competitor
-        </ButtonLink>
-      </div>
-
-      <ManageBoard competitors={competitors} now={now} />
-
-      <Suspense fallback={null}>
-        <FlashToast />
-      </Suspense>
-    </div>
+    <>
+      <CompetitorsView
+        key={state}
+        competitors={state === "empty" ? [] : competitors}
+        loading={state === "loading"}
+        error={state === "error"}
+        ownDomain={ownStore?.domain ?? null}
+      />
+      <DevStateBar states={STATES} current={state} />
+    </>
   );
 }

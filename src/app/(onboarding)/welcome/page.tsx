@@ -1,36 +1,33 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { getAccount } from "@/features/account/queries";
-import { getCompetitorsWithPages } from "@/features/competitors/queries";
-import { LIMITS } from "@/features/plan/limits";
-import { WelcomeOnboarding } from "./WelcomeOnboarding";
+import { WelcomeView } from "@/components/app/WelcomeView";
+import { DevStateBar } from "@/components/ui/DevStateBar";
+import { previewState } from "@/features/appData/devState";
 
-export const metadata: Metadata = { title: "Set up your watchlist" };
+export const metadata: Metadata = { title: "Set up TrailWatch" };
 
-// seedCompetitors warms baseline + Wayback history via after() (post-response);
-// give that work room under the function budget.
-export const maxDuration = 60;
+const STATES = [
+  "step-1-your-store",
+  "step-2-empty",
+  "step-2-adding",
+  "step-2-with-stores",
+  "step-2-invalid-address",
+  "step-2-marketplace",
+  "step-2-cant-reach",
+  "step-2-not-on-shopify",
+  "step-2-already-added",
+  "step-2-own-store",
+  "step-2-limit-reached",
+  "building-report",
+  "slow",
+] as const;
+export type WelcomeState = (typeof STATES)[number];
 
-// Post-signup onboarding: confirm and create the competitors the visitor picked
-// on the homepage / (carried in localStorage). Only for fresh accounts — anyone who already
-// has competitors is sent to the dashboard.
-export default async function WelcomePage() {
-  const supabase = await createClient();
-  const [account, competitors, { data: { user } }] = await Promise.all([
-    getAccount(),
-    getCompetitorsWithPages(),
-    supabase.auth.getUser(),
-  ]);
-  if (!account || !user) redirect("/login");
-  if (competitors.length > 0) redirect("/dashboard");
-
+export default async function WelcomePage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
+  const state = previewState((await searchParams).state, STATES, "step-1-your-store");
   return (
-    <WelcomeOnboarding
-      plan={account.plan}
-      limit={LIMITS[account.plan].competitors}
-      email={account.email}
-      userId={user.id}
-    />
+    <>
+      <WelcomeView key={state} state={state} />
+      <DevStateBar states={STATES} current={state} />
+    </>
   );
 }

@@ -1,27 +1,19 @@
 import { Suspense } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { DevStateBar } from "@/components/ui/DevStateBar";
+import { previewState } from "@/features/appData/devState";
+import { AuthShell } from "@/features/auth/AuthShell";
 import { ForgotPasswordForm } from "@/features/auth/ForgotPasswordForm";
-import styles from "../login/page.module.css";
 
-export default function ForgotPasswordPage() {
+const STATES = ["default", "link-sent"] as const;
+
+export default async function ForgotPasswordPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
+  const preview = previewState((await searchParams).state, STATES, "default");
   return (
-    <div className={styles.wrap}>
-      <div className={styles.inner}>
-        <Link href="/" className={styles.logoLink}>
-          <Image
-            src="/logo.svg"
-            alt="Trailwatch"
-            width={217}
-            height={48}
-            className={styles.logo}
-            priority
-          />
-        </Link>
-        <Suspense fallback={null}>
-          <ForgotPasswordForm />
-        </Suspense>
-      </div>
-    </div>
+    <AuthShell>
+      <ForgotPasswordForm key={preview} preview={preview} />
+      <Suspense fallback={null}>
+        <DevStateBar states={STATES} current={preview} />
+      </Suspense>
+    </AuthShell>
   );
 }

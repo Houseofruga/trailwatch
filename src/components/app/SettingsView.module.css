@@ -1,0 +1,164 @@
+.sections {
+  display: flex;
+  flex-direction: column;
+}
+
+.section {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  padding: 24px 0;
+  border-top: 1px solid var(--border);
+  scroll-margin-top: 72px;
+}
+
+.sectionText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 300px;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.sectionDescription {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-3);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.sectionBody {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.slackHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-soft);
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.slackHead svg {
+  color: var(--ink-2);
+}
+
+.slackConnected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+
+.inlineActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.twoCol {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.storeMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.plan {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plan p {
+  margin: 0;
+}
+
+.planTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.planTitle p {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.planLimits {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+.planNote {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
+
+.rowAction {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rowLabel {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.rowDescription {
+  margin: 2px 0 0 0;
+  font-size: 13px;
+  color: var(--ink-3);
+  line-height: 1.45;
+}
+
+@media (max-width: 768px) {
+  .section {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .sectionText {
+    width: auto;
+  }
+  .twoCol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rowAction {
+    flex-wrap: wrap;
+  }
+}

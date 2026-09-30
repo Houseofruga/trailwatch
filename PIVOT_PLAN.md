@@ -128,7 +128,19 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
   - **Step 2 done:** `UX_SPEC.md` approved 2026-09-30, with all open questions resolved as recommended.
   - **Step 3 done:** `CLAUDE_DESIGN_BRIEF.md` is ready to paste. It supersedes
     `DESIGN_BRIEF_FOR_CLAUDE_DESIGN.md`.
-  - Next: the owner creates the designs; then Step 4, `DESIGN_TO_COMPONENTS.md`.
+  - **Step 4 done:** `DESIGN_TO_COMPONENTS.md`. Decisions D1–D6 are all as recommended.
+  - **Step 5 built (mock data), awaiting review:**
+    - The component set is in `src/components/ui/` and the screens are in `src/components/app/`.
+    - Routes: `/login`, `/forgot-password`, `/reset-password`, `/welcome`, `/dashboard`, `/competitors`,
+      `/competitors/[id]`, `/competitors/[id]/report` (new), `/settings`.
+    - `/billing` now redirects to `/settings#plan`.
+    - Mock data is in `src/features/appData/mock.ts`, shaped like `types.ts`. Step 6 swaps in real queries.
+    - Development-only `?state=` switcher: `src/features/appData/devState.ts` and `DevStateBar`.
+    - Auth stays real. Its actions gained field errors, a "check your inbox" state, a link-expired
+      state and `resendConfirmation`.
+    - Old founder-edition screen files are unused now but still on disk (deleting them needs the
+      owner's OK): `@modal/`, `changes/`, `competitors/add/`, the old dashboard, competitor and
+      onboarding components.
 
 **Log of new env vars and migrations:**
 - Phase 0: none.

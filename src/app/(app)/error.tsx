@@ -1,29 +1,33 @@
 "use client";
 
 import { useEffect } from "react";
-import { ErrorState, HomeLink } from "@/components/ErrorState";
-import styles from "@/components/ErrorState.module.css";
+import { Banner } from "@/components/ui/Banner";
+import { Button } from "@/components/ui/Button";
+import { PageBody } from "@/components/ui/Page";
 
-// App-scoped error boundary: an error inside the authed area keeps the sidebar
-// (rendered by the layout, which sits above this boundary) and swaps only the
-// content for a branded retry, rather than blanking the whole shell.
+// App-scoped error boundary: the frame (layout.tsx) stays; only the content
+// swaps for a retry.
 export default function AppError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
     console.error(error);
   }, [error]);
 
   return (
-    <ErrorState
-      title="Something went wrong"
-      body="This page hit a snag loading your data. It's usually temporary — try again in a moment."
-      action={
-        <>
-          <button type="button" className={styles.button} onClick={reset}>
-            Try again
-          </button>
-          <HomeLink />
-        </>
-      }
-    />
+    <PageBody>
+      <Banner
+        tone="critical"
+        title="Something went wrong"
+        actions={
+          <>
+            <Button onClick={reset}>Try again</Button>
+            <Button variant="plainDark" href="/dashboard">
+              Go to Home
+            </Button>
+          </>
+        }
+      >
+        This page hit a snag loading your data. It&rsquo;s usually temporary; try again in a moment.
+      </Banner>
+    </PageBody>
   );
 }
