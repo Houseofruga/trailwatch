@@ -14,11 +14,33 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
   - robots.txt wildcard + query support
   - `scripts/probe-stores.ts`, which probes real stores with no DB writes
   - The add-by-domain **screen** isn't wired up yet; it waits on the artboards. The legacy page flow still works.
-- Next: Phase 2 (catalog tracking). New UI waits on the owner's Claude Design artboards.
+- **Phase 2 done (backend):** `src/features/catalog/`
+  - Paginated `products.json` fetch: polite, with 429/5xx backoff and a 25k-product ceiling
+  - Sitemap + JSON-LD fallback, including `ProductGroup`/`hasVariant` markup
+  - Normalization to cents, which drops $0 helper "products"
+  - The pure diff covering all 8 event types
+  - The first report and catalog stats
+  - Gzipped snapshots in Storage
+  - A due-queue scheduler with optimistic claims, the `/api/cron/catalog` tick, and an instant first read via `after()` on add
+  - Verified live, with no DB writes: brooklinen.com (313 products in ~5s via `products.json`) and ruggable.com (2,644 via sitemap)
+  - **Deviation from §3:** no `catalog_products`/`catalog_variants` tables. The latest gzipped snapshot in Storage is the current state (one download per diff instead of reading up to 25k rows, and far less Postgres space), and stats are cached on `stores.catalog_stats`.
+  - **Low-noise choices in the diff** (`diff.ts` header):
+    - events are per product, not per variant
+    - `sold_out` means every variant is out, so one size selling out isn't an event
+    - a sale doesn't also count as a price change
+    - a sitewide sale folds in the per-product `sale_started` events it explains, with a minimum of 5 products
+  - **Known limits of the sitemap fallback:** no compare-at price (so no sale events) and no publish dates (so the first report has no "recent launches").
+- Next: Phase 3 (events + severity). New UI waits on the owner's Claude Design artboards.
 
 **Log of new env vars and migrations:**
 - Phase 0: none.
 - Phase 1: migration **`0009_stores.sql`** (`stores`, `store_pages`, `competitors.store_id`, RLS). **Apply it in the Supabase SQL editor** before `addCompetitorByDomain` can write. No new env vars.
+  - As of 2026-09-30 it's **not** live on project `pavknbmnrutbusqninau` (the one `.env.local` uses).
+- Phase 2:
+  - Migration **`0010_catalog.sql`** adds the scheduling columns on `stores`, `catalog_snapshots`, `events` and the private `catalog-snapshots` bucket. Apply it after 0009.
+  - **One-time setup, `supabase/setup/pg_cron_catalog.sql`:** it schedules pg_cron → `/api/cron/catalog` every 10 min. Run it after deploying, with `CRON_SECRET` filled in.
+  - No new env vars; it reuses `CRON_SECRET`.
+  - Local scripts that use supabase-js need Node 22+. Node 20 fails on a missing WebSocket.
 
 ## 0. Git preservation (done 2026-09-30)
 

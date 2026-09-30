@@ -2,6 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { checkStoreIfDue } from "@/features/catalog/schedule";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -299,6 +301,19 @@ export async function addCompetitorByDomain(domain: string): Promise<AddStoreRes
     if (error.code === "23505") return duplicate;
     throw error;
   }
+
+  // The instant first report (SPEC.md §5 Phase 2): read the catalog right after
+  // responding instead of waiting for the next tick. checkStoreIfDue claims the
+  // store first, so this is a no-op for a store that's already been read, and
+  // can't double-run with a concurrent tick. If it fails or runs out of time,
+  // the store is still due and the next tick picks it up.
+  after(async () => {
+    try {
+      await checkStoreIfDue(store.id);
+    } catch (err) {
+      console.error(`First catalog read failed for store ${store.id}:`, err);
+    }
+  });
 
   revalidatePath("/dashboard");
   revalidatePath("/competitors");
