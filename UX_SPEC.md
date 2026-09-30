@@ -1,6 +1,7 @@
 # TrailWatch: UX spec (Shopify-admin-style web app)
 
-Status: **draft for owner review**. This is Step 2 of `trailwatch-shopify-ui-prompt.md`. There is no app code in this step.
+Status: **approved 2026-09-30**. All open questions in §7 were resolved as recommended; see the
+**Decisions** list there. This is Step 2 of `trailwatch-shopify-ui-prompt.md`. There is no app code in this step.
 
 TrailWatch stays a standalone web app, with its own domain, login and billing. The UI adopts the
 **patterns** of the Shopify admin, so Shopify merchants feel at home, but it's built from **our own
@@ -469,6 +470,21 @@ Settings and to the unsubscribe link.
 ---
 
 ## 7. Open questions
+
+**Decisions (2026-09-30, "all recommended"):**
+1. Briefing stays on **Monday**; users pick the **time and time zone**.
+2. Removal list confirmed: billing and account move into Settings, `/admin` is unchanged, and the
+   founder-edition screens are removed.
+3. Keep TrailWatch's current **lime accent** (`--accent` #9ff50a) and **DM Sans** from `tokens.css`.
+   Both are clearly distinct from Shopify's look.
+4. Support email: **to be decided**. The design uses a placeholder.
+5. Watched pages are **read-only**.
+6. Your store is **optional** (skippable in onboarding).
+7. Both first-report data fixes happen **during the build**.
+8. Mobile is **daily use** for Home, competitor detail and the emails. Every other screen must work at
+   narrow widths.
+
+The original questions:
 
 1. **Briefing timing.** The brief asks for day *and* time. My recommendation: keep **Monday** (it's the
    product promise, and one weekly batch keeps AI costs down) and let users pick the **time and time
