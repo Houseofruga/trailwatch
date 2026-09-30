@@ -10,7 +10,10 @@ export async function GET(request: NextRequest) {
   const next = searchParams.get("next");
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/login?error=oauth`);
+    // A Google sign-up blocked by the daily signup cap (migration 0015's
+    // trigger) comes back from Supabase as a generic database error.
+    const blocked = /database error saving new user/i.test(searchParams.get("error_description") ?? "");
+    return NextResponse.redirect(`${origin}/login?error=${blocked ? "capacity" : "oauth"}`);
   }
 
   const supabase = await createClient();

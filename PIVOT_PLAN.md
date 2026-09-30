@@ -96,7 +96,24 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
     - the 3-tier pricing table
     - founding-member display
     - applying the founding discount at checkout (`NEXT_PUBLIC_PADDLE_FOUNDING_DISCOUNT_ID`; `isFoundingMember()` is ready)
-- Next: Phase 7 (cost guardrails + admin). New UI waits on the owner's Claude Design artboards.
+- **Phase 7 done:**
+  - **AI cost tracking.** Every model call is logged to `ai_usage` with its tokens and list-price cost. Model prices live in `ai/pricing.ts` (verify when a model changes); cache reads cost 10%, cache writes 125%, and Batch runs at 50%.
+    - Classification calls count as store work.
+    - Briefing calls are the user's own cost.
+    - A failed parse is still logged, because the tokens were spent.
+  - **Crawl volume.** Outbound requests are counted per store, per day and per kind in `fetch_log`, via an atomic RPC.
+  - **Caps:**
+    - **AI calls per store per day** (`MAX_AI_CALLS_PER_STORE_PER_DAY`, default 20). Over the cap, the baseline isn't moved, so the change is classified later rather than lost.
+    - Competitors per plan (Phase 6).
+    - Products fully tracked per competitor (`priceTrackCap`, Phase 2).
+    - **Signups per day**, from `app_settings.free_signups_per_day`, default 50. The signup form shows a friendly message; the DB trigger is the backstop for Google sign-in, which the callback maps to the same message.
+  - **`/admin`** (gated by `ADMIN_EMAILS`; everyone else gets a 404):
+    - cost per user per month: own briefing cost plus an even share of each followed store's cost
+    - per-store AI calls, cost and requests
+    - month navigation
+    - It's an internal tool built only from existing tokens and patterns; it's not in the design brief.
+  - Not tracked: the **legacy** page pipeline's summarizer and insight calls (pre-pivot). They go away with the legacy cleanup.
+- Next: Phase 8 (in-app copy). Needs the owner's Claude Design artboards for the new screens.
 
 **Log of new env vars and migrations:**
 - Phase 0: none.
@@ -129,6 +146,12 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
     - the existing `NEXT_PUBLIC_PADDLE_PRICE_PRO_*` must point at the new **$79 / $790** prices
     - optional: `NEXT_PUBLIC_PADDLE_PRICE_AGENCY_*`, `NEXT_PUBLIC_PADDLE_FOUNDING_DISCOUNT_ID`
   - **Owner, in the Paddle sandbox:** create the Starter ($29 / $290) and Pro ($79 / $790) prices and a "Founding member" 40%-forever discount.
+- Phase 7:
+  - Migration **`0015_usage.sql`** adds `ai_usage`, `fetch_log` plus the `increment_fetch_log` RPC, and `app_settings` (seeded with `free_signups_per_day = 50`). It also re-creates `handle_new_user` with the signup-cap check. All service-role only. Apply it after 0014.
+  - **New env vars:**
+    - `ADMIN_EMAILS`: comma-separated; required to see `/admin`
+    - optional: `MAX_AI_CALLS_PER_STORE_PER_DAY` (default 20)
+  - To change the signup cap: `update public.app_settings set value = '100' where key = 'free_signups_per_day';`
 
 ## 0. Git preservation (done 2026-09-30)
 

@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
+import { SIGNUP_CAP_MESSAGE, signupsLeftToday } from "@/features/usage/signupCap";
 
 export type AuthState = { error: string } | null;
 
@@ -24,6 +26,12 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   const parsed = readCredentials(formData);
   if (!parsed.success) {
     return { error: parsed.error.issues[0].message };
+  }
+
+  // Daily signup cap (Phase 7): say so plainly instead of the generic
+  // database error the backstop trigger would produce.
+  if ((await signupsLeftToday(createServiceClient())) <= 0) {
+    return { error: SIGNUP_CAP_MESSAGE };
   }
 
   const supabase = await createClient();

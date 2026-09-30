@@ -8,6 +8,7 @@ import { classifyPageChange } from "@/features/events/classifyPageChange";
 import { recordEvents } from "@/features/events/record";
 import { severityFor } from "@/features/events/severity.config";
 import type { NewEvent } from "@/features/events/types";
+import { aiCallsToday, recordAiUsage, recordFetches, USAGE_CONFIG } from "@/features/usage/record";
 import { featuredProductHandles } from "./discoverPages";
 
 const EXCERPT_CAP = 1000;
@@ -33,6 +34,8 @@ export async function checkStorePages(service: SupabaseClient, storeId: string):
   if (error) throw new Error(`Couldn't load store pages: ${error.message}`);
 
   const totals: StorePagesResult = { checked: 0, changed: 0, events: 0, errors: 0 };
+  // Phase 7 cap: AI classifications this store may still use today.
+  let aiBudget = USAGE_CONFIG.maxAiCallsPerStorePerDay - (await aiCallsToday(service, storeId, "classify"));
 
   for (const page of pages ?? []) {
     totals.checked += 1;
@@ -75,12 +78,23 @@ export async function checkStorePages(service: SupabaseClient, storeId: string):
     }
 
     totals.changed += 1;
+    if (aiBudget <= 0) {
+      // Over today's AI cap: leave the old baseline in place so this change is
+      // classified on a later check instead of being dropped.
+      console.warn(`AI cap reached for store ${storeId}; deferring ${page.url}`);
+      await update(ok);
+      continue;
+    }
+    aiBudget -= 1;
     const result = await classifyPageChange({
       storeName: store?.name ?? "",
       pageKind: page.kind,
       oldText: page.content_text,
       newText: text,
     });
+    if (result.call) {
+      await recordAiUsage(service, [{ feature: "classify", storeId, ...result.call }]);
+    }
     if (result.ok) {
       const { type, ...details } = result.classification;
       const { added, removed } = diffLines(page.content_text, text);
@@ -111,5 +125,6 @@ export async function checkStorePages(service: SupabaseClient, storeId: string):
     await update(baseline);
   }
 
+  await recordFetches(service, storeId, "page", totals.checked);
   return totals;
 }

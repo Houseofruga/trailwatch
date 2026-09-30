@@ -1,13 +1,22 @@
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { ANTHROPIC_FAST_MODEL, GROQ_BASE_URL, GROQ_SMALL_MODEL } from "@/features/ai/models";
+import type { TokenUsage } from "@/features/ai/pricing";
 import { buildClassifierPrompt, parseClassification, type Classification, type ClassifyInput } from "./classifyPrompt";
 
-export type ClassifyResult = { ok: true; classification: Classification } | { ok: false; reason: string };
+// What a model call consumed, for cost tracking (Phase 7). Present whenever a
+// call was made — including one whose reply didn't parse.
+export type ModelCall = { provider: "anthropic" | "groq"; model: string; usage: TokenUsage };
+
+export type ClassifyResult =
+  | { ok: true; classification: Classification; call: ModelCall }
+  | { ok: false; reason: string; call?: ModelCall };
+
+type Reply = { text: string; call: ModelCall };
 
 const MAX_TOKENS = 300;
 
-async function withAnthropic(apiKey: string, input: ClassifyInput): Promise<string> {
+async function withAnthropic(apiKey: string, input: ClassifyInput): Promise<Reply> {
   const { system, user } = buildClassifierPrompt(input);
   const response = await new Anthropic({ apiKey }).messages.create({
     model: ANTHROPIC_FAST_MODEL,
@@ -15,13 +24,27 @@ async function withAnthropic(apiKey: string, input: ClassifyInput): Promise<stri
     system,
     messages: [{ role: "user", content: user }],
   });
-  return response.content
+  const text = response.content
     .filter((block) => block.type === "text")
     .map((block) => block.text)
     .join("");
+  const u = response.usage;
+  return {
+    text,
+    call: {
+      provider: "anthropic",
+      model: ANTHROPIC_FAST_MODEL,
+      usage: {
+        inputTokens: u.input_tokens,
+        outputTokens: u.output_tokens,
+        cacheReadTokens: u.cache_read_input_tokens ?? 0,
+        cacheWriteTokens: u.cache_creation_input_tokens ?? 0,
+      },
+    },
+  };
 }
 
-async function withGroq(apiKey: string, input: ClassifyInput): Promise<string> {
+async function withGroq(apiKey: string, input: ClassifyInput): Promise<Reply> {
   const { system, user } = buildClassifierPrompt(input);
   const response = await new OpenAI({ apiKey, baseURL: GROQ_BASE_URL }).chat.completions.create({
     model: GROQ_SMALL_MODEL,
@@ -34,7 +57,14 @@ async function withGroq(apiKey: string, input: ClassifyInput): Promise<string> {
       { role: "user", content: user },
     ],
   });
-  return response.choices[0]?.message?.content ?? "";
+  return {
+    text: response.choices[0]?.message?.content ?? "",
+    call: {
+      provider: "groq",
+      model: GROQ_SMALL_MODEL,
+      usage: { inputTokens: response.usage?.prompt_tokens ?? 0, outputTokens: response.usage?.completion_tokens ?? 0 },
+    },
+  };
 }
 
 /**
@@ -49,9 +79,9 @@ export async function classifyPageChange(input: ClassifyInput): Promise<Classify
   if (!anthropicKey && !groqKey) return { ok: false, reason: "no model provider configured" };
 
   try {
-    const text = anthropicKey ? await withAnthropic(anthropicKey, input) : await withGroq(groqKey!, input);
+    const { text, call } = anthropicKey ? await withAnthropic(anthropicKey, input) : await withGroq(groqKey!, input);
     const classification = parseClassification(text);
-    return classification ? { ok: true, classification } : { ok: false, reason: "unparseable model reply" };
+    return classification ? { ok: true, classification, call } : { ok: false, reason: "unparseable model reply", call };
   } catch (err) {
     return { ok: false, reason: err instanceof Error ? err.message : String(err) };
   }

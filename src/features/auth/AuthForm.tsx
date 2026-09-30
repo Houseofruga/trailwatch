@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Button } from "@/components/Button";
 import { logIn, signInWithGoogle, signUp, type AuthState } from "./actions";
 import styles from "@/app/(auth)/login/page.module.css";
+import { SIGNUP_CAP_MESSAGE } from "@/features/usage/signupCap";
 
 const COPY = {
   signup: {
@@ -82,7 +83,9 @@ export function AuthForm({ initialMode }: { initialMode: Mode }) {
   const errorMessage =
     errorCode === "link"
       ? "That link is invalid or has expired. Request a new one."
-      : errorCode
+      : errorCode === "capacity"
+        ? SIGNUP_CAP_MESSAGE
+        : errorCode
         ? "Google sign-in didn't complete. Try again."
         : null;
   const message = state?.error ?? errorMessage;

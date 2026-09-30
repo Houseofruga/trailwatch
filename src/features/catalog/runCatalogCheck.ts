@@ -11,6 +11,7 @@ import { recordEvents } from "@/features/events/record";
 import { hasBestsellerTag, severityFor } from "@/features/events/severity.config";
 import type { NewEvent } from "@/features/events/types";
 import { annotateFollowers } from "@/features/matching/annotate";
+import { recordFetches } from "@/features/usage/record";
 
 export type CatalogCheckResult =
   | { status: "skipped"; reason: string }
@@ -66,6 +67,7 @@ export async function runCatalogCheck(service: SupabaseClient, storeId: string):
     ? await fetchShopifyCatalog(base, net)
     : await fetchSitemapCatalog(base, robots, net);
 
+  await recordFetches(service, storeId, "catalog", fetched.pages);
   if (!fetched.ok) {
     await mark({ check_status: "error", check_error: fetched.message });
     return { status: "error", message: fetched.message };

@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { ANTHROPIC_SMART_MODEL } from "@/features/ai/models";
+import type { TokenUsage } from "@/features/ai/pricing";
 import { parseInterpretation, type BriefingInput, type BriefingInterpretation } from "./content";
 import { BRIEFING_SYSTEM, buildBriefingMessage } from "./prompt";
 
@@ -36,13 +37,15 @@ export async function submitBriefingBatch(items: { briefingId: string; input: Br
   return batch.id;
 }
 
-export type BatchOutcome =
-  | { status: "in_progress" }
-  | {
-      status: "ended";
-      // Per briefing id: the parsed interpretation, or why there isn't one.
-      results: Map<string, { ok: true; interpretation: BriefingInterpretation } | { ok: false; reason: string }>;
-    };
+// Per briefing id: the parsed interpretation (or why there isn't one), and
+// what the request consumed (Phase 7 cost tracking).
+export type BatchEntry =
+  | { ok: true; interpretation: BriefingInterpretation; usage: TokenUsage }
+  | { ok: false; reason: string; usage?: TokenUsage };
+
+export type BatchOutcome = { status: "in_progress" } | { status: "ended"; results: Map<string, BatchEntry> };
+
+export const BRIEFING_MODEL = ANTHROPIC_SMART_MODEL;
 
 export async function collectBriefingBatch(batchId: string): Promise<BatchOutcome> {
   const anthropic = client();
@@ -50,7 +53,7 @@ export async function collectBriefingBatch(batchId: string): Promise<BatchOutcom
   const batch = await anthropic.messages.batches.retrieve(batchId);
   if (batch.processing_status !== "ended") return { status: "in_progress" };
 
-  const results = new Map<string, { ok: true; interpretation: BriefingInterpretation } | { ok: false; reason: string }>();
+  const results = new Map<string, BatchEntry>();
   for await (const entry of await anthropic.messages.batches.results(batchId)) {
     if (entry.result.type !== "succeeded") {
       results.set(entry.custom_id, { ok: false, reason: `batch request ${entry.result.type}` });
@@ -60,10 +63,17 @@ export async function collectBriefingBatch(batchId: string): Promise<BatchOutcom
       .filter((block) => block.type === "text")
       .map((block) => block.text)
       .join("");
+    const u = entry.result.message.usage;
+    const usage: TokenUsage = {
+      inputTokens: u.input_tokens,
+      outputTokens: u.output_tokens,
+      cacheReadTokens: u.cache_read_input_tokens ?? 0,
+      cacheWriteTokens: u.cache_creation_input_tokens ?? 0,
+    };
     const interpretation = parseInterpretation(text);
     results.set(
       entry.custom_id,
-      interpretation ? { ok: true, interpretation } : { ok: false, reason: "unparseable model reply" },
+      interpretation ? { ok: true, interpretation, usage } : { ok: false, reason: "unparseable model reply", usage },
     );
   }
   return { status: "ended", results };

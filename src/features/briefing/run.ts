@@ -3,7 +3,8 @@ import { movesCaughtThisMonth } from "@/features/alerts/settings";
 import { getMailer } from "@/features/digest/mailer";
 import { unsubscribeUrl } from "@/features/digest/unsubscribe";
 import type { EventType, Severity } from "@/features/events/types";
-import { batchAvailable, collectBriefingBatch, submitBriefingBatch } from "./batch";
+import { recordAiUsage } from "@/features/usage/record";
+import { batchAvailable, BRIEFING_MODEL, collectBriefingBatch, submitBriefingBatch } from "./batch";
 import { fallbackInterpretation, type BriefingEvent, type BriefingInput, type BriefingInterpretation } from "./content";
 import { renderBriefingEmail } from "./render";
 import { briefingWeek, canSend, canSubmit, stopWaiting } from "./schedule";
@@ -153,7 +154,7 @@ async function submit(service: SupabaseClient, week: string): Promise<number> {
 async function collect(service: SupabaseClient, week: string, now: Date): Promise<number> {
   const { data: submitted } = await service
     .from("briefings")
-    .select("id, batch_id, input")
+    .select("id, user_id, batch_id, input")
     .eq("week_start", week)
     .eq("status", "submitted");
   if (!submitted || submitted.length === 0) return 0;
@@ -176,6 +177,16 @@ async function collect(service: SupabaseClient, week: string, now: Date): Promis
       }
       continue;
     }
+    // The briefing is the user's own AI cost (Batch API rates).
+    await recordAiUsage(
+      service,
+      rows.flatMap((b) => {
+        const usage = outcome.results.get(b.id)?.usage;
+        return usage
+          ? [{ feature: "briefing" as const, provider: "anthropic" as const, model: BRIEFING_MODEL, usage, batch: true, userId: b.user_id }]
+          : [];
+      }),
+    );
     for (const b of rows) {
       const r = outcome.results.get(b.id);
       if (r?.ok) await setReady(service, b.id, r.interpretation, true, null);
