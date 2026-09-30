@@ -113,7 +113,20 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
     - month navigation
     - It's an internal tool built only from existing tokens and patterns; it's not in the design brief.
   - Not tracked: the **legacy** page pipeline's summarizer and insight calls (pre-pivot). They go away with the legacy cleanup.
-- Next: Phase 8 (in-app copy). Needs the owner's Claude Design artboards for the new screens.
+- Phase 7 tagged `pivot-phase-7`.
+- **UI track (replaces Phase 8), brief `trailwatch-shopify-ui-prompt.md`:** the standalone web app gets a
+  Shopify-admin-style UI. It is **not** a Shopify app.
+  - **Step 1 done (2026-09-30), owner chose option 3:** our own components styled like Polaris.
+    - Polaris web components (CDN `polaris.js`) do render standalone (tested on a throwaway page).
+      But the script ships without a license and is documented only for apps inside the Shopify admin.
+    - Polaris React (`@shopify/polaris`) is deprecated and needs React 18 (we're on 19).
+    - `@shopify/polaris` and `@shopify/polaris-tokens` are MIT plus a clause: standalone apps must be
+      "dissimilar and visually distinct" from Shopify and its admin. So we use no Shopify code or
+      token values.
+    - We borrow the patterns (sidebar, page header, card sections, index tables, badges, banners,
+      empty states) with our own tokens, accent colour and branding. Familiar, not a clone.
+  - Next: Step 2, `UX_SPEC.md`. `DESIGN_BRIEF_FOR_CLAUDE_DESIGN.md` will be superseded by
+    `CLAUDE_DESIGN_BRIEF.md` in Step 3.
 
 **Log of new env vars and migrations:**
 - Phase 0: none.
