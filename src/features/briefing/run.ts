@@ -7,7 +7,7 @@ import { recordAiUsage } from "@/features/usage/record";
 import { batchAvailable, BRIEFING_MODEL, collectBriefingBatch, submitBriefingBatch } from "./batch";
 import { fallbackInterpretation, type BriefingEvent, type BriefingInput, type BriefingInterpretation } from "./content";
 import { renderBriefingEmail } from "./render";
-import { briefingWeek, canSend, canSubmit, stopWaiting } from "./schedule";
+import { briefingWeek, canSend, canSubmit, DEFAULT_BRIEFING, stopWaiting, userBriefingDue } from "./schedule";
 
 export type BriefingStepResult = {
   week: string | null;
@@ -200,7 +200,7 @@ async function collect(service: SupabaseClient, week: string, now: Date): Promis
 async function send(service: SupabaseClient, week: string, now: Date): Promise<{ sent: number; failed: number }> {
   const { data: ready } = await service
     .from("briefings")
-    .select("id, user_id, input, content, window_end, users(email)")
+    .select("id, user_id, input, content, window_end, users(email, briefing_hour, briefing_time_zone)")
     .eq("week_start", week)
     .eq("status", "ready");
   if (!ready || ready.length === 0) return { sent: 0, failed: 0 };
@@ -211,8 +211,12 @@ async function send(service: SupabaseClient, week: string, now: Date): Promise<{
   let failed = 0;
 
   for (const b of ready) {
-    const email = one(b.users as { email: string } | { email: string }[] | null)?.email;
+    type U = { email: string; briefing_hour?: number | null; briefing_time_zone?: string | null };
+    const user = one(b.users as U | U[] | null);
+    const email = user?.email;
     if (!email) continue;
+    // Each user's own Monday hour and zone (UI settings, migration 0016).
+    if (!userBriefingDue(now, user.briefing_hour ?? DEFAULT_BRIEFING.hour, user.briefing_time_zone ?? DEFAULT_BRIEFING.timeZone)) continue;
     const unsub = unsubscribeUrl(siteUrl, b.user_id) ?? undefined;
     const rendered = renderBriefingEmail({
       input: b.input as BriefingInput,

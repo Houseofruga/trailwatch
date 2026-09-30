@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { resolvePlan } from "@/features/plan/comp";
+import { writeMeanings } from "./meaning";
 import { deliveryFor } from "./routing";
 import { dedupeKey, type NewEvent } from "./types";
 
@@ -69,5 +70,12 @@ export async function recordEvents(
     const { error } = await service.from("user_events").insert(fanOut.slice(i, i + INSERT_CHUNK));
     if (error) throw new Error(`Couldn't fan out events: ${error.message}`);
   }
+
+  // "What it means" for the high-priority ones (best-effort, capped per store).
+  await writeMeanings(
+    service,
+    storeId,
+    inserted.flatMap((e, i) => (e.severity === "high" ? [{ id: e.id, type: events[i].type, payload: events[i].payload }] : [])),
+  );
   return inserted.length;
 }

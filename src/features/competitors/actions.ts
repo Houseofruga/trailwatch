@@ -248,7 +248,7 @@ export type AddStoreResult =
   | { ok: true; competitorId: string; store: StoreSummary }
   | {
       ok: false;
-      code: "invalid" | "marketplace" | "unreachable" | "duplicate" | "limit";
+      code: "invalid" | "marketplace" | "unreachable" | "duplicate" | "limit" | "own";
       message: string;
     };
 
@@ -271,7 +271,7 @@ export async function addCompetitorByDomain(domain: string): Promise<AddStoreRes
     return {
       ok: false,
       code: "limit",
-      message: `You're already following all ${limit} competitors on your plan.`,
+      message: `That's ${limit}, the ${limit === 10 ? "beta" : "plan"} limit. Remove one to add another.`,
     };
   }
 
@@ -282,8 +282,12 @@ export async function addCompetitorByDomain(domain: string): Promise<AddStoreRes
   const duplicate: AddStoreResult = {
     ok: false,
     code: "duplicate",
-    message: `You're already following ${store.name}.`,
+    message: `You've already added ${store.name}.`,
   };
+  const { data: me } = await supabase.from("users").select("own_store_id").eq("id", userId).maybeSingle();
+  if (me?.own_store_id === store.id) {
+    return { ok: false, code: "own", message: "That's your store. Add a competitor's instead." };
+  }
   const { data: existing } = await supabase
     .from("competitors")
     .select("id")

@@ -41,7 +41,7 @@ export function storeInputError(input: string): StoreProbeError | null {
     return {
       ok: false,
       code: "invalid",
-      message: "That doesn't look like a store address. Enter a domain like brand.com.",
+      message: "Enter a website like dewlane.com.",
     };
   }
   if (isMarketplace(host)) return { ok: false, code: "marketplace", message: MARKETPLACE_MESSAGE };
@@ -72,7 +72,7 @@ export async function probeStore(input: string): Promise<StoreProbe> {
     return {
       ok: false,
       code: "unreachable",
-      message: `We couldn't reach ${host}. Check the address and try again.`,
+      message: "We couldn't open that site. Check the address, or try their main domain.",
     };
   }
 

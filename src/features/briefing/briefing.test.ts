@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { competitorSections, fallbackInterpretation, parseInterpretation, type BriefingInput } from "./content";
 import { buildBriefingMessage, BRIEFING_SYSTEM } from "./prompt";
 import { renderBriefingEmail } from "./render";
-import { briefingWeek, canSend, canSubmit, easternParts, stopWaiting } from "./schedule";
+import { briefingWeek, canSend, canSubmit, easternParts, nextBriefingAt, stopWaiting, userBriefingDue } from "./schedule";
 
 describe("briefing schedule (US Eastern, DST-aware)", () => {
   it("reads Eastern wall-clock time in summer (EDT, UTC-4) and winter (EST, UTC-5)", () => {
@@ -12,11 +12,32 @@ describe("briefing schedule (US Eastern, DST-aware)", () => {
     expect(easternParts(new Date("2026-12-07T13:00:00Z"))).toEqual({ weekday: 1, hour: 8, date: "2026-12-07" });
   });
 
-  it("sends from Monday 08:00 ET — the same local hour across the DST switch", () => {
-    expect(canSend(new Date("2026-09-28T11:59:00Z"))).toBe(false); // 07:59 EDT
-    expect(canSend(new Date("2026-09-28T12:00:00Z"))).toBe(true); // 08:00 EDT
-    expect(canSend(new Date("2026-12-07T12:30:00Z"))).toBe(false); // 07:30 EST
-    expect(canSend(new Date("2026-12-07T13:00:00Z"))).toBe(true); // 08:00 EST
+  it("sends each user at their own Monday hour in their own zone", () => {
+    const mon1400Utc = new Date("2026-09-28T14:00:00Z"); // 10:00 EDT, 07:00 PDT
+    expect(userBriefingDue(mon1400Utc, 8, "America/New_York")).toBe(true);
+    expect(userBriefingDue(mon1400Utc, 8, "America/Los_Angeles")).toBe(false);
+    expect(userBriefingDue(new Date("2026-09-28T15:00:00Z"), 8, "America/Los_Angeles")).toBe(true);
+    expect(userBriefingDue(mon1400Utc, 8, "Not/AZone")).toBe(true); // falls back to Eastern
+    expect(userBriefingDue(new Date("2026-09-29T14:00:00Z"), 8, "America/New_York")).toBe(false); // Tuesday
+  });
+
+  it("finds the next Monday briefing time, DST-aware", () => {
+    // Wednesday 2026-09-30 → Monday 2026-10-05 08:00 EDT = 12:00 UTC
+    expect(nextBriefingAt(new Date("2026-09-30T16:00:00Z"), 8, "America/New_York").toISOString()).toBe("2026-10-05T12:00:00.000Z");
+    // Pacific 7 AM → 14:00 UTC
+    expect(nextBriefingAt(new Date("2026-09-30T16:00:00Z"), 7, "America/Los_Angeles").toISOString()).toBe("2026-10-05T14:00:00.000Z");
+    // Monday before the hour → today; after → next week
+    expect(nextBriefingAt(new Date("2026-09-28T11:00:00Z"), 8, "America/New_York").toISOString()).toBe("2026-09-28T12:00:00.000Z");
+    expect(nextBriefingAt(new Date("2026-09-28T13:00:00Z"), 8, "America/New_York").toISOString()).toBe("2026-10-05T12:00:00.000Z");
+    // Across the November DST change: 8 AM EST = 13:00 UTC
+    expect(nextBriefingAt(new Date("2026-11-04T16:00:00Z"), 8, "America/New_York").toISOString()).toBe("2026-11-09T13:00:00.000Z");
+  });
+
+  it("the send window opens Monday 06:00 ET (the earliest choice) — same local hour across DST", () => {
+    expect(canSend(new Date("2026-09-28T09:59:00Z"))).toBe(false); // 05:59 EDT
+    expect(canSend(new Date("2026-09-28T10:00:00Z"))).toBe(true); // 06:00 EDT, the earliest choice
+    expect(canSend(new Date("2026-12-07T10:30:00Z"))).toBe(false); // 05:30 EST
+    expect(canSend(new Date("2026-12-07T11:00:00Z"))).toBe(true); // 06:00 EST
     expect(canSend(new Date("2026-09-29T12:00:00Z"))).toBe(false); // Tuesday
   });
 
