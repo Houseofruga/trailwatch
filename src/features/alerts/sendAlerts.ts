@@ -7,6 +7,7 @@ import { resolvePlan } from "@/features/plan/comp";
 import { renderAlertEmail, renderAlertSlack, type AlertBundle } from "./render";
 import { loadAlertSettings, movesCaughtThisMonth } from "./settings";
 import { postToSlack } from "./slack";
+import { PLANS } from "@/features/plan/limits";
 
 type PendingRow = {
   id: string;
@@ -66,8 +67,8 @@ export async function runAlertSender(service: SupabaseClient, now: Date = new Da
     totals.users += 1;
     const user = usersById.get(userId);
     const settings = settingsMap.get(userId)!;
-    const plan = resolvePlan(user?.email, user?.plan === "paid" ? "paid" : "free");
-    const slackUrl = plan !== "free" ? settings.slackWebhookUrl : null;
+    const plan = resolvePlan(user?.email, user?.plan);
+    const slackUrl = PLANS[plan].slack ? settings.slackWebhookUrl : null;
 
     const muted = pending.filter((r) => settings.mutedTypes.includes(r.events!.type));
     const active = pending.filter((r) => !settings.mutedTypes.includes(r.events!.type));

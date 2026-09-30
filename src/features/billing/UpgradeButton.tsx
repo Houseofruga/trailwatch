@@ -7,7 +7,7 @@ import { Button } from "@/components/Button";
 import { BoltIcon } from "@/components/icons";
 import { useCursorDust } from "@/components/CursorDust";
 import ctaStyles from "@/components/UpgradeCta.module.css";
-import type { BillingPeriod } from "@/features/plan/limits";
+import { billingEnabled, type BillingPeriod } from "@/features/plan/limits";
 
 // One env var per Pro price — set from the Paddle dashboard, never hardcoded.
 const PRICE_ID_BY_PERIOD: Record<BillingPeriod, string | undefined> = {
@@ -76,7 +76,9 @@ export function UpgradeButton({
     return () => clearInterval(id);
   }, [finalizing, paddle, router]);
 
-  const configured = Boolean(token && priceId);
+  // During the free beta checkout stays closed (SPEC.md §4), even with Paddle set up.
+  const billingOpen = billingEnabled();
+  const configured = billingOpen && Boolean(token && priceId);
 
   function openCheckout() {
     if (!paddle || !priceId) return;
@@ -118,7 +120,7 @@ export function UpgradeButton({
           {dust}
         </>
       ) : (
-        "Upgrade unavailable — billing not configured"
+        billingOpen ? "Upgrade unavailable — billing not configured" : "Billing opens soon — you’re in the free beta"
       )}
     </button>
   );

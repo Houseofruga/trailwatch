@@ -1,4 +1,4 @@
-import type { Plan } from "@/features/plan/limits";
+import { PLANS, type Plan } from "@/features/plan/limits";
 import type { EventType, Severity } from "./types";
 
 // Delivery knobs (SPEC.md §5 Phase 3). Read at call time so an env change
@@ -19,12 +19,12 @@ export type Delivery = "instant" | "briefing";
 
 /**
  * Where an event goes for one follower. Low severity is stored only. Instant
- * alerts are a paid feature (Starter/Pro once Phase 6 lands; "paid" today);
- * everyone else gets high events in the briefing.
+ * alerts are a plan feature (Starter and up); everyone else gets high events
+ * in the briefing.
  */
 export function deliveryFor(severity: Severity, plan: Plan): Delivery | null {
   if (severity === "low") return null;
-  if (severity === "high" && plan !== "free") return "instant";
+  if (severity === "high" && PLANS[plan].instantAlerts) return "instant";
   return "briefing";
 }
 

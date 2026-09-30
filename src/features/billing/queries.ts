@@ -1,5 +1,6 @@
 import "server-only";
 import type { BillingPeriod } from "@/features/plan/limits";
+import { createClient } from "@/lib/supabase/server";
 
 export type SubscriptionBillingInfo = {
   nextBilledAt: string | null;
@@ -46,5 +47,25 @@ export async function getSubscriptionBillingInfo(
     };
   } catch {
     return null;
+  }
+}
+
+/**
+ * Whether the signed-in user is a founding member (joined during the free
+ * beta → 40% off for life once billing opens). For the redesigned plan page
+ * and checkout discount. Tolerant by design: false on any error, including the
+ * column not existing before migration 0014 is applied.
+ */
+export async function isFoundingMember(): Promise<boolean> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return false;
+    const { data, error } = await supabase.from("users").select("is_founding_member").eq("id", user.id).single();
+    return !error && data?.is_founding_member === true;
+  } catch {
+    return false;
   }
 }

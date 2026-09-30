@@ -29,7 +29,8 @@ export const CATALOG_CONFIG = {
   // First report: what counts as "recently launched", and how many items per section.
   firstReportRecentDays: 30,
   firstReportLimit: 8,
-  // How often a store's catalog is checked until per-plan cadence lands (Phase 6).
+  // Fallback cadence if the per-plan lookup fails (normal cadence comes from
+  // the followers' plans — see plan/limits.ts storeCheckIntervalHours).
   defaultCheckIntervalHours: 24,
   // After a failed check, try again sooner than the normal interval.
   errorRetryMinutes: 60,

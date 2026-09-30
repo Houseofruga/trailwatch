@@ -55,7 +55,7 @@ export async function recordEvents(
   const fanOut = (followers ?? []).flatMap((f) => {
     // A to-one relation can come back as an object or a one-element array.
     const user = (Array.isArray(f.users) ? f.users[0] : f.users) as { plan?: string; email?: string } | null;
-    const plan = resolvePlan(user?.email, user?.plan === "paid" ? "paid" : "free");
+    const plan = resolvePlan(user?.email, user?.plan);
     return inserted.flatMap((e, index) => {
       if (e.forUserId && e.forUserId !== f.user_id) return [];
       const delivery = deliveryFor(e.severity, plan);

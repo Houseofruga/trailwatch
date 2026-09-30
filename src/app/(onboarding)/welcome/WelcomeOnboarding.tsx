@@ -380,7 +380,7 @@ export function WelcomeOnboarding({
           <div>
             <div className={styles.upgradeNudgeTitle}>Want to watch more than {limit}?</div>
             <div className={styles.upgradeNudgeBody}>
-              Free watches {limit}. Go Pro to track up to {LIMITS.paid.competitors} — checkout
+              Free watches {limit}. Go Pro to track up to {LIMITS.pro.competitors} — checkout
               happens right here, no redirect.
             </div>
           </div>

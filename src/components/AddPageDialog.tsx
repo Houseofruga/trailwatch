@@ -8,7 +8,7 @@ import { addPages, type FormState } from "@/features/competitors/actions";
 import { originOf } from "@/features/competitors/domain";
 import { formatUrlError, domainMismatchError } from "@/features/competitors/rowValidation";
 import { PAGE_TYPE_VALUES, pageTypeLabel, type PageType } from "@/features/competitors/pageTypes";
-import { LIMITS } from "@/features/plan/limits";
+import { LIMITS, type Plan } from "@/features/plan/limits";
 import styles from "./AddPageDialog.module.css";
 
 // Loose URL equality for the "already tracking this" check — protocol / www /
@@ -61,7 +61,7 @@ type AddPageDialogProps = {
   existingUrls?: string[];
   currentCount?: number;
   pagesPerCompetitor: number;
-  plan: "free" | "paid";
+  plan: Plan;
   onClose: () => void;
 };
 
@@ -308,7 +308,7 @@ export function AddPageDialog({
                   </div>
                   <div className={styles.sub}>
                     {plan === "free"
-                      ? `Pro tracks up to ${LIMITS.paid.pagesPerCompetitor} pages per competitor. Upgrade to add this one.`
+                      ? `Pro tracks up to ${LIMITS.pro.pagesPerCompetitor} pages per competitor. Upgrade to add this one.`
                       : "That's the most pages we track per competitor. Remove one to make room for another."}
                   </div>
                 </div>

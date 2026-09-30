@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { resolvePlan } from "@/features/plan/comp";
-import type { Plan } from "@/features/plan/limits";
+import { PLANS, type Plan } from "@/features/plan/limits";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { DEFAULT_ALERT_SETTINGS, loadAlertSettings, movesCaughtThisMonth, MUTABLE_TYPES } from "./settings";
@@ -26,7 +26,7 @@ async function currentUser() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const { data: profile } = await supabase.from("users").select("plan").eq("id", user.id).single();
-  return { user, plan: resolvePlan(user.email, profile?.plan === "paid" ? "paid" : "free") };
+  return { user, plan: resolvePlan(user.email, profile?.plan) };
 }
 
 /** The caller's alert settings, for the (pending-design) Alert settings screen. */
@@ -63,9 +63,9 @@ export async function saveAlertSettings(raw: unknown): Promise<SaveAlertSettings
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
   const { emailInstant, mutedTypes, slackWebhookUrl } = parsed.data;
 
-  // Slack is a paid-plan channel — enforced here, not trusted from the client.
-  if (slackWebhookUrl && plan === "free") {
-    return { ok: false, error: "Slack alerts are on paid plans. Upgrade to connect Slack." };
+  // Slack is a Pro channel — enforced here, not trusted from the client.
+  if (slackWebhookUrl && !PLANS[plan].slack) {
+    return { ok: false, error: "Slack alerts are on the Pro plan. Upgrade to connect Slack." };
   }
 
   const row: Record<string, unknown> = {

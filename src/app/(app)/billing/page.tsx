@@ -1,20 +1,27 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAccount } from "@/features/account/queries";
 import { getSubscriptionBillingInfo } from "@/features/billing/queries";
-import { LIMITS, PLAN_PRICE, PRO_MONTHLY_USD, PRO_ANNUAL_USD, formatProPrice } from "@/features/plan/limits";
+import { billingEnabled, LIMITS, PLAN_PRICE, PLANS, PRO_MONTHLY_USD, PRO_ANNUAL_USD, formatProPrice, type Plan } from "@/features/plan/limits";
 import { ProPricingCard } from "@/features/billing/ProPricingCard";
 import { CancelButton } from "@/features/billing/CancelButton";
 import { ManageBillingButton } from "@/features/billing/ManageBillingButton";
 import { formatBillingDate } from "@/features/billing/formatDate";
 import styles from "./page.module.css";
 
-function planFeatures(comp: number, pages: number): string[] {
+// Check cadence in words, from the plan config (SPEC.md §4).
+function cadence(plan: Plan): string {
+  const h = PLANS[plan].checkIntervalHours;
+  return h >= 24 ? "Daily checks, noise filtered" : `Checks every ${h} hours, noise filtered`;
+}
+
+function planFeatures(plan: Plan): string[] {
+  const { competitors: comp, pagesPerCompetitor: pages } = LIMITS[plan];
   return [
     `${comp} competitor${comp === 1 ? "" : "s"}`,
     comp === 1
       ? `${pages} page${pages === 1 ? "" : "s"} on that competitor`
       : `${pages} page${pages === 1 ? "" : "s"} per competitor`,
-    "Daily checks, noise filtered",
+    cadence(plan),
     "Weekly email digest",
   ];
 }
@@ -28,6 +35,8 @@ export default async function BillingPage() {
   if (!account || !user) return null;
 
   const isFree = account.plan === "free";
+  // Free beta (SPEC.md §4): plans are shown, but nobody is billed.
+  const beta = !billingEnabled();
 
   // A paid user normally has a Paddle subscription — but a comp (founder) account
   // is Pro with none. Distinguish them so we don't show Cancel/Invoices for a
@@ -58,7 +67,7 @@ export default async function BillingPage() {
 
   // Pro now includes the day-0 baseline + Wayback history (Phases 1–2).
   const paidFeatures = [
-    ...planFeatures(LIMITS.paid.competitors, LIMITS.paid.pagesPerCompetitor),
+    ...planFeatures("pro"),
     "Full change history & archive",
   ];
 
@@ -67,8 +76,10 @@ export default async function BillingPage() {
       <h1 className={styles.heading}>Plan &amp; billing</h1>
       <p className={styles.sub}>
         {isFree
-          ? "You’re on Free. Pro is the only paid plan — no tiers, no add-ons."
-          : cancelsAt
+          ? "You’re on Free."
+          : beta && !hasSubscription
+            ? "You’re on Pro, free during the beta — no billing yet."
+            : cancelsAt
             ? `Your Pro plan is cancelling — you’ll keep access until ${formatBillingDate(cancelsAt)}, then move to Free.`
             : `You’re on Pro, billed ${period}. Cancel any time.`}
       </p>
@@ -82,7 +93,7 @@ export default async function BillingPage() {
           </div>
           <div className={styles.price}>{PLAN_PRICE.free}</div>
           <ul className={styles.features}>
-            {planFeatures(LIMITS.free.competitors, LIMITS.free.pagesPerCompetitor).map((f) => (
+            {planFeatures("free").map((f) => (
               <li key={f} className={styles.feature}>
                 {f}
               </li>
@@ -124,7 +135,7 @@ export default async function BillingPage() {
               </div>
             ) : (
               <div className={styles.action}>
-                <div className={styles.compNote}>Complimentary Pro — no billing on this account.</div>
+                <div className={styles.compNote}>{beta ? "Free during the beta — no billing on this account." : "Complimentary Pro — no billing on this account."}</div>
               </div>
             )}
           </div>
@@ -158,10 +169,11 @@ export default async function BillingPage() {
       ) : null}
 
       <p className={styles.footNote}>
-        One paid plan, no add-ons. Cancel any time — you keep Pro through the end of your current
+        {beta ? "Billing is off during the free beta. " : ""}Cancel any time — you keep Pro through the end of your current
         billing period; we don&rsquo;t prorate or refund unused time. If you cancel you keep the Free
-        plan&rsquo;s {LIMITS.free.competitors} competitors and {LIMITS.free.pagesPerCompetitor} page
-        {LIMITS.free.pagesPerCompetitor === 1 ? "" : "s"} each.
+        plan&rsquo;s {LIMITS.free.competitors} competitor{LIMITS.free.competitors === 1 ? "" : "s"} and{" "}
+        {LIMITS.free.pagesPerCompetitor} page{LIMITS.free.pagesPerCompetitor === 1 ? "" : "s"}{" "}
+        {LIMITS.free.competitors === 1 ? "on it" : "each"}.
       </p>
     </div>
   );

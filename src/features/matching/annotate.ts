@@ -6,6 +6,7 @@ import type { ContextFor } from "@/features/events/record";
 import type { NewEvent } from "@/features/events/types";
 import { resolvePlan } from "@/features/plan/comp";
 import { buildOwnIndex, headlinePrice, undercut } from "./match";
+import { PLANS } from "@/features/plan/limits";
 
 // Events about a specific competitor product that can be compared to yours.
 const PRODUCT_EVENTS = new Set(["product_launched", "price_changed", "sale_started", "sale_ended", "sold_out", "restocked"]);
@@ -79,7 +80,7 @@ export function annotateForUser(
 
 /**
  * Run annotateForUser for every follower of a store who has their own store on
- * a paid plan (own-store matching is a Pro feature). Returns the extra
+ * a plan that includes it (own-store matching is a Pro feature). Returns the extra
  * per-user events and a contextFor for recordEvents. Best-effort: a missing
  * or unreadable own catalog just means no annotations for that user.
  */
@@ -100,8 +101,8 @@ export async function annotateFollowers(
     const u = (Array.isArray(f.users) ? f.users[0] : f.users) as
       | { email?: string; plan?: string; own_store_id?: string | null }
       | null;
-    const plan = resolvePlan(u?.email, u?.plan === "paid" ? "paid" : "free");
-    return u?.own_store_id && u.own_store_id !== storeId && plan !== "free"
+    const plan = resolvePlan(u?.email, u?.plan);
+    return u?.own_store_id && u.own_store_id !== storeId && PLANS[plan].ownStore
       ? [{ userId: f.user_id as string, ownStoreId: u.own_store_id }]
       : [];
   });

@@ -9,7 +9,7 @@ import { useCursorDust } from "@/components/CursorDust";
 import ctaStyles from "@/components/UpgradeCta.module.css";
 import { ProPricingCard } from "@/features/billing/ProPricingCard";
 import { seedCompetitors, currentPlan } from "@/features/competitors/actions";
-import { LIMITS, type BillingPeriod } from "@/features/plan/limits";
+import { billingEnabled, LIMITS, type BillingPeriod, type Plan } from "@/features/plan/limits";
 import { StepIndicator } from "./StepIndicator";
 import styles from "./welcome.module.css";
 
@@ -23,7 +23,7 @@ const PRICE_ID_BY_PERIOD: Record<BillingPeriod, string | undefined> = {
 
 type SeedRow = { name: string; url: string };
 
-function features(kind: "free" | "paid"): string[] {
+function features(kind: Plan): string[] {
   const l = LIMITS[kind];
   return [
     `${l.competitors} competitors`,
@@ -92,7 +92,7 @@ export function OnboardingPlanStep({
 
     const tick = async () => {
       tries += 1;
-      let plan: "free" | "paid" = "free";
+      let plan: Plan = "free";
       try {
         plan = await currentPlan();
       } catch {
@@ -100,7 +100,7 @@ export function OnboardingPlanStep({
       }
       if (cancelled) return;
 
-      if (plan === "paid") {
+      if (plan !== "free") {
         try {
           await seedCompetitors(allRows);
           localStorage.removeItem(KEY);
@@ -174,7 +174,7 @@ export function OnboardingPlanStep({
           ? `You're watching all ${allRows.length}. Here's everything Pro unlocks — pick monthly or annual, then continue.`
           : allRows.length > LIMITS.free.competitors
             ? `Free tracks ${LIMITS.free.competitors} competitors. Go Pro to watch all ${allRows.length}.`
-            : `Start free, or go Pro for up to ${LIMITS.paid.competitors} competitors and ${LIMITS.paid.pagesPerCompetitor} pages each.`}
+            : `Start free, or go Pro for up to ${LIMITS.pro.competitors} competitors and ${LIMITS.pro.pagesPerCompetitor} pages each.`}
       </p>
 
       {proIntent ? (
@@ -183,9 +183,10 @@ export function OnboardingPlanStep({
           <ProPricingCard
             email={email}
             userId={userId}
-            features={features("paid")}
+            features={features("pro")}
             renderButton={(period) => {
-              const configured = Boolean(token && PRICE_ID_BY_PERIOD[period]);
+              // Closed during the free beta (SPEC.md §4).
+              const configured = billingEnabled() && Boolean(token && PRICE_ID_BY_PERIOD[period]);
               return (
                 <Button type="button" full onClick={() => openCheckout(period)} disabled={!configured || !paddle || busy}>
                   {configured ? "Continue to checkout" : "Upgrade unavailable"}
@@ -222,9 +223,10 @@ export function OnboardingPlanStep({
           <ProPricingCard
             email={email}
             userId={userId}
-            features={features("paid")}
+            features={features("pro")}
             renderButton={(period) => {
-              const configured = Boolean(token && PRICE_ID_BY_PERIOD[period]);
+              // Closed during the free beta (SPEC.md §4).
+              const configured = billingEnabled() && Boolean(token && PRICE_ID_BY_PERIOD[period]);
               return (
                 <button
                   type="button"

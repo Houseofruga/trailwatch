@@ -11,6 +11,7 @@ import { createCompetitor, type FormState } from "@/features/competitors/actions
 import { canonUrl as canon, toFullUrl as toFull, hostname as hostOf, rowUrlError } from "@/features/competitors/rowRules";
 import { pageTypeLabel, type PageType } from "@/features/competitors/pageTypes";
 import styles from "./CompetitorSetup.module.css";
+import { type Plan } from "@/features/plan/limits";
 
 type ExistingUrl = { url: string; competitor: string };
 type Row = { key: string; url: string; label: string; pageType: PageType; locked: boolean };
@@ -58,7 +59,7 @@ export function CompetitorSetup({
   existingUrls,
   onClose,
 }: {
-  plan: "free" | "paid";
+  plan: Plan;
   competitorCount: number;
   competitorCap: number;
   pagesPerCompetitor: number;
@@ -135,11 +136,11 @@ export function CompetitorSetup({
           <button type="button" className={styles.close} onClick={onClose} aria-label="Close">&#10005;</button>
         </div>
         <div className={styles.limitBody}>
-          <span className={styles.limitBadgeLg} aria-hidden="true">{plan === "paid" ? "✓" : "↑"}</span>
+          <span className={styles.limitBadgeLg} aria-hidden="true">{plan !== "free" ? "✓" : "↑"}</span>
           <div className={styles.limitTitle}>
             You&rsquo;re watching all {competitorCap} of your {planLabel} competitor{competitorCap === 1 ? "" : "s"}
           </div>
-          {plan === "paid" ? (
+          {plan !== "free" ? (
             <>
               <p className={styles.limitText}>
                 That&rsquo;s the most Pro tracks. To add a different one, remove a competitor you no longer need &mdash;

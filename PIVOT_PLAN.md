@@ -76,7 +76,27 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
   - Known limit: context matches near 0.5 can be loose, but they never trigger alerts. Embeddings are a later upgrade, as the spec says.
   - Not yet covered: an undercut caused by **you** raising your price (only the competitor's moves trigger).
   - **Server actions (screen pending design):** `setOwnStore`, `getOwnStore`, `clearOwnStore`, gated to paid plans on the server.
-- Next: Phase 6 (plans, limits, cadence, beta). New UI waits on the owner's Claude Design artboards.
+- **Phase 6 done:**
+  - **`plan/limits.ts` is the single plan config** for Free / Starter / Pro / Agency: competitors, instant alerts, Slack, own store, cadence, price, launched.
+    - Agency isn't launched and mirrors Pro's limits, since the spec sets only its price.
+    - Annual = 10× monthly.
+  - **Gating by plan:**
+    - instant alerts on Starter and up
+    - Slack and own-store matching on Pro only
+    - competitor limits of 1 / 3 / 10
+  - **Cadence is per store:** the fastest plan among everyone who follows or owns it (24h / 6h / 2h), hourly for Pro during `BFCM_START`–`BFCM_END`.
+  - **Paddle:**
+    - the webhook maps the subscribed **price → plan**
+    - `subscription.updated` handles Starter ↔ Pro switches; a scheduled cancellation still keeps access
+    - an unknown price fails loudly so Paddle retries
+  - **Beta:** with `NEXT_PUBLIC_BILLING_ENABLED` unset, checkout is closed in both places it could open, and **everyone gets `BETA_PLAN` (default Pro)**. A higher stored plan still wins. Every beta user is a founding member (`users.is_founding_member` defaults to true).
+  - **Legacy screens** still compile and work on the 4-tier model: `LIMITS` / `PLAN_LABEL` / `PLAN_PRICE` are derived, and legacy page counts are kept only for the page-picking UI.
+  - **The billing page's false statements for beta users were corrected in its existing layout:** "billed monthly", "complimentary", "one paid plan", and "daily checks" on Pro.
+  - Waiting on artboards:
+    - the 3-tier pricing table
+    - founding-member display
+    - applying the founding discount at checkout (`NEXT_PUBLIC_PADDLE_FOUNDING_DISCOUNT_ID`; `isFoundingMember()` is ready)
+- Next: Phase 7 (cost guardrails + admin). New UI waits on the owner's Claude Design artboards.
 
 **Log of new env vars and migrations:**
 - Phase 0: none.
@@ -99,6 +119,16 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
 - Phase 5:
   - Migration **`0013_own_store.sql`** adds `users.own_store_id` and an owner read policy on `stores`, `events.for_user_id` plus `price_undercut` (with per-user RLS), and `user_events.context`. Apply it after 0012.
   - No new env vars.
+- Phase 6:
+  - Migration **`0014_plans.sql`** sets the plan constraint to free/starter/pro/agency, turns `paid` into `pro`, and adds `users.is_founding_member` (default true for the beta). Apply it after 0013. When billing opens, flip that column's default to false (the SQL is in the file).
+  - **New env vars:**
+    - `NEXT_PUBLIC_BILLING_ENABLED`: leave unset for the beta; `true` opens checkout
+    - `BETA_PLAN`: default `pro`
+    - `BFCM_START` / `BFCM_END`: ISO datetimes
+    - `NEXT_PUBLIC_PADDLE_PRICE_STARTER_MONTHLY` / `_ANNUAL`
+    - the existing `NEXT_PUBLIC_PADDLE_PRICE_PRO_*` must point at the new **$79 / $790** prices
+    - optional: `NEXT_PUBLIC_PADDLE_PRICE_AGENCY_*`, `NEXT_PUBLIC_PADDLE_FOUNDING_DISCOUNT_ID`
+  - **Owner, in the Paddle sandbox:** create the Starter ($29 / $290) and Pro ($79 / $790) prices and a "Founding member" 40%-forever discount.
 
 ## 0. Git preservation (done 2026-09-30)
 

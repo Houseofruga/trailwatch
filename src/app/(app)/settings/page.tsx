@@ -42,7 +42,7 @@ export default async function SettingsPage() {
         <h2 className={styles.sectionTitle}>Plan</h2>
         <p className={styles.sectionDesc}>
           You&rsquo;re on the {PLAN_LABEL[account.plan]} plan
-          {isFree ? "." : ` (${PLAN_PRICE.paid}).`}
+          {isFree ? "." : ` (${PLAN_PRICE[account.plan]}).`}
         </p>
         {isFree ? (
           // Compact nudge, not the full pricing surface — defaults to Annual

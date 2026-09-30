@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/Button";
 import { PlusIcon } from "@/components/icons";
 import { AddPageDialog, type AddPageCompetitor } from "@/components/AddPageDialog";
+import { type Plan } from "@/features/plan/limits";
 
 /**
  * Dashboard "Add page" entry point. There's no competitor context here, so the
@@ -17,7 +18,7 @@ export function DashboardAddPage({
 }: {
   competitors: AddPageCompetitor[];
   pagesPerCompetitor: number;
-  plan: "free" | "paid";
+  plan: Plan;
 }) {
   const [open, setOpen] = useState(false);
 

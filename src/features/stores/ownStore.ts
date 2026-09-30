@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import type { StoreProbeError } from "./probeStore";
 import { resolveStore, type StoreSummary } from "./resolveStore";
+import { PLANS } from "@/features/plan/limits";
 
 async function currentUser() {
   const supabase = await createClient();
@@ -19,27 +20,27 @@ async function currentUser() {
   const { data: profile } = await supabase.from("users").select("plan, own_store_id").eq("id", user.id).single();
   return {
     user,
-    plan: resolvePlan(user.email, profile?.plan === "paid" ? "paid" : "free"),
+    plan: resolvePlan(user.email, profile?.plan),
     ownStoreId: (profile?.own_store_id as string | null) ?? null,
   };
 }
 
 export type OwnStoreView = {
   store: (StoreSummary & { productCount: number | null; lastCheckedAt: string | null }) | null;
-  // Own-store matching (comparable products, undercut alerts) is a paid feature.
+  // Own-store matching (comparable products, undercut alerts) is a Pro feature.
   matchingEnabled: boolean;
 };
 
 /** The caller's own store, for the (pending-design) settings screen. */
 export async function getOwnStore(): Promise<OwnStoreView> {
   const { plan, ownStoreId } = await currentUser();
-  if (!ownStoreId) return { store: null, matchingEnabled: plan !== "free" };
+  if (!ownStoreId) return { store: null, matchingEnabled: PLANS[plan].ownStore };
   const { data } = await createServiceClient()
     .from("stores")
     .select("id, domain, name, platform, catalog_stats, last_checked_at")
     .eq("id", ownStoreId)
     .maybeSingle();
-  if (!data) return { store: null, matchingEnabled: plan !== "free" };
+  if (!data) return { store: null, matchingEnabled: PLANS[plan].ownStore };
   return {
     store: {
       id: data.id,
@@ -49,7 +50,7 @@ export async function getOwnStore(): Promise<OwnStoreView> {
       productCount: (data.catalog_stats as { productCount?: number } | null)?.productCount ?? null,
       lastCheckedAt: data.last_checked_at,
     },
-    matchingEnabled: plan !== "free",
+    matchingEnabled: PLANS[plan].ownStore,
   };
 }
 
@@ -62,7 +63,7 @@ export type SetOwnStoreResult = { ok: true; store: StoreSummary } | StoreProbeEr
  */
 export async function setOwnStore(domain: string): Promise<SetOwnStoreResult> {
   const { user, plan } = await currentUser();
-  if (plan === "free") {
+  if (!PLANS[plan].ownStore) {
     return { ok: false, code: "plan", message: "Matching your own products is on the Pro plan." };
   }
 

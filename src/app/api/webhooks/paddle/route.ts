@@ -33,12 +33,18 @@ export async function POST(request: Request): Promise<Response> {
     // Not an event we act on — acknowledge so Paddle stops retrying.
     return NextResponse.json({ ok: true, ignored: event.event_type });
   }
+  if ("unknownPriceId" in change) {
+    // A paying customer on a price we can't map (a missing/renamed price env
+    // var). Fail so Paddle retries and it surfaces, instead of leaving them on Free.
+    console.error(`Paddle webhook: unknown price ${change.unknownPriceId ?? "?"} on ${event.event_type}.`);
+    return NextResponse.json({ error: "Unknown price" }, { status: 500 });
+  }
 
   const service = createServiceClient();
   const patch = {
     plan: change.plan,
     paddle_customer_id: change.paddleCustomerId,
-    paddle_subscription_id: change.plan === "paid" ? change.paddleSubscriptionId : null,
+    paddle_subscription_id: change.plan !== "free" ? change.paddleSubscriptionId : null,
   };
 
   const updateFor = async (column: "id" | "paddle_customer_id", value: string) => {
@@ -71,7 +77,7 @@ export async function POST(request: Request): Promise<Response> {
     // Paddle retries (covers a transient DB blip) and it surfaces loudly. A
     // downgrade that matches nothing has nothing to revert (e.g. the account was
     // already deleted), so acknowledge it to stop the retries.
-    if (change.plan === "paid") {
+    if (change.plan !== "free") {
       return NextResponse.json({ error: "No matching user for upgrade" }, { status: 500 });
     }
     return NextResponse.json({ ok: true, matched: 0, event: event.event_type });

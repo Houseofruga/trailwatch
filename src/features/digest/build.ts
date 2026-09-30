@@ -8,6 +8,7 @@
 
 import { pageTypeLabel } from "@/features/competitors/pageTypes";
 import { siteOf } from "@/features/competitors/domain";
+import { isPaidPlan, parsePlan } from "@/features/plan/limits";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -202,7 +203,7 @@ export function buildDigests(users: RawUser[], now: number): UserDigest[] {
     digests.push({
       userId: user.id,
       email: user.email,
-      plan: user.plan === "paid" ? "pro" : "free",
+      plan: isPaidPlan(parsePlan(user.plan)) ? "pro" : "free",
       changeCount,
       competitorCount: built.length,
       competitors: shownCompetitors,

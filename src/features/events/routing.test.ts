@@ -4,16 +4,17 @@ import { deliveryFor, planInstantAlerts, type PendingAlert } from "./routing";
 describe("deliveryFor", () => {
   it("low is stored only, for everyone", () => {
     expect(deliveryFor("low", "free")).toBeNull();
-    expect(deliveryFor("low", "paid")).toBeNull();
+    expect(deliveryFor("low", "pro")).toBeNull();
   });
 
-  it("high is instant on a paid plan, briefing on Free", () => {
-    expect(deliveryFor("high", "paid")).toBe("instant");
+  it("high is instant on Starter and up, briefing on Free", () => {
+    expect(deliveryFor("high", "starter")).toBe("instant");
+    expect(deliveryFor("high", "pro")).toBe("instant");
     expect(deliveryFor("high", "free")).toBe("briefing");
   });
 
   it("normal always goes to the briefing", () => {
-    expect(deliveryFor("normal", "paid")).toBe("briefing");
+    expect(deliveryFor("normal", "pro")).toBe("briefing");
     expect(deliveryFor("normal", "free")).toBe("briefing");
   });
 });

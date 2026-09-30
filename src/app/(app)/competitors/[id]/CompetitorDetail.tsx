@@ -20,6 +20,7 @@ import { PageIntel } from "../PageIntel";
 import { EditCompetitorDialog } from "./EditCompetitorDialog";
 import toastStyles from "@/components/Toast.module.css";
 import styles from "../page.module.css";
+import { type Plan } from "@/features/plan/limits";
 
 type Page = CompetitorRow["pages"][number];
 type PendingDelete =
@@ -52,7 +53,7 @@ export function CompetitorDetail({
 }: {
   competitor: CompetitorRow;
   pagesPerCompetitor: number;
-  plan: "free" | "paid";
+  plan: Plan;
   otherUrls: { url: string; competitor: string }[];
   summaryLine: string;
   initialProfiles: Record<string, PageProfile | null>;

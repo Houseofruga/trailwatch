@@ -9,6 +9,7 @@ import { canonUrl, toFullUrl, hostname, rowUrlError } from "@/features/competito
 import { pageTypeLabel, type PageType } from "@/features/competitors/pageTypes";
 import s from "@/app/(app)/competitors/add/CompetitorSetup.module.css";
 import m from "./EditCompetitorDialog.module.css";
+import { type Plan } from "@/features/plan/limits";
 
 type InitialPage = { id: string; url: string; label: string; pageType: PageType };
 type Row = { key: string; pageId: string; url: string; label: string; pageType: PageType };
@@ -47,7 +48,7 @@ export function EditCompetitorDialog({
   initialPages: InitialPage[];
   otherUrls: { url: string; competitor: string }[];
   pagesPerCompetitor: number;
-  plan: "free" | "paid";
+  plan: Plan;
   onClose: () => void;
 }) {
   const [name, setName] = useState(initialName);

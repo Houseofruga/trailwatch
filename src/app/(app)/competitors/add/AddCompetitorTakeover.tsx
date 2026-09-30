@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { CompetitorSetup } from "./CompetitorSetup";
 import styles from "./AddCompetitorTakeover.module.css";
+import { type Plan } from "@/features/plan/limits";
 
 type ExistingUrl = { url: string; competitor: string };
 
@@ -21,7 +22,7 @@ export function AddCompetitorTakeover({
   existingUrls,
 }: {
   variant: "overlay" | "page";
-  plan: "free" | "paid";
+  plan: Plan;
   competitorCount: number;
   competitorCap: number;
   pagesPerCompetitor: number;

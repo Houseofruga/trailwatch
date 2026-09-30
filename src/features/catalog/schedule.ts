@@ -3,6 +3,8 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { CATALOG_CONFIG } from "./config";
 import { runCatalogCheck, type CatalogCheckResult } from "./runCatalogCheck";
 import { checkStorePages, type StorePagesResult } from "@/features/stores/checkStorePages";
+import { resolvePlan } from "@/features/plan/comp";
+import { storeCheckIntervalHours } from "@/features/plan/limits";
 
 const minutesFromNow = (m: number) => new Date(Date.now() + m * 60_000).toISOString();
 
@@ -68,9 +70,27 @@ export async function checkStoreIfDue(
   const next =
     catalog.status === "error"
       ? minutesFromNow(CATALOG_CONFIG.errorRetryMinutes)
-      : minutesFromNow(CATALOG_CONFIG.defaultCheckIntervalHours * 60);
+      : minutesFromNow((await intervalHoursFor(service, storeId)) * 60);
   await service.from("stores").update({ next_check_at: next }).eq("id", storeId);
   return { catalog, pages };
+}
+
+/**
+ * The store's cadence (SPEC.md §4): the fastest among the plans of everyone who
+ * follows it or owns it — it's crawled once and shared — hourly for Pro in
+ * BFCM mode. Falls back to the default interval if the lookup fails.
+ */
+async function intervalHoursFor(service: SupabaseClient, storeId: string): Promise<number> {
+  const [{ data: followers, error: fErr }, { data: owners, error: oErr }] = await Promise.all([
+    service.from("competitors").select("users(email, plan)").eq("store_id", storeId),
+    service.from("users").select("email, plan").eq("own_store_id", storeId),
+  ]);
+  if (fErr || oErr) return CATALOG_CONFIG.defaultCheckIntervalHours;
+  const users = [
+    ...(followers ?? []).map((f) => (Array.isArray(f.users) ? f.users[0] : f.users) as { email?: string; plan?: string } | null),
+    ...(owners ?? []),
+  ];
+  return storeCheckIntervalHours(users.filter(Boolean).map((u) => resolvePlan(u!.email, u!.plan)));
 }
 
 export type CatalogTickResult = {

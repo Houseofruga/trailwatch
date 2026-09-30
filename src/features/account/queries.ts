@@ -55,7 +55,7 @@ export const getAccount = cache(async function getAccount(): Promise<Account | n
   ]);
 
   const email = profileResult.data?.email ?? user.email ?? "";
-  const plan: Plan = resolvePlan(email, profileResult.data?.plan === "paid" ? "paid" : "free");
+  const plan: Plan = resolvePlan(email, profileResult.data?.plan);
   const displayName = deriveDisplayName(email, user.user_metadata?.full_name);
 
   const competitorCount = competitorsResult.data?.length ?? 0;

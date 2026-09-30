@@ -1,4 +1,4 @@
-import type { Plan } from "./limits";
+import { betaPlan, billingEnabled, higherPlan, parsePlan, type Plan } from "./limits";
 
 // Emails that always get Pro without paying — founder/team comp accounts,
 // independent of Paddle. Comma-separated in the COMP_EMAILS env var so it's
@@ -15,8 +15,15 @@ export function isCompEmail(email: string | null | undefined): boolean {
   return !!email && compEmails().includes(email.toLowerCase());
 }
 
-// A comp email is Pro regardless of what the DB (Paddle) says; otherwise the
-// stored plan wins.
-export function resolvePlan(email: string | null | undefined, dbPlan: Plan): Plan {
-  return isCompEmail(email) ? "paid" : dbPlan;
+/**
+ * The plan a user actually gets. Comp emails are Pro regardless of the DB.
+ * During the free beta (billing off) everyone gets at least the beta plan —
+ * a paid plan already on the account still wins if it's higher. Otherwise
+ * the stored (Paddle-driven) plan. `dbPlan` may be any raw DB value.
+ */
+export function resolvePlan(email: string | null | undefined, dbPlan: unknown): Plan {
+  const stored = parsePlan(dbPlan);
+  if (isCompEmail(email)) return higherPlan(stored, "pro");
+  if (!billingEnabled()) return higherPlan(stored, betaPlan());
+  return stored;
 }

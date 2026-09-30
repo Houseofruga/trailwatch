@@ -7,7 +7,7 @@ import { checkStoreIfDue } from "@/features/catalog/schedule";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { LIMITS, type Plan } from "@/features/plan/limits";
+import { LIMITS, type Plan, PLAN_LABEL } from "@/features/plan/limits";
 import { resolvePlan } from "@/features/plan/comp";
 import { runCheckForPage } from "@/features/checks/runCheck";
 import { storeInputError } from "@/features/stores/probeStore";
@@ -39,7 +39,7 @@ async function loadPlanAndUsage(supabase: Awaited<ReturnType<typeof createClient
     supabase.from("competitors").select("id"),
   ]);
 
-  const plan: Plan = resolvePlan(user.email, profile?.plan === "paid" ? "paid" : "free");
+  const plan: Plan = resolvePlan(user.email, profile?.plan);
   return { userId: user.id, plan, competitorCount: competitors?.length ?? 0 };
 }
 
@@ -209,7 +209,7 @@ export async function createCompetitor(_prev: FormState, formData: FormData): Pr
   const limits = LIMITS[plan];
 
   if (competitorCount >= limits.competitors) {
-    return { error: `You're already tracking all ${limits.competitors} competitors on ${plan === "free" ? "Free" : "Pro"}.` };
+    return { error: `You're already tracking all ${limits.competitors} competitors on ${PLAN_LABEL[plan]}.` };
   }
 
   const nameResult = competitorName.safeParse(formData.get("name"));
@@ -218,7 +218,7 @@ export async function createCompetitor(_prev: FormState, formData: FormData): Pr
   const rawRows = readPageRows(formData);
   if (rawRows.length === 0) return { error: "Add at least one page URL." };
   if (rawRows.length > limits.pagesPerCompetitor) {
-    return { error: `${plan === "free" ? "Free" : "Pro"} allows up to ${limits.pagesPerCompetitor} page${limits.pagesPerCompetitor === 1 ? "" : "s"} per competitor.` };
+    return { error: `${PLAN_LABEL[plan]} allows up to ${limits.pagesPerCompetitor} page${limits.pagesPerCompetitor === 1 ? "" : "s"} per competitor.` };
   }
 
   const rowsResult = z.array(pageRow).safeParse(rawRows);
@@ -339,7 +339,7 @@ export async function seedCompetitors(
   const remaining = Math.max(0, limits.competitors - competitorCount);
   if (remaining === 0) {
     return {
-      error: `You're already tracking all ${limits.competitors} competitors on ${plan === "free" ? "Free" : "Pro"}.`,
+      error: `You're already tracking all ${limits.competitors} competitors on ${PLAN_LABEL[plan]}.`,
     };
   }
 
@@ -386,7 +386,7 @@ export async function addPages(_prev: FormState, formData: FormData): Promise<Fo
   if (rawRows.length === 0) return { error: "Add at least one page URL." };
   if (existingCount + rawRows.length > limits.pagesPerCompetitor) {
     return {
-      error: `${competitor.name} can have at most ${limits.pagesPerCompetitor} page${limits.pagesPerCompetitor === 1 ? "" : "s"} on ${plan === "free" ? "Free" : "Pro"}.`,
+      error: `${competitor.name} can have at most ${limits.pagesPerCompetitor} page${limits.pagesPerCompetitor === 1 ? "" : "s"} on ${PLAN_LABEL[plan]}.`,
     };
   }
 
@@ -546,7 +546,7 @@ export async function updateCompetitorDetails(
   const limits = LIMITS[plan];
   if (rows.length > limits.pagesPerCompetitor) {
     return {
-      error: `${plan === "free" ? "Free" : "Pro"} allows up to ${limits.pagesPerCompetitor} page${limits.pagesPerCompetitor === 1 ? "" : "s"} per competitor.`,
+      error: `${PLAN_LABEL[plan]} allows up to ${limits.pagesPerCompetitor} page${limits.pagesPerCompetitor === 1 ? "" : "s"} per competitor.`,
     };
   }
 
