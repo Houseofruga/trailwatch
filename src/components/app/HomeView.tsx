@@ -31,13 +31,11 @@ export function HomeView({
   summary,
   moves,
   competitors,
-  ownDomain,
 }: {
   state: HomeState;
   summary: HomeSummary;
   moves: Move[];
   competitors: CompetitorRow[];
-  ownDomain: string | null;
 }) {
   const [modal, setModal] = useState(state === "add-competitor-modal");
   const [guideDismissed, setGuideDismissed] = useState(false);
@@ -247,8 +245,6 @@ export function HomeView({
         open={modal}
         onClose={() => setModal(false)}
         remaining={BETA_LIMIT - competitors.length}
-        ownDomain={ownDomain}
-        existing={competitors}
       />
     </PageBody>
   );

@@ -16,6 +16,7 @@ import { PageBody, PageHeader } from "@/components/ui/Page";
 import { FilterSelect } from "@/components/ui/Select";
 import { TimelineDay, TimelineItem, TimelineNote } from "@/components/ui/Timeline";
 import { useToast } from "@/components/ui/Toast";
+import { removeCompetitor } from "@/features/appData/actions";
 import { ago, clockTime, count, dayHeading, dayKey, money, shortDate, when } from "@/features/appData/format";
 import type { CompetitorOverview, Move } from "@/features/appData/types";
 import { MoveIcon, PRIORITY_OPTIONS, PriorityBadge, TYPE_OPTIONS } from "./moveParts";
@@ -91,7 +92,11 @@ export function CompetitorDetailView({
 
   async function confirmRemove() {
     setRemoving(true);
-    await new Promise((r) => setTimeout(r, 600)); // mock round-trip
+    const res = await removeCompetitor(c.id);
+    if (!res.ok) {
+      setRemoving(false);
+      return toast(`Couldn't remove ${c.name}. Try again.`, { error: true });
+    }
     toast(`${c.name} removed`);
     router.push("/competitors");
   }

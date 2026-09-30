@@ -36,12 +36,10 @@ export function CompetitorsView({
   competitors,
   loading,
   error,
-  ownDomain,
 }: {
   competitors: CompetitorRow[];
   loading?: boolean;
   error?: boolean;
-  ownDomain: string | null;
 }) {
   const [modal, setModal] = useState(false);
 
@@ -134,8 +132,6 @@ export function CompetitorsView({
         open={modal}
         onClose={() => setModal(false)}
         remaining={BETA_LIMIT - competitors.length}
-        ownDomain={ownDomain}
-        existing={competitors}
       />
     </PageBody>
   );

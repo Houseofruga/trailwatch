@@ -26,9 +26,14 @@ export const CATALOG_CONFIG = {
   // ...and at least this many of them, so a 3-product store putting one item
   // on sale doesn't read as "sitewide".
   sitewideSaleMinProducts: 5,
-  // First report: what counts as "recently launched", and how many items per section.
+  // First report: what counts as "recently launched", and how many items per
+  // section ("See all" expands in place up to this many; DESIGN_TO_COMPONENTS D3).
   firstReportRecentDays: 30,
-  firstReportLimit: 8,
+  firstReportLimit: 50,
+  // Checkout add-ons that apps create as products (shipping protection, return
+  // fees, gift wrap...). Not merchandise, so the first report leaves them out.
+  helperProductPattern:
+    /\b(package|shipping|order|delivery) (protection|insurance)\b|\broute\b.*\bprotection\b|\breturns? (fee|label|shipping)\b|\bgift (card|wrap|wrapping)\b|\bshipping insurance\b/i,
   // Fallback cadence if the per-plan lookup fails (normal cadence comes from
   // the followers' plans — see plan/limits.ts storeCheckIntervalHours).
   defaultCheckIntervalHours: 24,

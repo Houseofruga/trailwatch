@@ -7,9 +7,11 @@ export type AlertSettings = {
   slackWebhookUrl: string | null;
   // Event types this user doesn't want instant alerts for (they still reach the briefing).
   mutedTypes: EventType[];
+  // Where our emails go (alerts and the Monday briefing); null = the account email.
+  sendTo: string | null;
 };
 
-export const DEFAULT_ALERT_SETTINGS: AlertSettings = { emailInstant: true, slackWebhookUrl: null, mutedTypes: [] };
+export const DEFAULT_ALERT_SETTINGS: AlertSettings = { emailInstant: true, slackWebhookUrl: null, mutedTypes: [], sendTo: null };
 
 // Instant-alert types a user can mute (the high-severity ones — the rest never
 // alert instantly anyway).
@@ -28,7 +30,7 @@ export async function loadAlertSettings(service: SupabaseClient, userIds: string
   if (userIds.length === 0) return map;
   const { data, error } = await service
     .from("alert_settings")
-    .select("user_id, email_instant, slack_webhook_url, muted_types")
+    .select("user_id, email_instant, slack_webhook_url, muted_types, send_to")
     .in("user_id", userIds);
   if (error) throw new Error(`Couldn't load alert settings: ${error.message}`);
   for (const row of data ?? []) {
@@ -36,6 +38,7 @@ export async function loadAlertSettings(service: SupabaseClient, userIds: string
       emailInstant: row.email_instant,
       slackWebhookUrl: row.slack_webhook_url,
       mutedTypes: row.muted_types ?? [],
+      sendTo: row.send_to ?? null,
     });
   }
   for (const id of userIds) if (!map.has(id)) map.set(id, DEFAULT_ALERT_SETTINGS);

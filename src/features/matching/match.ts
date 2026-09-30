@@ -141,3 +141,27 @@ export function undercut(competitor: CatalogProduct, own: CatalogProduct, score:
   const pctBelow = Math.round(((ours - theirs) / ours) * 1000) / 10;
   return pctBelow >= cfg.undercutPct ? { competitorPrice: theirs, ownPrice: ours, pctBelow } : null;
 }
+
+export type CheaperThanYours = { title: string; yourTitle: string; price: number; yourPrice: number };
+export type CatalogComparison = { similar: number; cheaper: CheaperThanYours[] };
+
+/**
+ * A competitor's whole catalog against yours (first report, competitor
+ * overview): how many of their products have a comparable one of yours, and
+ * which are priced below it (same bar as the undercut alert), biggest gap first.
+ */
+export function compareCatalogs(competitor: CatalogProduct[], own: CatalogProduct[], cfg = MATCH_CONFIG): CatalogComparison {
+  if (own.length === 0) return { similar: 0, cheaper: [] };
+  const bestMatch = buildOwnIndex(own);
+  let similar = 0;
+  const cheaper: CheaperThanYours[] = [];
+  for (const p of competitor) {
+    const match = bestMatch(p, cfg);
+    if (!match) continue;
+    similar += 1;
+    const cut = undercut(p, match.product, match.score, cfg);
+    if (cut) cheaper.push({ title: p.title, yourTitle: match.product.title, price: cut.competitorPrice, yourPrice: cut.ownPrice });
+  }
+  cheaper.sort((a, b) => b.yourPrice - b.price - (a.yourPrice - a.price));
+  return { similar, cheaper };
+}

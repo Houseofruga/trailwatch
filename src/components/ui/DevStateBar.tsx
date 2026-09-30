@@ -17,13 +17,16 @@ export function DevStateBar({ states, current }: { states: readonly string[]; cu
       <label htmlFor="dev-state">State</label>
       <select
         id="dev-state"
-        value={current}
+        // No ?state = the live, real-data screen.
+        value={params.get("state") ? current : ""}
         onChange={(e) => {
           const next = new URLSearchParams(params);
-          next.set("state", e.target.value);
-          router.replace(`${pathname}?${next}`, { scroll: false });
+          if (e.target.value) next.set("state", e.target.value);
+          else next.delete("state");
+          router.replace(next.size ? `${pathname}?${next}` : pathname, { scroll: false });
         }}
       >
+        <option value="">live data</option>
         {states.map((s) => (
           <option key={s} value={s}>
             {s}

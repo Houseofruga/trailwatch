@@ -15,6 +15,8 @@ import { FormSelect } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
 import { useToast } from "@/components/ui/Toast";
 import { Toggle } from "@/components/ui/Toggle";
+import { deleteAccount } from "@/features/account/actions";
+import * as actions from "@/features/appData/actions";
 import { ago } from "@/features/appData/format";
 import type { MutableAlertType, Settings } from "@/features/appData/types";
 import styles from "./SettingsView.module.css";
@@ -55,7 +57,16 @@ function Section({ id, title, description, children }: { id?: string; title: str
   );
 }
 
-export function SettingsView({ initial, state }: { initial: Settings; state: SettingsState }) {
+export function SettingsView({
+  initial,
+  state,
+  preview = false,
+}: {
+  initial: Settings;
+  state: SettingsState;
+  /** Design-review preview: buttons act on the mock screen only. */
+  preview?: boolean;
+}) {
   const toast = useToast();
   const loading = state === "loading";
   const start: Form = {
@@ -80,6 +91,8 @@ export function SettingsView({ initial, state }: { initial: Settings; state: Set
   const [testing, setTesting] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(state === "delete-account-modal");
   const [deleteText, setDeleteText] = useState(state === "delete-account-modal" ? "delet" : "");
+  const [deleting, setDeleting] = useState(false);
+  const [connecting, setConnecting] = useState(false);
   const shownToast = useRef(false);
 
   useEffect(() => {
@@ -94,25 +107,47 @@ export function SettingsView({ initial, state }: { initial: Settings; state: Set
 
   async function save() {
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 600)); // mock round-trip
+    const res = preview ? ({ ok: true } as const) : await actions.saveSettings(form);
     setSaving(false);
+    if (!res.ok) return toast(res.error, { error: true });
     setSaved(form);
     toast("Settings saved");
   }
 
-  function connectSlack() {
+  async function connectSlack() {
     if (!slackUrl.startsWith(SLACK_PREFIX)) return setSlackError(`Enter a Slack webhook URL. It starts with ${SLACK_PREFIX}`);
+    setConnecting(true);
+    const res = preview ? ({ ok: true } as const) : await actions.connectSlack(slackUrl);
+    setConnecting(false);
+    if (!res.ok) return setSlackError(res.error);
     setSlackError(null);
     setSlackUrl("");
     setSlackConnected(true);
     toast("Connected to Slack");
   }
 
+  async function disconnectSlack() {
+    const res = preview ? ({ ok: true } as const) : await actions.disconnectSlack();
+    if (!res.ok) return toast(res.error, { error: true });
+    setSlackConnected(false);
+    setSlackTestFailed(false);
+  }
+
   async function sendTest() {
     setTesting(true);
-    await new Promise((r) => setTimeout(r, 700));
+    const res = preview ? ({ ok: true } as const) : await actions.sendSlackTest();
     setTesting(false);
+    if (!res.ok) return setSlackTestFailed(true);
+    setSlackTestFailed(false);
     toast("Test message sent to Slack");
+  }
+
+  async function confirmDelete() {
+    if (preview) return toast("Preview only: accounts aren't deleted from preview screens.");
+    setDeleting(true);
+    const res = await deleteAccount(); // redirects home on success
+    setDeleting(false);
+    if (res?.error) toast(res.error, { error: true });
   }
 
   const noChannels = !form.emailAlerts && !slackConnected;
@@ -164,7 +199,7 @@ export function SettingsView({ initial, state }: { initial: Settings; state: Set
                         <Button loading={testing} onClick={sendTest}>
                           Send test
                         </Button>
-                        <Button variant="plainDark" onClick={() => (setSlackConnected(false), setSlackTestFailed(false))}>
+                        <Button variant="plainDark" onClick={() => void disconnectSlack()}>
                           Disconnect
                         </Button>
                       </div>
@@ -173,7 +208,7 @@ export function SettingsView({ initial, state }: { initial: Settings; state: Set
                       <Banner
                         tone="critical"
                         title="Slack test failed"
-                        actions={<Button onClick={() => (setSlackConnected(false), setSlackTestFailed(false))}>Reconnect Slack</Button>}
+                        actions={<Button onClick={() => void disconnectSlack()}>Reconnect Slack</Button>}
                       >
                         We couldn&rsquo;t post to your Slack channel. The webhook may have been removed in Slack. Create a new one and reconnect.
                       </Banner>
@@ -189,7 +224,11 @@ export function SettingsView({ initial, state }: { initial: Settings; state: Set
                     onChange={(e) => setSlackUrl(e.target.value)}
                     error={slackError}
                     help="Paste an incoming webhook URL from Slack. We post big moves to that channel."
-                    trailing={<Button onClick={connectSlack}>Connect</Button>}
+                    trailing={
+                      <Button loading={connecting} onClick={() => void connectSlack()}>
+                        Connect
+                      </Button>
+                    }
                   />
                 )}
               </div>
@@ -268,7 +307,9 @@ export function SettingsView({ initial, state }: { initial: Settings; state: Set
                 {initial.ownStore && form.storeDomain === initial.ownStore.domain ? (
                   <div className={styles.storeMeta}>
                     <span>
-                      {initial.ownStore.products} products · checked {ago(initial.ownStore.checkedAt)}
+                      {initial.ownStore.products !== null
+                        ? `${initial.ownStore.products.toLocaleString("en-US")} products · checked ${ago(initial.ownStore.checkedAt)}`
+                        : "Reading your catalog…"}
                     </span>
                     <Button variant="plainDark" onClick={() => set("storeDomain", "")}>
                       Remove
@@ -337,7 +378,8 @@ export function SettingsView({ initial, state }: { initial: Settings; state: Set
             <Button
               variant="critical"
               disabled={deleteText !== "delete"}
-              onClick={() => toast("Preview only: accounts aren't deleted from mock screens.")}
+              loading={deleting}
+              onClick={() => void confirmDelete()}
             >
               Delete account
             </Button>

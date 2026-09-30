@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { CompetitorDetailView } from "@/components/app/CompetitorDetailView";
 import { DevStateBar } from "@/components/ui/DevStateBar";
-import { previewState } from "@/features/appData/devState";
-import { getCompetitorOverview, listCompetitorMoves } from "@/features/appData/mock";
+import { previewEnabled, previewState } from "@/features/appData/devState";
+import * as mock from "@/features/appData/mock";
+import * as real from "@/features/appData/queries";
 
 export const metadata: Metadata = { title: "Competitor" };
 
@@ -37,11 +38,16 @@ export default async function CompetitorPage({
 }) {
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const state = previewState(sp.state, STATES, "busy");
-  const competitorId = sp.state && COMPETITOR_FOR[state] ? COMPETITOR_FOR[state] : id;
-  const [competitor, moves] = await Promise.all([
-    state === "not-found" ? null : getCompetitorOverview(competitorId),
-    listCompetitorMoves(competitorId),
-  ]);
+  const preview = previewEnabled && !!sp.state;
+  const competitorId = preview && COMPETITOR_FOR[state] ? COMPETITOR_FOR[state]! : id;
+  const [competitor, moves] = preview
+    ? await Promise.all([state === "not-found" ? null : mock.getCompetitorOverview(competitorId), mock.listCompetitorMoves(competitorId)])
+    : await Promise.all([real.getCompetitorOverview(id), real.listMoves({ competitorId: id, sinceDays: 30 })]);
+  // Nothing yet from a competitor added this month reads "No moves yet"; an
+  // older one with a quiet month reads "No moves in the last 30 days".
+  const noMovesYet = preview
+    ? state === "no-moves-yet"
+    : !!competitor && moves.length === 0 && real.addedThisMonth(competitor.addedAt);
 
   return (
     <>
@@ -49,11 +55,11 @@ export default async function CompetitorPage({
         key={`${competitorId}-${state}`}
         competitor={competitor}
         moves={state === "no-moves-yet" ? [] : moves}
-        noMovesYet={state === "no-moves-yet"}
+        noMovesYet={noMovesYet}
         loading={state === "loading"}
         error={state === "error"}
         openRemove={state === "remove-modal"}
-        highlight={state === "from-email" ? "m1" : undefined}
+        highlight={preview && state === "from-email" ? "m1" : undefined}
       />
       <DevStateBar states={STATES} current={state} />
     </>

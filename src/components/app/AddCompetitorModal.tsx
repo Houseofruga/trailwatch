@@ -6,21 +6,17 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { TextField } from "@/components/ui/TextField";
 import { useToast } from "@/components/ui/Toast";
-import { checkStoreInput } from "@/features/appData/mockAdd";
+import { addCompetitor } from "@/features/appData/actions";
 
 /** "Add competitor" dialog (04-Home / add-competitor modal), shared by Home and Competitors. */
 export function AddCompetitorModal({
   open,
   onClose,
   remaining,
-  ownDomain,
-  existing,
 }: {
   open: boolean;
   onClose: () => void;
   remaining: number;
-  ownDomain: string | null;
-  existing: { name: string; domain: string }[];
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -36,15 +32,13 @@ export function AddCompetitorModal({
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const check = checkStoreInput(value, { ownDomain, existing });
-    if (!check.ok) return setError(check.error);
-    setError(null);
     setBusy(true);
-    await new Promise((r) => setTimeout(r, 700)); // mock round-trip
+    const res = await addCompetitor(value);
     setBusy(false);
+    if (!res.ok) return setError(res.error);
     close();
     toast("Competitor added");
-    router.push("/competitors/dewlane/report?state=still-reading");
+    router.push(`/competitors/${res.competitorId}/report`);
   }
 
   return (

@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { movesCaughtThisMonth } from "@/features/alerts/settings";
+import { loadAlertSettings, movesCaughtThisMonth } from "@/features/alerts/settings";
 import { getMailer } from "@/features/digest/mailer";
 import { unsubscribeUrl } from "@/features/digest/unsubscribe";
 import type { EventType, Severity } from "@/features/events/types";
@@ -207,14 +207,16 @@ async function send(service: SupabaseClient, week: string, now: Date): Promise<{
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gettrailwatch.com";
   const mailer = getMailer();
+  const settings = await loadAlertSettings(service, ready.map((b) => b.user_id));
   let sent = 0;
   let failed = 0;
 
   for (const b of ready) {
     type U = { email: string; briefing_hour?: number | null; briefing_time_zone?: string | null };
     const user = one(b.users as U | U[] | null);
-    const email = user?.email;
-    if (!email) continue;
+    // Settings' "Send to" covers the briefing too.
+    const email = settings.get(b.user_id)?.sendTo ?? user?.email;
+    if (!user || !email) continue;
     // Each user's own Monday hour and zone (UI settings, migration 0016).
     if (!userBriefingDue(now, user.briefing_hour ?? DEFAULT_BRIEFING.hour, user.briefing_time_zone ?? DEFAULT_BRIEFING.timeZone)) continue;
     const unsub = unsubscribeUrl(siteUrl, b.user_id) ?? undefined;

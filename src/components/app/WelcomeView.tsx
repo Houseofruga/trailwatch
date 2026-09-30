@@ -13,25 +13,35 @@ import { Stepper } from "@/components/ui/Guides";
 import { IconCheck, IconClock, IconX, SpinnerIcon } from "@/components/ui/icons";
 import { PageBody } from "@/components/ui/Page";
 import { TextField } from "@/components/ui/TextField";
+import { addCompetitor, onboardingStatus, removeCompetitor, saveOwnStore } from "@/features/appData/actions";
 import { ADD_MESSAGES, checkStoreInput } from "@/features/appData/mockAdd";
+import type { OnboardingItem } from "@/features/appData/types";
 import styles from "./WelcomeView.module.css";
 
 const LIMIT = 10;
 const LIST_PREVIEW = 5;
+const POLL_MS = 3000;
+/** After this long on "Building your first report", show the slow state. */
+const SLOW_MS = 60_000;
 
-type AddedStatus = "ready" | "reading" | "pages" | "failed";
-type Added = { name: string; domain: string; status: AddedStatus };
+type Added = OnboardingItem;
 
-const HP: Added = { name: "Hearth & Pine", domain: "hearthandpine.com", status: "ready" };
-const DW: Added = { name: "Dewlane", domain: "dewlane.com", status: "ready" };
-const NK: Added = { name: "Northwind Knits", domain: "northwindknits.com", status: "ready" };
-const OG: Added = { name: "Oakline Goods", domain: "oaklinegoods.com", status: "pages" };
-const PT: Added = { name: "Peak Tonic", domain: "peaktonic.com", status: "ready" };
-const MORE: Added[] = ["Linden Loom", "Harbor Hemp", "Tallgrass Home", "Birch & Bay", "Quietwood"].map((name) => ({
+// Design-review data (dev `?state=` only).
+const item = (name: string, domain: string, status: Added["status"] = "ready", products: number | null = null): Added => ({
+  id: domain,
   name,
-  domain: `${name.toLowerCase().replace(/[^a-z]/g, "")}.com`,
-  status: "ready",
-}));
+  domain,
+  status,
+  products,
+});
+const HP = item("Hearth & Pine", "hearthandpine.com", "ready", 1632);
+const DW = item("Dewlane", "dewlane.com", "ready", 313);
+const NK = item("Northwind Knits", "northwindknits.com");
+const OG = item("Oakline Goods", "oaklinegoods.com", "pages");
+const PT = item("Peak Tonic", "peaktonic.com");
+const MORE = ["Linden Loom", "Harbor Hemp", "Tallgrass Home", "Birch & Bay", "Quietwood"].map((name) =>
+  item(name, `${name.toLowerCase().replace(/[^a-z]/g, "")}.com`),
+);
 
 // Designed states (02-Onboarding): the list and field each one starts with.
 const PRESETS: Partial<Record<WelcomeState, { added: Added[]; value?: string; error?: string }>> = {
@@ -49,7 +59,7 @@ const PRESETS: Partial<Record<WelcomeState, { added: Added[]; value?: string; er
   "step-2-limit-reached": { added: [HP, DW, NK, OG, PT, ...MORE] },
 };
 
-function StatusBadge({ status }: { status: AddedStatus }) {
+function StatusBadge({ status }: { status: Added["status"] }) {
   if (status === "reading")
     return (
       <Badge tone="info" spinner>
@@ -61,44 +71,108 @@ function StatusBadge({ status }: { status: AddedStatus }) {
   return <Badge tone="success">Ready</Badge>;
 }
 
-export function WelcomeView({ state }: { state: WelcomeState }) {
+/** The store whose report opens first: the first one added with a catalog, else the first one. */
+const reportTarget = (list: Added[]) => list.find((a) => a.status !== "pages") ?? list[0];
+
+export function WelcomeView({
+  state,
+  live,
+}: {
+  state: WelcomeState;
+  /** Real data; null on a design-review preview. */
+  live: { ownDomain: string | null; added: Added[] } | null;
+}) {
   const router = useRouter();
-  const preset = PRESETS[state];
-  const [step, setStep] = useState<1 | 2 | 3>(state === "step-1-your-store" ? 1 : preset ? 2 : 3);
-  const [store, setStore] = useState("glowfield.com");
-  const [added, setAdded] = useState<Added[]>(preset?.added ?? [HP, { ...DW, status: "reading" }, OG]);
+  const preset = live ? undefined : PRESETS[state];
+  const [step, setStep] = useState<1 | 2 | 3>(
+    live ? (live.added.length > 0 ? 2 : 1) : state === "step-1-your-store" ? 1 : preset ? 2 : 3,
+  );
+  const [store, setStore] = useState(live ? (live.ownDomain ?? "") : "glowfield.com");
+  const [storeError, setStoreError] = useState<string | null>(null);
+  const [savingStore, setSavingStore] = useState(false);
+  const [added, setAdded] = useState<Added[]>(
+    live ? live.added : (preset?.added ?? [HP, { ...DW, status: "reading" }, OG]),
+  );
   const [value, setValue] = useState(preset?.value ?? "");
   const [error, setError] = useState<string | null>(preset?.error ?? null);
-  const [adding, setAdding] = useState(state === "step-2-adding");
+  const [adding, setAdding] = useState(state === "step-2-adding" && !live);
   const [showAll, setShowAll] = useState(false);
-  const [progress, setProgress] = useState(state === "slow" ? 410 : 250);
+  const [buildingSince, setBuildingSince] = useState<number | null>(null);
+  const [slowNow, setSlowNow] = useState(false);
 
   const full = added.length >= LIMIT;
-  const slow = state === "slow";
+  const slow = live ? slowNow : state === "slow";
+  const reading = added.some((a) => a.status === "reading");
 
-  // Live flow (not a frozen review state): fill the bar, then open the report.
+  // Live: poll each store's first read while any is still reading.
   useEffect(() => {
-    if (step !== 3 || state === "building-report" || slow) return;
-    const t = setInterval(() => setProgress((p) => Math.min(313, p + 21)), 250);
+    if (!live || step === 1 || !reading) return;
+    const t = setInterval(() => void onboardingStatus().then(setAdded), POLL_MS);
     return () => clearInterval(t);
-  }, [step, state, slow]);
+  }, [live, step, reading]);
+
+  // Live: open the first report once its store is read (or its read failed).
+  const target = reportTarget(added);
   useEffect(() => {
-    if (step === 3 && progress >= 313) router.push("/competitors/dewlane/report");
-  }, [step, progress, router]);
+    if (!live || step !== 3 || !target) return;
+    if (target.status !== "reading") router.push(`/competitors/${target.id}/report`);
+  }, [live, step, target, router]);
+
+  // Live: switch to the slow state after a minute.
+  useEffect(() => {
+    if (!live || buildingSince === null) return;
+    const t = setTimeout(() => setSlowNow(true), Math.max(0, buildingSince + SLOW_MS - Date.now()));
+    return () => clearTimeout(t);
+  }, [live, buildingSince]);
+
+  async function continueFromStore(e: React.FormEvent) {
+    e.preventDefault();
+    if (!live || store.trim() === (live.ownDomain ?? "") || !store.trim()) return setStep(2);
+    setSavingStore(true);
+    const res = await saveOwnStore(store);
+    setSavingStore(false);
+    if (!res.ok) return setStoreError(res.error);
+    setStoreError(null);
+    setStep(2);
+  }
 
   async function add(e: React.FormEvent) {
     e.preventDefault();
-    const check = checkStoreInput(value, { ownDomain: store || null, existing: added });
-    if (!check.ok) return setError(check.error);
-    setError(null);
+    if (!live) {
+      const check = checkStoreInput(value, { ownDomain: store || null, existing: added });
+      if (!check.ok) return setError(check.error);
+      setError(null);
+      setAdding(true);
+      await new Promise((r) => setTimeout(r, 700));
+      setAdding(false);
+      setAdded((a) => [...a, item(check.name, check.host, "reading")]);
+      setValue("");
+      return;
+    }
     setAdding(true);
-    await new Promise((r) => setTimeout(r, 700)); // mock probe
+    const res = await addCompetitor(value);
+    if (res.ok) {
+      setAdded(await onboardingStatus());
+      setValue("");
+      setError(null);
+    } else {
+      setError(res.error);
+    }
     setAdding(false);
-    setAdded((a) => [...a, { name: check.name, domain: check.host, status: "reading" }]);
-    setValue("");
+  }
+
+  async function remove(a: Added) {
+    setAdded((list) => list.filter((x) => x.id !== a.id));
+    if (live) await removeCompetitor(a.id);
+  }
+
+  function seeReport() {
+    setStep(3);
+    setBuildingSince(Date.now());
   }
 
   const shown = showAll ? added : added.slice(0, LIST_PREVIEW);
+  const done = added.filter((a) => a.status !== "reading").length;
 
   return (
     <PageBody narrow>
@@ -106,13 +180,7 @@ export function WelcomeView({ state }: { state: WelcomeState }) {
 
       {step === 1 ? (
         <Card>
-          <form
-            className={styles.card}
-            onSubmit={(e) => {
-              e.preventDefault();
-              setStep(2);
-            }}
-          >
+          <form className={styles.card} onSubmit={continueFromStore} noValidate>
             <h1 className={styles.title}>What&rsquo;s your store?</h1>
             <p className={styles.lead}>We&rsquo;ll compare your competitors&rsquo; prices with yours.</p>
             <div className={styles.spacer} />
@@ -121,14 +189,17 @@ export function WelcomeView({ state }: { state: WelcomeState }) {
               label="Your store’s website"
               prefix="https://"
               placeholder="yourstore.com"
+              inputMode="url"
+              autoComplete="off"
               value={store}
+              error={storeError}
               onChange={(e) => setStore(e.target.value)}
             />
             <div className={styles.actions}>
-              <Button variant="primary" type="submit">
+              <Button variant="primary" type="submit" loading={savingStore}>
                 Continue
               </Button>
-              <Button variant="plain" onClick={() => (setStore(""), setStep(2))}>
+              <Button variant="plain" onClick={() => setStep(2)}>
                 Skip for now
               </Button>
             </div>
@@ -168,7 +239,7 @@ export function WelcomeView({ state }: { state: WelcomeState }) {
                 </p>
                 <ul className={styles.list}>
                   {shown.map((a) => (
-                    <li key={a.domain} className={styles.item}>
+                    <li key={a.id} className={styles.item}>
                       <Avatar name={a.name} size={32} />
                       <div className={styles.itemText}>
                         <span className={styles.itemName}>{a.name}</span>
@@ -180,12 +251,7 @@ export function WelcomeView({ state }: { state: WelcomeState }) {
                         ) : null}
                       </div>
                       <StatusBadge status={a.status} />
-                      <button
-                        type="button"
-                        aria-label={`Remove ${a.name}`}
-                        className={styles.remove}
-                        onClick={() => setAdded((list) => list.filter((x) => x.domain !== a.domain))}
-                      >
+                      <button type="button" aria-label={`Remove ${a.name}`} className={styles.remove} onClick={() => void remove(a)}>
                         <IconX />
                       </button>
                     </li>
@@ -203,7 +269,7 @@ export function WelcomeView({ state }: { state: WelcomeState }) {
 
             <div className={styles.spacer} />
             <div className={styles.actions}>
-              <Button variant="primary" disabled={added.length === 0} onClick={() => (setProgress(0), setStep(3))}>
+              <Button variant="primary" disabled={added.length === 0} onClick={seeReport}>
                 See your first report
               </Button>
               <Button variant="plainDark" onClick={() => setStep(1)}>
@@ -217,10 +283,17 @@ export function WelcomeView({ state }: { state: WelcomeState }) {
           <div className={styles.card}>
             <h1 className={styles.title}>Building your first report</h1>
             {!slow ? <p className={styles.lead}>This usually takes under a minute.</p> : null}
-            {slow ? (
+            {live ? (
+              // We don't know a catalog's size until it's read, so progress is per store.
+              <ProgressBar
+                label={target ? `Reading ${target.name}’s catalog` : "Reading catalogs"}
+                value={done}
+                max={Math.max(1, added.length)}
+              />
+            ) : slow ? (
               <ProgressBar label="Reading Hearth & Pine’s catalog: 410 of 1,632 products" value={410} max={1632} />
             ) : (
-              <ProgressBar label={`Reading Dewlane’s catalog: ${progress} of 313 products`} value={progress} max={313} />
+              <ProgressBar label="Reading Dewlane’s catalog: 250 of 313 products" value={250} max={313} />
             )}
             {slow ? (
               <>
@@ -233,15 +306,34 @@ export function WelcomeView({ state }: { state: WelcomeState }) {
               </>
             ) : (
               <ul className={styles.progressList}>
-                <li>
-                  <IconCheck /> Hearth &amp; Pine: 1,632 products read
-                </li>
-                <li>
-                  <SpinnerIcon tone="#4a4740" /> Dewlane: reading catalog
-                </li>
-                <li>
-                  <IconClock /> Oakline Goods: pages next
-                </li>
+                {(live
+                  ? added
+                  : [
+                      { ...HP, status: "ready" as const },
+                      { ...DW, status: "reading" as const },
+                      OG,
+                    ]
+                ).map((a) => (
+                  <li key={a.id}>
+                    {a.status === "ready" ? (
+                      <>
+                        <IconCheck /> {a.name}: {a.products !== null ? `${a.products.toLocaleString("en-US")} products read` : "read"}
+                      </>
+                    ) : a.status === "reading" ? (
+                      <>
+                        <SpinnerIcon tone="#4a4a4a" /> {a.name}: reading catalog
+                      </>
+                    ) : a.status === "failed" ? (
+                      <>
+                        <IconX /> {a.name}: couldn&rsquo;t read, we&rsquo;ll try again
+                      </>
+                    ) : (
+                      <>
+                        <IconClock /> {a.name}: pages next
+                      </>
+                    )}
+                  </li>
+                ))}
               </ul>
             )}
           </div>

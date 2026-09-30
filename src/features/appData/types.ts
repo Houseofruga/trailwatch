@@ -90,7 +90,8 @@ export type FirstReport = {
 
 export type Account = { name: string; email: string; hasPassword: boolean };
 
-export type OwnStore = { domain: string; products: number; checkedAt: string };
+/** products is null until the first catalog read finishes. */
+export type OwnStore = { domain: string; products: number | null; checkedAt: string };
 
 export type HomeSummary = {
   movesThisMonth: number;
@@ -117,4 +118,13 @@ export type Settings = {
   ownStore: OwnStore | null;
   plan: { label: string; foundingMember: boolean; competitors: number; checkIntervalHours: number; slack: boolean };
   account: Account;
+};
+
+/** A store added during onboarding, with its first-read status. */
+export type OnboardingItem = {
+  id: string;
+  name: string;
+  domain: string;
+  status: "ready" | "reading" | "pages" | "failed";
+  products: number | null;
 };

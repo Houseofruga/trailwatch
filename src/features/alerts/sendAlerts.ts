@@ -131,7 +131,7 @@ export async function runAlertSender(service: SupabaseClient, now: Date = new Da
       };
 
       const results = await Promise.all([
-        settings.emailInstant ? mailer.send(user.email, renderAlertEmail(bundle, siteUrl, counter)) : null,
+        settings.emailInstant ? mailer.send(settings.sendTo ?? user.email, renderAlertEmail(bundle, siteUrl, counter)) : null,
         slackUrl ? postToSlack(slackUrl, renderAlertSlack(bundle, siteUrl)) : null,
       ]);
       const ids = group.map((a) => a.userEventId);

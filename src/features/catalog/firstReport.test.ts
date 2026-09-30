@@ -6,10 +6,15 @@ const NOW = new Date("2026-09-30T12:00:00Z");
 
 describe("buildFirstReport", () => {
   const catalog = [
-    product("old", { publishedAt: "2026-01-01T00:00:00Z" }),
-    product("new1", { publishedAt: "2026-09-20T00:00:00Z", title: "Barrier Repair Night Cream" }),
-    product("new2", { publishedAt: "2026-09-28T00:00:00Z" }),
-    product("future", { publishedAt: "2026-12-01T00:00:00Z" }),
+    product("old", { createdAt: "2026-01-01T00:00:00Z" }),
+    product("new1", { createdAt: "2026-09-20T00:00:00Z", title: "Barrier Repair Night Cream" }),
+    product("new2", { createdAt: "2026-09-28T00:00:00Z" }),
+    product("future", { createdAt: "2026-12-01T00:00:00Z" }),
+    // Republished: an old product with a fresh published date isn't a launch.
+    product("republished", { createdAt: "2025-06-01T00:00:00Z", publishedAt: "2026-09-29T00:00:00Z" }),
+    // Checkout add-ons aren't merchandise.
+    product("protect", { createdAt: "2026-09-29T00:00:00Z", title: "Package Protection" }),
+    product("returns", { createdAt: "2026-09-29T00:00:00Z", title: "Return Fee", productType: "" }),
     product("sale10", { variants: [variant({ price: 4500, compareAtPrice: 5000 })] }),
     product("sale40", { variants: [variant({ price: 3000, compareAtPrice: 5000 })] }),
     product("saleSoldOut", { variants: [variant({ price: 1000, compareAtPrice: 5000, available: false })] }),
@@ -17,8 +22,9 @@ describe("buildFirstReport", () => {
   ];
   const report = buildFirstReport(catalog, NOW);
 
-  it("lists products launched in the last 30 days, newest first (not future-dated ones)", () => {
+  it("lists products created in the last 30 days, newest first (not future-dated, republished or add-ons)", () => {
     expect(report.recentlyLaunched.map((i) => i.id)).toEqual(["new2", "new1"]);
+    expect(report.totals.recentlyLaunched).toBe(2);
     expect(report.recentlyLaunched[1]).toMatchObject({ title: "Barrier Repair Night Cream", launchedAt: "2026-09-20T00:00:00Z" });
   });
 
@@ -35,7 +41,7 @@ describe("buildFirstReport", () => {
   });
 
   it("includes catalog stats", () => {
-    expect(report.stats).toMatchObject({ productCount: 8, onSaleCount: 3, soldOutCount: 2 });
+    expect(report.stats).toMatchObject({ productCount: 9, onSaleCount: 3, soldOutCount: 2 });
   });
 });
 

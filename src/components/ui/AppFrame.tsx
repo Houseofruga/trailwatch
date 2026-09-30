@@ -21,7 +21,7 @@ const NAV = [
 
 type Props = {
   account: { name: string; email: string };
-  ownStore: { domain: string; products: number } | null;
+  ownStore: { domain: string; products: number | null } | null;
   competitorCount: number;
   /** Onboarding: nav items shown but not usable. */
   navDisabled?: boolean;
@@ -77,7 +77,10 @@ function Sidebar({
         <span className={styles.storeLabel}>Your store</span>
         {ownStore ? (
           <span className={styles.storeName}>
-            {ownStore.domain} <span className={styles.storeCount}>· {ownStore.products.toLocaleString("en-US")} products</span>
+            {ownStore.domain}{" "}
+            {ownStore.products !== null ? (
+              <span className={styles.storeCount}>· {ownStore.products.toLocaleString("en-US")} products</span>
+            ) : null}
           </span>
         ) : (
           <Link href="/settings#your-store" className={styles.storeAdd} onClick={onNavigate}>

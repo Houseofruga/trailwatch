@@ -22,10 +22,16 @@ export type ReportItem = {
 
 export type FirstReport = {
   stats: CatalogStats;
+  // Each list is capped at firstReportLimit; totals count every match.
   recentlyLaunched: ReportItem[];
   onSaleNow: ReportItem[];
   soldOut: ReportItem[];
+  totals: { recentlyLaunched: number; onSaleNow: number; soldOut: number };
 };
+
+/** Checkout add-ons (shipping protection, return fees) that apps list as products. */
+export const isHelperProduct = (p: CatalogProduct) =>
+  CATALOG_CONFIG.helperProductPattern.test(p.title) || CATALOG_CONFIG.helperProductPattern.test(p.productType);
 
 const minPrice = (p: CatalogProduct) =>
   p.variants.length ? Math.min(...p.variants.map((v) => v.price)) : null;
@@ -51,7 +57,8 @@ const item = (p: CatalogProduct): ReportItem => ({
   price: minPrice(p),
 });
 
-export function catalogStats(products: CatalogProduct[]): CatalogStats {
+export function catalogStats(allProducts: CatalogProduct[]): CatalogStats {
+  const products = allProducts.filter((p) => !isHelperProduct(p));
   const priced = products.map(minPrice).filter((n): n is number => n !== null);
   return {
     productCount: products.length,
@@ -66,25 +73,32 @@ export function catalogStats(products: CatalogProduct[]): CatalogStats {
  * (SPEC.md §5 Phase 2): what launched recently, what's on sale now, what's
  * sold out — straight from the first catalog read, no history needed.
  */
-export function buildFirstReport(products: CatalogProduct[], now: Date = new Date()): FirstReport {
+export function buildFirstReport(allProducts: CatalogProduct[], now: Date = new Date()): FirstReport {
   const limit = CATALOG_CONFIG.firstReportLimit;
   const cutoff = now.getTime() - CATALOG_CONFIG.firstReportRecentDays * 24 * 60 * 60 * 1000;
+  const products = allProducts.filter((p) => !isHelperProduct(p));
 
-  const recentlyLaunched = products
-    .map((p) => ({ p, at: p.publishedAt ?? p.createdAt }))
+  // Created date first: stores republish old products, which moves
+  // published_at and would read as a launch.
+  const launched = products
+    .map((p) => ({ p, at: p.createdAt ?? p.publishedAt }))
     .filter(({ at }) => at !== null && Date.parse(at) >= cutoff && Date.parse(at) <= now.getTime())
-    .sort((a, b) => Date.parse(b.at!) - Date.parse(a.at!))
-    .slice(0, limit)
-    .map(({ p, at }) => ({ ...item(p), launchedAt: at! }));
+    .sort((a, b) => Date.parse(b.at!) - Date.parse(a.at!));
 
-  const onSaleNow = products
+  const onSale = products
     .map((p) => ({ p, d: bestDiscount(p) }))
     .filter(({ p, d }) => d !== null && !isSoldOut(p))
-    .sort((a, b) => b.d!.pct - a.d!.pct)
-    .slice(0, limit)
-    .map(({ p, d }) => ({ ...item(p), price: d!.price, compareAtPrice: d!.compareAt, pctOff: d!.pct }));
+    .sort((a, b) => b.d!.pct - a.d!.pct);
 
-  const soldOut = products.filter(isSoldOut).slice(0, limit).map(item);
+  const soldOut = products.filter(isSoldOut);
 
-  return { stats: catalogStats(products), recentlyLaunched, onSaleNow, soldOut };
+  return {
+    stats: catalogStats(products),
+    recentlyLaunched: launched.slice(0, limit).map(({ p, at }) => ({ ...item(p), launchedAt: at! })),
+    onSaleNow: onSale
+      .slice(0, limit)
+      .map(({ p, d }) => ({ ...item(p), price: d!.price, compareAtPrice: d!.compareAt, pctOff: d!.pct })),
+    soldOut: soldOut.slice(0, limit).map(item),
+    totals: { recentlyLaunched: launched.length, onSaleNow: onSale.length, soldOut: soldOut.length },
+  };
 }

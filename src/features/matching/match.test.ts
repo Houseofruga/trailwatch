@@ -4,7 +4,7 @@ import type { CatalogEvent } from "@/features/catalog/diff";
 import { describeEvent } from "@/features/alerts/describe";
 import { buildBriefingMessage } from "@/features/briefing/prompt";
 import { annotateForUser } from "./annotate";
-import { baseTitle, buildOwnIndex, headlinePrice, packaging, similarity, titleTokens, undercut } from "./match";
+import { baseTitle, buildOwnIndex, compareCatalogs, headlinePrice, packaging, similarity, titleTokens, undercut } from "./match";
 
 describe("titleTokens", () => {
   it("drops brand, sizes, numbers, packaging words and folds plurals", () => {
@@ -188,5 +188,24 @@ describe("undercut in words", () => {
       ],
     });
     expect(msg).toContain("Dewlane launched Barrier Repair Night Cream at $48. [vs your Overnight Barrier Repair Cream at $52]");
+  });
+});
+
+describe("compareCatalogs", () => {
+  it("counts comparable products and lists the cheaper ones, biggest gap first", () => {
+    const own = [
+      product("o1", { title: "Linen Duvet Cover", productType: "Duvet Covers", variants: [variant({ price: 18900 })] }),
+      product("o2", { title: "Percale Sheet Set", productType: "Sheets", variants: [variant({ price: 15000 })] }),
+    ];
+    const theirs = [
+      product("c1", { title: "Linen Duvet Cover", productType: "Duvet Covers", variants: [variant({ price: 16900 })] }),
+      product("c2", { title: "Percale Sheet Set", productType: "Sheets", variants: [variant({ price: 16000 })] }),
+      product("c3", { title: "Wideboy Clock", productType: "Decor", variants: [variant({ price: 2900 })] }),
+    ];
+    expect(compareCatalogs(theirs, own)).toEqual({
+      similar: 2,
+      cheaper: [{ title: "Linen Duvet Cover", yourTitle: "Linen Duvet Cover", price: 16900, yourPrice: 18900 }],
+    });
+    expect(compareCatalogs(theirs, [])).toEqual({ similar: 0, cheaper: [] });
   });
 });
