@@ -49,6 +49,22 @@ function selectGroup(groups: Group[], userAgent: string): Group | null {
   return groups.find((g) => g.agents.includes("*")) ?? null;
 }
 
+// Google-style path matching (RFC 9309): `*` matches any run of characters and a
+// trailing `$` anchors the end of the URL; anything else is a plain prefix match.
+// Shopify's default robots.txt leans on both (`/collections/*sort_by*`,
+// `*/collections/*filter*&*filter*`), so prefix-only matching would misread it.
+function ruleMatches(rulePath: string, path: string): boolean {
+  const anchored = rulePath.endsWith("$");
+  const body = anchored ? rulePath.slice(0, -1) : rulePath;
+  if (!body.includes("*")) return anchored ? path === body : path.startsWith(body);
+  const pattern = body
+    .split("*")
+    .map((part) => part.replace(/[.+?^${}()|[\]\\]/g, "\\$&"))
+    .join(".*");
+  return new RegExp(`^${pattern}${anchored ? "$" : ""}`).test(path);
+}
+
+/** `pathname` should include the query string (`/search?q=x`) so query rules can match. */
 export function isPathAllowed(robotsTxt: string, userAgent: string, pathname: string): boolean {
   const group = selectGroup(parseGroups(robotsTxt), userAgent);
   if (!group) return true;
@@ -59,7 +75,7 @@ export function isPathAllowed(robotsTxt: string, userAgent: string, pathname: st
   let decision = true;
   let matchLen = -1;
   for (const rule of group.rules) {
-    if (rule.path === "" || !pathname.startsWith(rule.path)) continue;
+    if (rule.path === "" || !ruleMatches(rule.path, pathname)) continue;
     if (rule.path.length > matchLen || (rule.path.length === matchLen && rule.allow)) {
       matchLen = rule.path.length;
       decision = rule.allow;

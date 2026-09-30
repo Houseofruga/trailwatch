@@ -16,13 +16,22 @@ export type FetchResult =
   | { ok: false; reason: "robots"; message: string }
   | { ok: false; reason: "fetch-error"; message: string; status?: number };
 
-async function checkRobots(origin: string, pathname: string): Promise<boolean> {
+/** A site's robots.txt body, or null when there isn't a reachable one. */
+export async function fetchRobotsTxt(origin: string): Promise<string | null> {
   const res = await safeFetch(`${origin}/robots.txt`, { maxBytes: ROBOTS_MAX_BYTES });
+  return res.ok ? res.html : null;
+}
+
+/** Whether our bot may fetch `path` (pathname + query) under this robots.txt. */
+export function robotsAllows(robotsTxt: string | null, path: string): boolean {
   // No reachable robots.txt (404, private/blocked host, network error) is the
   // common case → treat as allowed. An internal host is still refused when we
-  // fetch the page itself below, so this can't be used to reach one.
-  if (!res.ok) return true;
-  return isPathAllowed(res.html, USER_AGENT, pathname);
+  // fetch the page itself, so this can't be used to reach one.
+  return robotsTxt === null || isPathAllowed(robotsTxt, USER_AGENT, path);
+}
+
+async function checkRobots(origin: string, path: string): Promise<boolean> {
+  return robotsAllows(await fetchRobotsTxt(origin), path);
 }
 
 export async function fetchPageIfAllowed(pageUrl: string): Promise<FetchResult> {
@@ -31,7 +40,7 @@ export async function fetchPageIfAllowed(pageUrl: string): Promise<FetchResult> 
   try {
     const url = new URL(pageUrl);
     origin = url.origin;
-    pathname = url.pathname;
+    pathname = url.pathname + url.search;
   } catch {
     return { ok: false, reason: "fetch-error", message: "Invalid URL" };
   }

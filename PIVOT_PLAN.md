@@ -8,10 +8,17 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
   - `SPEC.md` and `CLAUDE.md` rewritten
   - model IDs moved to `src/features/ai/models.ts`
   - `DESIGN_SYSTEM.md` and `DESIGN_BRIEF_FOR_CLAUDE_DESIGN.md` written
-- Next: Phase 1. New UI waits on the owner's Claude Design artboards.
+- **Phase 1 done (backend):**
+  - `src/features/stores/`: marketplace denylist config, canonical store host, platform detection, sale/policy page discovery, `probeStore` (network only) and `resolveStore` (shared store find-or-create)
+  - `addCompetitorByDomain` server action: coded results, competitor-only limit
+  - robots.txt wildcard + query support
+  - `scripts/probe-stores.ts`, which probes real stores with no DB writes
+  - The add-by-domain **screen** isn't wired up yet; it waits on the artboards. The legacy page flow still works.
+- Next: Phase 2 (catalog tracking). New UI waits on the owner's Claude Design artboards.
 
 **Log of new env vars and migrations:**
 - Phase 0: none.
+- Phase 1: migration **`0009_stores.sql`** (`stores`, `store_pages`, `competitors.store_id`, RLS). **Apply it in the Supabase SQL editor** before `addCompetitorByDomain` can write. No new env vars.
 
 ## 0. Git preservation (done 2026-09-30)
 

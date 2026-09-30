@@ -8,6 +8,8 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { LIMITS, type Plan } from "@/features/plan/limits";
 import { resolvePlan } from "@/features/plan/comp";
 import { runCheckForPage } from "@/features/checks/runCheck";
+import { storeInputError } from "@/features/stores/probeStore";
+import { resolveStore, type StoreSummary } from "@/features/stores/resolveStore";
 import { warmPages } from "./warm";
 import { competitorName, pageRow } from "./validation";
 import { normalizeUrl } from "./url";
@@ -238,6 +240,69 @@ export async function createCompetitor(_prev: FormState, formData: FormData): Pr
   revalidatePath("/dashboard");
   revalidatePath("/competitors");
   redirect(flashUrl("/dashboard", captureFlash(result.outcomes)));
+}
+
+export type AddStoreResult =
+  | { ok: true; competitorId: string; store: StoreSummary }
+  | {
+      ok: false;
+      code: "invalid" | "marketplace" | "unreachable" | "duplicate" | "limit";
+      message: string;
+    };
+
+/**
+ * Pivot Phase 1: add a competitor by domain only — no page picking. Resolves
+ * (or creates) the shared store, then records this user's follow of it. Returns
+ * a coded result rather than redirecting so the add screen (pending design) can
+ * render each state: marketplace blocked, unreachable, duplicate, plan limit.
+ * Limits count competitors only and come from the DB, never the client.
+ */
+export async function addCompetitorByDomain(domain: string): Promise<AddStoreResult> {
+  const supabase = await createClient();
+  const { userId, plan, competitorCount } = await loadPlanAndUsage(supabase);
+  const { competitors: limit } = LIMITS[plan];
+
+  // Cheap input checks first, then the limit — both before any network work.
+  const inputError = storeInputError(domain);
+  if (inputError) return inputError;
+  if (competitorCount >= limit) {
+    return {
+      ok: false,
+      code: "limit",
+      message: `You're already following all ${limit} competitors on your plan.`,
+    };
+  }
+
+  const resolved = await resolveStore(domain);
+  if (!resolved.ok) return resolved;
+  const { store } = resolved;
+
+  const duplicate: AddStoreResult = {
+    ok: false,
+    code: "duplicate",
+    message: `You're already following ${store.name}.`,
+  };
+  const { data: existing } = await supabase
+    .from("competitors")
+    .select("id")
+    .eq("store_id", store.id)
+    .maybeSingle();
+  if (existing) return duplicate;
+
+  const { data: competitor, error } = await supabase
+    .from("competitors")
+    .insert({ user_id: userId, name: store.name, store_id: store.id })
+    .select("id")
+    .single();
+  if (error) {
+    // The (user_id, store_id) unique index is the backstop for a double submit.
+    if (error.code === "23505") return duplicate;
+    throw error;
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/competitors");
+  return { ok: true, competitorId: competitor.id, store };
 }
 
 // --------------------------------------------------------------- pre-seed (onboarding)
