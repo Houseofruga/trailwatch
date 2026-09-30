@@ -2,13 +2,13 @@ import OpenAI from "openai";
 import Anthropic from "@anthropic-ai/sdk";
 import { buildPagePrompt, parsePageProfile } from "./prompt";
 import type { InsightProvider } from "./types";
+import { ANTHROPIC_FAST_MODEL, GROQ_BASE_URL, GROQ_SMALL_MODEL } from "@/features/ai/models";
 
 // Same provider seam as summaries/competitorTeardown: Groq (free tier) preferred,
 // then Anthropic Haiku, then a null provider that declines cleanly. The single
 // swap point is getInsightProvider().
-const GROQ_MODEL = "openai/gpt-oss-20b";
-const GROQ_BASE_URL = "https://api.groq.com/openai/v1";
-const ANTHROPIC_MODEL = "claude-haiku-4-5";
+const GROQ_MODEL = GROQ_SMALL_MODEL;
+const ANTHROPIC_MODEL = ANTHROPIC_FAST_MODEL;
 const MAX_TOKENS = 700;
 const DECLINE = "We couldn't profile that page.";
 

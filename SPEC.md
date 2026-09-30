@@ -1,214 +1,175 @@
-# SPEC.md — Competitor Radar MVP
+# SPEC.md — TrailWatch: competitive briefings for Shopify DTC brands
 
-> This is the implementation spec for Claude Code. It is intentionally scoped to the
-> smallest thing that delivers the core value: **a user adds competitor pages and
-> receives a plain-English weekly digest of what actually changed.**
-> Anything not listed under "In scope" is out of scope for the MVP — do not build it.
+> Source of truth for scope and behavior, from pivot Phase 0 (2026-09-30) onward.
+> Derived from `trailwatch-ecommerce-pivot-prompt.md` plus the decisions recorded in
+> `PIVOT_PLAN.md` §6. The previous "founder edition" spec (competitor *page* monitoring)
+> is preserved on branch `archive/founder-edition` / tag `v1-founder-edition`.
 
 ---
 
 ## 1. What we're building
 
-A web app where a user adds a few competitor page URLs, the system checks them daily,
-detects meaningful text changes, summarizes each change in plain English using an LLM,
-and emails the user a weekly digest. Free tier + one paid tier via Paddle.
+**Instant alerts when a competitor makes a move. A briefing every Monday for the big picture.**
 
-The single differentiator is **low noise**: trivial changes must be filtered out, and
-each surfaced change must come with a short, readable summary — not a raw diff.
+- A user adds competitor **stores by domain**.
+- For Shopify stores, we track the **full product catalog**: launches, removals, prices, sales, stock.
+- For every store, we also watch the **homepage and sale page** for promos and positioning changes.
+- Changes become typed **events** with a severity:
+  - **High** events trigger **instant alerts**.
+  - **Normal** events land in the **Monday briefing**, which interprets what the moves mean for the user's own products.
+- The category is **competitive briefing**, not monitoring. The edge is **interpretation**. Low noise still matters: cosmetic changes never reach the user.
 
----
+**Target user:** a US Shopify DTC brand doing ~$1M–$10M/yr and selling its **own** products in promo-heavy categories (beauty, skincare, supplements, apparel, home, pet). The buyer is the founder or head of marketing/growth: busy and not technical.
+
+**Not for:** dropshippers, enterprise, or SaaS founders.
 
 ## 2. Tech stack
 
-Recommended (swap any layer for what you're fastest in — but keep it boring and few moving parts):
+| Layer | Choice |
+|---|---|
+| App | Next.js App Router (TS strict) on Vercel |
+| DB and auth | Supabase Postgres + Auth + RLS |
+| Snapshot storage | Supabase **Storage** (gzipped catalog snapshots) |
+| Scheduling | Supabase **`pg_cron` + `pg_net`**. They call our cron endpoints every 10–15 min, and each tick processes the stores that are due (`next_check_at <= now()`). Vercel Cron stays daily-only. |
+| AI | Anthropic. Model IDs live **only** in `src/features/ai/models.ts`. Haiku classifies page changes. Sonnet writes briefings through the **Batch API** with **prompt caching**. Groq stays as the legacy fallback for old paths. A funded `ANTHROPIC_API_KEY` is required. |
+| Email | Resend |
+| Billing | Paddle (sandbox; billing disabled during beta) |
 
-- **Frontend + backend:** Next.js (App Router, TypeScript)
-- **DB + Auth:** Supabase (Postgres + Supabase Auth)
-- **Scheduled jobs:** Vercel Cron (or Supabase scheduled functions) — a daily check job and a weekly digest job
-- **Change summaries:** Anthropic API, cheapest/fastest model (Claude Haiku tier) to control cost — verify the current model string in the API docs
-- **Email:** Resend (transactional)
-- **Billing:** Paddle (Checkout + webhooks)
+Cost constraint: stay on free tiers wherever possible. **Ask before adding any new paid service.**
 
-Constraint: total infra cost must stay under ~$50/mo at MVP scale. Prefer free tiers.
+## 3. Data model (target; migrations `0009+`, applied in the Supabase SQL editor)
 
----
+**Crawl data is global (per store). User data is per user.**
 
-## 3. Data model
+Global tables (written by the service role; readable by users who follow the store):
+- `stores`
+- `store_pages`
+- `catalog_products`
+- `catalog_variants`
+- `catalog_snapshots` (a Storage reference, written only when the catalog hash changes)
+- `events` (`type`, `severity`, `payload`, `source`, `dedupe_key`)
 
-```
-users            # profile row per auth user
-  id (uuid, = auth user id)
-  email
-  plan               # 'free' | 'paid'
-  paddle_customer_id # nullable
-  last_digest_sent_at (timestamp, nullable)
-  created_at
+Per-user tables:
+- `competitors` (gains `store_id`; it becomes the user↔store follow)
+- `user_events` (fan-out, delivery, throttling)
+- `alert_settings`
+- `briefings` (async Batch API state)
+- own store + `product_matches` (Phase 5)
+- `ai_usage` and `fetch_log` (Phase 7)
 
-competitors        # a competitor is a named group of pages
-  id (uuid)
-  user_id (fk users)
-  name
-  created_at
+`users.plan` becomes `free|starter|pro|agency`, plus `is_founding_member`.
 
-pages              # one monitored URL
-  id (uuid)
-  competitor_id (fk competitors)
-  url
-  label              # e.g. 'pricing', 'homepage', 'blog'
-  is_active (bool, default true)
-  last_checked_at (timestamp, nullable)
-  latest_snapshot_id (fk snapshots, nullable)
-  created_at
+The legacy `pages / snapshots / changes / page_insights` tables become read-only and get dropped in a later cleanup migration. See `PIVOT_PLAN.md` §3 for column-level detail.
 
-snapshots          # captured content of a page at a point in time
-  id (uuid)
-  page_id (fk pages)
-  content_text       # normalized main-content text
-  content_hash       # hash of content_text for fast equality
-  fetched_at
+## 4. Plans (Phase 6)
 
-changes            # a detected meaningful change between two snapshots
-  id (uuid)
-  page_id (fk pages)
-  from_snapshot_id (fk snapshots)
-  to_snapshot_id (fk snapshots)
-  summary            # LLM plain-English summary
-  diff_excerpt       # short before/after excerpt for context
-  detected_at
-```
+| | Free | Starter | Pro | Agency |
+|---|---|---|---|---|
+| Price | $0 | $29/mo | $79/mo | $199/mo (feature-flagged, not launched) |
+| Competitors | 1 | 3 | 10 | — |
+| Weekly briefing | ✓ | ✓ | ✓ | |
+| Instant alerts | — | email | email + Slack | |
+| Check cadence | daily | every 6h | every 2h (hourly in BFCM mode) | |
+| Own-store matching | — | — | ✓ | |
 
-Notes:
-- Digests are **derived** from `changes` in the last 7 days — do not store a digest table for MVP.
-- Enforce plan limits in application logic (see §5).
+- Annual pricing is 10× monthly (2 months free): Starter $290/yr, Pro $790/yr.
+- "Founding member" coupon: 40% off for life. The Paddle prices and discount are created in the Paddle dashboard.
+- **Beta:** the app runs as a free beta. Plans are visible, billing is disabled (`BILLING_ENABLED=false`), and beta users are flagged as founding members.
+- Limits count **competitors only**. Page counts are gone.
+- Limits are enforced server-side and never trusted from the client.
 
----
+## 5. Behavior by phase
 
-## 4. Plan limits
+1. **Competitor = store.**
+   - Add by domain only. There is no page picking.
+   - Detect Shopify: `/products.json` returns a `products` array. Fall back to Shopify headers or `cdn.shopify.com` assets; otherwise the store is `generic`.
+   - Auto-discover watched pages: homepage, a sale/collection page (from nav links), and `/policies/shipping-policy` + `/policies/refund-policy` if they return 200 **and robots.txt allows them**. Shopify's default robots.txt disallows `/policies/`, and we honor that.
+   - Marketplace denylist (a single config file): amazon.\*, walmart.com, target.com, ebay.\*, etsy.com, aliexpress.com, temu.com. Message: *"Add the brand's own website instead; marketplace tracking is coming soon."*
+2. **Catalog tracking.**
+   - **Fetching:**
+     - Paginate `/products.json?limit=250&page=N` until an empty page.
+     - Wait a small delay between pages, back off on 429/5xx, send a polite User-Agent, and respect robots.txt with wildcard support.
+     - If `products.json` is unavailable, fall back to the product sitemap + JSON-LD `Product`/`Offer` data.
+     - Catalogs over 5,000 products get launch/removal tracking for everything, but per-variant price history only for a capped subset (configurable).
+   - **Normalize** each product to: id, handle, title, product_type, tags, vendor, created_at, published_at, image, and per variant: id, title, sku, price, compare_at_price, available.
+   - **Diff in code, with no AI.** Event types:
+     - `product_launched`, `product_removed`
+     - `price_changed` (old, new, %)
+     - `sale_started` / `sale_ended` (`compare_at_price` above `price`)
+     - `sold_out` / `restocked`
+     - `sitewide_sale_detected` (≥30% of in-stock products newly discounted in one check; includes the average discount)
+   - **Crawl each domain once** and fan the results out to every follower.
+   - **Instant first report** on add (recent launches / on sale now / sold out), delivered within minutes.
+3. **Events and severity.**
+   - Catalog events and page events live in one `events` table.
+   - Page pipeline: hash first, so an unchanged page costs zero AI. A changed page goes to Haiku, which classifies it as `promo_launched` (discount % / code / free-shipping threshold), `positioning_shift`, `policy_change` or `cosmetic`. Cosmetic changes are dropped.
+   - Severity rules are config-driven:
+     - **High:** sale ≥20% or sitewide, `sitewide_sale_detected`, `promo_launched`, `price_undercut`, top product sold out, `product_launched`.
+     - **Normal:** small `price_changed`, `restocked`, `policy_change`, `positioning_shift`.
+     - **Low:** cosmetic.
+   - At most N instant alerts per user per day (default 5). High events for the same competitor within a short window are bundled into one alert.
+4. **Alerts and briefing.**
+   - **Instant alerts** (Starter/Pro): email, plus Slack through an incoming webhook that must be a `hooks.slack.com` URL. They cover what happened, when, a link, and one suggested action.
+   - **Monday briefing** (all plans): arrives Monday morning US Eastern (DST-aware). It's written by Sonnet through the Batch API: submitted Sunday night, collected and sent Monday. Sections:
+     1. Top 3 moves
+     2. Per competitor: launches, pricing/promos, stock, positioning/policy
+     3. What this means for you
+     4. One suggested move
+   - A "Competitor moves caught this month: N" counter appears on the dashboard and in the email footer.
+5. **Own store** (basic).
+   - The user enters their own store domain, which is crawled the same way.
+   - Match competitor products to the user's products by title / product_type similarity.
+   - This enables `price_undercut` and catalog-aware briefing lines.
+6. **Plans, limits and cadence:** see §4. There's a BFCM-mode config window for hourly Pro checks.
+7. **Cost guardrails.**
+   - Log per-competitor fetch counts and per-user AI tokens and cost.
+   - `/admin` (gated by `ADMIN_EMAILS`) shows cost per user per month.
+   - Hard caps: competitors per plan, fully tracked products per competitor, AI calls per competitor per day, and free signups per day.
+8. **In-app copy** for DTC brand owners. Demo and sample content uses fictional DTC brands only.
 
-| | Free | Paid |
-|---|---|---|
-| Competitors | 2 | 10 |
-| Pages per competitor | 3 | 10 |
-| Check frequency | daily | daily |
-| Digest | weekly email | weekly email |
+## 6. Out of scope
 
-(Instant/daily alerting and more channels are Phase 2 — not now.)
+- **Landing / marketing / SEO pages and the public tools.** Don't modify them, but don't break them either. They share `tokens.css` and some components.
+- Marketplace tracking (Amazon etc.)
+- The Agency tier launch (it stays behind a flag)
+- Embeddings-based matching (Phase 5 starts simple)
+- Headless / JS rendering, screenshots and visual diffs
+- Team seats
+- Public API
+- Native apps
 
----
+**Remove or deprecate:**
+- The page-picking onboarding and page dialogs
+- Page-count limits and the old Free 2×2 / Pro 5×5 plans
+- Founder/SaaS copy and examples in-app, including the in-app AI competitor finder and the Wayback backfill in onboarding
 
-## 5. In scope — features & behavior
+## 7. Build order
 
-### F1. Auth (self-serve)
-- Email/password or Google sign-in via Supabase Auth.
-- On first sign-in, create a `users` row with `plan = 'free'`.
-- No manual onboarding steps.
+Phase 0 (groundwork) → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8, **one phase at a time**.
 
-### F2. Add / manage competitors and pages
-- User creates a competitor (name), then adds one or more pages (url + label).
-- Enforce plan limits from §4 — block with a clear message + upgrade prompt when exceeded.
-- User can edit label, pause/resume (`is_active`), and delete pages and competitors.
+After each phase:
+1. Run tests, lint and typecheck.
+2. Summarize the changes.
+3. Commit with a `pivot:` prefix.
+4. **Wait for the owner's go-ahead before pushing** or starting the next phase.
 
-### F3. Daily check engine (scheduled job)
-For each `page` where `is_active = true`:
-1. Fetch the URL with a plain HTTP GET (no headless browser). Set a sane timeout and a
-   descriptive User-Agent. Respect robots.txt; skip and log if disallowed.
-2. Extract the **main content text** (readability-style extraction; strip nav/footer/scripts).
-3. Normalize: collapse whitespace, drop volatile boilerplate (timestamps, CSRF tokens, etc.).
-4. Compute `content_hash`. If equal to the latest snapshot's hash → no change; update
-   `last_checked_at` and stop.
-5. If different, run the **noise filter** (F4). If the change is not meaningful → store the
-   new snapshot (so future diffs are against current) but create **no** `change` row.
-6. If meaningful → create a new `snapshot`, generate a summary (F5), create a `change` row,
-   and update `latest_snapshot_id` + `last_checked_at`.
+New UI gets built **1:1 from Claude Design artboards** (see `DESIGN_SYSTEM.md` and `DESIGN_BRIEF_FOR_CLAUDE_DESIGN.md`). Backend work proceeds while designs are pending.
 
-The job must be resilient: one failing URL must not break the batch. Log fetch errors per page.
+## 8. Tests (required)
 
-### F4. Noise filter (the core differentiator — unit-tested)
-A pure function `isMeaningfulChange(oldText, newText) -> { meaningful: bool, reason: string }`.
-- Ignore whitespace-only and case-only differences.
-- Ignore changes below a small character/line threshold unless they touch price/number/CTA-like tokens.
-- Ignore obviously volatile fragments (dates, counters, session tokens).
-- This function MUST have unit tests with fixtures (see §8).
+- Platform detection
+- Catalog pagination
+- Snapshot diffing, covering **every** event type
+- Severity routing and throttling / bundling
+- The marketplace denylist
+- robots.txt wildcard matching
+- Carried over: the noise filter, and the Paddle webhook, which now maps price → plan
 
-### F5. Change summary (LLM)
-- Input: the meaningful diff (old vs new main text, or a focused excerpt).
-- Prompt the model to return a **one-to-two sentence** plain-English summary of what changed
-  and, if obvious, why it might matter — no raw HTML, no fluff.
-- If the model judges the diff to be trivial, it may return a "no meaningful change" signal;
-  in that case suppress the change (belt-and-suspenders with F4).
-- Store the summary on the `change` row. Keep prompts/token use small (cost control).
+A pre-commit hook blocks commits when tests fail.
 
-### F6. Weekly digest (scheduled job)
-- Runs weekly per user.
-- Collect that user's `changes` from the last 7 days.
-- If there are changes → send an email (Resend) grouping changes by competitor, each line =
-  page label + summary + link to the page. Update `last_digest_sent_at`.
-- If there are **no** changes → send nothing (do not email "nothing changed").
+## 9. Definition of done
 
-### F7. Dashboard
-- List competitors → their pages → recent changes (summary + detected_at + link).
-- Add/edit/delete/pause controls from F2.
-- Show current plan and an Upgrade button.
-- Empty state for a brand-new user that guides them to add their first competitor.
-
-### F8. Billing (Paddle)
-- Upgrade via Paddle Checkout (one paid plan, monthly or annual, USD).
-- Webhook handler updates `users.plan` on subscription activation and reverts on
-  cancellation/subscription deletion. Store `paddle_customer_id`.
-- Webhook handler MUST be unit/integration-tested (see §8) — this touches money.
-
----
-
-## 6. Out of scope (do NOT build for MVP)
-
-Headless/JS rendering · screenshot or visual (pixel) diffs · Slack/Discord/Teams/webhook alerts ·
-instant or hourly alerting · visual element/CSS selector UI · team seats / multi-user accounts ·
-public API · native mobile app · multiple paid tiers · in-app change history browser beyond
-"recent changes." These are Phase 2+, only after paying users ask.
-
----
-
-## 7. Build order (vertical slices — ship each working before the next)
-
-1. **Auth + empty dashboard.** User can sign up, log in, see an empty dashboard, sign out.
-2. **Add competitor + page + list them.** CRUD for competitors/pages with plan limits enforced.
-3. **Check engine + noise filter, manually triggerable.** A dev endpoint runs the check for one
-   page; changed content produces a snapshot + (if meaningful) a change row. Unit-test F4.
-4. **LLM summary on detected changes.** Change rows get plain-English summaries.
-5. **Dashboard shows recent changes.** Competitor → pages → changes with summaries and links.
-6. **Weekly digest email.** Wire the scheduled job; verify the email for a user with changes and
-   the no-send for a user without.
-7. **Daily check on a schedule.** Move the manual trigger to the daily cron.
-8. **Paddle billing.** Checkout + webhook flips plan; limits update live. Test the webhook.
-
-Each slice must work end-to-end before starting the next. Prefer the simplest approach; do not
-add abstractions, helper layers, or config that a slice doesn't need yet.
-
----
-
-## 8. Tests (only where it hurts — money + data)
-
-- **`isMeaningfulChange` (F4):** unit tests with fixture pairs — whitespace-only (not meaningful),
-  price change (meaningful), added paragraph (meaningful), timestamp-only (not meaningful).
-- **Paddle webhook handler (F8):** given a subscription-activated event, `plan` becomes
-  `'paid'`; given a cancellation event, `plan` reverts to `'free'`.
-- Add a pre-commit hook that blocks commits when tests fail.
-- No exhaustive coverage elsewhere for MVP — manual QA covers the rest.
-
----
-
-## 9. End-to-end verification (the definition of "done")
-
-The MVP is done when all of these pass by hand in a test environment:
-
-1. A new user signs up, adds a competitor with one page URL, and sees it on the dashboard.
-2. Running the check when the page's content has changed creates a change row **with an
-   AI summary**; running it when nothing changed creates **no** change row.
-3. A whitespace-only or timestamp-only change produces **no** change row (noise filter works).
-4. The weekly digest job emails a user who has changes (grouped, with links) and sends
-   **nothing** to a user with none.
-5. A free user is blocked from adding a 3rd competitor; completing Paddle Checkout (sandbox)
-   flips them to paid and lifts the limit immediately.
-6. Cancelling the subscription reverts the user to the free plan and re-applies the limit.
-
-When 1–6 pass, stop building and ship. Fix everything else from real user reports.
+1. I can sign up, add `somebrand.com`, and **within minutes** receive a first report built from its catalog.
+2. High-severity changes produce **instant alerts**. Everything else lands in **Monday's briefing**.
+3. Crawls are **shared** across users, **unchanged pages cost zero AI calls**, and an **admin view** shows cost per user.
+4. The tests in §8 pass.

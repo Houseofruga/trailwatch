@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { buildFinderPrompt, parseCompetitors } from "./prompt";
 import type { FinderProvider } from "./types";
+import { GROQ_BASE_URL, GROQ_LARGE_MODEL } from "@/features/ai/models";
 
 // Groq's OpenAI-compatible endpoint. gpt-oss-120b (free on Groq): strong,
 // consistent, clean-JSON competitor recall with correct homepage URLs. (Trialed
@@ -8,8 +9,8 @@ import type { FinderProvider } from "./types";
 // company and hallucinated obscure/fake competitors, so gpt-oss stays.) Still
 // offline — can't know about a shutdown after its cutoff — which is why the UI
 // frames results as editable suggestions. Verified against the account 2026-09-05.
-const MODEL = "openai/gpt-oss-120b";
-const BASE_URL = "https://api.groq.com/openai/v1";
+const MODEL = GROQ_LARGE_MODEL;
+const BASE_URL = GROQ_BASE_URL;
 const MAX_TOKENS = 600;
 
 export function createGroqFinder(apiKey: string): FinderProvider {

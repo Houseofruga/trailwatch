@@ -1,10 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { buildPrompt, parseTeardown } from "./prompt";
 import type { TeardownProvider } from "./types";
+import { ANTHROPIC_FAST_MODEL } from "@/features/ai/models";
 
 // Same cheap/fast tier as the change summarizer. The teardown is a bit longer,
 // so allow more tokens than the 256 used for diffs.
-const MODEL = "claude-haiku-4-5";
+const MODEL = ANTHROPIC_FAST_MODEL;
 const MAX_TOKENS = 700;
 
 export function createAnthropicTeardown(apiKey: string): TeardownProvider {

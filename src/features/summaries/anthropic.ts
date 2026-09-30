@@ -1,9 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { buildPrompt, NO_CHANGE_SENTINEL } from "./prompt";
 import type { Summarizer } from "./types";
+import { ANTHROPIC_FAST_MODEL } from "@/features/ai/models";
 
 // Cheapest/fastest tier per SPEC.md — summaries are short and mechanical.
-const MODEL = "claude-haiku-4-5";
+const MODEL = ANTHROPIC_FAST_MODEL;
 
 export function createAnthropicSummarizer(apiKey: string): Summarizer {
   const client = new Anthropic({ apiKey });

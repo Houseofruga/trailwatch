@@ -1,11 +1,12 @@
 import OpenAI from "openai";
 import { buildPrompt, parseTeardown } from "./prompt";
 import type { TeardownProvider } from "./types";
+import { GROQ_BASE_URL, GROQ_SMALL_MODEL } from "@/features/ai/models";
 
 // Groq's OpenAI-compatible endpoint, same as the change summarizer. JSON mode
 // keeps the reply parseable; the prompt still defines the exact shape.
-const MODEL = "openai/gpt-oss-20b";
-const BASE_URL = "https://api.groq.com/openai/v1";
+const MODEL = GROQ_SMALL_MODEL;
+const BASE_URL = GROQ_BASE_URL;
 const MAX_TOKENS = 900;
 
 export function createGroqTeardown(apiKey: string): TeardownProvider {

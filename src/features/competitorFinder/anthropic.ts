@@ -1,9 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { buildFinderPrompt, parseCompetitors } from "./prompt";
 import type { FinderProvider } from "./types";
+import { ANTHROPIC_FAST_MODEL } from "@/features/ai/models";
 
 // Same cheap/fast tier as the teardown and change summarizer.
-const MODEL = "claude-haiku-4-5";
+const MODEL = ANTHROPIC_FAST_MODEL;
 const MAX_TOKENS = 500;
 
 export function createAnthropicFinder(apiKey: string): FinderProvider {

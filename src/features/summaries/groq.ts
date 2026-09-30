@@ -1,12 +1,13 @@
 import OpenAI from "openai";
 import { buildPrompt, NO_CHANGE_SENTINEL } from "./prompt";
 import type { Summarizer } from "./types";
+import { GROQ_BASE_URL, GROQ_SMALL_MODEL } from "@/features/ai/models";
 
 // Groq exposes an OpenAI-compatible API, so we reuse the openai SDK pointed at
 // Groq's endpoint. GPT-OSS-20B: production (not preview), cheapest tier, plenty
 // capable for a 1-2 sentence diff summary.
-const MODEL = "openai/gpt-oss-20b";
-const BASE_URL = "https://api.groq.com/openai/v1";
+const MODEL = GROQ_SMALL_MODEL;
+const BASE_URL = GROQ_BASE_URL;
 
 export function createGroqSummarizer(apiKey: string): Summarizer {
   const client = new OpenAI({ apiKey, baseURL: BASE_URL });
