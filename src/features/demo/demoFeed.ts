@@ -1,7 +1,7 @@
 import type { CompetitorRow } from "@/features/competitors/queries";
 import type { ChangeDetail } from "@/features/changes/queries";
 import { labelToType } from "@/features/competitors/pageTypes";
-import { domainOf, formatFullDate, formatShortDate } from "@/app/(app)/dashboard/dashboardFeed";
+import { domainOf, formatFullDate, formatShortDate } from "@/features/changes/dashboardFeed";
 
 // Curated, display-only demo content for the Seeded Demo Dashboard (SPEC Fix 2).
 //

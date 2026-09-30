@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { domainOf, formatFullDate, formatShortDate } from "@/app/(app)/dashboard/dashboardFeed";
+import { domainOf, formatFullDate, formatShortDate } from "@/features/changes/dashboardFeed";
 import { getDemoChangeDetail } from "@/features/demo/demoFeed";
 import { labelToType, pageTypeLabel } from "@/features/competitors/pageTypes";
 

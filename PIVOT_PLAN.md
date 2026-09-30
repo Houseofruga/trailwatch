@@ -138,9 +138,9 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
     - Development-only `?state=` switcher: `src/features/appData/devState.ts` and `DevStateBar`.
     - Auth stays real. Its actions gained field errors, a "check your inbox" state, a link-expired
       state and `resendConfirmation`.
-    - Old founder-edition screen files are unused now but still on disk (deleting them needs the
-      owner's OK): `@modal/`, `changes/`, `competitors/add/`, the old dashboard, competitor and
-      onboarding components.
+    - Old founder-edition screens and their now-unused components were deleted (2026-09-30, with the owner's OK).
+      They are still in git history and on `archive/founder-edition`. `dashboardFeed.ts` moved to
+      `src/features/changes/`.
 
 **Log of new env vars and migrations:**
 - Phase 0: none.
