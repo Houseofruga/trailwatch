@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServiceClient } from "@/lib/supabase/service";
 import { CATALOG_CONFIG } from "./config";
 import { runCatalogCheck, type CatalogCheckResult } from "./runCatalogCheck";
+import { checkStorePages, type StorePagesResult } from "@/features/stores/checkStorePages";
 
 const minutesFromNow = (m: number) => new Date(Date.now() + m * 60_000).toISOString();
 
@@ -23,30 +24,44 @@ async function claim(service: SupabaseClient, storeId: string): Promise<boolean>
   return (data?.length ?? 0) > 0;
 }
 
-/** Claim → check → schedule the next check. Null if the store wasn't due. */
+export type StoreCheckResult = { catalog: CatalogCheckResult; pages: StorePagesResult | null };
+
+/**
+ * Claim → check the store's pages, then its catalog → schedule the next check.
+ * Null if the store wasn't due. Pages go first so the homepage's featured
+ * products (the top-product signal) are fresh when catalog events get their
+ * severity. A page-check failure doesn't block the catalog check.
+ */
 export async function checkStoreIfDue(
   storeId: string,
   service: SupabaseClient = createServiceClient(),
-): Promise<CatalogCheckResult | null> {
+): Promise<StoreCheckResult | null> {
   if (!(await claim(service, storeId))) return null;
 
-  let result: CatalogCheckResult;
+  let pages: StorePagesResult | null = null;
   try {
-    result = await runCatalogCheck(service, storeId);
+    pages = await checkStorePages(service, storeId);
   } catch (err) {
-    result = { status: "error", message: err instanceof Error ? err.message : String(err) };
+    console.error(`Page checks failed for store ${storeId}:`, err);
+  }
+
+  let catalog: CatalogCheckResult;
+  try {
+    catalog = await runCatalogCheck(service, storeId);
+  } catch (err) {
+    catalog = { status: "error", message: err instanceof Error ? err.message : String(err) };
     await service
       .from("stores")
-      .update({ check_status: "error", check_error: result.message })
+      .update({ check_status: "error", check_error: catalog.message })
       .eq("id", storeId);
   }
 
   const next =
-    result.status === "error"
+    catalog.status === "error"
       ? minutesFromNow(CATALOG_CONFIG.errorRetryMinutes)
       : minutesFromNow(CATALOG_CONFIG.defaultCheckIntervalHours * 60);
   await service.from("stores").update({ next_check_at: next }).eq("id", storeId);
-  return result;
+  return { catalog, pages };
 }
 
 export type CatalogTickResult = {
@@ -82,11 +97,17 @@ export async function runCatalogTick(budgetMs: number = CATALOG_CONFIG.tickBudge
       if (Date.now() >= deadline) return { ...totals, remaining: true };
       const result = await checkStoreIfDue(id, service);
       if (!result) continue; // another runner took it
+      const { catalog, pages } = result;
       totals.checked += 1;
-      if (result.status === "error") totals.errors += 1;
-      if (result.status === "changed") {
+      if (catalog.status === "error") totals.errors += 1;
+      if (catalog.status === "changed") {
         totals.changed += 1;
-        totals.events += result.events;
+        totals.events += catalog.events;
+      }
+      if (pages) {
+        totals.changed += pages.changed;
+        totals.events += pages.events;
+        totals.errors += pages.errors;
       }
     }
   }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findSalePagePath } from "./discoverPages";
+import { featuredProductHandles, findSalePagePath } from "./discoverPages";
 
 const ORIGIN = "https://www.dewlane.com";
 const page = (...hrefs: string[]) => hrefs.map((h) => `<a href="${h}">x</a>`).join("");
@@ -58,5 +58,23 @@ describe("findSalePagePath", () => {
     expect(findSalePagePath(page("http://[bad", "/collections/%E0%A4%A", "/collections/sale"), ORIGIN)).toBe(
       "/collections/sale",
     );
+  });
+});
+
+describe("featuredProductHandles", () => {
+  it("collects same-host product links in page order, deduped and lowercased", () => {
+    const html = page(
+      "/products/Night-Cream",
+      "/collections/best/products/day-serum",
+      "/en-us/products/night-cream",
+      "https://dewlane.com/products/toner?variant=1",
+      "https://other.com/products/stolen",
+      "/collections/sale",
+    );
+    expect(featuredProductHandles(html, ORIGIN)).toEqual(["night-cream", "day-serum", "toner"]);
+  });
+
+  it("returns nothing for a page without product links", () => {
+    expect(featuredProductHandles(page("/pages/about", "/collections/all"), ORIGIN)).toEqual([]);
   });
 });

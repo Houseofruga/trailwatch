@@ -28,6 +28,32 @@ const LOCALE = String.raw`(?:/[a-z]{2}(?:-[a-z]{2})?)?`;
 const COLLECTION_PATH = new RegExp(String.raw`^${LOCALE}/collections/([^/]+)/?$`, "i");
 const TOP_LEVEL_PATH = new RegExp(String.raw`^${LOCALE}/(?:shop/)?([^/]+)/?$`, "i");
 
+const PRODUCT_LINK = new RegExp(String.raw`^${LOCALE}(?:/collections/[^/]+)?/products/([^/]+)/?$`, "i");
+const MAX_FEATURED = 50;
+
+/**
+ * Handles of the products a store features on its homepage — the best proxy
+ * for "top product" we have without sales data (a top product selling out is
+ * a high-severity event). Same-host /products/<handle> links, in page order.
+ */
+export function featuredProductHandles(homepageHtml: string, origin: string): string[] {
+  const $ = cheerio.load(homepageHtml);
+  const host = new URL(origin).hostname.replace(/^www\./, "");
+  const handles = new Set<string>();
+  $("a[href]").each((_, el) => {
+    if (handles.size >= MAX_FEATURED) return false;
+    try {
+      const url = new URL($(el).attr("href") ?? "", origin);
+      if (url.hostname.replace(/^www\./, "") !== host) return;
+      const match = PRODUCT_LINK.exec(url.pathname);
+      if (match) handles.add(decodeURIComponent(match[1]).toLowerCase());
+    } catch {
+      // malformed href or %-escape
+    }
+  });
+  return [...handles];
+}
+
 /**
  * Find the store's sale/collection page from the links on its homepage (nav,
  * banners, footer). Only same-host links count. Shopify collection URLs are

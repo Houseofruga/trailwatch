@@ -30,7 +30,22 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
     - a sale doesn't also count as a price change
     - a sitewide sale folds in the per-product `sale_started` events it explains, with a minimum of 5 products
   - **Known limits of the sitemap fallback:** no compare-at price (so no sale events) and no publish dates (so the first report has no "recent launches").
-- Next: Phase 3 (events + severity). New UI waits on the owner's Claude Design artboards.
+- **Phase 3 done (backend):** `src/features/events/`
+  - **One event model.** Catalog and page events share `events`, with severity and a dedupe key.
+  - **Severity lives in config** (`severity.config.ts`):
+    - "top product" = featured on the homepage or tagged best-seller, since there's no sales data
+    - `sale_ended` / `product_removed` aren't named in the spec; they go to normal
+    - `cosmetic` is kept as a **low** event (stored, never sent)
+  - **Store-page pipeline** (`stores/checkStorePages.ts`). Unchanged hash, first capture, and noise-filter-trivial all cost **zero AI**. Only meaningful changes get one classifier call: Haiku, with Groq as fallback.
+  - **Fan-out:** `user_events` rows per follower and plan. High goes instant for paid plans, briefing for Free; low isn't fanned out.
+  - **The pure `planInstantAlerts`:**
+    - bundles per store, holding each bundle until its 10-min burst settles
+    - dedupes the same news within 24h
+    - caps alerts at `ALERTS_PER_USER_PER_DAY` (default 5), biggest news first; overflow goes to the briefing
+  - Phase 4's sender executes that plan.
+  - The scheduler now checks pages, then the catalog, for each due store.
+  - Classifier verified live through Groq (no Anthropic key locally): promo, policy, positioning and cosmetic all classified correctly, with code, % off and threshold extracted.
+- Next: Phase 4 (alerts + briefing). New UI waits on the owner's Claude Design artboards.
 
 **Log of new env vars and migrations:**
 - Phase 0: none.
@@ -41,6 +56,10 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
   - **One-time setup, `supabase/setup/pg_cron_catalog.sql`:** it schedules pg_cron → `/api/cron/catalog` every 10 min. Run it after deploying, with `CRON_SECRET` filled in.
   - No new env vars; it reuses `CRON_SECRET`.
   - Local scripts that use supabase-js need Node 22+. Node 20 fails on a missing WebSocket.
+- Phase 3:
+  - Migration **`0011_events.sql`** adds `events.severity` / `store_page_id` / `dedupe_key`, the page event types, page-check columns on `store_pages`, `stores.featured_handles`, and the `user_events` fan-out table. Apply it after 0010.
+  - **Optional env:** `ALERTS_PER_USER_PER_DAY` (default 5).
+  - `ANTHROPIC_API_KEY` must be funded for Haiku classification in production; without it, Groq is used.
 
 ## 0. Git preservation (done 2026-09-30)
 

@@ -7,6 +7,8 @@ import { catalogStats } from "./firstReport";
 import { hashCatalog } from "./normalize";
 import { downloadSnapshot, uploadSnapshot } from "./snapshots";
 import { fetchSitemapCatalog } from "./sitemapFallback";
+import { recordEvents } from "@/features/events/record";
+import { hasBestsellerTag, severityFor } from "@/features/events/severity.config";
 
 export type CatalogCheckResult =
   | { status: "skipped"; reason: string }
@@ -15,7 +17,6 @@ export type CatalogCheckResult =
   | { status: "baseline"; products: number }
   | { status: "changed"; products: number; events: number };
 
-const EVENT_INSERT_CHUNK = 500;
 const net = { fetchPage: catalogPageFetcher, sleep: realSleep };
 
 /**
@@ -27,7 +28,9 @@ const net = { fetchPage: catalogPageFetcher, sleep: realSleep };
 export async function runCatalogCheck(service: SupabaseClient, storeId: string): Promise<CatalogCheckResult> {
   const { data: store, error } = await service
     .from("stores")
-    .select("id, domain, platform, products_json_available, catalog_hash, catalog_source, latest_snapshot_id")
+    .select(
+      "id, domain, platform, products_json_available, catalog_hash, catalog_source, latest_snapshot_id, featured_handles",
+    )
     .eq("id", storeId)
     .single();
   if (error || !store) throw new Error(`Store ${storeId} not found.`);
@@ -105,19 +108,28 @@ export async function runCatalogCheck(service: SupabaseClient, storeId: string):
   if (snapError || !snapshot) throw new Error(`Couldn't record the snapshot: ${snapError?.message}`);
 
   // Events before moving the baseline: if this throws, the store still points
-  // at the old snapshot, so the next check re-derives the same events.
-  const rows = events.map((e) => ({
-    store_id: storeId,
-    type: e.type,
-    source: "catalog",
-    product_id: e.productId,
-    payload: e.payload,
-    snapshot_id: snapshot.id,
-  }));
-  for (let i = 0; i < rows.length; i += EVENT_INSERT_CHUNK) {
-    const { error: eventsError } = await service.from("events").insert(rows.slice(i, i + EVENT_INSERT_CHUNK));
-    if (eventsError) throw new Error(`Couldn't save events: ${eventsError.message}`);
-  }
+  // at the old snapshot, so the next check re-derives the same events (a
+  // repeat that reaches alerts is caught by the routing dedupe).
+  const featured = new Set<string>(store.featured_handles ?? []);
+  const byId = new Map(catalog.products.map((p) => [p.id, p]));
+  await recordEvents(
+    service,
+    storeId,
+    events.map((e) => {
+      const product = e.productId ? byId.get(e.productId) : undefined;
+      const isTopProduct =
+        !!product && (featured.has(product.handle.toLowerCase()) || hasBestsellerTag(product.tags));
+      return {
+        type: e.type,
+        severity: severityFor({ type: e.type, payload: e.payload, isTopProduct }),
+        source: "catalog",
+        productId: e.productId,
+        storePageId: null,
+        payload: e.payload,
+        snapshotId: snapshot.id,
+      };
+    }),
+  );
 
   await mark({
     check_status: "ok",
