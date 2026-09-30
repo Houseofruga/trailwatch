@@ -125,8 +125,10 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
       token values.
     - We borrow the patterns (sidebar, page header, card sections, index tables, badges, banners,
       empty states) with our own tokens, accent colour and branding. Familiar, not a clone.
-  - Next: Step 2, `UX_SPEC.md`. `DESIGN_BRIEF_FOR_CLAUDE_DESIGN.md` will be superseded by
-    `CLAUDE_DESIGN_BRIEF.md` in Step 3.
+  - **Step 2 done:** `UX_SPEC.md` approved 2026-09-30, with all open questions resolved as recommended.
+  - **Step 3 done:** `CLAUDE_DESIGN_BRIEF.md` is ready to paste. It supersedes
+    `DESIGN_BRIEF_FOR_CLAUDE_DESIGN.md`.
+  - Next: the owner creates the designs; then Step 4, `DESIGN_TO_COMPONENTS.md`.
 
 **Log of new env vars and migrations:**
 - Phase 0: none.

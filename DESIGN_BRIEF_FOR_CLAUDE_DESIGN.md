@@ -1,5 +1,7 @@
 # TrailWatch: DTC pivot design brief (paste into Claude Design)
 
+> **Superseded (2026-09-30)** by `CLAUDE_DESIGN_BRIEF.md` (Shopify-admin-style UI). Don't use this one.
+
 You already have the **TrailWatch v2** design file. TrailWatch is pivoting its core product, and the app needs **new screens designed in the existing v2 visual language**. Don't reinvent the look; extend it. I'll build what you design 1:1, so please design **every state listed**.
 
 Scope: **core in-app product and emails only.** No landing or marketing pages.
