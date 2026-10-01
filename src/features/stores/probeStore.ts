@@ -69,10 +69,14 @@ export async function probeStore(input: string): Promise<StoreProbe> {
         : null,
     ]);
   let [home, productsJson] = await fetchBoth();
-  // One retry: a network blip shouldn't tell the user the site is unreachable.
+  // One retry: a network blip shouldn't tell the user the site is unreachable,
+  // or cost the homepage we read the store's name and pages from.
   if (!home?.ok && !productsJson?.ok) {
     await new Promise((r) => setTimeout(r, 1_500));
     [home, productsJson] = await fetchBoth();
+  } else if (homeAllowed && !home?.ok) {
+    await new Promise((r) => setTimeout(r, 1_500));
+    home = await safeFetch(`https://${host}/`);
   }
 
   if (!home?.ok && !productsJson?.ok) {

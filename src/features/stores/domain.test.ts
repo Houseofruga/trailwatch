@@ -34,6 +34,14 @@ describe("storeNameFrom", () => {
     expect(storeNameFrom("<title>x</title>", "shop.northwind.co.uk")).toBe("Northwind");
   });
 
+  it("takes the brand segment of the title when it matches the domain", () => {
+    const title = "<title>Luxury Organic Bedding, Sheets &amp; Towels | Boll &amp; Branch</title>";
+    expect(storeNameFrom(title, "bollandbranch.com")).toBe("Boll & Branch");
+    expect(storeNameFrom("<title>Parachute – Home happens here.</title>", "parachutehome.com")).toBe("Parachute");
+    // A tagline that doesn't match the domain isn't a name.
+    expect(storeNameFrom("<title>Home | Shop the best sheets</title>", "dewlane.com")).toBe("Dewlane");
+  });
+
   it("ignores an og:site_name that's too long to be a name", () => {
     const html = `<meta property="og:site_name" content="${"Very long tagline ".repeat(4)}">`;
     expect(storeNameFrom(html, "dewlane.com")).toBe("Dewlane");

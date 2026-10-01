@@ -18,18 +18,37 @@ export function canonicalStoreHost(input: string): string | null {
 
 const MAX_NAME_LENGTH = 40;
 
+// "Boll & Branch" → "bollandbranch", to compare a name with a domain.
+const squash = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]/g, "");
+
 /**
  * A display name for a store: the homepage's og:site_name when it looks like a
- * name, else the domain's brand part, capitalized ("dewlane.com" → "Dewlane").
+ * name; else the brand segment of the page title ("Luxury Bedding | Boll &
+ * Branch") when it matches the domain; else the domain's brand part,
+ * capitalized ("dewlane.com" → "Dewlane").
  */
 export function storeNameFrom(homepageHtml: string | null, host: string): string {
-  if (homepageHtml) {
-    const siteName = cheerio
-      .load(homepageHtml)('meta[property="og:site_name"]')
-      .attr("content")
-      ?.trim();
-    if (siteName && siteName.length <= MAX_NAME_LENGTH) return siteName;
-  }
   const brand = parse(host).domainWithoutSuffix || host;
+  if (homepageHtml) {
+    const $ = cheerio.load(homepageHtml);
+    const siteName = $('meta[property="og:site_name"]').attr("content")?.trim();
+    if (siteName && siteName.length <= MAX_NAME_LENGTH) return siteName;
+
+    const titles = [$("title").first().text(), $('meta[property="og:title"]').attr("content") ?? ""];
+    for (const title of titles) {
+      for (const part of title.split(/\s[|–—-]\s/)) {
+        const name = part.trim();
+        const key = squash(name);
+        // The whole brand ("Boll & Branch") or its leading word ("Parachute" for parachutehome.com).
+        if (name && name.length <= MAX_NAME_LENGTH && key.length >= 3 && (key === squash(brand) || squash(brand).startsWith(key))) {
+          return name;
+        }
+      }
+    }
+  }
   return brand.charAt(0).toUpperCase() + brand.slice(1);
 }
