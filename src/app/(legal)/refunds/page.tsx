@@ -35,12 +35,13 @@ export default function RefundsPage() {
       </nav>
 
       <h1 className={styles.title}>Refund Policy</h1>
-      <p className={styles.updated}>Last updated: August 26, 2026</p>
+      <p className={styles.updated}>Last updated: October 1, 2026</p>
 
       <p className={styles.lead}>
-        We want the pricing to feel as honest as the product. TrailWatch has a free plan
-        so you can evaluate it before you ever pay, and you can cancel a paid plan at any
-        time. This policy explains how billing, cancellations, and refunds work.
+        TrailWatch is free during the beta: there is nothing to pay and nothing to refund.
+        This policy explains how billing, cancellations, and refunds will work once paid
+        plans launch. We will tell you before that happens and will never charge you
+        without your agreement.
       </p>
 
       <section className={styles.section}>
@@ -57,25 +58,25 @@ export default function RefundsPage() {
           >
             buyer terms
           </a>{" "}
-          also apply to your transaction. The Pro plan is billed in advance on a monthly
-          or annual cycle, in USD, and renews automatically until you cancel.
+          also apply to your transaction. Paid plans will be billed in advance on a monthly
+          or annual cycle, in USD, and renew automatically until you cancel.
         </p>
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>2. Cancellation</h2>
         <p className={styles.para}>
-          You can cancel your Pro subscription at any time from your billing settings.
-          When you cancel, you keep Pro access until the end of the period you have
-          already paid for, and you are not charged again. After that, your account
-          returns to the free plan and its limits. We do not charge a cancellation fee.
+          You will be able to cancel a paid plan at any time from your settings. When you
+          cancel, you keep your plan&rsquo;s features until the end of the period you have
+          already paid for, and you are not charged again. After that, your account moves
+          to the free plan and its limits. We do not charge a cancellation fee.
         </p>
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>3. Refunds</h2>
         <p className={styles.para}>
-          Because the free plan lets you try TrailWatch before paying, subscription fees
+          Because you can try TrailWatch for free before paying, subscription fees
           are generally non-refundable for time already elapsed. That said, we deal with
           refund requests in good faith:
         </p>
@@ -90,7 +91,7 @@ export default function RefundsPage() {
           </li>
           <li>
             Annual fees are non-refundable and not pro-rated on early cancellation,
-            though you keep Pro access until the end of the year you have paid for. We
+            though you keep your plan&rsquo;s features until the end of the year you have paid for. We
             still consider good-faith exceptions case by case.
           </li>
         </ul>

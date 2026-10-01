@@ -35,7 +35,7 @@ export default function TermsPage() {
       </nav>
 
       <h1 className={styles.title}>Terms of Service</h1>
-      <p className={styles.updated}>Last updated: August 26, 2026</p>
+      <p className={styles.updated}>Last updated: October 1, 2026</p>
 
       <p className={styles.lead}>
         These terms govern your use of TrailWatch. TrailWatch is operated by House
@@ -47,12 +47,13 @@ export default function TermsPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>1. What TrailWatch does</h2>
         <p className={styles.para}>
-          TrailWatch lets you add public web page URLs — typically a competitor&rsquo;s
-          pricing, homepage, or changelog — and checks them on a recurring basis. When
-          it detects a meaningful change, it summarizes it in plain English and includes
-          it in a periodic digest email. The service is provided on an &ldquo;as is&rdquo;
-          and &ldquo;as available&rdquo; basis, and we may add, change, or remove features
-          over time.
+          TrailWatch tracks the public websites of online stores you add, typically your
+          competitors&rsquo;: their products, prices, sales and stock, and a few key pages. It
+          checks them on a recurring basis and tells you about meaningful changes through
+          instant alerts (by email, or Slack if you connect it) and a Monday briefing that
+          explains, in plain English, what the week&rsquo;s moves may mean for your store. The
+          service is provided on an &ldquo;as is&rdquo; and &ldquo;as available&rdquo; basis,
+          and we may add, change, or remove features over time.
         </p>
       </section>
 
@@ -72,8 +73,8 @@ export default function TermsPage() {
         <p className={styles.para}>You agree not to use TrailWatch to:</p>
         <ul className={styles.list}>
           <li>
-            monitor pages that require a login, sit behind a paywall, or are otherwise
-            not publicly accessible;
+            track pages that require a login, sit behind a paywall, or are otherwise not
+            publicly accessible;
           </li>
           <li>
             break the law, infringe intellectual property, or violate the rights or
@@ -89,19 +90,20 @@ export default function TermsPage() {
         </ul>
         <p className={styles.para}>
           TrailWatch only retrieves publicly available pages, respects robots.txt, and
-          identifies itself with a descriptive User-Agent. You are responsible for
-          ensuring the URLs you add are pages you are permitted to monitor.
+          identifies itself with a descriptive User-Agent. We may refuse websites that
+          aren&rsquo;t online stores, marketplaces, and addresses we can&rsquo;t read. You are
+          responsible for ensuring the stores you add are ones you are permitted to track.
         </p>
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>4. Plans, limits &amp; billing</h2>
         <p className={styles.para}>
-          TrailWatch offers a free plan and a paid Pro plan, each with its own limits on
-          the number of competitors and pages you can track. Paid subscriptions are
-          billed through our payment provider, Paddle, which acts as the merchant of
-          record for your purchase. Billing, cancellation, and refunds are described in
-          our{" "}
+          TrailWatch is free during the beta, with a limit on the number of stores you can
+          follow (currently 10). We will tell you before paid plans launch and will never
+          charge you without your agreement. Paid subscriptions will be billed through our
+          payment provider, Paddle, which acts as the merchant of record for your purchase.
+          Billing, cancellation, and refunds are described in our{" "}
           <Link className={styles.link} href="/refunds">
             Refund Policy
           </Link>
@@ -112,11 +114,11 @@ export default function TermsPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>5. Your content</h2>
         <p className={styles.para}>
-          The URLs you add and the account details you provide remain yours. You grant us
-          permission to fetch, process, and store snapshots of the public pages you ask us
-          to monitor solely to operate the service for you — for example, to detect and
-          summarize changes. We do not claim ownership of the third-party page content we
-          retrieve on your behalf, and we do not store personal data found on those pages.
+          The store addresses you add and the account details you provide remain yours. You
+          grant us permission to fetch, process, and store copies of the public catalogs and
+          pages of the stores you add solely to operate the service — for example, to detect
+          and explain changes. We do not claim ownership of the third-party content we
+          retrieve, and we do not store personal data found on those stores.
         </p>
       </section>
 
@@ -135,9 +137,10 @@ export default function TermsPage() {
         <p className={styles.para}>
           TrailWatch monitors third-party websites we do not control and relies on
           third-party providers to operate. We are not responsible for the content,
-          accuracy, or availability of the pages you monitor, nor for outages or changes
-          in the services we depend on. Change summaries are generated with automated
-          tools and may contain errors — treat them as a helpful signal, not a guarantee.
+          accuracy, or availability of the stores you track, nor for outages or changes in
+          the services we depend on. Moves, explanations and briefings are generated with
+          automated tools, including AI, and may contain errors — treat them as a helpful
+          signal, not a guarantee.
         </p>
       </section>
 
@@ -147,7 +150,7 @@ export default function TermsPage() {
           To the maximum extent permitted by law, TrailWatch is provided without
           warranties of any kind, and House of Ruga LLP is not liable for any indirect,
           incidental, or consequential damages, or for any loss arising from missed
-          changes, inaccurate summaries, or service interruptions. Our total liability for
+          moves, inaccurate explanations, or service interruptions. Our total liability for
           any claim relating to the service is limited to the amount you paid us in the
           three months before the claim arose. Nothing in these terms limits liability
           that cannot be limited under applicable law.
