@@ -50,7 +50,7 @@ export async function fetchShopifyCatalog(base: string, options: Options = {}): 
 
   for (let page = 1; page <= cfg.maxPages; page++) {
     if (page > 1) await sleep(cfg.pageDelayMs);
-    const url = `${base}/products.json?limit=${cfg.pageSize}&page=${page}`;
+    const url = `${base}/products.json?limit=${cfg.pageSize}&page=${page}&${cfg.usMarketQuery}`;
 
     let res = await fetchPage(url);
     for (let attempt = 1; isRetryable(res) && attempt <= cfg.maxRetries; attempt++) {

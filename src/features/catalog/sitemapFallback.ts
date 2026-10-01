@@ -194,7 +194,7 @@ export async function fetchSitemapCatalog(
   const detailed = new Map<string, CatalogProduct>();
   for (const [handle, entry] of newestFirst.slice(0, cfg.sitemapDetailCap)) {
     if (!robotsAllows(robotsTxt, new URL(entry.loc).pathname)) continue;
-    const res = await get(entry.loc);
+    const res = await get(`${entry.loc}${entry.loc.includes("?") ? "&" : "?"}${cfg.usMarketQuery}`);
     const product = res.ok ? productFromJsonLd(res.body, handle) : null;
     if (product) detailed.set(handle, product);
   }

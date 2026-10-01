@@ -42,9 +42,9 @@ describe("fetchShopifyCatalog", () => {
     expect(result.ok && result.catalog.complete).toBe(true);
     expect(result.ok && result.catalog.source).toBe("products.json");
     expect(calls).toEqual([
-      `${BASE}/products.json?limit=250&page=1`,
-      `${BASE}/products.json?limit=250&page=2`,
-      `${BASE}/products.json?limit=250&page=3`,
+      `${BASE}/products.json?limit=250&page=1&country=US&currency=USD`,
+      `${BASE}/products.json?limit=250&page=2&country=US&currency=USD`,
+      `${BASE}/products.json?limit=250&page=3&country=US&currency=USD`,
     ]);
   });
 

@@ -3,6 +3,10 @@
 export const CATALOG_CONFIG = {
   // /products.json paging. 250 is Shopify's max page size.
   pageSize: 250,
+  // Shopify Markets shows prices in the visitor's local currency (a check run
+  // from India read Cozy Earth in rupees). Every catalog request asks for the
+  // US market so prices are always USD, wherever the crawler runs.
+  usMarketQuery: "country=US&currency=USD",
   // Pause between catalog pages so we never hammer a store.
   pageDelayMs: 1_000,
   // Hard ceiling: 100 pages = 25,000 products. Beyond it the fetch is marked

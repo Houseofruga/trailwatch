@@ -126,7 +126,7 @@ describe("fetchSitemapCatalog", () => {
           [`${BASE}/collections/all`, "2026-09-01"],
         ]),
       },
-      [`${BASE}/products/new-rug`]: { ok: true, body: productPage("New Rug", { price: "99.00", availability: "InStock" }) },
+      [`${BASE}/products/new-rug?country=US&currency=USD`]: { ok: true, body: productPage("New Rug", { price: "99.00", availability: "InStock" }) },
     };
     const fetchPage = vi.fn(async (url: string) => pages[url] ?? { ok: false as const, status: 404, message: "404" });
 
