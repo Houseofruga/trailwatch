@@ -53,3 +53,21 @@ export function classifyPlatform(signals: PlatformSignals): PlatformResult {
   }
   return { platform: "generic", productsJsonAvailable: false, evidence: "none" };
 }
+
+// Signs a non-Shopify homepage sells products. Calibrated 2026-10-01 against
+// real homepages: stores (everlane, skullcandy, weber, casper, awaytravel,
+// purple, saatva, glossier, brooklinen, bollandbranch) all show at least one;
+// SaaS sites (linear, notion, figma, vercel, stripe, hubspot, mailchimp,
+// intercom, slack, acquire, equidam, trustmrr) show none. Deliberately left
+// out: JSON-LD Offer prices (SaaS pricing uses them), "checkout" links (Stripe)
+// and platform names in body text (Mailchimp mentions Squarespace Commerce).
+const STORE_SIGNALS: RegExp[] = [
+  /add[\s-]to[\s-](cart|bag|basket)/i,
+  /href=["'](?:https?:\/\/[^"'/]+)?\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?(cart|bag|basket|shopping-bag|shopping-cart)(\/|\?|["'#])/i,
+  /cdn\.shopify\.com|\/cdn\/shop\/|wp-content\/plugins\/woocommerce|\bwoocommerce-(?:page|cart|js)\b|cdn11\.bigcommerce\.com|\/static\/version\d+\/frontend\/|Magento_|demandware\.static|\/on\/demandware\.store\/|wixstores|ecwid\.com\/script|prestashop/i,
+];
+
+/** Does this homepage look like an online store (cart, add-to-cart, or a store platform's assets)? */
+export function looksLikeStore(homepageHtml: string): boolean {
+  return STORE_SIGNALS.some((re) => re.test(homepageHtml));
+}

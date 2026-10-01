@@ -248,7 +248,7 @@ export type AddStoreResult =
   | { ok: true; competitorId: string; store: StoreSummary }
   | {
       ok: false;
-      code: "invalid" | "marketplace" | "unreachable" | "duplicate" | "limit" | "own";
+      code: "invalid" | "marketplace" | "unreachable" | "not_store" | "duplicate" | "limit" | "own";
       message: string;
     };
 

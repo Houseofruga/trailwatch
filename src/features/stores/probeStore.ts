@@ -3,7 +3,7 @@ import { safeFetch } from "@/features/lastUpdated/fetch";
 import { fetchRobotsTxt, robotsAllows } from "@/features/checks/fetchPage";
 import { canonicalStoreHost, storeNameFrom } from "./domain";
 import { isMarketplace, MARKETPLACE_MESSAGE } from "./denylist.config";
-import { classifyPlatform, type PlatformResult } from "./detectPlatform";
+import { classifyPlatform, looksLikeStore, type PlatformResult } from "./detectPlatform";
 import {
   findSalePagePath,
   SHOPIFY_POLICY_PATHS,
@@ -16,7 +16,7 @@ export type SkippedPage = WatchedPage & { reason: "robots" | "not-found" };
 
 export type StoreProbeError = {
   ok: false;
-  code: "invalid" | "marketplace" | "unreachable";
+  code: "invalid" | "marketplace" | "unreachable" | "not_store";
   message: string;
 };
 
@@ -34,6 +34,9 @@ export type StoreProbe =
   | StoreProbeError;
 
 const PRODUCTS_JSON_PROBE = "/products.json?limit=1";
+
+export const notStoreMessage = (host: string) =>
+  `${host} doesn't look like an online store. TrailWatch follows stores that sell products, like Shopify brands.`;
 
 /** Validate a domain the user typed; null when it's fine to probe. */
 export function storeInputError(input: string): StoreProbeError | null {
@@ -110,6 +113,13 @@ export async function probeStore(input: string): Promise<StoreProbe> {
     homepageHeaders: home?.ok ? home.headers : null,
     homepageHtml: home?.ok ? home.html : null,
   });
+
+  // Not Shopify and nothing on the homepage says it sells products (a SaaS
+  // site, a blog): refuse rather than watch pages that will only make noise.
+  // When we couldn't read the homepage, give it the benefit of the doubt.
+  if (platform.platform !== "shopify" && home?.ok && !looksLikeStore(home.html)) {
+    return { ok: false, code: "not_store", message: notStoreMessage(host) };
+  }
 
   const pages: WatchedPage[] = [];
   const skipped: SkippedPage[] = [];

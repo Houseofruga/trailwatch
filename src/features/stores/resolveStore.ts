@@ -28,7 +28,15 @@ export async function resolveStore(input: string): Promise<ResolveStoreResult> {
 
   const { data: existing, error: findError } = await findExisting();
   if (findError) throw findError;
-  if (existing) return { ok: true, store: existing, created: false };
+  if (existing) {
+    // A non-Shopify store may predate the "is it a store?" check (e.g. SaaS
+    // sites from the founder edition): look again before anyone else follows it.
+    if (existing.platform !== "shopify") {
+      const recheck = await probeStore(host);
+      if (!recheck.ok && recheck.code === "not_store") return recheck;
+    }
+    return { ok: true, store: existing, created: false };
+  }
 
   const probe = await probeStore(host);
   if (!probe.ok) return probe;
