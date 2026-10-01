@@ -71,6 +71,23 @@ function StatusBadge({ status }: { status: Added["status"] }) {
   return <Badge tone="success">Ready</Badge>;
 }
 
+// Picks from the homepage finder, saved before signup (CompetitorFinder.tsx).
+const PENDING_COMPETITORS = "tw_pending_competitors";
+const PENDING_COMPANY = "tw_pending_company";
+
+function takePending(): { company: string | null; urls: string[] } {
+  try {
+    const company = localStorage.getItem(PENDING_COMPANY);
+    const list = JSON.parse(localStorage.getItem(PENDING_COMPETITORS) ?? "[]") as { url?: unknown }[];
+    localStorage.removeItem(PENDING_COMPANY);
+    localStorage.removeItem(PENDING_COMPETITORS);
+    const urls = Array.isArray(list) ? list.map((c) => (typeof c.url === "string" ? c.url.trim() : "")).filter(Boolean) : [];
+    return { company: company && /\.[a-z]{2,}/i.test(company) ? company.trim() : null, urls };
+  } catch {
+    return { company: null, urls: [] };
+  }
+}
+
 /** The store whose report opens first: the first one added with a catalog, else the first one. */
 const reportTarget = (list: Added[]) => list.find((a) => a.status !== "pages") ?? list[0];
 
@@ -103,6 +120,28 @@ export function WelcomeView({
   const full = added.length >= LIMIT;
   const slow = live ? slowNow : state === "slow";
   const reading = added.some((a) => a.status === "reading");
+
+  // Live: carry over what the visitor picked on the homepage before signing up —
+  // their store fills step 1, their competitors are added (once, then cleared).
+  useEffect(() => {
+    if (!live || live.added.length > 0) return;
+    void (async () => {
+      const pending = takePending();
+      if (pending.company && !live.ownDomain) setStore(pending.company);
+      if (pending.urls.length === 0) return;
+      setAdding(true);
+      for (const url of pending.urls.slice(0, LIMIT)) {
+        const res = await addCompetitor(url);
+        if (!res.ok) {
+          // Show the first one we couldn't add, so they can fix or skip it.
+          setValue((v) => v || url);
+          setError((e) => e ?? res.error);
+        }
+      }
+      setAdded(await onboardingStatus());
+      setAdding(false);
+    })();
+  }, [live]);
 
   // Live: poll each store's first read while any is still reading.
   useEffect(() => {

@@ -14,6 +14,13 @@ describe("isDirectoryDomain", () => {
     expect(isDirectoryDomain("company.g2.com")).toBe(true);
   });
 
+  it("flags the search provider and marketplaces (never a brand's own store)", () => {
+    for (const d of ["exa.ai", "amazon.com", "www.etsy.com"]) {
+      expect(isDirectoryDomain(d)).toBe(true);
+    }
+    expect(isDirectoryDomain("drinkpoppi.com")).toBe(false);
+  });
+
   it("is case-insensitive", () => {
     expect(isDirectoryDomain("LinkedIn.com")).toBe(true);
   });

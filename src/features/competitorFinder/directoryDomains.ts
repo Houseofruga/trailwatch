@@ -1,3 +1,5 @@
+import { isMarketplace } from "@/features/stores/denylist.config";
+
 // Directory / aggregator / social domains that live-search (Exa) routinely
 // surfaces when asked for a company's competitors — a LinkedIn company page, a
 // Crunchbase or G2 profile, a Wikipedia article — because they rank highly. None
@@ -49,6 +51,8 @@ const DIRECTORY_DOMAINS = new Set<string>([
   "gartner.com",
   "forbes.com",
   "techcrunch.com",
+  // Our live-search provider: its own pages can come back as results.
+  "exa.ai",
 ]);
 
 // Bare (registrable) domain check: strips a leading `www.`, then treats the input
@@ -56,6 +60,8 @@ const DIRECTORY_DOMAINS = new Set<string>([
 export function isDirectoryDomain(domain: string): boolean {
   const host = domain.trim().toLowerCase().replace(/^www\./, "");
   if (!host) return false;
+  // Marketplaces (Amazon, Etsy, ...) aren't a brand's own store either.
+  if (isMarketplace(host)) return true;
   if (DIRECTORY_DOMAINS.has(host)) return true;
   for (const d of DIRECTORY_DOMAINS) {
     if (host.endsWith(`.${d}`)) return true;
