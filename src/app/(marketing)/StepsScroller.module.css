@@ -614,3 +614,51 @@
     aspect-ratio: auto;
   }
 }
+
+/* ---------------------------------------------------- Shopify-style shapes
+   Polaris radii: 12px cards and frames, 8px fields and rows, 6px tags. */
+.step,
+.frame {
+  border-radius: 12px;
+}
+
+/* Clip the active step's progress rail to the rounded corners. */
+.step {
+  overflow: hidden;
+}
+
+.stepActive {
+  box-shadow: var(--ui-shadow-card);
+}
+
+.card {
+  border: 0;
+  border-radius: 12px;
+  box-shadow: var(--ui-shadow-card), 0 18px 44px rgba(20, 32, 52, 0.12);
+}
+
+.urlField {
+  border: 0.66px solid var(--border-input);
+  border-top-color: var(--border-input-top);
+  border-radius: 8px;
+  background: var(--ui-input-bg);
+}
+
+.snap,
+.diffRow {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.snapCol {
+  border-radius: 6px;
+}
+
+.tagMuted,
+.tagAccent {
+  border-radius: 6px;
+}
+
+.tagMuted {
+  color: var(--ink-3);
+}

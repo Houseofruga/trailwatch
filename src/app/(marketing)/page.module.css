@@ -1250,3 +1250,31 @@
     font-size: 13px;
   }
 }
+
+/* ---------------------------------------------------- Shopify-style shapes
+   Polaris radii and the app's card look: 12px cards with the card shadow,
+   6px badges, 8px callouts. */
+.compare,
+.plan {
+  border: 0;
+  border-radius: 12px;
+  box-shadow: var(--ui-shadow-card);
+  overflow: hidden;
+}
+
+.planPro {
+  box-shadow: var(--ui-shadow-card);
+}
+
+.planBadge {
+  border-radius: 6px;
+}
+
+.callout {
+  border-radius: 8px;
+}
+
+/* Column labels: --ink-3 passes WCAG AA on white (--ink-4 didn't). */
+.compareHead .compareCell {
+  color: var(--ink-3);
+}
