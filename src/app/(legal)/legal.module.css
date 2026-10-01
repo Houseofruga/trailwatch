@@ -1,7 +1,8 @@
 /*
  * Shared layout for the legal document pages (/terms, /privacy, /refunds).
- * Single readable column, long-form document — not a marketing page. Uses the
- * shared tokens + DM Sans; no new colors or fonts.
+ * Single readable column, long-form document — not a marketing page. Inside
+ * the `.ui` (Polaris) scope like the homepage and app: Inter, neutral greys,
+ * 450/550/650 weights.
  */
 
 .page {
@@ -9,20 +10,6 @@
   display: flex;
   flex-direction: column;
   background: var(--bg);
-}
-
-/* Logo masthead, aligned to the reading column. */
-.masthead {
-  width: 100%;
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 26px 40px 0 40px;
-}
-
-.logo {
-  height: 40px;
-  width: auto;
-  display: block;
 }
 
 .doc {
@@ -35,8 +22,9 @@
 
 .title {
   font-size: 34px;
-  font-weight: 600;
-  letter-spacing: -0.015em;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--ink);
   margin: 8px 0 0 0;
 }
 
@@ -46,20 +34,11 @@
   color: var(--ink-4);
 }
 
-/* Clearly flags the body as placeholder to replace before launch. */
-.note {
-  margin: 32px 0 8px 0;
-  padding: 14px 16px;
-  background: var(--accent-wash);
-  border: 1px solid var(--accent-line);
-  font-size: 14px;
-  color: var(--ink-2);
-}
-
 /* Short standfirst under the title, before the first section. */
 .lead {
   margin: 24px 0 0 0;
   font-size: 15px;
+  font-weight: 450;
   line-height: 1.6;
   color: var(--ink-2);
 }
@@ -70,7 +49,7 @@
 
 .sectionTitle {
   font-size: 17px;
-  font-weight: 600;
+  font-weight: 650;
   color: var(--ink);
   margin: 0 0 10px 0;
   padding-bottom: 10px;
@@ -79,6 +58,7 @@
 
 .para {
   font-size: 15px;
+  font-weight: 450;
   line-height: 1.65;
   color: var(--ink-2);
   margin: 12px 0 0 0;
@@ -91,6 +71,7 @@
 
 .list li {
   font-size: 15px;
+  font-weight: 450;
   line-height: 1.6;
   color: var(--ink-2);
   margin-top: 6px;
@@ -102,15 +83,6 @@
 }
 
 @media (max-width: 560px) {
-  .masthead {
-    padding-left: 22px;
-    padding-right: 22px;
-  }
-
-  .logo {
-    height: 34px;
-  }
-
   .doc {
     padding-left: 22px;
     padding-right: 22px;
@@ -121,7 +93,7 @@
   }
 }
 
-/* Breadcrumb (matches the tools/compare pages). */
+/* Breadcrumb. */
 .breadcrumb {
   display: flex;
   align-items: center;
@@ -141,9 +113,14 @@
 }
 
 .sep {
-  color: var(--ink-hint);
+  color: var(--ink-faint);
 }
 
 .current {
   color: var(--ink-2);
+}
+
+.doc strong {
+  font-weight: 650;
+  color: var(--ink);
 }

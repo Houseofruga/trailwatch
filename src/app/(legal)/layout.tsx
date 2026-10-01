@@ -8,7 +8,7 @@ import styles from "./legal.module.css";
 // /terms, /privacy, /refunds URLs.
 export default function LegalLayout({ children }: { children: ReactNode }) {
   return (
-    <div className={styles.page}>
+    <div className={`ui ${styles.page}`}>
       <SiteHeader />
       <main className={styles.doc}>{children}</main>
       <SiteFooter />
