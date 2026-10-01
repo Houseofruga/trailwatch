@@ -15,8 +15,9 @@ import { IndexTable, type Row } from "@/components/ui/IndexTable";
 import { PageBody, PageHeader } from "@/components/ui/Page";
 import { FilterSelect } from "@/components/ui/Select";
 import { briefingTime, money, when } from "@/features/appData/format";
-import type { CompetitorRow, HomeSummary, Move } from "@/features/appData/types";
+import type { BriefingPanel, CompetitorRow, HomeSummary, Move } from "@/features/appData/types";
 import { AddCompetitorModal } from "./AddCompetitorModal";
+import { BriefingCard } from "./BriefingCard";
 import { MoveIcon, PRIORITY_OPTIONS, PriorityBadge, TYPE_OPTIONS } from "./moveParts";
 import styles from "./HomeView.module.css";
 
@@ -31,11 +32,13 @@ export function HomeView({
   summary,
   moves,
   competitors,
+  briefing,
 }: {
   state: HomeState;
   summary: HomeSummary;
   moves: Move[];
   competitors: CompetitorRow[];
+  briefing: BriefingPanel;
 }) {
   const [modal, setModal] = useState(state === "add-competitor-modal");
   const [guideDismissed, setGuideDismissed] = useState(false);
@@ -184,6 +187,8 @@ export function HomeView({
           )}
         </Card>
       </div>
+
+      <BriefingCard panel={briefing} next={summary.nextBriefing} loading={loading} />
 
       <Card title="Recent moves" titleId="recent-moves" flush>
         <IndexTable

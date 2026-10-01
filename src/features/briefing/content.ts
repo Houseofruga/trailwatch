@@ -23,7 +23,8 @@ export type BriefingInput = { weekOf: string; events: BriefingEvent[] };
 // The model's part: interpretation only. Facts (the per-competitor lists) are
 // rendered from the events themselves, so the model can't invent any.
 export type BriefingInterpretation = {
-  topMoves: { headline: string; whyItMatters: string }[];
+  /** `move`: the 1-based number of the move it's about, in rankEvents order (briefings from 2026-10 on). */
+  topMoves: { headline: string; whyItMatters: string; move?: number }[];
   whatThisMeans: string | null;
   suggestedMove: string;
 };
@@ -67,19 +68,23 @@ export function competitorSections(input: BriefingInput): CompetitorSection[] {
     }));
 }
 
+/** The week's events, most important first (high severity, then newest): the order the model sees them in. */
+export function rankEvents(events: BriefingEvent[]): BriefingEvent[] {
+  return [...events].sort(
+    (a, b) => Number(b.severity === "high") - Number(a.severity === "high") || b.detectedAt.localeCompare(a.detectedAt),
+  );
+}
+
 /**
  * The no-AI version: top moves are the highest-severity, newest events stated
  * plainly, plus the templated suggestion. Used when no AI key is set or the
  * model didn't answer in time — the briefing still goes out.
  */
 export function fallbackInterpretation(input: BriefingInput): BriefingInterpretation {
-  const ranked = [...input.events].sort(
-    (a, b) => Number(b.severity === "high") - Number(a.severity === "high") || b.detectedAt.localeCompare(a.detectedAt),
-  );
-  const top = ranked.slice(0, 3);
+  const top = rankEvents(input.events).slice(0, 3);
   const lead = top.length ? leadEvent(top) : null;
   return {
-    topMoves: top.map((e) => ({ headline: describeEvent(e.type, e.payload, e.storeName), whyItMatters: "" })),
+    topMoves: top.map((e, i) => ({ headline: describeEvent(e.type, e.payload, e.storeName), whyItMatters: "", move: i + 1 })),
     whatThisMeans: null,
     suggestedMove: lead ? suggestedAction(lead.type, lead.payload) : "",
   };
@@ -87,7 +92,13 @@ export function fallbackInterpretation(input: BriefingInput): BriefingInterpreta
 
 const interpretationSchema = z.object({
   topMoves: z
-    .array(z.object({ headline: z.string().trim().min(1), whyItMatters: z.string().trim().default("") }))
+    .array(
+      z.object({
+        headline: z.string().trim().min(1),
+        whyItMatters: z.string().trim().default(""),
+        move: z.number().int().positive().optional().catch(undefined),
+      }),
+    )
     .min(1)
     .transform((moves) => moves.slice(0, 3)),
   whatThisMeans: z.string().trim().min(1).nullable().catch(null),

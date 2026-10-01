@@ -1,6 +1,6 @@
 import { describeEvent } from "@/features/alerts/describe";
 import { money } from "@/features/email/shell";
-import type { BriefingInput } from "./content";
+import { rankEvents, type BriefingInput } from "./content";
 
 // Fixed for every user and every week, so it's sent as a cached system block
 // (prompt caching) — only the per-user event list below varies.
@@ -12,6 +12,7 @@ Write:
 1. topMoves — the (up to) 3 most important moves this week, most important first. Each has:
    - headline: one short sentence stating the move with its key number (e.g. "Dewlane went 25% off sitewide with code GLOW25.").
    - whyItMatters: one sentence on why a competing DTC brand should care (e.g. price anchoring, traffic it will pull, a gap it leaves open).
+   - move: the number of the move it's mainly about, from the numbered list (for merged moves, the most important one).
    Prefer HIGH severity. A sitewide sale or promo beats a single price change; a best-seller selling out beats a routine restock. A move marked against the reader's own product (see Rules) usually beats an unmarked one of similar size. Merge related moves by the same competitor into one.
 2. whatThisMeans — two or three sentences on the pattern across competitors this week (e.g. "Two of your three competitors are discounting ahead of the holidays; the category is getting promo-heavy."). If there's no real pattern, say what the single biggest implication is. null only if the week is trivially quiet.
 3. suggestedMove — ONE concrete, doable action for this week, specific to the moves above (e.g. "Send your email list a 48-hour early-access offer while Dewlane's sale is pulling shoppers toward discounts."). Not generic advice.
@@ -25,18 +26,16 @@ Rules:
 - Money in dollars as given. Keep every string under 280 characters.
 
 Reply with ONLY this JSON object:
-{"topMoves": [{"headline": "...", "whyItMatters": "..."}], "whatThisMeans": "..." | null, "suggestedMove": "..."}`;
+{"topMoves": [{"headline": "...", "whyItMatters": "...", "move": 1}], "whatThisMeans": "..." | null, "suggestedMove": "..."}`;
 
-/** The per-user message: the week's events, newest first, capped for cost. */
+/** The per-user message: the week's events, numbered in rankEvents order, capped for cost. */
 export function buildBriefingMessage(input: BriefingInput, maxEvents = 60): string {
-  const events = [...input.events]
-    .sort((a, b) => Number(b.severity === "high") - Number(a.severity === "high") || b.detectedAt.localeCompare(a.detectedAt))
-    .slice(0, maxEvents);
-  const lines = events.map((e) => {
+  const events = rankEvents(input.events).slice(0, maxEvents);
+  const lines = events.map((e, i) => {
     const vs = e.ownMatch
       ? ` [vs your ${e.ownMatch.title}${e.ownMatch.price !== null ? ` at ${money(e.ownMatch.price)}` : ""}]`
       : "";
-    return `- [${e.severity === "high" ? "HIGH" : "normal"}] ${e.detectedAt.slice(0, 10)} ${describeEvent(e.type, e.payload, e.storeName)}${vs}`;
+    return `${i + 1}. [${e.severity === "high" ? "HIGH" : "normal"}] ${e.detectedAt.slice(0, 10)} ${describeEvent(e.type, e.payload, e.storeName)}${vs}`;
   });
   const extra = input.events.length - events.length;
   return `Week of ${input.weekOf}. ${input.events.length} competitor moves.\n\n${lines.join("\n")}${

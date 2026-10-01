@@ -16,6 +16,10 @@ const STATES = [
   "loading",
   "error",
   "briefing-off",
+  "briefing-no-store",
+  "briefing-plain",
+  "briefing-quiet",
+  "briefing-first",
   "add-competitor-modal",
 ] as const;
 export type HomeState = (typeof STATES)[number];
@@ -27,19 +31,21 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
   let data;
   if (preview) {
-    const [summary, moves, competitors] = await Promise.all([
+    const variant = state.startsWith("briefing-") && state !== "briefing-off" ? (state.slice(9) as mock.BriefingPreview) : "normal";
+    const [summary, moves, competitors, briefing] = await Promise.all([
       mock.getHomeSummary(),
       mock.listMoves({ busy: state === "busy-week" }),
       mock.listCompetitors(),
+      mock.getBriefingPanel(variant),
     ]);
-    data = { summary, moves, competitors };
+    data = { summary, moves, competitors, briefing };
   } else {
-    const [moves, competitors] = await Promise.all([real.listMoves(), real.listCompetitors()]);
+    const [moves, competitors, briefing] = await Promise.all([real.listMoves(), real.listCompetitors(), real.getBriefingPanel()]);
     // No competitors yet: onboarding isn't finished (UX_SPEC §4.4).
     if (competitors.length === 0) redirect("/welcome");
-    data = { summary: await real.getHomeSummary(moves), moves, competitors };
+    data = { summary: await real.getHomeSummary(moves), moves, competitors, briefing };
   }
-  const { summary, moves, competitors } = data;
+  const { summary, moves, competitors, briefing } = data;
 
   return (
     <>
@@ -49,6 +55,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         summary={state === "briefing-off" ? { ...summary, nextBriefing: null } : summary}
         moves={state === "no-moves-yet" ? [] : moves}
         competitors={competitors}
+        briefing={briefing}
       />
       <DevStateBar states={STATES} current={state} />
     </>

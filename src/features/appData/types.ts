@@ -93,6 +93,41 @@ export type Account = { name: string; email: string; hasPassword: boolean };
 /** products is null until the first catalog read finishes. */
 export type OwnStore = { domain: string; products: number | null; checkedAt: string };
 
+/** One top move on the Home briefing card; links to the move when we know which one it is. */
+export type BriefingTopMove = {
+  headline: string;
+  /** Empty in the plain (no-AI) version. */
+  why: string;
+  competitorId: string | null;
+  competitorName: string | null;
+  domain: string | null;
+  moveId: string | null;
+};
+
+/** A Monday briefing as sent (DESIGN 04b). */
+export type Briefing = {
+  id: string;
+  /** The Monday it's for (YYYY-MM-DD). */
+  weekStart: string;
+  sentAt: string;
+  moves: number;
+  /** The no-AI version: no "what this means", no "why it matters". */
+  plain: boolean;
+  whatThisMeans: string | null;
+  suggestedMove: string;
+  topMoves: BriefingTopMove[];
+};
+
+export type BriefingPanel = {
+  /** Sent briefings, newest first. Empty before the first Monday. */
+  briefings: Briefing[];
+  /** The user has added their own store (else the card offers to add it). */
+  personalised: boolean;
+  /** For the quiet-week line: "We checked A, B and C every 2 hours." */
+  checkedStores: string[];
+  checkIntervalHours: number;
+};
+
 export type HomeSummary = {
   movesThisMonth: number;
   highThisWeek: number;

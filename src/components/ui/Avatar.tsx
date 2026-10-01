@@ -26,7 +26,7 @@ export function Avatar({
   domain,
 }: {
   name: string;
-  size?: 20 | 28 | 32 | 36;
+  size?: 20 | 24 | 28 | 32 | 36;
   person?: boolean;
   domain?: string | null;
 }) {
@@ -42,7 +42,7 @@ export function Avatar({
   const style = {
     width: size,
     height: size,
-    fontSize: size <= 20 ? 8 : size <= 28 ? 11 : 13,
+    fontSize: size <= 20 ? 8 : size <= 24 ? 10 : size <= 28 ? 11 : 13,
     borderRadius: person ? 999 : size <= 20 ? 5 : 6,
     background: icon ? "var(--surface)" : person ? "var(--ui-avatar)" : `var(--ui-avatar-${toneFor(name)})`,
   };

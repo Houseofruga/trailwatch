@@ -3,8 +3,12 @@
 // are relative to "now" so labels ("2h ago", "Yesterday") match the designs.
 // Step 6 replaces these functions with real queries of the same shape.
 
+import { nextBriefingAt } from "@/features/briefing/schedule";
 import { dayKey, shortDate } from "./format";
 import type {
+  Briefing,
+  BriefingPanel,
+  BriefingTopMove,
   Account,
   CompetitorOverview,
   CompetitorRow,
@@ -286,13 +290,94 @@ export async function listCompetitorMoves(id: string): Promise<Move[]> {
   return listMoves({ competitorId: id });
 }
 
+// Home briefing card previews (DESIGN 04b), in the mock stores' names.
+const top = (competitorId: string, headline: string, why: string, moveId: string | null = "m1"): BriefingTopMove => {
+  const c = COMPETITORS.find((x) => x.id === competitorId)!;
+  // No domain: fictional stores' addresses may belong to real sites, so previews show letters.
+  return { headline, why, competitorId: c.id, competitorName: c.name, domain: null, moveId };
+};
+
+const WEEK: Briefing = {
+  id: "b-oct-5",
+  weekStart: "2026-10-05",
+  sentAt: "2026-10-05T12:00:00Z",
+  moves: 12,
+  plain: false,
+  suggestedMove:
+    "Send your email list a 48-hour early-access offer on your Night Repair Serum while Hearth & Pine’s sale is pulling shoppers toward discounts.",
+  whatThisMeans:
+    "Two of your five competitors are discounting ahead of Black Friday; the category is getting promo-heavy, and Dewlane’s new serum is $6 under your Night Repair Serum.",
+  topMoves: [
+    top("hearth-and-pine", "Hearth & Pine went 25% off sitewide.", "A deep sitewide discount will pull price-sensitive shoppers this week."),
+    top("dewlane", "Dewlane launched a Barrier Night Serum at $42.", "It is $6 under your Night Repair Serum ($48), the closest match in your range.", "m2"),
+    top("peak-tonic", "Peak Tonic started a “Black Friday early access” banner.", "A second competitor is already promoting Black Friday, so shoppers may hold off on full-price buys.", "m3"),
+  ],
+};
+
+const LAST_WEEK: Briefing = {
+  id: "b-sep-28",
+  weekStart: "2026-09-28",
+  sentAt: "2026-09-28T12:00:00Z",
+  moves: 5,
+  plain: false,
+  suggestedMove: "Hold your serum prices. Dewlane’s cut is on one cleanser, not a category-wide sale.",
+  whatThisMeans:
+    "A light week. Dewlane trimmed one price and Oakline Goods changed its shipping policy; nothing points to a broader price war yet.",
+  topMoves: [
+    top("dewlane", "Dewlane cut the Gel Cleanser from $28 to $24.", "A 14% cut on one product; your cleanser is still $2 cheaper."),
+    top("oakline-goods", "Oakline Goods changed its shipping policy.", "Free shipping now starts at $75 instead of $50."),
+    top("northwind-knits", "Northwind Knits’ Merino Throw sold out.", "Shoppers looking for a throw this week have one fewer option."),
+  ],
+};
+
+export type BriefingPreview = "normal" | "no-store" | "plain" | "quiet" | "first";
+
+export async function getBriefingPanel(variant: BriefingPreview = "normal"): Promise<BriefingPanel> {
+  const base = { personalised: true, checkedStores: COMPETITORS.slice(0, 3).map((c) => c.name), checkIntervalHours: 2 };
+  if (variant === "first") return { ...base, briefings: [] };
+  if (variant === "quiet") {
+    return { ...base, briefings: [{ ...WEEK, moves: 0, suggestedMove: "", whatThisMeans: null, topMoves: [] }, LAST_WEEK] };
+  }
+  if (variant === "plain") {
+    return {
+      ...base,
+      briefings: [
+        {
+          ...WEEK,
+          plain: true,
+          whatThisMeans: null,
+          suggestedMove: "Check your prices on serums and cleansers this week. Two competitors started sales.",
+          topMoves: WEEK.topMoves.map((t) => ({ ...t, why: "" })),
+        },
+        LAST_WEEK,
+      ],
+    };
+  }
+  if (variant === "no-store") {
+    return {
+      ...base,
+      personalised: false,
+      briefings: [
+        {
+          ...WEEK,
+          suggestedMove:
+            "Lock in your Black Friday offer this week and tell your list it’s coming. Two of five competitors are already discounting, so shoppers are comparing early.",
+          whatThisMeans:
+            "Two of your five competitors are discounting ahead of Black Friday, and the category is getting promo-heavy. Hearth & Pine is pushing hardest, with a sitewide sale.",
+          topMoves: [WEEK.topMoves[0], { ...WEEK.topMoves[1], why: "Their first serum, priced at the low end of the category." }, WEEK.topMoves[2]],
+        },
+        LAST_WEEK,
+      ],
+    };
+  }
+  return { ...base, briefings: [WEEK, LAST_WEEK] };
+}
+
 export async function getHomeSummary(): Promise<HomeSummary> {
-  const nextMonday = new Date();
-  nextMonday.setDate(nextMonday.getDate() + ((8 - nextMonday.getDay()) % 7 || 7));
   return {
     movesThisMonth: 37,
     highThisWeek: 4,
-    nextBriefing: { at: new Date(`${dayKey(nextMonday)}T08:00:00-04:00`).toISOString(), to: MOCK_ACCOUNT.email, timeZone: "America/New_York" },
+    nextBriefing: { at: nextBriefingAt(new Date(), 8, "America/New_York").toISOString(), to: MOCK_ACCOUNT.email, timeZone: "America/New_York" },
     setup: { ownStore: true, competitor: true, alerts: false },
   };
 }

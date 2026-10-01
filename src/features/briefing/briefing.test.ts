@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { competitorSections, fallbackInterpretation, parseInterpretation, type BriefingInput } from "./content";
+import { competitorSections, fallbackInterpretation, parseInterpretation, rankEvents, type BriefingInput } from "./content";
 import { buildBriefingMessage, BRIEFING_SYSTEM } from "./prompt";
 import { renderBriefingEmail } from "./render";
 import { briefingWeek, canSend, canSubmit, easternParts, nextBriefingAt, stopWaiting, userBriefingDue } from "./schedule";
@@ -187,5 +187,38 @@ describe("renderBriefingEmail", () => {
     });
     expect(email.text).not.toContain("WHAT THIS MEANS FOR YOU");
     expect(email.text).toContain("ONE MOVE FOR THIS WEEK");
+  });
+});
+
+describe("briefing top moves point at a move", () => {
+  const ev = (storeName: string, severity: "high" | "normal", detectedAt: string) => ({
+    storeId: storeName,
+    storeName,
+    type: "sold_out" as const,
+    severity,
+    payload: { title: "X" },
+    detectedAt,
+  });
+  const input: BriefingInput = {
+    weekOf: "2026-10-05",
+    events: [ev("A", "normal", "2026-10-03"), ev("B", "high", "2026-10-01"), ev("C", "high", "2026-10-02")],
+  };
+
+  it("numbers the prompt's moves in rankEvents order (high first, then newest)", () => {
+    const msg = buildBriefingMessage(input);
+    expect(rankEvents(input.events).map((e) => e.storeName)).toEqual(["C", "B", "A"]);
+    expect(msg).toMatch(/^1\. \[HIGH\] 2026-10-02 C/m);
+    expect(msg).toMatch(/^3\. \[normal\] 2026-10-03 A/m);
+  });
+
+  it("keeps a valid move number from the model and drops a bad one", () => {
+    const parsed = parseInterpretation(
+      '{"topMoves":[{"headline":"a","whyItMatters":"b","move":2},{"headline":"c","move":"two"}],"whatThisMeans":null,"suggestedMove":"d"}',
+    );
+    expect(parsed?.topMoves.map((m) => m.move)).toEqual([2, undefined]);
+  });
+
+  it("numbers the no-AI version's top moves too", () => {
+    expect(fallbackInterpretation(input).topMoves.map((m) => m.move)).toEqual([1, 2, 3]);
   });
 });

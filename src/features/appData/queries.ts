@@ -6,11 +6,11 @@
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { DEFAULT_ALERT_SETTINGS, loadAlertSettings, movesCaughtThisMonth, MUTABLE_TYPES } from "@/features/alerts/settings";
+import { fallbackInterpretation, rankEvents, type BriefingInput, type BriefingInterpretation } from "@/features/briefing/content";
 import { DEFAULT_BRIEFING, nextBriefingAt } from "@/features/briefing/schedule";
 import { CATALOG_CONFIG } from "@/features/catalog/config";
 import { buildFirstReport, type CatalogStats as StoredStats } from "@/features/catalog/firstReport";
 import { downloadSnapshot } from "@/features/catalog/snapshots";
-import type { UserRole } from "./roles";
 import type { CatalogProduct } from "@/features/catalog/types";
 import type { EventType, Severity } from "@/features/events/types";
 import { compareCatalogs } from "@/features/matching/match";
@@ -20,8 +20,11 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { shortDate } from "./format";
 import { toMoves, type FeedRow } from "./moves";
+import type { UserRole } from "./roles";
 import type {
   Account,
+  Briefing,
+  BriefingPanel,
   CatalogStats,
   CompetitorOverview,
   CompetitorRow,
@@ -415,6 +418,55 @@ export async function getHomeSummary(moves: Move[]): Promise<HomeSummary> {
         }
       : null,
     setup: { ownStore: !!ownStoreId, competitor: competitors.length > 0, alerts: chosen },
+  };
+}
+
+/** The Home briefing card: the user's sent briefings, newest first (DESIGN 04b). */
+export async function getBriefingPanel(): Promise<BriefingPanel> {
+  const { supabase, plan, ownStoreId } = await me();
+  const competitors = await followed();
+  const { data, error } = await supabase
+    .from("briefings")
+    .select("id, week_start, sent_at, input, content, ai")
+    .eq("status", "sent")
+    .order("week_start", { ascending: false })
+    .limit(12);
+  if (error) throw new Error(`Couldn't load briefings: ${error.message}`);
+
+  const byStore = new Map(competitors.map((c) => [c.store.id, c]));
+  type Row = { id: string; week_start: string; sent_at: string; input: BriefingInput; content: BriefingInterpretation | null; ai: boolean };
+  const briefings = ((data ?? []) as Row[]).map((b): Briefing => {
+    const ranked = rankEvents(b.input.events);
+    const content = b.content ?? fallbackInterpretation(b.input);
+    return {
+      id: b.id,
+      weekStart: b.week_start,
+      sentAt: b.sent_at,
+      moves: b.input.events.length,
+      plain: !b.ai,
+      whatThisMeans: b.ai ? content.whatThisMeans : null,
+      suggestedMove: content.suggestedMove,
+      topMoves: content.topMoves.map((t) => {
+        // The move it's about (briefings from 2026-10 on); else guess the
+        // competitor from the store name the headline starts with.
+        const event = t.move ? ranked[t.move - 1] : ranked.find((e) => t.headline.startsWith(e.storeName));
+        const competitor = event ? byStore.get(event.storeId) : undefined;
+        return {
+          headline: t.headline,
+          why: b.ai ? t.whyItMatters : "",
+          competitorId: competitor?.id ?? null,
+          competitorName: competitor?.name ?? event?.storeName ?? null,
+          domain: competitor?.store.domain ?? null,
+          moveId: t.move && event?.eventId ? event.eventId : null,
+        };
+      }),
+    };
+  });
+  return {
+    briefings,
+    personalised: !!ownStoreId,
+    checkedStores: competitors.map((c) => c.name),
+    checkIntervalHours: PLANS[plan].checkIntervalHours,
   };
 }
 
