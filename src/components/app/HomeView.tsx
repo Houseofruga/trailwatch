@@ -106,7 +106,7 @@ export function HomeView({
           </span>
         </div>,
         <span key="c" className={styles.competitor}>
-          <Avatar name={m.competitorName} />
+          <Avatar name={m.competitorName} domain={m.competitorDomain} />
           {m.competitorName}
         </span>,
         <PriorityBadge key="p" priority={m.priority} />,

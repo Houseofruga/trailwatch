@@ -98,7 +98,7 @@ export function FirstReportView({ report, reading, error }: { report: FirstRepor
     <PageHeader
       title={`${c.name} right now`}
       breadcrumb={{ href: `/competitors/${c.id}`, label: c.name }}
-      leading={<Avatar name={c.name} size={32} />}
+      leading={<Avatar name={c.name} size={32} domain={c.domain} />}
       actions={
         <>
           <Button variant="grey" href={storeUrl} external icon={<IconExternal />}>

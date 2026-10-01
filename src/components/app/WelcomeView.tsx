@@ -279,7 +279,7 @@ export function WelcomeView({
                 <ul className={styles.list}>
                   {shown.map((a) => (
                     <li key={a.id} className={styles.item}>
-                      <Avatar name={a.name} size={32} />
+                      <Avatar name={a.name} size={32} domain={a.domain} />
                       <div className={styles.itemText}>
                         <span className={styles.itemName}>{a.name}</span>
                         <span className={styles.itemSub}>{a.domain}</span>

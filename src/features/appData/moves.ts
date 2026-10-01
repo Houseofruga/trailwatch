@@ -10,6 +10,7 @@ export type FeedRow = {
   storeId: string;
   competitorId: string;
   competitorName: string;
+  competitorDomain?: string;
   type: EventType;
   severity: Severity;
   payload: Record<string, unknown>;
@@ -150,6 +151,7 @@ export function toMoves(rows: FeedRow[]): Move[] {
       id: lead.eventId,
       competitorId: lead.competitorId,
       competitorName: lead.competitorName,
+      competitorDomain: lead.competitorDomain,
       kind: kindOf(lead.type),
       priority: group.some((r) => r.severity === "high") ? "high" : lead.severity,
       summary: bundled ? bundleSummary(lead.type, group) : moveSummary(lead.type, lead.payload),

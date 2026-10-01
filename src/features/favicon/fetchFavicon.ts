@@ -175,7 +175,9 @@ export async function fetchFavicon(domain: string): Promise<Favicon | null> {
   // Homepage-declared icons first (best quality), from wherever the homepage
   // actually resolves to after redirects.
   const candidates: string[] = [];
-  const page = await safeFetch(origin);
+  // Some apexes don't answer at all (bollandbranch.com) while www does.
+  let page = await safeFetch(origin);
+  if (!page.ok && wwwHost) page = await safeFetch(`${parsed.url.protocol}//${wwwHost}`);
   if (page.ok) {
     candidates.push(...iconHrefsFromHtml(page.html, page.finalUrl));
     try {

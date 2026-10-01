@@ -20,11 +20,11 @@ export async function GET(request: Request): Promise<Response> {
 
   if (!icon) {
     // No icon found → 404 so the client <img>'s onError fires and the avatar
-    // falls back to initials. Cache the miss briefly so a dead domain isn't
-    // re-fetched on every render.
+    // falls back to the letter. Cache the miss for an hour only: it's often a
+    // store rate-limiting us (HTTP 429) rather than having no icon.
     return new Response(null, {
       status: 404,
-      headers: { "Cache-Control": "public, max-age=3600, s-maxage=86400" },
+      headers: { "Cache-Control": "public, max-age=3600, s-maxage=3600" },
     });
   }
 

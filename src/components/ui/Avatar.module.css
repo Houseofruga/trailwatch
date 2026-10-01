@@ -26,3 +26,14 @@
   height: 100%;
   object-fit: cover;
 }
+
+/* Favicon: a hairline frame so white icons don't vanish on white cards. */
+.withIcon {
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.icon {
+  width: 75%;
+  height: 75%;
+  object-fit: contain;
+}

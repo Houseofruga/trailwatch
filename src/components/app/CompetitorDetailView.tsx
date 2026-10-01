@@ -138,7 +138,7 @@ export function CompetitorDetailView({
       <PageHeader
         title={c.name}
         breadcrumb={{ href: "/competitors", label: "Competitors" }}
-        leading={<Avatar name={c.name} size={32} src={c.favicon} />}
+        leading={<Avatar name={c.name} size={32} domain={c.domain} />}
         badges={
           pagesOnly ? (
             <Badge>Pages only</Badge>

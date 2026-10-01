@@ -13,6 +13,7 @@ export type Move = {
   id: string;
   competitorId: string;
   competitorName: string;
+  competitorDomain?: string;
   kind: MoveKind;
   priority: Priority;
   summary: string;
@@ -39,7 +40,6 @@ export type CompetitorRow = {
   id: string;
   name: string;
   domain: string;
-  favicon?: string | null;
   products: number | null;
   onSale: number | null;
   moves7d: number;

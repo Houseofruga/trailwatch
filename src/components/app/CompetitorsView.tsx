@@ -46,7 +46,7 @@ export function CompetitorsView({
   const rows: Row[] = competitors.map((c) => {
     const store = (
       <span className={styles.store}>
-        <Avatar name={c.name} size={28} src={c.favicon} />
+        <Avatar name={c.name} size={28} domain={c.domain} />
         <span className={styles.storeText}>
           <Link href={`/competitors/${c.id}`} className={styles.storeName}>
             {c.name}

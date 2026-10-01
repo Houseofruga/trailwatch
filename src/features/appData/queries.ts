@@ -234,6 +234,7 @@ export async function listMoves(opts: { competitorId?: string; sinceDays?: numbe
       storeId: r.store_id,
       competitorId: c.id,
       competitorName: c.name,
+      competitorDomain: c.store.domain,
       type: e.type,
       severity: e.severity,
       payload: e.payload,
