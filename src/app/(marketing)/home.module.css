@@ -10,7 +10,7 @@
   min-height: 620px;
 }
 
-/* Full-bleed sky — matches the /1 hero's at-rest frame exactly (HeroScene.sky):
+/* Full-bleed sky — the at-rest sky frame (from the retired /1 hero):
    fullBG cover/centered, then scaled up and slid right so the deep-blue left of
    the image fills the frame behind the copy (no dark scrim needed). Static here
    (no scroll zoom). */

@@ -24,43 +24,6 @@ export function SiteFooter() {
           </div>
 
           <div className={styles.cols}>
-            <nav className={styles.legal} aria-label="Tools">
-              <div className={styles.legalHead}>Tools</div>
-              <ul className={styles.legalLinks}>
-                <li>
-                  <Link href="/tools/competitor-teardown">Competitor Teardown</Link>
-                </li>
-                <li>
-                  <Link href="/tools/when-was-a-website-last-updated">
-                    Last Updated Checker
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/tools/sitemap-finder">Sitemap Finder</Link>
-                </li>
-                <li>
-                  <Link href="/tools/robots-txt-tester">Robots.txt Tester</Link>
-                </li>
-              </ul>
-            </nav>
-
-            <nav className={styles.legal} aria-label="Compare">
-              <div className={styles.legalHead}>Compare</div>
-              <ul className={styles.legalLinks}>
-                <li>
-                  <Link href="/compare/visualping-alternative">
-                    Visualping alternative
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/compare/crayon-alternative">Crayon alternative</Link>
-                </li>
-                <li>
-                  <Link href="/compare/kompyte-alternative">Kompyte alternative</Link>
-                </li>
-              </ul>
-            </nav>
-
             <nav className={styles.legal} aria-label="Legal">
               <div className={styles.legalHead}>Legal</div>
               <ul className={styles.legalLinks}>

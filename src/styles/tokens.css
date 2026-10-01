@@ -97,7 +97,7 @@
 /* The Shopify-style (Polaris) scope: the signed-in app and auth screens
    (AppFrame, AuthShell), the homepage, and the shared site header/footer.
    Inter and the neutral greys match @shopify/polaris-tokens 9.4.2. The
-   tools/compare/legal page bodies keep DM Sans and the warm tokens above. */
+   legal page bodies keep DM Sans and the warm tokens above. */
 .ui {
   --bg: #f1f1f1;
   --surface: #ffffff;
