@@ -94,9 +94,10 @@
   --ui-avatar-5: #e0cfd8;
 }
 
-/* The signed-in app and auth screens (AppFrame, AuthShell): Inter and the
-   neutral greys from the owner's updated Claude Design canvas. Scoped so the
-   marketing site keeps DM Sans and the warm tokens above. */
+/* The Shopify-style (Polaris) scope: the signed-in app and auth screens
+   (AppFrame, AuthShell), the homepage, and the shared site header/footer.
+   Inter and the neutral greys match @shopify/polaris-tokens 9.4.2. The
+   tools/compare/legal page bodies keep DM Sans and the warm tokens above. */
 .ui {
   --bg: #f1f1f1;
   --surface: #ffffff;
@@ -161,6 +162,10 @@
   --ui-critical-soft-line: #fec1c7;
   --ui-critical-badge: #fed1d7;
 
+  /* Polaris --p-font-family-mono. */
+  --ui-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+
+  /* Polaris --p-font-family-sans, with Inter self-hosted by next/font. */
   font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, "Helvetica Neue",
     sans-serif;
   color: var(--ink);

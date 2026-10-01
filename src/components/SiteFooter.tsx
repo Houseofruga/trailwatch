@@ -8,7 +8,7 @@ const SUPPORT_EMAIL = "trailwatch@houseofruga.com";
  *  marketing landing and the legal document pages. */
 export function SiteFooter() {
   return (
-    <footer className={styles.band}>
+    <footer className={`ui ${styles.band}`}>
       <div className={styles.inner}>
         <div className={styles.top}>
           <div className={styles.brand}>
@@ -20,7 +20,7 @@ export function SiteFooter() {
                 alt="TrailWatch"
               />
             </Link>
-            <div className={styles.brandTag}>Competitor tracking for founders.</div>
+            <div className={styles.brandTag}>Competitor briefings for Shopify brands.</div>
           </div>
 
           <div className={styles.cols}>

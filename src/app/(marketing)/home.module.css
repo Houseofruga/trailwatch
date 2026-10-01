@@ -91,21 +91,7 @@
   gap: 14px;
 }
 
-.heroCtaBtn {
-  display: inline-block;
-  padding: 12px 22px;
-  font-size: 0.98rem;
-  font-weight: 600;
-  color: var(--ink);
-  background: var(--accent);
-  text-decoration: none;
-}
 
-.heroCtaBtn:hover {
-  background: var(--accent-hover);
-  color: var(--ink);
-  text-decoration: none;
-}
 
 .heroCtaNote {
   font-size: 0.85rem;
@@ -128,7 +114,7 @@
 .finderLabel {
   display: block;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 650;
   color: var(--ink);
   margin-bottom: 8px;
 }
@@ -156,26 +142,8 @@
   border-color: var(--border-input-hover);
 }
 
-.finderSubmit {
-  flex: 0 0 auto;
-  padding: 11px 18px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--ink);
-  background: var(--accent);
-  border: 1px solid var(--accent);
-  cursor: pointer;
-}
 
-.finderSubmit:hover:not(:disabled) {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
-}
 
-.finderSubmit:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
 
 .finderHint {
   margin: 10px 2px 0;
@@ -215,7 +183,7 @@
 
 .finderResultTitle {
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 650;
   color: var(--ink-2);
 }
 
@@ -263,7 +231,7 @@
   background: var(--surface-sunken);
   color: #5d5a53;
   font-size: 9px;
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .compMain {
@@ -276,7 +244,7 @@
 }
 
 .compName {
-  font-weight: 600;
+  font-weight: 650;
   color: var(--ink);
   font-size: 0.95rem;
 }
@@ -292,22 +260,7 @@
   color: var(--ink-2);
 }
 
-.compRemove {
-  flex: 0 0 auto;
-  width: 26px;
-  height: 26px;
-  line-height: 1;
-  font-size: 1.1rem;
-  color: var(--ink-2);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  cursor: pointer;
-}
 
-.compRemove:hover {
-  color: var(--danger);
-  border-color: var(--danger);
-}
 
 .compEmpty {
   margin: 0 0 12px;
@@ -343,37 +296,9 @@
   color: var(--ink-4);
 }
 
-.addBtn {
-  flex: 0 0 auto;
-  padding: 9px 16px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--ink);
-  background: var(--surface);
-  border: 1px solid var(--border-input);
-  cursor: pointer;
-}
 
-.addBtn:hover {
-  border-color: var(--border-input-hover);
-}
 
-.finderCta {
-  display: block;
-  text-align: center;
-  padding: 12px 16px;
-  font-size: 0.98rem;
-  font-weight: 600;
-  color: var(--ink);
-  background: var(--accent);
-  text-decoration: none;
-}
 
-.finderCta:hover {
-  background: var(--accent-hover);
-  color: var(--ink);
-  text-decoration: none;
-}
 
 @media (max-width: 900px) {
   .hero {

@@ -1,9 +1,9 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import Link from "next/link";
 import { findCompetitorsAction, type FinderState } from "./actions";
 import { CompetitorAvatar } from "@/components/CompetitorAvatar";
+import { Button } from "@/components/ui/Button";
 import type { Competitor } from "@/features/competitorFinder/types";
 import styles from "./home.module.css";
 
@@ -94,31 +94,31 @@ export function CompetitorFinder() {
         className={styles.finderForm}
       >
         <label htmlFor="company" className={styles.finderLabel}>
-          Your company website
+          Your store’s website
         </label>
         <div className={styles.finderRow}>
           <input
             id="company"
             name="company"
             type="text"
-            placeholder="yourcompany.com"
+            placeholder="yourstore.com"
             className={styles.finderInput}
             autoComplete="off"
-            aria-label="Your company name or website"
+            aria-label="Your store’s website"
             value={company}
             onChange={(e) => setCompany(e.target.value)}
             required
           />
           {showFind && (
-            <button type="submit" className={styles.finderSubmit} disabled={pending}>
+            <Button variant="primary" tall type="submit" disabled={pending}>
               {pending ? "Finding…" : "Find competitors"}
-            </button>
+            </Button>
           )}
         </div>
         <p className={styles.finderHint}>
           {pending
             ? "Reading your site and finding who to watch — a few seconds."
-            : "Your website gives the most accurate matches — a company name works too. You can edit the list before you start."}
+            : "Enter your store’s URL for the best matches. You can edit the list before you start."}
         </p>
       </form>
 
@@ -129,7 +129,7 @@ export function CompetitorFinder() {
           <div className={styles.emptyState}>
             {pending
               ? "Finding competitors…"
-              : "Your competitors will appear here — suggested from your company, and yours to edit."}
+              : "Competitor stores will appear here — suggested from your store, and yours to edit."}
           </div>
         ) : (
           <div className={styles.finderResult}>
@@ -170,14 +170,9 @@ export function CompetitorFinder() {
                     )}
                     {c.why && <span className={styles.compWhy}>{c.why}</span>}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => removeAt(i)}
-                    className={styles.compRemove}
-                    aria-label={`Remove ${c.name}`}
-                  >
+                  <Button variant="plainDark" iconOnly onClick={() => removeAt(i)} aria-label={`Remove ${c.name}`}>
                     ×
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -187,7 +182,7 @@ export function CompetitorFinder() {
 
           {list.length >= MAX_TOTAL ? (
             <p className={styles.addMax}>
-              That’s 5 — the most to start with. Sign up free to add and track more.
+              That’s 5 — the most to start with. Join the beta to add and track more.
             </p>
           ) : (
             <div className={styles.addRow}>
@@ -201,21 +196,21 @@ export function CompetitorFinder() {
                     addManual();
                   }
                 }}
-                placeholder="Add a competitor (name or URL)"
+                placeholder="Add a competitor store (URL)"
                 className={styles.addInput}
                 aria-label="Add a competitor"
               />
-              <button type="button" onClick={addManual} className={styles.addBtn}>
+              <Button tall onClick={addManual}>
                 Add
-              </button>
+              </Button>
             </div>
           )}
 
-            <Link href={SIGNUP_HREF} onClick={persistPending} className={styles.finderCta}>
+            <Button variant="primary" tall full href={SIGNUP_HREF} onClick={persistPending}>
               {list.length > 0
-                ? `Start free — watch ${list.length} competitor${list.length > 1 ? "s" : ""}`
-                : "Start free — no card required"}
-            </Link>
+                ? `Join the beta — watch ${list.length} competitor${list.length > 1 ? "s" : ""}`
+                : "Join the beta"}
+            </Button>
           </div>
         )}
       </div>

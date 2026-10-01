@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 // Default social card for every route without its own opengraph-image.
 // Palette mirrors src/styles/tokens.css (ImageResponse can't read CSS vars).
-export const alt = "TrailWatch — competitor tracking for founders";
+export const alt = "TrailWatch — competitor briefings for Shopify brands";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -52,7 +52,7 @@ export default function OpengraphImage() {
             maxWidth: 900,
           }}
         >
-          Competitor tracking for founders, one email a week.
+          Competitor briefings for Shopify brands.
         </div>
 
         <div
@@ -62,7 +62,7 @@ export default function OpengraphImage() {
             color: "#4a4740",
           }}
         >
-          Pricing, features, messaging — the meaningful changes, in plain English.
+          Instant alerts for big moves and a plain-English briefing every Monday.
         </div>
       </div>
     ),

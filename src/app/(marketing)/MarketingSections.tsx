@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Button } from "@/components/ui/Button";
 import { SiteFooter } from "@/components/SiteFooter";
 import { StepsScroller } from "./StepsScroller";
 import { CloudScene } from "./CloudScene";
@@ -17,7 +17,9 @@ const FOUNDER_X_URL = "https://x.com/thatguydongre";
  */
 export function MarketingSections() {
   return (
-    <>
+    // `ui`: the app's Shopify-style type and buttons (display: contents keeps the
+    // sections' own layout and pinned scroll untouched).
+    <div className="ui" style={{ display: "contents" }}>
       {/* ================================== SECTION 2 · HOW IT WORKS */}
       <StepsScroller />
 
@@ -32,15 +34,15 @@ export function MarketingSections() {
           The big tools weren’t built for you.
         </h2>
         <p className={styles.whyBody}>
-          Competitor monitoring today comes in two flavors: enterprise software with
-          battlecards, sales calls, and budgets you don’t have — or general page-watchers
-          that bury the AI summaries behind a premium plan and hand you a dashboard to
-          babysit. TrailWatch does one thing, for one kind of person: it tells founders
-          what their competitors changed, in one weekly email, at a price that doesn’t
-          need approval.
+          Competitor intelligence today comes in two flavors: enterprise platforms with
+          dashboards, sales calls and budgets in the hundreds a month, or spy tools that dump
+          raw numbers for dropshippers to dig through. TrailWatch does one thing, for one kind
+          of brand: it tells growing DTC brands what their competitors changed and what it
+          means for them, in an alert when it matters and a briefing every Monday.
         </p>
         <div className={styles.callout}>
-          Last week, it filtered out 47 trivial edits — so your email was 7 lines, not 54.
+          Footer tweaks, cookie banners and reordered menus are filtered out before they reach
+          you. Sales, launches and price moves aren’t.
         </div>
         <div className={styles.compare}>
           <div className={`${styles.compareRow} ${styles.compareHead}`}>
@@ -51,88 +53,63 @@ export function MarketingSections() {
             </div>
           </div>
           <div className={styles.compareRow}>
-            <div className={styles.compareCell}>Built for enterprise sales teams</div>
-            <div className={`${styles.compareCell} ${styles.tw}`}>
-              Built for founders &amp; small teams
-            </div>
-          </div>
-          <div className={styles.compareRow}>
             <div className={styles.compareCell}>
-              AI summaries locked behind a premium plan
+              Built for enterprise brands and dropshippers
             </div>
+            <div className={`${styles.compareCell} ${styles.tw}`}>Built for growing DTC brands</div>
+          </div>
+          <div className={styles.compareRow}>
+            <div className={styles.compareCell}>Dashboards to dig through</div>
             <div className={`${styles.compareCell} ${styles.tw}`}>
-              AI summaries on every plan, even free
+              Instant alerts + a Monday briefing in your inbox
             </div>
           </div>
           <div className={styles.compareRow}>
-            <div className={styles.compareCell}>A dashboard to check daily</div>
-            <div className={`${styles.compareCell} ${styles.tw}`}>One email a week</div>
+            <div className={styles.compareCell}>Raw numbers and diffs</div>
+            <div className={`${styles.compareCell} ${styles.tw}`}>
+              Plain English: what changed and what it means for you
+            </div>
           </div>
           <div className={styles.compareRow}>
-            <div className={styles.compareCell}>Metered pricing, “contact sales”</div>
-            <div className={`${styles.compareCell} ${styles.tw}`}>
-              Flat price, sign up in a minute
-            </div>
+            <div className={styles.compareCell}>“Contact sales” or hundreds a month</div>
+            <div className={`${styles.compareCell} ${styles.tw}`}>Free during beta</div>
           </div>
         </div>
         </div>
       </section>
         }
         pricing={
-      /* ===================================== SECTION 4 · PRICING */
+      /* ===================================== SECTION 4 · BETA (was pricing) */
       <section className={styles.pricing}>
         <div className={styles.shellWide}>
         <h2 className={`${styles.h2} ${styles.pricingHeading}`}>
-          Honest pricing. The AI’s never behind a paywall.
+          Free during the beta. Early-access pricing for life.
         </h2>
-        <div className={styles.planGrid}>
-          <div className={styles.plan}>
-            <div className={styles.planHead}>
-              <div className={styles.planName}>Free</div>
-              <span className={styles.planBadge}>No card required</span>
-            </div>
-            <div className={styles.planPrice}>$0</div>
-            <div className={styles.planFeatures}>
-              <div>2 competitors</div>
-              <div>2 pages each</div>
-              <div>Weekly digest</div>
-              <div>AI summaries included</div>
-            </div>
-            <Link
-              className={`${styles.btn} ${styles.btnSecondary} ${styles.planCta}`}
-              href="/login?mode=signup"
-            >
-              Start free
-            </Link>
-          </div>
-
+        <div className={`${styles.planGrid} ${styles.planGridSingle}`}>
           <div className={`${styles.plan} ${styles.planPro}`}>
             <div className={styles.planHead}>
-              <div className={styles.planName}>Pro</div>
-              <span className={styles.planBadge}>Cancel anytime</span>
+              <div className={styles.planName}>Beta access</div>
+              <span className={styles.planBadge}>No card required</span>
             </div>
-            <div className={styles.planPrice}>
-              $24.17<span className={styles.planPer}>/mo</span>
-              <div className={styles.planPer}>
-                billed annually ($290/yr, 2 months free). Or $29/mo month-to-month.
+            <div className={styles.planPrice}>Free while we’re in beta</div>
+            <div className={styles.planFeatures}>
+              <div>Track up to 10 competitor stores</div>
+              <div>Instant alerts for sales, launches, price changes and sell-outs</div>
+              <div>A plain-English briefing every Monday</div>
+              <div>
+                <b>40% off for life</b> when paid plans launch (early-access pricing)
               </div>
             </div>
-            <div className={styles.planFeatures}>
-              <div>5 competitors</div>
-              <div>5 pages each</div>
-              <div>Daily checks</div>
+            <div className={styles.planCta}>
+              <Button variant="primary" tall full href="/login?mode=signup">
+                Join the beta
+              </Button>
             </div>
-            <Link
-              className={`${styles.btn} ${styles.btnPrimary} ${styles.planCta}`}
-              href="/login?mode=signup"
-            >
-              Start free, upgrade later
-            </Link>
           </div>
         </div>
         <p className={styles.pricingFoot}>
-          No per-seat fees. Month-to-month or save with annual — your call. And the AI
-          summaries work on the free plan too, not gated behind an upgrade.
+          No card required. We’ll tell you well before paid plans start, and you can leave
+          anytime.
         </p>
         </div>
       </section>
@@ -174,15 +151,12 @@ export function MarketingSections() {
               no growth-hack dark patterns, and you can actually reach the person who built it.
             </p>
             <div className={styles.finalCta}>
-              <Link
-                className={`${styles.btn} ${styles.btnPrimary}`}
-                href="/login?mode=signup"
-              >
-                Start free — no card required
-              </Link>
+              <Button variant="primary" tall href="/login?mode=signup">
+                Join the beta — free, no card required
+              </Button>
             </div>
             <div className={styles.finalQuiet}>
-              Also a great fit for small marketing teams, PMs, and agencies.
+              Also a great fit for e-commerce agencies managing several brands.
             </div>
           </div>
           {/* Founder portrait — Ghibli/original before-after reveal slider. */}
@@ -210,6 +184,6 @@ export function MarketingSections() {
       </section>
 
       <SiteFooter />
-    </>
+    </div>
   );
 }

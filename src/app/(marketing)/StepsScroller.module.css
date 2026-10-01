@@ -28,7 +28,7 @@
 
 .h2 {
   font-size: 30px;
-  font-weight: 600;
+  font-weight: 650;
   letter-spacing: -0.015em;
   margin: 0 0 52px 0;
   color: var(--ink);
@@ -93,7 +93,7 @@
 }
 
 .stepNum {
-  font-family: var(--font-geist-mono), monospace;
+  font-family: var(--ui-font-mono);
   font-size: 13px;
   font-weight: 700;
   color: var(--ink);
@@ -176,7 +176,7 @@
 
 .cardTitle {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 650;
   color: var(--ink);
 }
 
@@ -188,7 +188,7 @@
 }
 
 .cardHost {
-  font-family: var(--font-geist-mono), monospace;
+  font-family: var(--ui-font-mono);
   font-size: 11px;
   color: var(--ink-4);
   white-space: nowrap;
@@ -210,7 +210,7 @@
 }
 
 .urlText {
-  font-family: var(--font-geist-mono), monospace;
+  font-family: var(--ui-font-mono);
   font-size: 12.5px;
   color: var(--ink-2);
   white-space: nowrap;
@@ -299,7 +299,7 @@
   align-items: center;
   gap: 6px;
   font-size: 11.5px;
-  font-weight: 600;
+  font-weight: 650;
   color: var(--accent-ink);
 }
 
@@ -340,7 +340,7 @@
 
 .diffText b {
   color: var(--accent-ink);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .diffKept {
@@ -364,7 +364,7 @@
 
 .tagAccent {
   color: var(--accent-ink);
-  font-weight: 600;
+  font-weight: 650;
   background: var(--surface);
 }
 
@@ -391,12 +391,12 @@
 
 .mailSubjectRow {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 650;
   color: var(--ink);
 }
 
 .mailChangeCount {
-  font-weight: 400;
+  font-weight: 450;
   font-size: 11.5px;
   color: var(--ink-4);
 }
@@ -437,7 +437,7 @@
 
 .mailSender {
   font-size: 12.5px;
-  font-weight: 600;
+  font-weight: 650;
   color: var(--ink);
 }
 
@@ -495,14 +495,14 @@
 
 .mailItem b {
   color: var(--accent-ink);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .mailCta {
   padding-top: 12px;
   border-top: 1px solid var(--border-soft);
   font-size: 12.5px;
-  font-weight: 600;
+  font-weight: 650;
   color: var(--accent-ink);
 }
 

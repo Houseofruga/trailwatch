@@ -23,9 +23,12 @@
   text-decoration: none;
 }
 
+/* Values from Shopify's published Polaris tokens (@shopify/polaris-tokens
+   9.4.2): focus = --p-color-border-focus, a 2px outline offset 1px; pressed =
+   the --p-shadow-button*-inset shadows and --p-color-bg-fill-active. */
 .button:focus-visible {
-  outline: none;
-  box-shadow: var(--ui-focus-ring);
+  outline: 2px solid #005bd3;
+  outline-offset: 1px;
 }
 
 .label {
@@ -56,6 +59,10 @@
   color: #ffffff;
   background: #1a1a1a;
 }
+.primary:active {
+  background: #1a1a1a;
+  box-shadow: inset 0 3px 0 0 #000000;
+}
 
 .secondary {
   background: var(--surface);
@@ -65,7 +72,13 @@
 }
 .secondary:hover {
   color: var(--ink);
-  background: var(--ui-subdued);
+  background: #fafafa;
+  box-shadow: inset 0 1px 0 0 #ebebeb, inset -1px 0 0 0 #ebebeb, inset 1px 0 0 0 #ebebeb, inset 0 -1px 0 0 #cccccc;
+}
+.secondary:active {
+  background: #f7f7f7;
+  box-shadow: inset -1px 0 1px 0 rgba(26, 26, 26, 0.122), inset 1px 0 1px 0 rgba(26, 26, 26, 0.122),
+    inset 0 2px 1px 0 rgba(26, 26, 26, 0.2);
 }
 
 /* Page-header and pagination actions (Visit store, More actions, View snapshot). */

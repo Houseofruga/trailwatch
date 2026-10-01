@@ -13,15 +13,15 @@ import styles from "./StepsScroller.module.css";
 const STEPS = [
   {
     num: "01",
-    body: "Paste their pricing, homepage, or changelog URLs — you’ll see a snapshot captured on the spot.",
+    body: "Paste a competitor’s store URL. TrailWatch reads their whole catalog on the spot: products, prices, what’s on sale, what’s sold out.",
   },
   {
     num: "02",
-    body: "Daily checks, trivial edits filtered out. Nothing to configure — no frequencies to set, no alert rules to tune, no dashboard to check.",
+    body: "Checked around the clock, noise filtered out. Footer tweaks and cookie banners never reach you. Sales, launches and price changes do, the moment they happen.",
   },
   {
     num: "03",
-    body: "Grouped by competitor, in plain English. “Linear raised their Business plan from $14 to $16.” Read it in 30 seconds — or open the dashboard to see every change in full.",
+    body: "A briefing every Monday, in plain English. “Fernwood Supply started a sitewide 25% sale on Thursday.” Read it in 30 seconds, or open the dashboard for every change in full.",
   },
 ];
 
@@ -110,7 +110,7 @@ export function StepsScroller() {
                       <div className={styles.card}>
                         <div className={styles.cardTitle}>Add a competitor</div>
                         <div className={styles.urlField}>
-                          <span className={styles.urlText}>linear.app/pricing</span>
+                          <span className={styles.urlText}>lunaskin.co</span>
                         </div>
                         <div className={styles.snap}>
                           <div className={styles.snapShot}>
@@ -134,8 +134,8 @@ export function StepsScroller() {
                             </div>
                           </div>
                           <div className={styles.snapFoot}>
-                            <span className={styles.snapBadge}>✓ Snapshot captured</span>
-                            <span className={styles.snapMeta}>Linear · Pricing</span>
+                            <span className={styles.snapBadge}>✓ Catalog captured</span>
+                            <span className={styles.snapMeta}>Luna Skin · 214 products</span>
                           </div>
                         </div>
                       </div>
@@ -147,7 +147,7 @@ export function StepsScroller() {
                       <div className={styles.card}>
                         <div className={styles.cardHead}>
                           <span className={styles.cardTitle}>Daily check</span>
-                          <span className={styles.cardHost}>linear.app/pricing</span>
+                          <span className={styles.cardHost}>lunaskin.co</span>
                         </div>
                         <div className={styles.diffRows}>
                           <div className={styles.diffRow}>
@@ -160,7 +160,7 @@ export function StepsScroller() {
                           </div>
                           <div className={`${styles.diffRow} ${styles.diffKept}`}>
                             <span className={styles.diffText}>
-                              Business plan <b>$14 → $16</b>
+                              Sitewide sale started: <b>25% off</b>
                             </span>
                             <span className={styles.tagAccent}>flagged</span>
                           </div>
@@ -222,7 +222,7 @@ export function StepsScroller() {
                         </div>
                         <div className={styles.mailSubjectRow}>
                           Your competitors this week
-                          <span className={styles.mailChangeCount}>· 7 changes</span>
+                          <span className={styles.mailChangeCount}>· 9 moves</span>
                         </div>
                         <div className={styles.mailSenderRow}>
                           <span className={styles.mailAvatar} aria-hidden="true">
@@ -254,20 +254,22 @@ export function StepsScroller() {
                         </div>
                         <div className={styles.mailBody}>
                           <div className={styles.mailGroup}>
-                            <div className={styles.mailComp}>Northwind</div>
+                            <div className={styles.mailComp}>Luna Skin</div>
                             <div className={styles.mailItem}>
-                              Renamed the Starter tier to “Basic”
+                              Launched 3 new serums <b>($38–$54)</b>
                             </div>
                           </div>
                           <div className={styles.mailGroup}>
-                            <div className={styles.mailComp}>Linear</div>
+                            <div className={styles.mailComp}>Fernwood Supply</div>
                             <div className={styles.mailItem}>
-                              Business plan raised <b>$14 → $16</b>
+                              Sitewide sale started: <b>25% off</b>
                             </div>
                           </div>
                           <div className={styles.mailGroup}>
-                            <div className={styles.mailComp}>Meridian</div>
-                            <div className={styles.mailItem}>Shipped SSO and a public API</div>
+                            <div className={styles.mailComp}>Kindred Pet</div>
+                            <div className={styles.mailItem}>
+                              Bestseller “Calm Chews” <b>sold out</b>
+                            </div>
                           </div>
                         </div>
                         <div className={styles.mailCta}>Open dashboard</div>

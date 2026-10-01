@@ -24,13 +24,14 @@ const geistMono = Geist_Mono({
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://gettrailwatch.com";
 
+const TITLE = "TrailWatch — competitor briefings for Shopify brands";
 const DESCRIPTION =
-  "We watch your competitors' pricing, homepage and changelog, and email you one plain-English digest a week explaining what actually changed. AI summaries on every plan, even free.";
+  "Track your competitors' products, prices, sales and stock. Instant alerts for big moves and a plain-English briefing every Monday. Free during beta.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "TrailWatch — competitor tracking for founders, one email a week",
+    default: TITLE,
     template: "%s — TrailWatch",
   },
   description: DESCRIPTION,
@@ -39,12 +40,12 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "TrailWatch",
     url: SITE_URL,
-    title: "TrailWatch — competitor tracking for founders, one email a week",
+    title: TITLE,
     description: DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: "TrailWatch — competitor tracking for founders, one email a week",
+    title: TITLE,
     description: DESCRIPTION,
   },
   verification: {

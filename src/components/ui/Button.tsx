@@ -20,7 +20,12 @@ type Common = {
 
 type AsButton = Common &
   Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children"> & { href?: undefined };
-type AsLink = Common & { href: string; external?: boolean; "aria-label"?: string };
+type AsLink = Common & {
+  href: string;
+  external?: boolean;
+  "aria-label"?: string;
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+};
 
 const SPIN_TONE: Record<Variant, string> = {
   primary: "#ffffff",

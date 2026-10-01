@@ -8,27 +8,27 @@ const SITE_URL =
 export const FAQ: Array<{ q: string; a: string }> = [
   {
     q: "What does TrailWatch do?",
-    a: "You add a competitor's public pages — pricing, homepage, changelog. TrailWatch checks them daily, filters out trivial edits, and emails you one plain-English digest a week summarizing what actually changed.",
+    a: "You add the stores you compete with. TrailWatch tracks their products, prices, sales, stock and key pages, alerts you when they make a big move, and sends a plain-English briefing every Monday on what changed and what it means for you.",
   },
   {
-    q: "How is this different from a raw diff or Google Alerts?",
-    a: "The whole point is low noise. Instead of a wall of red-and-green diffs, you get a short, readable summary of the meaningful changes — and trivial edits like reworded footers or timestamps are filtered out before they ever reach you.",
+    q: "How is this different from price trackers or spy tools?",
+    a: "Price trackers are built to reprice identical products, and spy tools give dropshippers raw numbers. TrailWatch is for brands selling their own products: it explains what competitors are doing (launches, promos, positioning) instead of handing you a spreadsheet.",
   },
   {
-    q: "Is there a free plan?",
-    a: "Yes. The free plan covers 2 competitors with 2 pages each, with AI summaries included — the AI is never behind a paywall. No card required to start.",
+    q: "Which stores can I track?",
+    a: "It works best with Shopify stores, where we can read the full catalog. For other sites, we watch key pages like the homepage, sale pages and policies. Marketplaces like Amazon aren't supported yet, so add the brand's own website instead.",
   },
   {
-    q: "How much is Pro, and what do I get?",
-    a: "Pro is $29/month, or $290/year (two months free). It raises your limits to 5 competitors with 5 pages each, with daily checks and the same weekly digest.",
+    q: "How quickly will I hear about changes?",
+    a: "Big moves, like a sale starting or a bestseller selling out, trigger an alert soon after we spot them. Everything else lands in your Monday briefing, so you're never flooded.",
   },
   {
-    q: "How often are pages checked?",
-    a: "Pages are checked daily. You receive a single digest email once a week, so you stay informed without a stream of alerts to manage.",
+    q: "Do I need to install anything on my store?",
+    a: "No. TrailWatch only looks at competitors' public storefronts. Nothing is installed on your store or theirs.",
   },
   {
-    q: "Can I cancel anytime?",
-    a: "Yes. You can cancel from your billing settings at any time and keep Pro access until the end of the period you've already paid for. After that your account returns to the free plan.",
+    q: "Is the beta really free? What happens after?",
+    a: "Yes, free with no card. When paid plans launch, we'll tell you well in advance, and beta members keep 40% off for life. You can leave anytime.",
   },
 ];
 
@@ -52,28 +52,8 @@ export function structuredData(): Record<string, unknown> {
         operatingSystem: "Web",
         url: SITE_URL,
         description:
-          "TrailWatch watches your competitors' public pages and emails you one plain-English digest a week explaining what actually changed. AI summaries on every plan, even free.",
+          "Competitor briefings for Shopify brands: track your competitors' products, prices, sales and stock, with instant alerts for big moves and a plain-English briefing every Monday. Free during beta.",
         publisher: { "@id": `${SITE_URL}/#organization` },
-        offers: [
-          {
-            "@type": "Offer",
-            name: "Free",
-            price: "0",
-            priceCurrency: "USD",
-          },
-          {
-            "@type": "Offer",
-            name: "Pro (monthly)",
-            price: "29",
-            priceCurrency: "USD",
-          },
-          {
-            "@type": "Offer",
-            name: "Pro (annual)",
-            price: "290",
-            priceCurrency: "USD",
-          },
-        ],
       },
       {
         "@type": "FAQPage",

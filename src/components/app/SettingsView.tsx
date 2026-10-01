@@ -325,14 +325,14 @@ export function SettingsView({
           <Card>
             <div className={styles.plan}>
               <div className={styles.planTitle}>
-                <p>Free beta · Founding member</p>
-                {initial.plan.foundingMember ? <Badge tone="success">Founding member</Badge> : null}
+                <p>Free beta</p>
+                {initial.plan.foundingMember ? <Badge tone="success">Beta member</Badge> : null}
               </div>
               <p className={styles.planLimits}>
                 {initial.plan.competitors} competitors · checks every {initial.plan.checkIntervalHours} hours · instant alerts
                 {initial.plan.slack ? " · Slack" : ""}
               </p>
-              <p className={styles.planNote}>Free while we&rsquo;re in beta. Founding members keep a discount when paid plans start.</p>
+              <p className={styles.planNote}>Free while we&rsquo;re in beta. Beta members keep 40% off for life when paid plans start (early-access pricing).</p>
             </div>
           </Card>
         </Section>

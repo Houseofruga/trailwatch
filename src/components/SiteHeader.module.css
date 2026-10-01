@@ -1,5 +1,10 @@
 /* Shared top nav. Mirrors the landing header; consistent across all public
- * pages. Uses the design tokens + DM Sans. */
+ * pages. Type and buttons come from the app's Shopify-style `ui` scope. */
+
+.header {
+  /* No page background behind the nav (it sits on the hero sky). */
+  color: inherit;
+}
 
 .inner {
   max-width: 1280px;
@@ -19,48 +24,22 @@
 .actions {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 12px;
 }
 
-.login {
-  font-size: 13.5px;
-  color: var(--ink-2);
-}
-
-.login:hover {
-  color: var(--accent-ink);
-  text-decoration: none;
-}
-
-/* Over a dark/photographic hero: white nav text and logo. */
-.onDark .login {
-  color: rgba(255, 255, 255, 0.92);
-}
-
+/* Over a dark/photographic hero: white "Log in" and logo. */
+.onDark .login,
 .onDark .login:hover {
   color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.onDark .login:not(:hover) {
+  background: transparent;
 }
 
 .onDark .logo {
   filter: brightness(0) invert(1);
-}
-
-.cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13.5px;
-  font-weight: 500;
-  padding: 10px 16px;
-  background: var(--accent);
-  color: var(--ink);
-  white-space: nowrap;
-}
-
-.cta:hover {
-  background: var(--accent-hover);
-  color: var(--ink);
-  text-decoration: none;
 }
 
 @media (max-width: 560px) {
@@ -73,6 +52,6 @@
   }
 
   .actions {
-    gap: 14px;
+    gap: 6px;
   }
 }
