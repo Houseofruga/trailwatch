@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -53,12 +53,15 @@ export function CompetitorDetailView({
   const [type, setType] = useState("all");
   const [priority, setPriority] = useState("all");
   const [days, setDays] = useState(DAYS_PER_PAGE);
-  // Arriving from an alert or briefing link (#move-<id>): highlight that move.
+  // Arriving from Home, an alert or a briefing link (#move-<id>): highlight
+  // that move. Only alert-email links (?from=alert) get the eyebrow.
   const hash = useSyncExternalStore(subscribeHash, () => window.location.hash, () => "");
-  const fromEmail = highlight ?? /^#move-(.+)$/.exec(hash)?.[1];
+  const fromAlert = useSearchParams().get("from") === "alert";
+  const focused = highlight ?? /^#move-(.+)$/.exec(hash)?.[1];
+  const fromEmail = highlight ?? (fromAlert ? focused : undefined);
   useEffect(() => {
-    if (fromEmail) document.getElementById(`move-${fromEmail}`)?.scrollIntoView({ block: "center" });
-  }, [fromEmail]);
+    if (focused) document.getElementById(`move-${focused}`)?.scrollIntoView({ block: "center" });
+  }, [focused]);
 
   const filtered = useMemo(
     () => moves.filter((m) => (type === "all" || m.kind === type) && (priority === "all" || m.priority === priority)),
@@ -210,7 +213,7 @@ export function CompetitorDetailView({
                             id={`move-${m.id}`}
                             icon={<MoveIcon kind={m.kind} />}
                             title={m.summary}
-                            highlighted={fromEmail === m.id}
+                            highlighted={focused === m.id}
                             eyebrow={fromEmail === m.id ? "From your alert email" : undefined}
                             meta={
                               <>

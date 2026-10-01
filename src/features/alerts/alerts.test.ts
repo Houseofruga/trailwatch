@@ -104,7 +104,7 @@ describe("renderAlertEmail", () => {
     const one = { ...bundle.events[0], eventId: "ev1", meaning: "Their first night cream." };
     const email = renderAlertEmail({ ...bundle, events: [one] }, "https://x.test", 1);
     expect(email.subject).toBe("Dewlane launched Night Cream at $48");
-    expect(email.html).toContain("https://x.test/competitors/c1#move-ev1");
+    expect(email.html).toContain("https://x.test/competitors/c1?from=alert#move-ev1");
     expect(email.html).toContain("Their first night cream.");
   });
 

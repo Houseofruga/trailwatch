@@ -40,7 +40,7 @@ export type AlertBundle = {
 
 function competitorUrl(siteUrl: string, b: AlertBundle, moveId?: string): string {
   if (!b.competitorId) return `${siteUrl}/dashboard`;
-  return `${siteUrl}/competitors/${encodeURIComponent(b.competitorId)}${moveId ? `#move-${encodeURIComponent(moveId)}` : ""}`;
+  return `${siteUrl}/competitors/${encodeURIComponent(b.competitorId)}${moveId ? `?from=alert#move-${encodeURIComponent(moveId)}` : ""}`;
 }
 
 /** The alert's events as moves: same-read launches and sales become one move, as on the app. */

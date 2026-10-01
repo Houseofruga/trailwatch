@@ -55,7 +55,8 @@ export async function callFastModel(system: string, user: string, maxTokens: num
       ],
     });
     return {
-      text: response.choices[0]?.message?.content ?? "",
+      // gpt-oss likes non-breaking hyphens (U+2011), which some mail fonts lack.
+      text: (response.choices[0]?.message?.content ?? "").replace(/[‐‑]/g, "-"),
       call: {
         provider: "groq",
         model: GROQ_SMALL_MODEL,
