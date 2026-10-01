@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { roleLabel } from "@/features/appData/roles";
 import { emailMatchesStore } from "@/features/auth/trust";
 
 export type UserCost = { userId: string; direct: number; shared: number; total: number };
@@ -136,20 +137,20 @@ export function isAdminEmail(email: string | null | undefined): boolean {
   return !!email && admins.includes(email.toLowerCase());
 }
 
-export type AdminUser = { email: string; ownStore: string | null; verified: boolean; signedUp: string };
+export type AdminUser = { email: string; ownStore: string | null; verified: boolean; role: string | null; signedUp: string };
 
 /** Every account, newest first, with the "verified brand" signal (email on their own store's site). */
 export async function listAdminUsers(service: SupabaseClient): Promise<AdminUser[]> {
   const { data, error } = await service
     .from("users")
-    .select("email, created_at, own_store:stores!own_store_id(domain)")
+    .select("email, created_at, role, own_store:stores!own_store_id(domain)")
     .order("created_at", { ascending: false })
     .limit(500);
   if (error) throw new Error(error.message);
-  type Row = { email: string; created_at: string; own_store: { domain: string } | { domain: string }[] | null };
+  type Row = { email: string; created_at: string; role: string | null; own_store: { domain: string } | { domain: string }[] | null };
   return ((data ?? []) as Row[]).map((u) => {
     const store = Array.isArray(u.own_store) ? u.own_store[0] : u.own_store;
     const ownStore = store?.domain ?? null;
-    return { email: u.email, ownStore, verified: emailMatchesStore(u.email, ownStore), signedUp: u.created_at };
+    return { email: u.email, ownStore, verified: emailMatchesStore(u.email, ownStore), role: roleLabel(u.role), signedUp: u.created_at };
   });
 }

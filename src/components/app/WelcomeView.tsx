@@ -12,9 +12,11 @@ import { ProgressBar } from "@/components/ui/Feedback";
 import { Stepper } from "@/components/ui/Guides";
 import { IconCheck, IconClock, IconX, SpinnerIcon } from "@/components/ui/icons";
 import { PageBody } from "@/components/ui/Page";
+import { FormSelect } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
-import { addCompetitor, onboardingStatus, removeCompetitor, saveOwnStore } from "@/features/appData/actions";
+import { addCompetitor, onboardingStatus, removeCompetitor, saveOwnStore, saveRole } from "@/features/appData/actions";
 import { ADD_MESSAGES, checkStoreInput } from "@/features/appData/mockAdd";
+import { ROLES, type UserRole } from "@/features/appData/roles";
 import type { OnboardingItem } from "@/features/appData/types";
 import styles from "./WelcomeView.module.css";
 
@@ -97,7 +99,7 @@ export function WelcomeView({
 }: {
   state: WelcomeState;
   /** Real data; null on a design-review preview. */
-  live: { ownDomain: string | null; added: Added[] } | null;
+  live: { ownDomain: string | null; added: Added[]; role: UserRole | null } | null;
 }) {
   const router = useRouter();
   const preset = live ? undefined : PRESETS[state];
@@ -106,6 +108,7 @@ export function WelcomeView({
   );
   const [store, setStore] = useState(live ? (live.ownDomain ?? "") : "glowfield.com");
   const [storeError, setStoreError] = useState<string | null>(null);
+  const [role, setRole] = useState<string>(live?.role ?? "");
   const [savingStore, setSavingStore] = useState(false);
   const [added, setAdded] = useState<Added[]>(
     live ? live.added : (preset?.added ?? [HP, { ...DW, status: "reading" }, OG]),
@@ -164,8 +167,19 @@ export function WelcomeView({
     return () => clearTimeout(t);
   }, [live, buildingSince]);
 
+  // The optional role answer is saved whichever way they leave step 1.
+  function keepRole() {
+    if (live && role && role !== (live.role ?? "")) void saveRole(role);
+  }
+
+  function skipStore() {
+    keepRole();
+    setStep(2);
+  }
+
   async function continueFromStore(e: React.FormEvent) {
     e.preventDefault();
+    keepRole();
     if (!live || store.trim() === (live.ownDomain ?? "") || !store.trim()) return setStep(2);
     setSavingStore(true);
     const res = await saveOwnStore(store);
@@ -234,11 +248,19 @@ export function WelcomeView({
               error={storeError}
               onChange={(e) => setStore(e.target.value)}
             />
+            <div className={styles.spacer} />
+            <FormSelect
+              id="role"
+              label="What’s your role? (optional)"
+              value={role}
+              options={[{ value: "", label: "Choose one" }, ...ROLES]}
+              onChange={setRole}
+            />
             <div className={styles.actions}>
               <Button variant="primary" type="submit" loading={savingStore}>
                 Continue
               </Button>
-              <Button variant="plain" onClick={() => setStep(2)}>
+              <Button variant="plain" onClick={skipStore}>
                 Skip for now
               </Button>
             </div>

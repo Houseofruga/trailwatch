@@ -106,6 +106,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           <thead>
             <tr>
               <th>User</th>
+              <th>Role</th>
               <th>Their store</th>
               <th>Verified brand</th>
               <th className={styles.num}>Signed up</th>
@@ -115,6 +116,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             {users.map((u) => (
               <tr key={u.email}>
                 <td className={styles.mono}>{u.email}</td>
+                <td>{u.role ?? ""}</td>
                 <td className={styles.mono}>{u.ownStore ?? "—"}</td>
                 <td>{u.verified ? "Yes — email matches store" : ""}</td>
                 <td className={styles.num}>{u.signedUp.slice(0, 10)}</td>

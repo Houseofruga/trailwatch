@@ -179,6 +179,10 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
     - `ADMIN_EMAILS`: comma-separated; required to see `/admin`
     - optional: `MAX_AI_CALLS_PER_STORE_PER_DAY` (default 20)
   - To change the signup cap: `update public.app_settings set value = '100' where key = 'free_signups_per_day';`
+- UI Step 6: migration **`0016_ui_settings.sql`** adds the briefing hour and time zone, `alert_settings.send_to`, and `events.meaning`. Apply it after 0015.
+- Beta trust signals (2026-10-01):
+  - Migration **`0017_user_role.sql`** adds `users.role`, the optional "What's your role?" answer from onboarding step 1, shown on `/admin`. Apply it after 0016. Until it's applied, the question is shown but the answer isn't saved.
+  - No new env vars. Sign-up refuses throwaway inboxes using the `disposable-email-domains` npm list (MIT).
 
 ## 0. Git preservation (done 2026-09-30)
 

@@ -10,6 +10,7 @@ import { DEFAULT_BRIEFING, nextBriefingAt } from "@/features/briefing/schedule";
 import { CATALOG_CONFIG } from "@/features/catalog/config";
 import { buildFirstReport, type CatalogStats as StoredStats } from "@/features/catalog/firstReport";
 import { downloadSnapshot } from "@/features/catalog/snapshots";
+import type { UserRole } from "./roles";
 import type { CatalogProduct } from "@/features/catalog/types";
 import type { EventType, Severity } from "@/features/events/types";
 import { compareCatalogs } from "@/features/matching/match";
@@ -84,6 +85,13 @@ const me = cache(async () => {
 
 export async function getAccount(): Promise<Account> {
   return (await me()).account;
+}
+
+/** The onboarding role answer, or null (also when migration 0017 isn't applied yet). */
+export async function getRole(): Promise<UserRole | null> {
+  const { supabase, userId } = await me();
+  const { data, error } = await supabase.from("users").select("role").eq("id", userId).single();
+  return error ? null : ((data?.role as UserRole | null) ?? null);
 }
 
 // ------------------------------------------------------------------ stores

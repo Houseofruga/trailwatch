@@ -16,6 +16,7 @@ import { clearOwnStore, setOwnStore } from "@/features/stores/ownStore";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getOnboardingStatus, getOwnStore } from "./queries";
+import { ROLES, type UserRole } from "./roles";
 import type { OnboardingItem } from "./types";
 
 async function currentUser() {
@@ -72,6 +73,15 @@ export async function saveOwnStore(domain: string): Promise<StoreResult> {
   if (!result.ok) return { ok: false, error: result.message };
   revalidateApp();
   return { ok: true };
+}
+
+/** Onboarding's optional "What's your role?". users is service-role-write only (migration 0004). */
+export async function saveRole(role: string): Promise<{ ok: boolean }> {
+  const parsed = z.enum(ROLES.map((r) => r.value) as [UserRole, ...UserRole[]]).safeParse(role);
+  if (!parsed.success) return { ok: false };
+  const { user } = await currentUser();
+  const { error } = await createServiceClient().from("users").update({ role: parsed.data }).eq("id", user.id);
+  return { ok: !error };
 }
 
 // ------------------------------------------------------------ settings

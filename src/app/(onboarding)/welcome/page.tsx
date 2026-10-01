@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { WelcomeView } from "@/components/app/WelcomeView";
 import { DevStateBar } from "@/components/ui/DevStateBar";
 import { previewEnabled, previewState } from "@/features/appData/devState";
-import { getOnboardingStatus, getOwnStore } from "@/features/appData/queries";
+import { getOnboardingStatus, getOwnStore, getRole } from "@/features/appData/queries";
 
 export const metadata: Metadata = { title: "Set up TrailWatch" };
 
@@ -29,7 +29,11 @@ export default async function WelcomePage({ searchParams }: { searchParams: Prom
   const live =
     previewEnabled && raw
       ? null
-      : await Promise.all([getOwnStore(), getOnboardingStatus()]).then(([own, added]) => ({ ownDomain: own?.domain ?? null, added }));
+      : await Promise.all([getOwnStore(), getOnboardingStatus(), getRole()]).then(([own, added, role]) => ({
+          ownDomain: own?.domain ?? null,
+          added,
+          role,
+        }));
   return (
     <>
       <WelcomeView key={state} state={state} live={live} />
