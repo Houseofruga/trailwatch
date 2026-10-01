@@ -54,7 +54,14 @@ type EventRow = {
   user_id: string;
   created_at: string;
   context: { ownMatch?: { title: string; price: number | null } } | null;
-  events: { type: EventType; severity: Severity; payload: Record<string, unknown>; detected_at: string } | null;
+  events: {
+    id: string;
+    type: EventType;
+    severity: Severity;
+    payload: Record<string, unknown>;
+    detected_at: string;
+    snapshot_id: string | null;
+  } | null;
   stores: { id: string; name: string } | null;
 };
 
@@ -63,14 +70,16 @@ async function prepare(service: SupabaseClient, week: string, now: Date): Promis
   const since = new Date(now.getTime() - WEEK_MS - 24 * 60 * 60 * 1000).toISOString();
   const { data, error } = await service
     .from("user_events")
-    .select("user_id, created_at, context, events(type, severity, payload, detected_at), stores(id, name)")
+    .select("user_id, created_at, context, events(id, type, severity, payload, detected_at, snapshot_id), stores(id, name)")
     .gte("created_at", since)
     .lte("created_at", now.toISOString())
     .limit(20000);
   if (error) throw new Error(`Couldn't load the week's events: ${error.message}`);
   const rows = (data ?? []).map((r) => ({ ...r, events: one(r.events), stores: one(r.stores) })) as EventRow[];
 
-  const userIds = [...new Set(rows.map((r) => r.user_id))];
+  // Plus everyone following a store with no moves: they get the quiet-week email (E2).
+  const { data: followers } = await service.from("competitors").select("user_id").not("store_id", "is", null);
+  const userIds = [...new Set([...rows.map((r) => r.user_id), ...(followers ?? []).map((f) => f.user_id as string)])];
   if (userIds.length === 0) return 0;
 
   const [{ data: users }, { data: existing }, { data: previous }] = await Promise.all([
@@ -99,6 +108,8 @@ async function prepare(service: SupabaseClient, week: string, now: Date): Promis
     const events: BriefingEvent[] = rows
       .filter((r) => r.user_id === userId && Date.parse(r.created_at) > startMs && r.events && r.stores)
       .map((r) => ({
+        eventId: r.events!.id,
+        snapshotId: r.events!.snapshot_id,
         storeId: r.stores!.id,
         storeName: r.stores!.name,
         type: r.events!.type,
@@ -108,14 +119,15 @@ async function prepare(service: SupabaseClient, week: string, now: Date): Promis
         ownMatch: r.context?.ownMatch ? { title: r.context.ownMatch.title, price: r.context.ownMatch.price } : null,
       }));
     const input: BriefingInput = { weekOf: week, events };
-    // A quiet week sends nothing (low noise) — the row still records the window.
+    // A quiet week needs no model: it's ready to send as the quiet-week email.
     const { error: insertError } = await service.from("briefings").insert({
       user_id: userId,
       week_start: week,
-      status: events.length ? "pending" : "skipped",
+      status: events.length ? "pending" : "ready",
       window_start: windowStart,
       window_end: now.toISOString(),
       input,
+      ...(events.length ? {} : { content: fallbackInterpretation(input), ai: false }),
     });
     // 23505: another runner prepared it first — fine.
     if (insertError && insertError.code !== "23505") throw new Error(`Couldn't prepare briefing: ${insertError.message}`);
@@ -207,7 +219,11 @@ async function send(service: SupabaseClient, week: string, now: Date): Promise<{
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gettrailwatch.com";
   const mailer = getMailer();
-  const settings = await loadAlertSettings(service, ready.map((b) => b.user_id));
+  const readyUsers = ready.map((b) => b.user_id);
+  const [settings, { data: follows }] = await Promise.all([
+    loadAlertSettings(service, readyUsers),
+    service.from("competitors").select("id, name, user_id, store_id").in("user_id", readyUsers).not("store_id", "is", null),
+  ]);
   let sent = 0;
   let failed = 0;
 
@@ -226,6 +242,10 @@ async function send(service: SupabaseClient, week: string, now: Date): Promise<{
       siteUrl,
       unsubscribeUrl: unsub,
       movesThisMonth: await movesCaughtThisMonth(service, b.user_id, now),
+      competitors: (follows ?? [])
+        .filter((c) => c.user_id === b.user_id)
+        .map((c) => ({ id: c.id as string, name: c.name as string, storeId: c.store_id as string })),
+      sentTo: email,
     });
     // One-click unsubscribe (RFC 8058), as on the digest.
     const headers = unsub

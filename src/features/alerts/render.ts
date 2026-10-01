@@ -1,21 +1,35 @@
 import type { RenderedEmail } from "@/features/digest/email";
-import { button, escapeHtml, item, money, paragraph, plural, renderShell, section } from "@/features/email/shell";
-import type { EventType } from "@/features/events/types";
+import { toMoves, type FeedRow } from "@/features/appData/moves";
+import type { Move } from "@/features/appData/types";
+import {
+  badge,
+  button,
+  card,
+  escapeHtml,
+  eyebrow,
+  footerLine,
+  heading,
+  note,
+  paragraph,
+  renderShell,
+  rows,
+} from "@/features/email/shell";
+import type { EventType, Severity } from "@/features/events/types";
 import { describeEvent, leadEvent, suggestedAction } from "./describe";
 
 export type AlertEvent = {
+  /** events.id: links the alert to that move on the competitor's page. */
+  eventId?: string;
   type: EventType;
+  severity?: Severity;
   payload: Record<string, unknown>;
   detectedAt: string;
+  snapshotId?: string | null;
+  /** The one-line "What it means" (high-priority moves), when written. */
+  meaning?: string | null;
   // Phase 5: the reader's comparable product, when they've added their store.
   ownMatch?: { title: string; price: number | null } | null;
 };
-
-// "vs your Overnight Recovery Balm ($52)" — appended to a line's timestamp.
-function vsYours(e: AlertEvent): string {
-  if (!e.ownMatch || e.type === "price_undercut") return ""; // undercut already says it
-  return ` · vs your ${e.ownMatch.title}${e.ownMatch.price !== null ? ` (${money(e.ownMatch.price)})` : ""}`;
-}
 
 export type AlertBundle = {
   storeName: string;
@@ -24,78 +38,114 @@ export type AlertBundle = {
   events: AlertEvent[]; // one or more high-severity events for one store
 };
 
-function when(iso: string): string {
-  return new Date(iso).toLocaleString("en-US", {
-    timeZone: "America/New_York",
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    timeZoneName: "short",
-  });
+function competitorUrl(siteUrl: string, b: AlertBundle, moveId?: string): string {
+  if (!b.competitorId) return `${siteUrl}/dashboard`;
+  return `${siteUrl}/competitors/${encodeURIComponent(b.competitorId)}${moveId ? `#move-${encodeURIComponent(moveId)}` : ""}`;
 }
 
-function competitorUrl(siteUrl: string, b: AlertBundle): string {
-  return b.competitorId ? `${siteUrl}/competitors/${encodeURIComponent(b.competitorId)}` : `${siteUrl}/dashboard`;
+/** The alert's events as moves: same-read launches and sales become one move, as on the app. */
+function alertMoves(b: AlertBundle): Move[] {
+  const feed: FeedRow[] = b.events.map((e, i) => ({
+    eventId: e.eventId ?? `e${i}`,
+    storeId: b.storeDomain,
+    competitorId: b.competitorId ?? "",
+    competitorName: b.storeName,
+    type: e.type,
+    severity: e.severity ?? "high",
+    payload: e.payload,
+    detectedAt: e.detectedAt,
+    snapshotId: e.snapshotId ?? null,
+    meaning: e.meaning ?? null,
+    ownMatch: e.ownMatch ?? null,
+  }));
+  return toMoves(feed);
 }
 
-function subjectFor(b: AlertBundle): string {
-  if (b.events.length === 1) return describeEvent(b.events[0].type, b.events[0].payload, b.storeName);
-  return `${b.storeName}: ${b.events.length} moves just now`;
+const noStop = (s: string) => s.replace(/\.$/, "");
+
+function headlineFor(b: AlertBundle, moves: Move[]): string {
+  if (moves.length > 1) return `${b.storeName} made ${moves.length} big moves`;
+  const m = moves[0];
+  if (m.bundle) {
+    return m.kind === "sale"
+      ? `${b.storeName} put ${m.bundle.length} products on sale`
+      : `${b.storeName} launched ${m.bundle.length} products`;
+  }
+  const lead = leadEvent(b.events);
+  return noStop(describeEvent(lead.type, lead.payload, b.storeName));
 }
+
+// "Your Waffle Duvet Cover is $189, $81 more." → "your Waffle Duvet Cover is $189, $81 more."
+const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 
 /**
- * The instant alert email (SPEC.md §5 Phase 4): what happened, when, a link,
- * and one suggested action. A bundle of several events from one store becomes
- * one email led by the biggest move. Layout is a placeholder on the shared
- * shell until the email artboards arrive.
+ * The instant alert email (E1): a High badge, what happened, the products
+ * when several launched or went on sale together, how it compares with the
+ * reader's product, one thing they could do, and a link to the move in the app.
  */
-export function renderAlertEmail(b: AlertBundle, siteUrl: string, movesThisMonth: number): RenderedEmail {
-  const lead = leadEvent(b.events);
-  const lines = b.events.map((e) => ({
-    sentence: describeEvent(e.type, e.payload, b.storeName),
-    when: when(e.detectedAt) + vsYours(e),
-  }));
-  const suggestion = suggestedAction(lead.type, lead.payload);
-  const subject = subjectFor(b);
-  const link = competitorUrl(siteUrl, b);
-  const counter = `Competitor moves caught this month: ${movesThisMonth}`;
+export function renderAlertEmail(b: AlertBundle, siteUrl: string, movesThisMonth: number, sentTo?: string): RenderedEmail {
+  const moves = alertMoves(b);
+  const lead = moves[0];
+  const leadEv = leadEvent(b.events);
+  const subject = headlineFor(b, moves);
+  const suggestion = suggestedAction(leadEv.type, leadEv.payload);
+  const href = competitorUrl(siteUrl, b, b.events.some((e) => e.eventId) ? lead.id : undefined);
+
+  // Several products in one move, or several moves: list them.
+  const list: { title: string; price: string | null }[] =
+    moves.length > 1
+      ? moves.map((m) => ({ title: m.summary, price: null }))
+      : (lead.bundle ?? []).map((i) => ({ title: i.title, price: i.price !== null ? `$${(i.price / 100).toFixed(2)}` : null }));
 
   const text = [
-    `TRAILWATCH — INSTANT ALERT`,
+    `TRAILWATCH · INSTANT ALERT`,
     ``,
-    ...lines.map((l) => `• ${l.sentence}\n  ${l.when}`),
+    subject,
+    ...(lead.meaning ? [lead.meaning] : []),
+    ...list.map((i) => `• ${i.title}${i.price ? `  ${i.price}` : ""}`),
+    ...(lead.comparedWithYours ? [``, `Compared with yours: ${lowerFirst(lead.comparedWithYours)}`] : []),
     ``,
-    `Suggested move: ${suggestion}`,
+    `What you could do: ${suggestion}`,
     ``,
-    `See ${b.storeName}: ${link}`,
+    `See it in TrailWatch: ${href}`,
     ``,
     `—`,
-    counter,
-    `Manage alerts: ${siteUrl}/settings`,
+    `Moves caught this month: ${movesThisMonth}`,
+    `Change alerts: ${siteUrl}/settings`,
+    ...(sentTo ? [`Sent to ${sentTo}`] : []),
     `© 2026 House of Ruga LLP`,
   ].join("\n");
+
+  const inner = [
+    badge("high"),
+    `<div style="height:12px;line-height:12px;font-size:0;">&nbsp;</div>`,
+    heading(subject),
+    lead.meaning ? paragraph(lead.meaning, { muted: true, margin: list.length ? "0 0 12px 0" : "0" }) : "",
+    list.length
+      ? rows(list.map((i) => ({ left: escapeHtml(i.title), right: i.price !== null ? escapeHtml(i.price) : undefined })))
+      : "",
+    lead.comparedWithYours ? note("Compared with yours:", lowerFirst(lead.comparedWithYours)) : "",
+    `<div style="height:16px;line-height:16px;font-size:0;">&nbsp;</div>`,
+    eyebrow("What you could do"),
+    paragraph(suggestion, { margin: "0 0 20px 0" }),
+    button(href, "See it in TrailWatch"),
+  ].join("");
 
   const html = renderShell({
     siteUrl,
     subject,
-    preheader: suggestion,
-    eyebrow: "Instant alert",
-    headline:
-      b.events.length === 1
-        ? lines[0].sentence
-        : `${b.storeName} made ${b.events.length} ${plural(b.events.length, "move", "moves")}.`,
-    subline: `${b.storeDomain} · ${lines[0].when}`,
-    bodyRows: [
-      b.events.length > 1 ? section("What happened", lines.map((l) => item(l.sentence, l.when)).join("")) : "",
-      section("Suggested move", paragraph(suggestion)),
-      button(link, `See ${b.storeName}`),
-    ].join(""),
-    footerHtml: `${escapeHtml(counter)}.<br>You're getting instant alerts for competitors you follow on TrailWatch. <a href="${escapeHtml(siteUrl)}/settings" class="tw-faint" style="color:#8b877e;text-decoration:underline;">Manage alerts in Settings</a>`,
+    preheader: lead.meaning ?? lead.comparedWithYours ?? suggestion,
+    label: "Instant alert",
+    cards: card(inner),
+    footerHtml: footerLine(siteUrl, movesThisMonth, `${siteUrl}/settings`),
+    sentTo,
   });
 
   return { subject, html, text };
+}
+
+function subjectFor(b: AlertBundle): string {
+  return headlineFor(b, alertMoves(b));
 }
 
 /** Slack incoming-webhook payload for the same bundle (mrkdwn blocks + text fallback). */

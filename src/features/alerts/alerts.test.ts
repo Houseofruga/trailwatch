@@ -83,26 +83,45 @@ const bundle: AlertBundle = {
 };
 
 describe("renderAlertEmail", () => {
-  it("has what happened, when, a link, one suggested move and the counter", () => {
-    const email = renderAlertEmail(bundle, "https://gettrailwatch.com", 14);
-    expect(email.subject).toBe("Dewlane: 2 moves just now");
+  it("lists each move, one thing to do, a link and the counter (E1)", () => {
+    const email = renderAlertEmail(bundle, "https://gettrailwatch.com", 14, "jo@glowfield.com");
+    expect(email.subject).toBe("Dewlane made 2 big moves");
     for (const part of [
-      "Dewlane launched Night Cream at $48.",
-      "Dewlane is running a sitewide sale",
-      "Suggested move",
+      "Launched Night Cream at $48",
+      "What you could do",
       "consider a counter-offer",
       "https://gettrailwatch.com/competitors/c1",
-      "Competitor moves caught this month: 14",
-      "EDT", // times are shown in US Eastern
+      "Moves caught this month: 14",
+      "Sent to jo@glowfield.com",
     ]) {
       expect(email.text).toContain(part);
     }
-    expect(email.html).toContain("https://gettrailwatch.com/competitors/c1");
+    expect(email.html).toContain("See it in TrailWatch");
+    expect(email.html).toContain(">High<");
   });
 
-  it("a single event becomes the subject line", () => {
-    const email = renderAlertEmail({ ...bundle, events: [bundle.events[0]] }, "https://x.test", 1);
-    expect(email.subject).toBe("Dewlane launched Night Cream at $48.");
+  it("a single event is the headline; the button opens that move", () => {
+    const one = { ...bundle.events[0], eventId: "ev1", meaning: "Their first night cream." };
+    const email = renderAlertEmail({ ...bundle, events: [one] }, "https://x.test", 1);
+    expect(email.subject).toBe("Dewlane launched Night Cream at $48");
+    expect(email.html).toContain("https://x.test/competitors/c1#move-ev1");
+    expect(email.html).toContain("Their first night cream.");
+  });
+
+  it("bundles launches from one read into a product list, with the comparison", () => {
+    const launches = ["Ink", "Sage"].map((c, i) => ({
+      eventId: `l${i}`,
+      type: "product_launched" as const,
+      payload: { title: `Boucle Pillow (${c})`, price: 7900 },
+      detectedAt: "2026-09-30T14:00:00Z",
+      snapshotId: "s1",
+      ownMatch: { title: "Boucle Cushion", price: 6800 },
+    }));
+    const email = renderAlertEmail({ ...bundle, events: launches }, "https://x.test", 1);
+    expect(email.subject).toBe("Dewlane launched 2 products");
+    expect(email.html).toContain("Boucle Pillow (Sage)");
+    expect(email.html).toContain("$79.00");
+    expect(email.text).toContain("Compared with yours: your Boucle Cushion is $68, $11 less.");
   });
 
   it("escapes store-supplied text in HTML", () => {
@@ -116,7 +135,7 @@ describe("renderAlertEmail", () => {
 describe("renderAlertSlack", () => {
   it("builds blocks with a text fallback and escapes mrkdwn control characters", () => {
     const msg = renderAlertSlack({ ...bundle, storeName: "A&B <Co>" }, "https://x.test");
-    expect(msg.text).toBe("A&B <Co>: 2 moves just now");
+    expect(msg.text).toBe("A&B <Co> made 2 big moves");
     const body = JSON.stringify(msg.blocks);
     expect(body).toContain("A&amp;B &lt;Co&gt;");
     expect(body).toContain("<https://x.test/competitors/c1|See A&amp;B &lt;Co&gt; on TrailWatch>");

@@ -126,31 +126,56 @@ describe("briefing prompt", () => {
 });
 
 describe("renderBriefingEmail", () => {
-  it("has all four sections and the counter", () => {
+  const competitors = [
+    { id: "c-d", name: "Dewlane", storeId: "d" },
+    { id: "c-n", name: "Northwind Knits", storeId: "n" },
+    { id: "c-o", name: "Oakline Goods", storeId: "o" },
+  ];
+  const withIds = { ...input, events: input.events.map((e, i) => ({ ...e, eventId: `ev${i}` })) };
+
+  it("has the meaning, one move, top moves, each competitor and the counter (E2)", () => {
     const email = renderBriefingEmail({
-      input,
+      input: withIds,
       interpretation: {
-        topMoves: [{ headline: "Dewlane went 25% off sitewide.", whyItMatters: "It will anchor shoppers' price expectations." }],
+        topMoves: [{ headline: "Dewlane went 25% off sitewide.", whyItMatters: "" }],
         whatThisMeans: "Your category is getting promo-heavy ahead of the holidays.",
         suggestedMove: "Run a 48-hour early-access offer to your list.",
       },
       siteUrl: "https://gettrailwatch.com",
       unsubscribeUrl: "https://gettrailwatch.com/api/unsubscribe?u=1&t=x",
       movesThisMonth: 14,
+      competitors,
+      sentTo: "jo@glowfield.com",
     });
-    expect(email.subject).toBe("Monday briefing: Dewlane went 25% off sitewide.");
+    expect(email.subject).toBe("Your Monday briefing: 3 competitors, 4 moves");
     for (const part of [
-      "TOP MOVES THIS WEEK",
-      "DEWLANE",
-      "Pricing & promos",
       "WHAT THIS MEANS FOR YOU",
       "ONE MOVE FOR THIS WEEK",
-      "Competitor moves caught this month: 14",
-      "4 moves across 2 competitors",
+      "TOP MOVES",
+      "Dewlane (3 moves · 2 high)",
+      "Oakline Goods: quiet week, nothing changed.",
+      "Moves caught this month: 14",
+      "Sent to jo@glowfield.com",
     ]) {
       expect(email.text).toContain(part);
     }
-    expect(email.html).toContain("Unsubscribe from the Monday briefing");
+    // Top moves open the move; "See all" opens the competitor.
+    expect(email.html).toContain("https://gettrailwatch.com/competitors/c-d#move-ev1");
+    expect(email.html).toContain("https://gettrailwatch.com/competitors/c-n");
+    expect(email.html).toContain("https://gettrailwatch.com/api/unsubscribe?u=1&amp;t=x");
+  });
+
+  it("a week with no moves is the quiet-week email", () => {
+    const email = renderBriefingEmail({
+      input: { weekOf: "2026-10-05", events: [] },
+      interpretation: fallbackInterpretation({ weekOf: "2026-10-05", events: [] }),
+      siteUrl: "https://x.test",
+      movesThisMonth: 0,
+      competitors,
+    });
+    expect(email.subject).toBe("Your Monday briefing: a quiet week");
+    expect(email.text).toContain("None of your 3 competitors made a big move.");
+    expect(email.html).not.toContain("Top moves");
   });
 
   it("omits 'what this means' for the no-AI version", () => {

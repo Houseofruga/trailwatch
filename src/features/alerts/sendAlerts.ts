@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getMailer } from "@/features/digest/mailer";
 import { planInstantAlerts, routingConfig, type PendingAlert } from "@/features/events/routing";
-import type { EventType } from "@/features/events/types";
+import type { EventType, Severity } from "@/features/events/types";
 import { resolvePlan } from "@/features/plan/comp";
 import { renderAlertEmail, renderAlertSlack, type AlertBundle } from "./render";
 import { loadAlertSettings, movesCaughtThisMonth } from "./settings";
@@ -14,7 +14,16 @@ type PendingRow = {
   user_id: string;
   store_id: string;
   context: { ownMatch?: { title: string; price: number | null } } | null;
-  events: { type: EventType; payload: Record<string, unknown>; detected_at: string; dedupe_key: string | null } | null;
+  events: {
+    id: string;
+    type: EventType;
+    severity: Severity;
+    payload: Record<string, unknown>;
+    detected_at: string;
+    dedupe_key: string | null;
+    snapshot_id: string | null;
+    meaning: string | null;
+  } | null;
   stores: { name: string; domain: string } | null;
 };
 
@@ -37,7 +46,7 @@ export async function runAlertSender(service: SupabaseClient, now: Date = new Da
 
   const { data, error } = await service
     .from("user_events")
-    .select("id, user_id, store_id, context, events(type, payload, detected_at, dedupe_key), stores(name, domain)")
+    .select("id, user_id, store_id, context, events(id, type, severity, payload, detected_at, dedupe_key, snapshot_id, meaning), stores(name, domain)")
     .eq("delivery", "instant")
     .eq("status", "pending")
     .order("created_at", { ascending: true })
@@ -126,12 +135,21 @@ export async function runAlertSender(service: SupabaseClient, now: Date = new Da
         events: group.map((a) => {
           const row = byId.get(a.userEventId)!;
           const e = row.events!;
-          return { type: e.type, payload: e.payload, detectedAt: e.detected_at, ownMatch: row.context?.ownMatch ?? null };
+          return {
+            eventId: e.id,
+            type: e.type,
+            severity: e.severity,
+            payload: e.payload,
+            detectedAt: e.detected_at,
+            snapshotId: e.snapshot_id,
+            meaning: e.meaning,
+            ownMatch: row.context?.ownMatch ?? null,
+          };
         }),
       };
 
       const results = await Promise.all([
-        settings.emailInstant ? mailer.send(settings.sendTo ?? user.email, renderAlertEmail(bundle, siteUrl, counter)) : null,
+        settings.emailInstant ? mailer.send(settings.sendTo ?? user.email, renderAlertEmail(bundle, siteUrl, counter, settings.sendTo ?? user.email)) : null,
         slackUrl ? postToSlack(slackUrl, renderAlertSlack(bundle, siteUrl)) : null,
       ]);
       const ids = group.map((a) => a.userEventId);

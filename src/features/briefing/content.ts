@@ -5,6 +5,9 @@ import type { EventType, Severity } from "@/features/events/types";
 // What a briefing is built from: one user's week of events, frozen on the
 // briefing row when it's prepared so the email matches what the model saw.
 export type BriefingEvent = {
+  /** events.id, for links to the move (briefings prepared before 2026-10 lack it). */
+  eventId?: string;
+  snapshotId?: string | null;
   storeId: string;
   storeName: string;
   type: EventType;
