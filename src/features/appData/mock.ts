@@ -292,7 +292,7 @@ export async function getHomeSummary(): Promise<HomeSummary> {
   return {
     movesThisMonth: 37,
     highThisWeek: 4,
-    nextBriefing: { at: new Date(`${dayKey(nextMonday)}T08:00:00-04:00`).toISOString(), to: MOCK_ACCOUNT.email },
+    nextBriefing: { at: new Date(`${dayKey(nextMonday)}T08:00:00-04:00`).toISOString(), to: MOCK_ACCOUNT.email, timeZone: "America/New_York" },
     setup: { ownStore: true, competitor: true, alerts: false },
   };
 }

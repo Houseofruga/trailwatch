@@ -61,12 +61,19 @@ export async function probeStore(input: string): Promise<StoreProbe> {
 
   const robots = await fetchRobotsTxt(`https://${host}`);
   const homeAllowed = robotsAllows(robots, "/");
-  const [home, productsJson] = await Promise.all([
-    homeAllowed ? safeFetch(`https://${host}/`) : null,
-    robotsAllows(robots, PRODUCTS_JSON_PROBE)
-      ? safeFetch(`https://${host}${PRODUCTS_JSON_PROBE}`, { maxBytes: 500_000 })
-      : null,
-  ]);
+  const fetchBoth = () =>
+    Promise.all([
+      homeAllowed ? safeFetch(`https://${host}/`) : null,
+      robotsAllows(robots, PRODUCTS_JSON_PROBE)
+        ? safeFetch(`https://${host}${PRODUCTS_JSON_PROBE}`, { maxBytes: 500_000 })
+        : null,
+    ]);
+  let [home, productsJson] = await fetchBoth();
+  // One retry: a network blip shouldn't tell the user the site is unreachable.
+  if (!home?.ok && !productsJson?.ok) {
+    await new Promise((r) => setTimeout(r, 1_500));
+    [home, productsJson] = await fetchBoth();
+  }
 
   if (!home?.ok && !productsJson?.ok) {
     return {

@@ -97,7 +97,7 @@ export type HomeSummary = {
   movesThisMonth: number;
   highThisWeek: number;
   /** null when the briefing is turned off. */
-  nextBriefing: { at: string; to: string } | null;
+  nextBriefing: { at: string; to: string; timeZone: string } | null;
   setup: { ownStore: boolean; competitor: boolean; alerts: boolean };
 };
 

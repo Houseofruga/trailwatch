@@ -59,6 +59,13 @@ export function dayHeading(iso: string, now: Date = new Date()): string {
 
 export { dayKey };
 
-/** "Mon, Oct 5, 8:00 AM" */
-export const briefingTime = (iso: string) =>
-  fmt(new Date(iso), { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+/** "Mon, Oct 5, 8:00 AM", in the time zone the user picked for the briefing. */
+export const briefingTime = (iso: string, timeZone: string = DISPLAY_TIME_ZONE) =>
+  new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(iso));

@@ -399,7 +399,11 @@ export async function getHomeSummary(moves: Move[]): Promise<HomeSummary> {
     movesThisMonth: monthCount,
     highThisWeek: moves.filter((m) => m.priority === "high" && Date.parse(m.at) >= weekAgo).length,
     nextBriefing: briefing.enabled
-      ? { at: nextBriefingAt(new Date(), briefing.hour, briefing.timeZone).toISOString(), to: settings.sendTo ?? account.email }
+      ? {
+          at: nextBriefingAt(new Date(), briefing.hour, briefing.timeZone).toISOString(),
+          to: settings.sendTo ?? account.email,
+          timeZone: briefing.timeZone,
+        }
       : null,
     setup: { ownStore: !!ownStoreId, competitor: competitors.length > 0, alerts: chosen },
   };

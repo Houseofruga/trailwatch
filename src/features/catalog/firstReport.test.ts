@@ -41,7 +41,7 @@ describe("buildFirstReport", () => {
   });
 
   it("includes catalog stats", () => {
-    expect(report.stats).toMatchObject({ productCount: 9, onSaleCount: 3, soldOutCount: 2 });
+    expect(report.stats).toMatchObject({ productCount: 9, onSaleCount: 2, soldOutCount: 2 });
   });
 });
 

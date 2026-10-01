@@ -63,9 +63,16 @@ export async function runCatalogCheck(service: SupabaseClient, storeId: string):
   const robots = await fetchRobotsTxt(base);
   const useProductsJson =
     store.products_json_available && robotsAllows(robots, `/products.json?limit=${CATALOG_CONFIG.pageSize}&page=1`);
-  const fetched: FetchCatalogResult = useProductsJson
+  let fetched: FetchCatalogResult = useProductsJson
     ? await fetchShopifyCatalog(base, net)
     : await fetchSitemapCatalog(base, robots, net);
+  // Headless storefronts (e.g. Hydrogen on www.) can 404 /products.json while
+  // the bare domain the probe checked still serves it.
+  const bare = `https://${store.domain}`;
+  if (!fetched.ok && useProductsJson && bare !== base) {
+    await recordFetches(service, storeId, "catalog", fetched.pages);
+    fetched = await fetchShopifyCatalog(bare, net);
+  }
 
   await recordFetches(service, storeId, "catalog", fetched.pages);
   if (!fetched.ok) {

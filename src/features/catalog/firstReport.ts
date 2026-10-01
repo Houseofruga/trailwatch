@@ -62,7 +62,8 @@ export function catalogStats(allProducts: CatalogProduct[]): CatalogStats {
   const priced = products.map(minPrice).filter((n): n is number => n !== null);
   return {
     productCount: products.length,
-    onSaleCount: products.filter((p) => bestDiscount(p) !== null).length,
+    // In-stock sale items, the same set the "On sale now" list shows.
+    onSaleCount: products.filter((p) => bestDiscount(p) !== null && !isSoldOut(p)).length,
     soldOutCount: products.filter(isSoldOut).length,
     avgPrice: priced.length ? Math.round(priced.reduce((a, b) => a + b, 0) / priced.length) : null,
   };

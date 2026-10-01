@@ -175,7 +175,7 @@ export function HomeView({
             <Stat
               label="Next briefing"
               size="sm"
-              value={briefingTime(summary.nextBriefing.at)}
+              value={briefingTime(summary.nextBriefing.at, summary.nextBriefing.timeZone)}
               sub={`to ${summary.nextBriefing.to}`}
               loading={loading}
             />
