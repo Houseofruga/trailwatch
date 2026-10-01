@@ -1,7 +1,13 @@
 import { parse } from "tldts";
 import { fetchRobotsTxt, robotsAllows } from "@/features/checks/fetchPage";
 import { safeFetch } from "@/features/lastUpdated/fetch";
-import { classifyPlatform, looksLikeStore, type PlatformResult } from "@/features/stores/detectPlatform";
+import {
+  classifyPlatform,
+  hasShopifyAssets,
+  hasShopifyHeaders,
+  isProductsJson,
+  looksLikeStore,
+} from "@/features/stores/detectPlatform";
 import { canonicalStoreHost, storeNameFrom } from "@/features/stores/domain";
 
 // Public tool T1 (SEO_PLAN.md): "Is this site on Shopify?". Same detection as
@@ -39,45 +45,58 @@ export function otherPlatform(html: string): string | null {
   return OTHER_PLATFORMS.find((p) => p.re.test(html))?.name ?? null;
 }
 
-const EVIDENCE: Record<PlatformResult["evidence"], string> = {
-  "products.json": "Its product catalog is public at /products.json, a Shopify-only address.",
-  headers: "Its web server sends headers that only Shopify's servers send.",
-  assets: "Its pages load files from Shopify's CDN.",
-  none: "",
-};
-
-/** Pure: turn what we fetched into the tool's answer. */
+/** Pure: turn what we fetched into the tool's answer (DESIGN 08 · Checker a–f). */
 export function explain(input: {
   host: string;
   name: string;
-  platform: PlatformResult;
+  productsJson: string | null;
+  homepageHeaders: Record<string, string> | null;
   homepageHtml: string | null;
 }): Extract<ShopifyCheck, { ok: true }> {
-  const { host, name, platform, homepageHtml } = input;
+  const { host, name, productsJson, homepageHeaders, homepageHtml } = input;
+  const platform = classifyPlatform({ productsJson, homepageHeaders, homepageHtml });
   if (platform.platform === "shopify") {
+    // Every sign we saw, strongest first.
+    const evidence = [
+      productsJson !== null && isProductsJson(productsJson)
+        ? "Its product catalog is public at /products.json, a Shopify-only address."
+        : null,
+      homepageHeaders && hasShopifyHeaders(homepageHeaders) ? "Its server sends Shopify’s own headers." : null,
+      homepageHtml && hasShopifyAssets(homepageHtml) ? "Its pages load files from Shopify’s CDN." : null,
+    ].filter((e): e is string => e !== null);
+    return { ok: true, host, name, verdict: "shopify", platformName: "Shopify", evidence, catalogPublic: platform.productsJsonAvailable };
+  }
+  if (homepageHtml === null) {
     return {
       ok: true,
       host,
       name,
-      verdict: "shopify",
-      platformName: "Shopify",
-      evidence: [EVIDENCE[platform.evidence]],
-      catalogPublic: platform.productsJsonAvailable,
+      verdict: "unknown",
+      platformName: null,
+      evidence: ["The site doesn’t let us read its homepage."],
+      catalogPublic: false,
     };
   }
-  if (homepageHtml === null) {
-    return { ok: true, host, name, verdict: "unknown", platformName: null, evidence: [], catalogPublic: false };
-  }
   const other = otherPlatform(homepageHtml);
-  const store = other !== null || looksLikeStore(homepageHtml);
+  if (other === null && !looksLikeStore(homepageHtml)) {
+    return {
+      ok: true,
+      host,
+      name,
+      verdict: "not-a-store",
+      platformName: null,
+      evidence: ["We didn’t find products, prices or a cart on its pages."],
+      catalogPublic: false,
+    };
+  }
   return {
     ok: true,
     host,
     name,
-    verdict: store ? "other-store" : "not-a-store",
+    verdict: "other-store",
     platformName: other,
     evidence: [
-      "There's no public /products.json catalog, and no Shopify headers or files.",
+      "There’s no public /products.json catalog, and no Shopify headers or files.",
       ...(other ? [`Its pages load files from ${other}.`] : []),
     ],
     catalogPublic: false,
@@ -103,22 +122,22 @@ export async function checkShopify(input: string): Promise<ShopifyCheck> {
       : null,
   ]);
 
+  // Blocked (robots.txt, or bot protection answering 401/403/429/503): we
+  // can't tell, and say so, rather than calling the address broken.
+  const blocked = home === null || (!home.ok && [401, 403, 429, 503].includes(home.status ?? 0));
+
   let result: ShopifyCheck;
-  if (!home?.ok && !productsJson?.ok) {
+  if (!home?.ok && !productsJson?.ok && !blocked) {
     result = { ok: false, message: "We couldn't open that site. Check the address and try again." };
   } else if (home?.ok && parse(new URL(home.finalUrl).hostname).domain !== parse(host).domain) {
     const other = new URL(home.finalUrl).hostname.replace(/^www\./, "");
     result = { ok: false, message: `${host} sends visitors to ${other}. Try checking ${other} instead.` };
   } else {
-    const platform = classifyPlatform({
-      productsJson: productsJson?.ok ? productsJson.html : null,
-      homepageHeaders: home?.ok ? home.headers : null,
-      homepageHtml: home?.ok ? home.html : null,
-    });
     result = explain({
       host,
       name: storeNameFrom(home?.ok ? home.html : null, host),
-      platform,
+      productsJson: productsJson?.ok ? productsJson.html : null,
+      homepageHeaders: home?.ok ? home.headers : null,
       homepageHtml: home?.ok ? home.html : null,
     });
   }

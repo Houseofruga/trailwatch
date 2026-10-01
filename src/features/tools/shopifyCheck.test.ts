@@ -1,30 +1,45 @@
 import { describe, expect, it } from "vitest";
-import { classifyPlatform } from "@/features/stores/detectPlatform";
 import { explain, otherPlatform } from "./shopifyCheck";
 
-const base = { host: "dewlane.com", name: "Dewlane" };
+const base = { host: "dewlane.com", name: "Dewlane", productsJson: null, homepageHeaders: null, homepageHtml: null };
 
 describe("Shopify checker", () => {
-  it("says Shopify, with the strongest reason and whether the catalog is public", () => {
-    const platform = classifyPlatform({ productsJson: '{"products":[]}', homepageHeaders: null, homepageHtml: null });
-    const r = explain({ ...base, platform, homepageHtml: "<html></html>" });
+  it("lists every Shopify sign it saw, catalog first, and whether the catalog is public", () => {
+    const r = explain({
+      ...base,
+      productsJson: '{"products":[]}',
+      homepageHeaders: { "x-shopid": "1" },
+      homepageHtml: '<img src="https://cdn.shopify.com/a.png">',
+    });
     expect(r).toMatchObject({ verdict: "shopify", platformName: "Shopify", catalogPublic: true });
+    expect(r.evidence).toHaveLength(3);
     expect(r.evidence[0]).toMatch(/products\.json/);
+  });
+
+  it("says Shopify with a hidden catalog from its CDN files alone", () => {
+    const r = explain({ ...base, homepageHeaders: {}, homepageHtml: '<link href="/cdn/shop/t/1/a.css">' });
+    expect(r).toMatchObject({ verdict: "shopify", catalogPublic: false });
+    expect(r.evidence).toEqual(["Its pages load files from Shopify’s CDN."]);
   });
 
   it("names another store platform when it sees one", () => {
     const html = '<link href="/wp-content/plugins/woocommerce/a.css">';
-    const platform = classifyPlatform({ productsJson: null, homepageHeaders: {}, homepageHtml: html });
-    expect(explain({ ...base, platform, homepageHtml: html })).toMatchObject({
+    expect(explain({ ...base, homepageHeaders: {}, homepageHtml: html })).toMatchObject({
       verdict: "other-store",
       platformName: "WooCommerce",
     });
   });
 
-  it("calls a cart-less, platform-less site 'not a store', and an unreadable one 'unknown'", () => {
-    const platform = classifyPlatform({ productsJson: null, homepageHeaders: {}, homepageHtml: "<a href='/pricing'>Pricing</a>" });
-    expect(explain({ ...base, platform, homepageHtml: "<a href='/pricing'>Pricing</a>" }).verdict).toBe("not-a-store");
-    expect(explain({ ...base, platform, homepageHtml: null }).verdict).toBe("unknown");
+  it("tells a store on an unknown platform from a site that isn't a store", () => {
+    expect(explain({ ...base, homepageHeaders: {}, homepageHtml: '<a href="/cart">Cart</a>' })).toMatchObject({
+      verdict: "other-store",
+      platformName: null,
+    });
+    expect(explain({ ...base, homepageHeaders: {}, homepageHtml: "<a href='/pricing'>Pricing</a>" }).verdict).toBe("not-a-store");
+  });
+
+  it("can't tell when the homepage couldn't be read", () => {
+    expect(explain(base)).toMatchObject({ verdict: "unknown", evidence: ["The site doesn’t let us read its homepage."] });
   });
 
   it("recognises platforms by their asset paths, not by mentions", () => {

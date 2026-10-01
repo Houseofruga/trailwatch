@@ -24,6 +24,18 @@ export function SiteFooter() {
           </div>
 
           <div className={styles.cols}>
+            <nav className={styles.legal} aria-label="Free tools">
+              <div className={styles.legalHead}>Free tools</div>
+              <ul className={styles.legalLinks}>
+                <li>
+                  <Link href="/tools/shopify-store-checker">Shopify store checker</Link>
+                </li>
+                <li>
+                  <Link href="/tools">All free tools</Link>
+                </li>
+              </ul>
+            </nav>
+
             <nav className={styles.legal} aria-label="Legal">
               <div className={styles.legalHead}>Legal</div>
               <ul className={styles.legalLinks}>
@@ -45,7 +57,8 @@ export function SiteFooter() {
         </div>
 
         <div className={styles.copyright}>
-          © 2026 House of Ruga. All rights reserved.
+          © 2026 House of Ruga. All rights reserved. TrailWatch is an independent product and isn’t affiliated with
+          or endorsed by Shopify.
         </div>
       </div>
 
