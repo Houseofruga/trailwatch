@@ -66,6 +66,12 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
 
   if (error) return { error: error.message };
 
+  // An email that's already registered: Supabase sends nothing but still
+  // "succeeds" (a user with no identities), so say so instead of "check your inbox".
+  if (data.user && data.user.identities?.length === 0) {
+    return { fieldErrors: { email: "You already have an account with this email. Log in instead." } };
+  }
+
   // With "Confirm email" enabled in Supabase, signUp returns no session — the
   // user has to click the emailed link before they can get in.
   if (!data.session) {
