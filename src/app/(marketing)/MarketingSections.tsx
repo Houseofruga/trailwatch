@@ -11,9 +11,6 @@ const FOUNDER_X_URL = "https://x.com/thatguydongre";
 /**
  * Everything on the marketing landing BELOW the hero: how-it-works, the cloud
  * fly-through (why + pricing), FAQ, the final CTA + founder reveal, and footer.
- * Shared verbatim by the homepage (`/`, finder hero) and the animated landing
- * variant (`/1`) so the two pages can never drift on pricing, copy, or FAQ —
- * only their heroes differ.
  */
 export function MarketingSections() {
   return (
@@ -31,14 +28,15 @@ export function MarketingSections() {
       <section className={styles.why}>
         <div className={styles.shellWide}>
         <h2 className={`${styles.h2} ${styles.whyHeading}`}>
-          The big tools weren’t built for you.
+          Checking competitors by hand doesn’t scale. The big tools weren’t built for you.
         </h2>
         <p className={styles.whyBody}>
-          Competitor intelligence today comes in two flavors: enterprise platforms with
-          dashboards, sales calls and budgets in the hundreds a month, or spy tools that dump
-          raw numbers for dropshippers to dig through. TrailWatch does one thing, for one kind
-          of brand: it tells growing DTC brands what their competitors changed and what it
-          means for them, in an alert when it matters and a briefing every Monday.
+          Right now you probably keep tabs on competitors the hard way: a Sunday-night crawl
+          through their sites, their newsletter in your inbox, a customer mentioning a cheaper
+          alternative. The tools that do this properly are built for enterprise teams, with
+          sales calls and budgets to match, or for dropshippers who want raw numbers.
+          TrailWatch is built for brands like yours. It tells you what changed, what it means,
+          and what to do about it.
         </p>
         <div className={styles.callout}>
           Footer tweaks, cookie banners and reordered menus are filtered out before they reach
@@ -67,7 +65,7 @@ export function MarketingSections() {
           <div className={styles.compareRow}>
             <div className={styles.compareCell}>Raw numbers and diffs</div>
             <div className={`${styles.compareCell} ${styles.tw}`}>
-              Plain English: what changed and what it means for you
+              Plain English: what changed, what it means, what to do
             </div>
           </div>
           <div className={styles.compareRow}>
@@ -95,9 +93,9 @@ export function MarketingSections() {
             <div className={styles.planFeatures}>
               <div>Track up to 10 competitor stores</div>
               <div>Instant alerts for sales, launches, price changes and sell-outs</div>
-              <div>A plain-English briefing every Monday</div>
+              <div>A Monday briefing with one move to make each week</div>
               <div>
-                <b>40% off for life</b> when paid plans launch (early-access pricing)
+                <b>40% off for life</b> when paid plans launch
               </div>
             </div>
             <div className={styles.planCta}>
@@ -108,8 +106,8 @@ export function MarketingSections() {
           </div>
         </div>
         <p className={styles.pricingFoot}>
-          No card required. We’ll tell you well before paid plans start, and you can leave
-          anytime.
+          Black Friday is 27 November. Add your competitors now and you’ll know their normal
+          prices before the sales start. No card required, and you can leave anytime.
         </p>
         </div>
       </section>
@@ -147,8 +145,9 @@ export function MarketingSections() {
               Built by one indie founder, not a faceless enterprise.
             </h2>
             <p className={styles.finalBody}>
-              TrailWatch is built and run by a single indie founder. That means honest pricing,
-              no growth-hack dark patterns, and you can actually reach the person who built it.
+              TrailWatch is built and run by one person who answers every email. Honest pricing,
+              no dark patterns, and if something’s missing, you can tell the person who’ll build
+              it.
             </p>
             <div className={styles.finalCta}>
               <Button variant="primary" tall href="/login?mode=signup">

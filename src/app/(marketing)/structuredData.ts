@@ -8,7 +8,7 @@ const SITE_URL =
 export const FAQ: Array<{ q: string; a: string }> = [
   {
     q: "What does TrailWatch do?",
-    a: "You add the stores you compete with. TrailWatch tracks their products, prices, sales, stock and key pages, alerts you when they make a big move, and sends a plain-English briefing every Monday on what changed and what it means for you.",
+    a: "You add the stores you compete with. TrailWatch tracks their products, prices, sales, stock and key pages, alerts you when they make a big move, and sends a plain-English briefing every Monday on what changed, what it means for you, and what to do about it.",
   },
   {
     q: "How is this different from price trackers or spy tools?",
@@ -20,11 +20,15 @@ export const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "How quickly will I hear about changes?",
-    a: "Big moves, like a sale starting or a bestseller selling out, trigger an alert soon after we spot them. Everything else lands in your Monday briefing, so you're never flooded.",
+    a: "Big moves, like a sale starting or a bestseller selling out, reach you within hours. Everything else lands in your Monday briefing, so you're never flooded.",
   },
   {
     q: "Do I need to install anything on my store?",
     a: "No. TrailWatch only looks at competitors' public storefronts. Nothing is installed on your store or theirs.",
+  },
+  {
+    q: "Will my competitors know I'm watching them?",
+    a: "No. TrailWatch only reads their public storefront, the same pages any visitor sees. Nothing is installed on their store, they aren't notified, and they can't see who's tracking them.",
   },
   {
     q: "Is the beta really free? What happens after?",
@@ -52,7 +56,7 @@ export function structuredData(): Record<string, unknown> {
         operatingSystem: "Web",
         url: SITE_URL,
         description:
-          "Competitor briefings for Shopify brands: track your competitors' products, prices, sales and stock, with instant alerts for big moves and a plain-English briefing every Monday. Free during beta.",
+          "Competitor briefings for Shopify brands: your competitors' launches, price cuts, sales and sell-outs within hours, plus a plain-English briefing every Monday. Free during beta.",
         publisher: { "@id": `${SITE_URL}/#organization` },
       },
       {

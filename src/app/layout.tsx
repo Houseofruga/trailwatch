@@ -26,7 +26,7 @@ const SITE_URL =
 
 const TITLE = "TrailWatch — competitor briefings for Shopify brands";
 const DESCRIPTION =
-  "Track your competitors' products, prices, sales and stock. Instant alerts for big moves and a plain-English briefing every Monday. Free during beta.";
+  "Your competitors' launches, price cuts, sales and sell-outs, in your inbox within hours, plus a plain-English briefing every Monday. Free during beta.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

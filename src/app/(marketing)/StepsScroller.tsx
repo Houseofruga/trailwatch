@@ -13,15 +13,15 @@ import styles from "./StepsScroller.module.css";
 const STEPS = [
   {
     num: "01",
-    body: "Paste a competitor’s store URL. TrailWatch reads their whole catalog on the spot: products, prices, what’s on sale, what’s sold out.",
+    body: "Paste a competitor’s store address. TrailWatch reads their whole catalog on the spot: every product, price, discount and sold-out item.",
   },
   {
     num: "02",
-    body: "Checked around the clock, noise filtered out. Footer tweaks and cookie banners never reach you. Sales, launches and price changes do, the moment they happen.",
+    body: "Then it checks every store around the clock and throws away the noise. Footer tweaks and cookie banners never reach you. A sitewide sale, a new launch or a price cut on the product you compete with does, within hours.",
   },
   {
     num: "03",
-    body: "A briefing every Monday, in plain English. “Fernwood Supply started a sitewide 25% sale on Thursday.” Read it in 30 seconds, or open the dashboard for every change in full.",
+    body: "Every Monday, one briefing in plain English: what your competitors did, why it matters, and one move to make this week. “Fernwood Supply started a sitewide 25% sale on Thursday.” Read it over coffee.",
   },
 ];
 
