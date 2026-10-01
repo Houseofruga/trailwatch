@@ -64,7 +64,7 @@ export function classifyPlatform(signals: PlatformSignals): PlatformResult {
 const STORE_SIGNALS: RegExp[] = [
   /add[\s-]to[\s-](cart|bag|basket)/i,
   /href=["'](?:https?:\/\/[^"'/]+)?\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?(cart|bag|basket|shopping-bag|shopping-cart)(\/|\?|["'#])/i,
-  /cdn\.shopify\.com|\/cdn\/shop\/|wp-content\/plugins\/woocommerce|\bwoocommerce-(?:page|cart|js)\b|cdn11\.bigcommerce\.com|\/static\/version\d+\/frontend\/|Magento_|demandware\.static|\/on\/demandware\.store\/|wixstores|ecwid\.com\/script|prestashop/i,
+  /cdn\.shopify\.com|\/cdn\/shop\/|wp-content\/plugins\/woocommerce|\bwoocommerce-(?:page|cart|js)\b|cdn11\.bigcommerce\.com|\/static\/version\d+\/frontend\/|Magento_|demandware\.static|\/on\/demandware\.store\/|wixstores|ecwid\.com\/script|var prestashop\s*=/i,
 ];
 
 /** Does this homepage look like an online store (cart, add-to-cart, or a store platform's assets)? */
