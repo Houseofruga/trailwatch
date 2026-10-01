@@ -1,3 +1,4 @@
+import { parse } from "tldts";
 import { safeFetch } from "@/features/lastUpdated/fetch";
 import { fetchRobotsTxt, robotsAllows } from "@/features/checks/fetchPage";
 import { canonicalStoreHost, storeNameFrom } from "./domain";
@@ -85,6 +86,20 @@ export async function probeStore(input: string): Promise<StoreProbe> {
       code: "unreachable",
       message: "We couldn't open that site. Check the address, or try their main domain.",
     };
+  }
+
+  // An address that forwards to a different site (a parked or sold domain, or
+  // the brand's real domain) isn't this store: say where it goes.
+  if (home?.ok) {
+    const landed = new URL(home.finalUrl).hostname.toLowerCase();
+    if (parse(landed).domain !== parse(host).domain) {
+      const other = landed.replace(/^www\./, "");
+      return {
+        ok: false,
+        code: "unreachable",
+        message: `${host} sends visitors to ${other}. If that's their store, add ${other} instead.`,
+      };
+    }
   }
 
   // Build watched-page URLs on the origin the homepage settled on (usually the
