@@ -6,6 +6,7 @@ import type { EventType, Severity } from "@/features/events/types";
 import { recordAiUsage } from "@/features/usage/record";
 import { batchAvailable, BRIEFING_MODEL, collectBriefingBatch, submitBriefingBatch } from "./batch";
 import { fallbackInterpretation, type BriefingEvent, type BriefingInput, type BriefingInterpretation } from "./content";
+import { GROQ_BRIEFING_MODEL, groqAvailable, interpretWithGroq } from "./groq";
 import { renderBriefingEmail } from "./render";
 import { briefingWeek, canSend, canSubmit, DEFAULT_BRIEFING, stopWaiting, userBriefingDue } from "./schedule";
 
@@ -19,6 +20,8 @@ export type BriefingStepResult = {
 };
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+// Per tick, for Groq briefings (the tick's limit is 300s; stores need the rest).
+const GROQ_BUDGET_MS = 90_000;
 const one = <T>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? null) : v);
 
 /**
@@ -27,7 +30,8 @@ const one = <T>(v: T | T[] | null): T | null => (Array.isArray(v) ? (v[0] ?? nul
  *   prepare  (Sun 18:00 ET →) one row per user with moves since their last
  *            briefing; the week's events are frozen onto the row
  *   submit   all prepared rows as one Batch API job (or, with no Anthropic
- *            key, fill them with the no-AI version right away)
+ *            key, interpret them one by one with Groq; with neither key, fill
+ *            them with the no-AI version right away)
  *   collect  finished batch results onto the rows; past Mon 11:00 ET, stop
  *            waiting and use the no-AI version
  *   send     (Mon 08:00 ET →) ready rows; their events are marked delivered
@@ -39,7 +43,7 @@ export async function runBriefingStep(service: SupabaseClient, now: Date = new D
 
   if (canSubmit(now)) {
     result.prepared = await prepare(service, week, now);
-    result.submitted = await submit(service, week);
+    result.submitted = await submit(service, week, now);
   }
   result.collected = await collect(service, week, now);
   if (canSend(now)) {
@@ -140,17 +144,54 @@ async function setReady(service: SupabaseClient, id: string, content: BriefingIn
   await service.from("briefings").update({ status: "ready", content, ai, error }).eq("id", id);
 }
 
-async function submit(service: SupabaseClient, week: string): Promise<number> {
+/**
+ * No Anthropic key: interpret each pending briefing with Groq, one call at a
+ * time (the free tier is rate-limited) and within a time budget so the tick
+ * still has time to check stores. Leftovers and failures stay "pending" and are
+ * retried on the next tick (~10 min); past Monday 11:00 ET a failure goes out
+ * as the no-AI version instead.
+ */
+async function interpretNow(
+  service: SupabaseClient,
+  pending: { id: string; user_id: string; input: unknown }[],
+  now: Date,
+): Promise<number> {
+  const deadline = Date.now() + GROQ_BUDGET_MS;
+  const giveUp = stopWaiting(now);
+  let done = 0;
+  for (const b of pending) {
+    if (Date.now() > deadline) break;
+    const input = b.input as BriefingInput;
+    const r = await interpretWithGroq(input);
+    if (r.usage) {
+      await recordAiUsage(service, [
+        { feature: "briefing", provider: "groq", model: GROQ_BRIEFING_MODEL, usage: r.usage, userId: b.user_id },
+      ]);
+    }
+    if (r.ok) {
+      await setReady(service, b.id, r.interpretation, true, null);
+      done += 1;
+    } else if (giveUp) {
+      await setReady(service, b.id, fallbackInterpretation(input), false, r.reason);
+    } else {
+      console.warn(`Briefing ${b.id} not interpreted yet: ${r.reason}`);
+    }
+  }
+  return done;
+}
+
+async function submit(service: SupabaseClient, week: string, now: Date): Promise<number> {
   const { data: pending } = await service
     .from("briefings")
-    .select("id, input")
+    .select("id, user_id, input")
     .eq("week_start", week)
     .eq("status", "pending");
   if (!pending || pending.length === 0) return 0;
 
   if (!batchAvailable()) {
+    if (groqAvailable()) return interpretNow(service, pending, now);
     for (const b of pending) {
-      await setReady(service, b.id, fallbackInterpretation(b.input as BriefingInput), false, "no ANTHROPIC_API_KEY");
+      await setReady(service, b.id, fallbackInterpretation(b.input as BriefingInput), false, "no AI provider key");
     }
     return 0;
   }

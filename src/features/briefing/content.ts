@@ -69,8 +69,8 @@ export function competitorSections(input: BriefingInput): CompetitorSection[] {
 
 /**
  * The no-AI version: top moves are the highest-severity, newest events stated
- * plainly, plus the templated suggestion. Used when no Anthropic key is set or
- * the batch didn't finish in time — the briefing still goes out.
+ * plainly, plus the templated suggestion. Used when no AI key is set or the
+ * model didn't answer in time — the briefing still goes out.
  */
 export function fallbackInterpretation(input: BriefingInput): BriefingInterpretation {
   const ranked = [...input.events].sort(
