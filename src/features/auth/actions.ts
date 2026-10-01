@@ -7,6 +7,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { SIGNUP_CAP_MESSAGE, signupsLeftToday } from "@/features/usage/signupCap";
+import { isDisposableEmail } from "./trust";
 
 export type AuthState = {
   error?: string;
@@ -44,6 +45,10 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   const parsed = readCredentials(formData);
   if (!parsed.success) {
     return { fieldErrors: fieldErrors(parsed.error.issues) };
+  }
+
+  if (isDisposableEmail(parsed.data.email)) {
+    return { fieldErrors: { email: "Use an email you'll keep. Your alerts and Monday briefing go here." } };
   }
 
   // Daily signup cap (Phase 7): say so plainly instead of the generic

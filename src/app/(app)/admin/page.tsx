@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getAccount } from "@/features/account/queries";
-import { getMonthlyReport, isAdminEmail, monthRange } from "@/features/usage/report";
+import { getMonthlyReport, isAdminEmail, listAdminUsers, monthRange } from "@/features/usage/report";
 import { createServiceClient } from "@/lib/supabase/service";
 import styles from "./page.module.css";
 
@@ -27,8 +27,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const { month } = monthRange(requested);
 
   let report;
+  let users;
   try {
-    report = await getMonthlyReport(createServiceClient(), month);
+    const service = createServiceClient();
+    [report, users] = await Promise.all([getMonthlyReport(service, month), listAdminUsers(service)]);
   } catch (err) {
     return (
       <div className={styles.wrap}>
@@ -94,6 +96,30 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 </tr>
               ))
             )}
+          </tbody>
+        </table>
+      </div>
+
+      <h2 className={styles.section}>Users</h2>
+      <div className={styles.card}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Their store</th>
+              <th>Verified brand</th>
+              <th className={styles.num}>Signed up</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.email}>
+                <td className={styles.mono}>{u.email}</td>
+                <td className={styles.mono}>{u.ownStore ?? "—"}</td>
+                <td>{u.verified ? "Yes — email matches store" : ""}</td>
+                <td className={styles.num}>{u.signedUp.slice(0, 10)}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
