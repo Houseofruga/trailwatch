@@ -631,6 +631,17 @@
   box-shadow: var(--ui-shadow-card);
 }
 
+/* Narrow screens show the step as plain text (no card or padding), so no frame. */
+@media (max-width: 860px) {
+  .step {
+    border-radius: 0;
+    overflow: visible;
+  }
+  .stepActive {
+    box-shadow: none;
+  }
+}
+
 .card {
   border: 0;
   border-radius: 12px;
