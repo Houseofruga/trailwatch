@@ -25,6 +25,25 @@ the reasoning into a commit, not here.
   checkout → plan flips to paid → cancel → reverts to free**. These need the
   owner (account creation + entering the test card can't be automated).
 
+## SEO / growth — parked 2026-10-02 (owner is fixing the product first; bring up when asked)
+
+Plan and status: `SEO_PLAN.md`. Live so far: `/tools` hub and all four free tools.
+
+- **Submit the new pages in Google Search Console** (owner): `/tools`,
+  `/tools/shopify-store-checker`, `/tools/store-snapshot`, `/tools/sale-checker`,
+  `/tools/competitor-finder`.
+- **Black Friday guides** (time-sensitive: publish by ~2026-10-20). G1 draft is ready for
+  owner review in `content/guides/competitor-black-friday-sale-start.md`; G2 (checklist) and
+  G3 (real vs fake discounts) not started. Needs a **guide-page design** in Claude Design first.
+- **Evergreen guides G4–G9** and **comparison pages C1–C6** (Visualping rewrite, Prisync,
+  Price2Spy, Particl, spreadsheet, Google Alerts) — need a comparison-page design.
+- **Result-card designs** for store snapshot / sale checker / competitor finder: built from
+  existing parts; match them if the owner designs specific ones.
+- **Homepage hero line**: optionally change "…and what to do about it" to "…and one move to
+  make this week" (matches the briefing card).
+- **Old founder-edition competitor rows** (Linear, Notion… with no store) are still in the
+  database; harmless, delete if the owner wants.
+
 ## Data retention
 
 - **Rolling snapshot prune (~90 days).** Page snapshots currently accumulate
