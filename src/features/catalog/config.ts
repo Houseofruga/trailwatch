@@ -37,7 +37,7 @@ export const CATALOG_CONFIG = {
   // Checkout add-ons that apps create as products (shipping protection, return
   // fees, gift wrap...). Not merchandise, so the first report leaves them out.
   helperProductPattern:
-    /\b(package|shipping|order|delivery) (protection|insurance)\b|\broute\b.*\bprotection\b|\breturns? (fee|label|shipping)\b|\bgift (card|wrap|wrapping)\b|\bshipping insurance\b/i,
+    /\b(package|shipping|order|delivery)[ _-](protection|insurance)\b|\broute\b.*\bprotection\b|\breturns? (fee|label|shipping|coverage)\b|\bgift (card|wrap|wrapping)\b|\bshipping insurance\b/i,
   // Fallback cadence if the per-plan lookup fails (normal cadence comes from
   // the followers' plans — see plan/limits.ts storeCheckIntervalHours).
   defaultCheckIntervalHours: 24,

@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { checkShopify, type ShopifyCheck } from "./shopifyCheck";
+import { storeSnapshot, type SnapshotResult } from "./storeSnapshot";
 
 // Public tools fetch other sites on a visitor's behalf, so cap per IP. Per
 // instance only, like the homepage finder (BACKLOG.md).
@@ -27,4 +28,11 @@ export async function checkShopifyAction(domain: string): Promise<ShopifyCheck> 
   if (typeof domain !== "string" || domain.length > 300) return { ok: false, message: "Enter a website like dewlane.com." };
   if (rateLimited(await clientIp())) return { ok: false, message: "That's a lot of checks. Give it a minute and try again." };
   return checkShopify(domain);
+}
+
+/** T2 store snapshot and T3 sale checker (SEO_PLAN.md): the same catalog read. */
+export async function storeSnapshotAction(domain: string): Promise<SnapshotResult> {
+  if (typeof domain !== "string" || domain.length > 300) return { ok: false, message: "Enter a store like dewlane.com." };
+  if (rateLimited(await clientIp())) return { ok: false, message: "That's a lot of checks. Give it a minute and try again." };
+  return storeSnapshot(domain);
 }
