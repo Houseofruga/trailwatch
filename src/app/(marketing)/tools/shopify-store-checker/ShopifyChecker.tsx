@@ -61,7 +61,8 @@ function Reason({ text }: { text: string }) {
 export function ShopifyChecker() {
   const check = useSiteCheck<Omit<Result, "ok">>(checkShopifyAction);
   const { checking, result } = check;
-  const trackable = result && result.verdict !== "not-a-store" && result.verdict !== "unknown";
+  // TrailWatch tracks Shopify stores only.
+  const trackable = result?.verdict === "shopify";
 
   return (
     <div className={styles.toolColumn}>
@@ -121,6 +122,8 @@ export function ShopifyChecker() {
                   : `Want to know when ${result.name} changes its homepage, sale page or policies?`
               }
             />
+          ) : result.verdict === "other-store" ? (
+            <p className={styles.resultFoot}>TrailWatch tracks Shopify stores, so it can’t track {result.name}.</p>
           ) : result.verdict === "not-a-store" ? (
             <p className={styles.resultFoot}>Checked a blog or a brand site? Try the store’s shop address instead.</p>
           ) : (

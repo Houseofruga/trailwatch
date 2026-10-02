@@ -23,15 +23,15 @@ describe("parseCompetitors", () => {
     ]);
   });
 
-  it("caps the list at 4", () => {
+  it("caps the candidates at 8", () => {
     const raw = JSON.stringify({
-      competitors: Array.from({ length: 7 }, (_, i) => ({
+      competitors: Array.from({ length: 11 }, (_, i) => ({
         name: `Co${i}`,
         url: `co${i}.com`,
         why: "x",
       })),
     });
-    expect(parseCompetitors(raw)).toHaveLength(4);
+    expect(parseCompetitors(raw)).toHaveLength(8);
   });
 
   it("drops junk entries and keeps the good ones", () => {

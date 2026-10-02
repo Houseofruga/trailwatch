@@ -11,7 +11,7 @@ import { GROQ_BASE_URL, GROQ_LARGE_MODEL } from "@/features/ai/models";
 // frames results as editable suggestions. Verified against the account 2026-09-05.
 const MODEL = GROQ_LARGE_MODEL;
 const BASE_URL = GROQ_BASE_URL;
-const MAX_TOKENS = 600;
+const MAX_TOKENS = 1500;
 
 export function createGroqFinder(apiKey: string): FinderProvider {
   const client = new OpenAI({ apiKey, baseURL: BASE_URL });

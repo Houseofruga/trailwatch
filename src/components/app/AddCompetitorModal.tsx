@@ -55,7 +55,7 @@ export function AddCompetitorModal({
         </>
       }
     >
-      <p>Use the store&rsquo;s own website, not an Amazon or Etsy page. We&rsquo;ll read their catalog and key pages; it takes about a minute.</p>
+      <p>Add a Shopify store, using the brand&rsquo;s own website, not an Amazon or Etsy page. We&rsquo;ll read their catalog and key pages; it takes about a minute.</p>
       <form id="add-competitor-form" onSubmit={submit} noValidate>
         <TextField
           id="add-competitor-url"

@@ -47,7 +47,7 @@ export default function TermsPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>1. What TrailWatch does</h2>
         <p className={styles.para}>
-          TrailWatch tracks the public websites of online stores you add, typically your
+          TrailWatch tracks the public websites of Shopify stores you add, typically your
           competitors&rsquo;: their products, prices, sales and stock, and a few key pages. It
           checks them on a recurring basis and tells you about meaningful changes through
           instant alerts (by email, or Slack if you connect it) and a Monday briefing that
@@ -91,7 +91,7 @@ export default function TermsPage() {
         <p className={styles.para}>
           TrailWatch only retrieves publicly available pages, respects robots.txt, and
           identifies itself with a descriptive User-Agent. We may refuse websites that
-          aren&rsquo;t online stores, marketplaces, and addresses we can&rsquo;t read. You are
+          aren&rsquo;t Shopify stores, marketplaces, and addresses we can&rsquo;t read. You are
           responsible for ensuring the stores you add are ones you are permitted to track.
         </p>
       </section>

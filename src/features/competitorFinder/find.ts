@@ -6,6 +6,11 @@
 import { lookup } from "node:dns/promises";
 import { extractSite } from "../competitorTeardown/extract";
 import { fetchCompetitorContext, type ExaCandidate } from "./exa";
+import { isMarketplace } from "@/features/stores/denylist.config";
+import { safeFetch } from "@/features/lastUpdated/fetch";
+import { isProductsJson } from "@/features/stores/detectPlatform";
+import { canonicalStoreHost } from "@/features/stores/domain";
+import { checkShopify } from "@/features/tools/shopifyCheck";
 import { isDirectoryDomain } from "./directoryDomains";
 import { getFinderProvider } from "./index";
 import type { Competitor, FinderResult } from "./types";
@@ -93,6 +98,21 @@ function correctUrls(competitors: Competitor[], candidates: ExaCandidate[]): Com
   });
 }
 
+/**
+ * Is this suggestion a Shopify store with a public catalog? One small request
+ * to /products.json, capped at 5 seconds so the finder stays quick. A Shopify
+ * store that hides its catalog is left out here; the user can still add it.
+ */
+async function isShopifyStore(url: string): Promise<boolean> {
+  const host = canonicalStoreHost(url);
+  if (!host) return false;
+  const res = await safeFetch(`https://${host}/products.json?limit=1`, { maxBytes: 200_000, timeoutMs: 5_000 });
+  return res.ok && isProductsJson(res.html);
+}
+
+// Suggestions shown, after the Shopify check (the model offers up to 8).
+const SHOWN = 4;
+
 export async function runFind(
   rawInput: string,
 ): Promise<{ ok: true; result: FinderResult } | { ok: false; reason: string }> {
@@ -104,7 +124,18 @@ export async function runFind(
   let companyLabel = company;
 
   if (isUrl) {
-    const extracted = await extractSite(company);
+    // Shopify brands only (2026-10-02): a marketplace or a store on another
+    // platform gets a plain answer instead of suggestions we couldn't track.
+    if (isMarketplace(company)) {
+      return { ok: false, reason: "That's a marketplace. Enter your own store's website to find the brands you compete with." };
+    }
+    const [own, extracted] = await Promise.all([checkShopify(company), extractSite(company)]);
+    if (own.ok && own.verdict !== "shopify" && own.verdict !== "unknown") {
+      return {
+        ok: false,
+        reason: `${own.host} isn't a Shopify store. TrailWatch is for Shopify brands, so enter your Shopify store's website.`,
+      };
+    }
     if (extracted.ok) {
       siteText = extracted.site.pages.map((p) => p.text).join("\n\n");
       companyLabel = extracted.site.title || company;
@@ -124,8 +155,14 @@ export async function runFind(
   const outcome = await provider.suggest({ company: companyLabel, groundingText });
   if (!outcome.ok) return { ok: false, reason: outcome.reason };
 
-  // Prefer real live-search domains over the model's guesses, then DNS-verify.
+  // Prefer real live-search domains over the model's guesses, then DNS-verify,
+  // then keep only confirmed Shopify stores (the only ones TrailWatch tracks).
   const corrected = correctUrls(outcome.result.competitors, exaContext?.candidates ?? []);
-  const competitors = await verifyUrls(corrected);
-  return { ok: true, result: { ...outcome.result, competitors } };
+  const resolved = (await verifyUrls(corrected)).filter((c) => c.url && !isMarketplace(c.url));
+  const checks = await Promise.all(resolved.map((c) => isShopifyStore(c.url)));
+  const competitors = resolved.filter((_, i) => checks[i]);
+  if (competitors.length === 0) {
+    return { ok: false, reason: "We couldn't find Shopify stores that compete with that. Add the ones you know below." };
+  }
+  return { ok: true, result: { ...outcome.result, competitors: competitors.slice(0, SHOWN) } };
 }

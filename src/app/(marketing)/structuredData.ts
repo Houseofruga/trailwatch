@@ -16,7 +16,7 @@ export const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "Which stores can I track?",
-    a: "It works best with Shopify stores, where we can read the full catalog. For other sites, we watch key pages like the homepage, sale pages and policies. Marketplaces like Amazon aren't supported yet, so add the brand's own website instead.",
+    a: "Shopify stores, where we can read the full catalog: every product, price, sale and stock change. Stores on other platforms and marketplaces like Amazon aren't supported, so add the brand's own Shopify store.",
   },
   {
     q: "How quickly will I hear about changes?",

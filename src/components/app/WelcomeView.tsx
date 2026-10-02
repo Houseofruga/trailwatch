@@ -270,7 +270,7 @@ export function WelcomeView({
         <Card>
           <div className={styles.card}>
             <h1 className={styles.title}>Who do you compete with?</h1>
-            <p className={styles.lead}>Add up to {LIMIT} stores during the beta. Use their own website, not an Amazon or Etsy page.</p>
+            <p className={styles.lead}>Add up to {LIMIT} Shopify stores during the beta. Use their own website, not an Amazon or Etsy page.</p>
             <div className={styles.spacer} />
             {full ? <Banner tone="info" title={`You've added ${LIMIT} stores`}>That&rsquo;s the beta limit. Remove one to add another.</Banner> : null}
             <form onSubmit={add} noValidate>

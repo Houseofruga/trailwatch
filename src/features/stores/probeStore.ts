@@ -16,7 +16,7 @@ export type SkippedPage = WatchedPage & { reason: "robots" | "not-found" };
 
 export type StoreProbeError = {
   ok: false;
-  code: "invalid" | "marketplace" | "unreachable" | "not_store";
+  code: "invalid" | "marketplace" | "unreachable" | "not_store" | "not_shopify";
   message: string;
 };
 
@@ -35,8 +35,11 @@ export type StoreProbe =
 
 const PRODUCTS_JSON_PROBE = "/products.json?limit=1";
 
+export const notShopifyMessage = (host: string) =>
+  `${host} isn't a Shopify store. TrailWatch tracks Shopify stores, where we can read every product, price and sale.`;
+
 export const notStoreMessage = (host: string) =>
-  `${host} doesn't look like an online store. TrailWatch follows stores that sell products, like Shopify brands.`;
+  `${host} doesn't look like an online store. TrailWatch tracks Shopify stores.`;
 
 /** Validate a domain the user typed; null when it's fine to probe. */
 export function storeInputError(input: string): StoreProbeError | null {
@@ -114,11 +117,13 @@ export async function probeStore(input: string): Promise<StoreProbe> {
     homepageHtml: home?.ok ? home.html : null,
   });
 
-  // Not Shopify and nothing on the homepage says it sells products (a SaaS
-  // site, a blog): refuse rather than watch pages that will only make noise.
-  // When we couldn't read the homepage, give it the benefit of the doubt.
-  if (platform.platform !== "shopify" && home?.ok && !looksLikeStore(home.html)) {
-    return { ok: false, code: "not_store", message: notStoreMessage(host) };
+  // Shopify only (owner decision 2026-10-02): elsewhere we can't read the
+  // catalog, so the store would be tracked with no products. Say whether it's
+  // not a store at all (a SaaS site, a blog) or a store on another platform.
+  if (platform.platform !== "shopify") {
+    return home?.ok && !looksLikeStore(home.html)
+      ? { ok: false, code: "not_store", message: notStoreMessage(host) }
+      : { ok: false, code: "not_shopify", message: notShopifyMessage(host) };
   }
 
   const pages: WatchedPage[] = [];

@@ -43,4 +43,9 @@ describe("isMarketplace", () => {
     expect(isMarketplace("")).toBe(false);
     expect(isMarketplace("not a domain")).toBe(false);
   });
+
+  it("blocks the big Indian marketplaces", () => {
+    for (const d of ["flipkart.com", "www.myntra.com", "nykaa.com", "ajio.com", "meesho.com"]) expect(isMarketplace(d)).toBe(true);
+    expect(isMarketplace("brooklinen.com")).toBe(false);
+  });
 });

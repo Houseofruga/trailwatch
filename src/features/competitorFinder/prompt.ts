@@ -4,20 +4,27 @@ import type { Competitor } from "./types";
 // name real competitors — the caller turns that into the manual-entry fallback.
 export const EMPTY_SENTINEL = "NO_USABLE_INPUT";
 
-const MAX_COMPETITORS = 4;
+// Candidates before the Shopify check (find.ts keeps the first 4 confirmed).
+const MAX_COMPETITORS = 8;
 // Ground the model on live web results (Exa) and/or the company's own site text.
 // Capped for cost (this tool is unauthenticated). Large enough to fit the web
 // candidates plus some site text.
 const GROUNDING_CAP = 6000;
 
-const SYSTEM = `You help a founder find direct competitors to monitor.
+const SYSTEM = `You help the founder of a direct-to-consumer (DTC) brand find the online stores they compete with.
 
-You are given a company (a name, and sometimes text extracted from its website). Identify its most relevant DIRECT competitors — products a customer would realistically evaluate as alternatives.
+You are given a company (a name or website, and sometimes text from its site or live web results). Identify the BRANDS that sell similar products to a similar customer through their OWN online store (typically a Shopify store) — the stores a shopper would realistically compare with this one.
 
 Respond with ONLY a JSON object — no markdown, no code fence, no preamble — with exactly this key:
-- "competitors": an array of 3 to 4 objects {"name": string, "url": string, "why": string}, where "url" is the competitor's best-guess homepage as a bare domain (e.g. "linear.app"), and "why" is one short clause (max ~12 words) on why it competes. Order by how directly they compete.
+- "competitors": an array of 6 to 8 objects {"name": string, "url": string, "why": string}, where "url" is the brand's own store homepage as a bare domain (e.g. "dewlane.com"), and "why" is one short clause (max ~12 words) on why it competes. Order by how directly they compete.
 
-If the context includes "Live web search results", use them to surface CURRENT and recent/niche competitors you might not otherwise know, and to prioritise ones that are clearly still active. Blend them with the well-established direct competitors you already know — aim for a mix of the most relevant established players and any strong recent/niche ones from the results, rather than only obscure names. Only include a company if it is clearly a real, operating product (either named in the results as an actual product, or well-known to you) — skip vague, listicle, or SEO-spam entries. Never include the company itself in the list — only its competitors. Only name real companies you are reasonably confident exist and that are CURRENTLY OPERATING — exclude any product that has shut down, been discontinued, or was acquired and folded into another product. If the company's country or primary market is evident (from its name, domain TLD, or website text), prefer competitors that operate in that same region. Prefer specific direct product competitors over broad categories. If you genuinely cannot identify real competitors from the input, return an empty array — {"competitors": []} — and never invent companies.`;
+Rules:
+- Only single-brand stores that sell their own products. NEVER include marketplaces, multi-brand retailers, department stores or aggregators (e.g. Amazon, Walmart, Target, Etsy, eBay, Flipkart, Myntra, Nykaa, Ajio, Meesho, Zalando, ASOS, Sephora, Ulta), and never social or review sites.
+- If the company itself is a marketplace or big multi-brand retailer, return an empty array.
+- If the context includes "Live web search results", use them to surface current and recent/niche brands you might not otherwise know, blended with well-established direct competitors. Skip listicle or SEO-spam entries.
+- Never include the company itself. Only name real brands you are reasonably confident exist and are CURRENTLY OPERATING.
+- If the company's country or primary market is evident (from its name, domain TLD, or website text), prefer brands selling in that same market.
+- If you genuinely cannot identify real competing brands from the input, return an empty array — {"competitors": []} — and never invent companies.`;
 
 export function buildFinderPrompt(
   company: string,

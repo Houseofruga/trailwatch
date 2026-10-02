@@ -118,7 +118,7 @@ export function CompetitorFinder() {
         <p className={styles.finderHint}>
           {pending
             ? "Reading your site and finding who to watch — a few seconds."
-            : "Enter your store’s URL for the best matches. You can edit the list before you start."}
+            : "Enter your Shopify store’s URL. We suggest Shopify stores you compete with, and you can edit the list."}
         </p>
       </form>
 

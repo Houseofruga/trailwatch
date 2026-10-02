@@ -5,7 +5,7 @@ import { ANTHROPIC_FAST_MODEL } from "@/features/ai/models";
 
 // Same cheap/fast tier as the teardown and change summarizer.
 const MODEL = ANTHROPIC_FAST_MODEL;
-const MAX_TOKENS = 500;
+const MAX_TOKENS = 900;
 
 export function createAnthropicFinder(apiKey: string): FinderProvider {
   const client = new Anthropic({ apiKey });
