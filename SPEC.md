@@ -141,7 +141,7 @@ The legacy `pages / snapshots / changes / page_insights` tables become read-only
 **Remove or deprecate:**
 - The page-picking onboarding and page dialogs
 - Page-count limits and the old Free 2×2 / Pro 5×5 plans
-- Founder/SaaS copy and examples in-app, including the in-app AI competitor finder and the Wayback backfill in onboarding
+- Founder/SaaS copy and examples in-app, and the Wayback backfill in onboarding. (The in-app competitor finder was removed here, then brought back Shopify-only on 2026-10-02: PIVOT_PLAN.md decision 7.)
 
 ## 7. Build order
 

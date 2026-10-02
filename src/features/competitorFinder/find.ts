@@ -110,11 +110,13 @@ async function isShopifyStore(url: string): Promise<boolean> {
   return res.ok && isProductsJson(res.html);
 }
 
-// Suggestions shown, after the Shopify check (the model offers up to 8).
+// Suggestions shown on the homepage, after the Shopify check (the model offers
+// up to 8). The app keeps them all, so it can skip stores already followed.
 const SHOWN = 4;
 
 export async function runFind(
   rawInput: string,
+  shown = SHOWN,
 ): Promise<{ ok: true; result: FinderResult } | { ok: false; reason: string }> {
   const company = rawInput.trim();
   if (!company) return { ok: false, reason: "Enter your company name or website." };
@@ -164,5 +166,5 @@ export async function runFind(
   if (competitors.length === 0) {
     return { ok: false, reason: "We couldn't find Shopify stores that compete with that. Add the ones you know below." };
   }
-  return { ok: true, result: { ...outcome.result, competitors: competitors.slice(0, SHOWN) } };
+  return { ok: true, result: { ...outcome.result, competitors: competitors.slice(0, shown) } };
 }

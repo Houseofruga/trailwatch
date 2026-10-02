@@ -182,6 +182,7 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
 - UI Step 6: migration **`0016_ui_settings.sql`** adds the briefing hour and time zone, `alert_settings.send_to`, and `events.meaning`. Apply it after 0015.
 - Beta trust signals (2026-10-01):
   - Migration **`0017_user_role.sql`** adds `users.role`, the optional "What's your role?" answer from onboarding step 1, shown on `/admin`. Apply it after 0016. Until it's applied, the question is shown but the answer isn't saved.
+  - Migration **`0018_competitor_suggestions.sql`** adds `users.suggestions`, `suggestions_store` and `suggestions_at`: the in-app competitor finder's cached result (a week per own store). Apply it after 0017. Until it's applied, suggestions still work but every open runs a fresh search.
   - No new env vars. Sign-up refuses throwaway inboxes using the `disposable-email-domains` npm list (MIT).
 
 ## 0. Git preservation (done 2026-09-30)
@@ -336,7 +337,7 @@ Follow-up answers from the owner:
 4. **Honor Shopify robots on `/policies/`**, which means policy tracking only where it's allowed. (C4)
 5. **Anthropic spend:** OK to require a funded `ANTHROPIC_API_KEY` for Haiku classification and **`claude-sonnet-5`** Batch briefings, with Groq kept only as the legacy fallback? (C5)
 6. **Existing sandbox/test data:** payments aren't live, so **reset it and rewrite the seed with fictional DTC stores** rather than migrate.
-7. **Remove from in-app onboarding:** the AI competitor finder and the Wayback backfill. **Yes.** The marketing-site finder stays; it's out of scope.
+7. **Remove from in-app onboarding:** the AI competitor finder and the Wayback backfill. **Yes.** The marketing-site finder stays; it's out of scope. _Reversed for the finder on 2026-10-02 (owner): it is now Shopify-only, so it comes back in onboarding step 2 and the Add competitor modal (`suggestCompetitors`), built from the owner's artboards. The Wayback backfill stays removed._
 8. **Design:** Case A plus a **new-screens-only Claude Design brief**. Backend phases proceed while you design, and no new UI is built without artboards.
 9. **Pricing:** annual prices are 10× monthly (Starter **$290/yr**, Pro **$790/yr**). You create the Starter/Pro prices and the 40%-for-life "founding member" discount in the Paddle sandbox.
 

@@ -9,6 +9,14 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { MUTABLE_TYPES } from "@/features/alerts/settings";
 import { isSlackWebhookUrl, postToSlack } from "@/features/alerts/slack";
+import { runFind } from "@/features/competitorFinder/find";
+import {
+  cacheIsFresh,
+  pickSuggestions,
+  SUGGEST_CONFIG,
+  toSuggestions,
+  type Suggestion,
+} from "@/features/competitorFinder/suggest";
 import { addCompetitorByDomain, deleteCompetitor } from "@/features/competitors/actions";
 import { resolvePlan } from "@/features/plan/comp";
 import { PLANS } from "@/features/plan/limits";
@@ -82,6 +90,76 @@ export async function saveRole(role: string): Promise<{ ok: boolean }> {
   const { user } = await currentUser();
   const { error } = await createServiceClient().from("users").update({ role: parsed.data }).eq("id", user.id);
   return { ok: !error };
+}
+
+// ------------------------------------------------------------ suggestions
+
+export type SuggestResult =
+  | { ok: true; suggestions: Suggestion[] }
+  | { ok: false; reason: "no-store" | "none" | "busy" | "error"; message: string };
+
+/**
+ * Shopify stores that compete with the user's own store (onboarding step 2 and
+ * the Add competitor modal). A cached result is reused for a week; `refresh`
+ * ("Find more") searches again, at most once a minute. Stores the user already
+ * follows are skipped.
+ */
+export async function suggestCompetitors(opts: { refresh?: boolean } = {}): Promise<SuggestResult> {
+  const { supabase, user } = await currentUser();
+  const own = await getOwnStore();
+  if (!own) return { ok: false, reason: "no-store", message: "Add your store in Settings to get suggestions." };
+
+  const { data: rows } = await supabase.from("competitors").select("stores(domain)").not("store_id", "is", null);
+  const followed = (rows ?? []).flatMap((r) => {
+    const s = r.stores as { domain: string } | { domain: string }[] | null;
+    return (Array.isArray(s) ? s : s ? [s] : []).map((x) => x.domain);
+  });
+  const exclude = [own.domain, ...followed];
+
+  const service = createServiceClient();
+  const { data: cached } = await service
+    .from("users")
+    .select("suggestions, suggestions_store, suggestions_at")
+    .eq("id", user.id)
+    .single();
+  const saved = { store: cached?.suggestions_store ?? null, at: cached?.suggestions_at ?? null };
+  const savedList = (cached?.suggestions as Suggestion[] | null) ?? [];
+
+  if (!opts.refresh && cacheIsFresh(saved, own.domain)) {
+    const shown = pickSuggestions(savedList, exclude);
+    if (shown.length > 0) return { ok: true, suggestions: shown };
+  }
+  if (saved.at && Date.now() - new Date(saved.at).getTime() < SUGGEST_CONFIG.refreshCooldownMs) {
+    const shown = pickSuggestions(savedList, exclude);
+    return shown.length > 0
+      ? { ok: true, suggestions: shown }
+      : { ok: false, reason: "busy", message: "Give it a minute, then try again." };
+  }
+
+  let found;
+  try {
+    found = await runFind(own.domain, 8);
+  } catch {
+    return { ok: false, reason: "error", message: "We couldn't search just now. Try again, or add stores you know below." };
+  }
+  // Merge with what we had, so "Find more" never loses earlier suggestions.
+  const fresh = found.ok ? toSuggestions(found.result.competitors) : [];
+  const merged = toSuggestions([
+    ...fresh.map((s) => ({ name: s.name, url: s.domain, why: s.why })),
+    ...(saved.store === own.domain ? savedList : []).map((s) => ({ name: s.name, url: s.domain, why: s.why })),
+  ]);
+  await service
+    .from("users")
+    .update({ suggestions: merged, suggestions_store: own.domain, suggestions_at: new Date().toISOString() })
+    .eq("id", user.id);
+
+  const shown = pickSuggestions(merged, exclude);
+  if (shown.length > 0) return { ok: true, suggestions: shown };
+  return {
+    ok: false,
+    reason: "none",
+    message: "We couldn't find Shopify stores that compete with yours. Add the ones you know below.",
+  };
 }
 
 // ------------------------------------------------------------ settings
