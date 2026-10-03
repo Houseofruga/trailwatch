@@ -43,6 +43,13 @@ const SYNONYMS: Record<string, [string, string]> = {
   tote: ["apparel", "accessories"],
   "tote bag": ["apparel", "accessories"],
   hat: ["apparel", "accessories"],
+  diffuser: ["home", "home fragrance"],
+  "room spray": ["home", "home fragrance"],
+  detergent: ["home", "laundry"],
+  "bleach alternative": ["home", "laundry"],
+  "duvet set": ["home", "duvet covers"],
+  clock: ["home", "decor"],
+  "wall clock": ["home", "decor"],
 };
 
 const singular = (w: string) => w.replace(/(ies)$/, "y").replace(/(es|s)$/, "");
@@ -66,9 +73,19 @@ export function validClass(category: string, subcategory: string): { category: C
   }
   const syn = SYNONYMS[s] ?? SYNONYMS[s.split(" ").slice(-2).join(" ")] ?? SYNONYMS[s.split(" ").slice(-1)[0]];
   if (syn) return { category: syn[0] as Category, subcategory: syn[1] };
-  const owners = Object.entries(TAXONOMY).flatMap(([cat, subs]) =>
-    (subs as readonly string[]).filter((x) => s && norm(x) === s).map((x) => ({ category: cat as Category, subcategory: x })),
-  );
-  if (owners.length === 1) return owners[0];
+  // No usable category: accept a subcategory only one category has, trying the
+  // product noun first ("bed blanket" → blankets, not pet beds).
+  const unique = (match: (subs: readonly string[]) => string | undefined) => {
+    const owners = Object.entries(TAXONOMY).flatMap(([cat, subs]) => {
+      const hit = match(subs);
+      return hit ? [{ category: cat as Category, subcategory: hit }] : [];
+    });
+    return owners.length === 1 ? owners[0] : null;
+  };
+  const noun = s.split(" ").at(-1) ?? "";
+  const byNoun = noun ? unique((subs) => subs.find((x) => norm(x).split(" ").at(-1) === noun)) : null;
+  if (byNoun) return byNoun;
+  const byAny = s ? unique(find) : null;
+  if (byAny) return byAny;
   return { category: "other", subcategory: "other" };
 }

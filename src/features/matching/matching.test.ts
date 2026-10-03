@@ -271,6 +271,8 @@ describe("taxonomy", () => {
     expect(validClass("home", "Pillow")).toEqual({ category: "home", subcategory: "pillows" });
     expect(validClass("bedding", "duvet covers")).toEqual({ category: "home", subcategory: "duvet covers" });
     expect(validClass("home", "spaceships")).toEqual({ category: "other", subcategory: "other" });
+    expect(validClass("other", "bed blanket")).toEqual({ category: "home", subcategory: "blankets" });
+    expect(validClass("other", "Room spray")).toEqual({ category: "home", subcategory: "home fragrance" });
     expect(validClass("skincare", "")).toEqual({ category: "other", subcategory: "other" });
   });
 });
@@ -279,7 +281,7 @@ describe("noisy store data", () => {
   it("drops system tags and recovers 'other' answers from the stated use", async () => {
     const { usefulTags } = await import("./classify");
     expect(usefulTags(["Discount Amount: 75", "DY Category 1: Bedding", "Active Last Call", "Linen", "feedonomics-include", "Organic"])).toEqual(["Linen", "Organic"]);
-    const out = parseClassReply('{"items":[{"i":0,"c":"other","s":"","u":"Sham set","a":[],"p":"single"},{"i":1,"c":"other","s":"","u":"Duvet cover","a":[],"p":"single"},{"i":2,"c":"other","s":"","u":"Wall clock","a":[],"p":"single"}]}', 3);
+    const out = parseClassReply('{"items":[{"i":0,"c":"other","s":"","u":"Sham set","a":[],"p":"single"},{"i":1,"c":"other","s":"","u":"Duvet cover","a":[],"p":"single"},{"i":2,"c":"other","s":"","u":"Parking permit","a":[],"p":"single"}]}', 3);
     expect(out.get(0)).toMatchObject({ category: "home", subcategory: "pillowcases" });
     expect(out.get(1)).toMatchObject({ category: "home", subcategory: "duvet covers" });
     expect(out.get(2)).toMatchObject({ category: "other" });
