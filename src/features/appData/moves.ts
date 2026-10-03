@@ -34,7 +34,7 @@ const KIND: Record<EventType, MoveKind> = {
   positioning_shift: "promo",
   policy_change: "page",
   cosmetic: "page",
-  price_undercut: "undercut",
+  price_position_change: "undercut",
 };
 
 export const kindOf = (type: EventType): MoveKind => KIND[type];
@@ -80,12 +80,15 @@ export function moveSummary(type: EventType, payload: Record<string, unknown>): 
       return `${title} sold out`;
     case "restocked":
       return `Back in stock: ${title}`;
-    case "price_undercut": {
+    case "price_position_change": {
       const theirs = num(payload.competitorPrice);
       const ours = num(payload.ownPrice);
+      const pct = num(payload.pctBelow);
+      const size = str(payload.competitorSize);
+      const named = `${title}${size ? ` (${size})` : ""}`;
       return theirs !== null && ours !== null
-        ? `Cheaper than you: ${title} is ${price(theirs)}, yours is ${price(ours)}`
-        : `Cheaper than you: ${title}`;
+        ? `Cheaper than you: ${named} is ${price(theirs)}${pct !== null ? `, ${pct}% below yours like for like` : `, yours is ${price(ours)}`}`
+        : `Cheaper than you: ${named}`;
     }
     default:
       // Page events carry the classifier's one sentence.
@@ -94,7 +97,7 @@ export function moveSummary(type: EventType, payload: Record<string, unknown>): 
 }
 
 function comparedWithYours(r: FeedRow): string | undefined {
-  if (!r.ownMatch || r.type === "price_undercut") return undefined; // an undercut already says it
+  if (!r.ownMatch || r.type === "price_position_change") return undefined; // an undercut already says it
   const theirs = num(r.payload.salePrice) ?? num(r.payload.newPrice) ?? num(r.payload.price);
   const ours = r.ownMatch.price;
   if (theirs === null || ours === null) return `Your ${r.ownMatch.title} is the closest match.`;

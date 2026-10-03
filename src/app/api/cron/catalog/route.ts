@@ -3,6 +3,8 @@ import { runAlertSender } from "@/features/alerts/sendAlerts";
 import { runBriefingStep } from "@/features/briefing/run";
 import { CATALOG_CONFIG } from "@/features/catalog/config";
 import { runCatalogTick } from "@/features/catalog/schedule";
+import { MATCHING_CONFIG } from "@/features/matching/config";
+import { runMatchingTick } from "@/features/matching/work";
 import { createServiceClient } from "@/lib/supabase/service";
 
 // The pivot's heartbeat, called every ~10 min by Supabase pg_cron (see
@@ -10,7 +12,8 @@ import { createServiceClient } from "@/lib/supabase/service";
 // Each call, in order:
 //   1. send due instant alerts (quick; events from earlier ticks)
 //   2. advance the Monday briefing (time-gated, US Eastern; usually a no-op)
-//   3. check due stores with whatever time is left
+//   3. check due stores
+//   4. product matching (classify, judge pairs) with what's left, up to a minute
 // Same CRON_SECRET guard as the other cron routes.
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -33,6 +36,12 @@ export async function GET(request: Request): Promise<Response> {
   const alerts = await runAlertSender(service).catch((err) => ({ error: String(err) }));
   const briefing = await runBriefingStep(service).catch((err) => ({ error: String(err) }));
   const checks = await runCatalogTick(Math.max(0, CATALOG_CONFIG.tickBudgetMs - (Date.now() - started)));
+  // Stop well before maxDuration (300s); unfinished matching resumes next tick.
+  const matchingBudget = Math.min(MATCHING_CONFIG.tickBudgetMs, 270_000 - (Date.now() - started));
+  const matching =
+    matchingBudget > 5_000
+      ? await runMatchingTick(service, matchingBudget).catch((err) => ({ error: String(err) }))
+      : { skipped: "no time left" };
 
-  return NextResponse.json({ ok: true, alerts, briefing, checks });
+  return NextResponse.json({ ok: true, alerts, briefing, checks, matching });
 }

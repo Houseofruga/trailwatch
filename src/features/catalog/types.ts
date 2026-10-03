@@ -21,6 +21,9 @@ export type CatalogProduct = {
   createdAt: string | null;
   publishedAt: string | null;
   image: string | null;
+  // The first part of the product description as plain text, for the product
+  // classifier (matching). Missing in snapshots from before 2026-10-03.
+  description?: string;
   // Empty when the product is outside the price-tracked subset: it still counts
   // for launches/removals, but produces no price/sale/stock events.
   variants: CatalogVariant[];

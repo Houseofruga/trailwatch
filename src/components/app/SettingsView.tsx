@@ -24,7 +24,7 @@ import styles from "./SettingsView.module.css";
 const ALERT_TYPES: { type: MutableAlertType; label: string; description: string }[] = [
   { type: "sitewide_sale_detected", label: "Sitewide sales", description: "A big share of a catalog goes on sale at once." },
   { type: "promo_launched", label: "Promotions and banners", description: "New sale banners, codes and homepage messages." },
-  { type: "price_undercut", label: "Cheaper than you", description: "A similar product is now priced below yours." },
+  { type: "price_position_change", label: "Cheaper than you", description: "A similar product is now priced below yours." },
   { type: "sale_started", label: "Big sales", description: "30% or more off a single product." },
   { type: "product_launched", label: "New products", description: "Launches and new collections." },
   { type: "sold_out", label: "Best-sellers selling out", description: "Popular products that go out of stock." },

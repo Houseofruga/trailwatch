@@ -162,6 +162,54 @@ export async function suggestCompetitors(opts: { refresh?: boolean } = {}): Prom
   };
 }
 
+// ------------------------------------------------------------ product matches
+
+const matchInput = z.object({
+  competitorId: z.string().uuid(),
+  compProductId: z.string().trim().min(1).max(100),
+  ownProductId: z.string().trim().min(1).max(100),
+});
+
+/**
+ * Confirm, reject or manually link a pair of products (yours, theirs).
+ * Rejected pairs never come back; confirmed and linked pairs are always active.
+ * Written with the user's own client (RLS: their own rows only).
+ */
+async function setMatchVerdict(raw: unknown, verdict: "confirmed" | "rejected", manual: boolean): Promise<{ ok: boolean }> {
+  const parsed = matchInput.safeParse(raw);
+  if (!parsed.success) return { ok: false };
+  const { supabase, user } = await currentUser();
+  const [{ data: profile }, { data: competitor }] = await Promise.all([
+    supabase.from("users").select("own_store_id").eq("id", user.id).single(),
+    supabase.from("competitors").select("store_id").eq("id", parsed.data.competitorId).maybeSingle(),
+  ]);
+  if (!profile?.own_store_id || !competitor?.store_id) return { ok: false };
+  const { error } = await supabase.from("match_feedback").upsert({
+    user_id: user.id,
+    own_store_id: profile.own_store_id,
+    own_product_id: parsed.data.ownProductId,
+    comp_store_id: competitor.store_id,
+    comp_product_id: parsed.data.compProductId,
+    verdict,
+    manual,
+  });
+  if (error) return { ok: false };
+  revalidateApp();
+  return { ok: true };
+}
+
+export async function confirmMatch(input: unknown) {
+  return setMatchVerdict(input, "confirmed", false);
+}
+
+export async function rejectMatch(input: unknown) {
+  return setMatchVerdict(input, "rejected", false);
+}
+
+export async function linkProducts(input: unknown) {
+  return setMatchVerdict(input, "confirmed", true);
+}
+
 // ------------------------------------------------------------ settings
 
 const TIME_ZONE_OK = (tz: string) => {

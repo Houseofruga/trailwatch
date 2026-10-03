@@ -124,12 +124,12 @@ export async function runCatalogCheck(service: SupabaseClient, storeId: string):
   const featured = new Set<string>(store.featured_handles ?? []);
   const byId = new Map(catalog.products.map((p) => [p.id, p]));
 
-  // Phase 5: for followers who've added their own store, tie each product
-  // event to their comparable product and flag new undercuts. Best-effort —
+  // For followers who've added their own store, tie each product event to
+  // their matched product and flag price moves below theirs. Best-effort —
   // matching trouble must never cost the store's own events.
-  let annotations: Awaited<ReturnType<typeof annotateFollowers>> = { undercuts: [], contextFor: () => null };
+  let annotations: Awaited<ReturnType<typeof annotateFollowers>> = { positions: [], contextFor: () => null };
   try {
-    annotations = await annotateFollowers(service, storeId, events, catalog.products);
+    annotations = await annotateFollowers(service, storeId, events, catalog.products, previous?.products ?? []);
   } catch (err) {
     console.error(`Own-store matching failed for store ${storeId}:`, err);
   }
@@ -148,8 +148,8 @@ export async function runCatalogCheck(service: SupabaseClient, storeId: string):
     };
   });
   // Catalog events first, so contextFor's indexes line up with `events`.
-  const undercuts = annotations.undercuts.map((u) => ({ ...u, snapshotId: snapshot.id }));
-  await recordEvents(service, storeId, [...catalogEvents, ...undercuts], annotations.contextFor);
+  const positions = annotations.positions.map((u) => ({ ...u, snapshotId: snapshot.id }));
+  await recordEvents(service, storeId, [...catalogEvents, ...positions], annotations.contextFor);
 
   await mark({
     check_status: "ok",
@@ -161,6 +161,6 @@ export async function runCatalogCheck(service: SupabaseClient, storeId: string):
   });
 
   return previous
-    ? { status: "changed", products: catalog.products.length, events: events.length + undercuts.length }
+    ? { status: "changed", products: catalog.products.length, events: events.length + positions.length }
     : { status: "baseline", products: catalog.products.length };
 }

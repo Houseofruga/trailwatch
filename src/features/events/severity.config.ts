@@ -14,7 +14,7 @@ export const SEVERITY_CONFIG = {
 const FIXED: Partial<Record<EventType, Severity>> = {
   sitewide_sale_detected: "high",
   promo_launched: "high",
-  price_undercut: "high",
+  price_position_change: "high",
   product_launched: "high",
   price_changed: "normal",
   restocked: "normal",

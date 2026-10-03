@@ -44,6 +44,7 @@ describe("normalizeShopifyProduct", () => {
       createdAt: "2026-05-01T00:00:00Z",
       publishedAt: "2026-05-02T00:00:00Z",
       image: "https://cdn.shopify.com/a.jpg",
+      description: "long description",
       variants: [
         { id: "111", title: "6", sku: "FF-6", price: 2500, compareAtPrice: 5000, available: false },
         { id: "112", title: "7", sku: null, price: 2500, compareAtPrice: null, available: true },

@@ -451,7 +451,7 @@ export async function getSettings(): Promise<Settings> {
     alertTypes: {
       sitewide_sale_detected: true,
       promo_launched: true,
-      price_undercut: true,
+      price_position_change: true,
       sale_started: true,
       product_launched: true,
       sold_out: true,

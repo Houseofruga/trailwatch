@@ -13,7 +13,10 @@ import { buildFirstReport, type CatalogStats as StoredStats } from "@/features/c
 import { downloadSnapshot } from "@/features/catalog/snapshots";
 import type { CatalogProduct } from "@/features/catalog/types";
 import type { EventType, Severity } from "@/features/events/types";
-import { compareCatalogs } from "@/features/matching/match";
+import { activeMatches, matchStatus, verdictKey } from "@/features/matching/candidates";
+import { compareMatched } from "@/features/matching/compare";
+import { loadPairs, loadVerdicts } from "@/features/matching/store";
+import { headlinePrice } from "@/features/matching/units";
 import { resolvePlan } from "@/features/plan/comp";
 import { PLANS } from "@/features/plan/limits";
 import { createClient } from "@/lib/supabase/server";
@@ -289,6 +292,17 @@ async function snapshotProducts(snapshotId: string | null): Promise<CatalogProdu
 }
 
 /** The user's own catalog, for "compared with yours". Null when there's no own store (or it isn't read yet). */
+/** Their catalog against yours, from your active matches (RLS: your store's matches, your verdicts). */
+async function comparison(compStoreId: string, theirs: CatalogProduct[], own: CatalogProduct[]) {
+  const { supabase, userId, ownStoreId } = await me();
+  if (!ownStoreId) return null;
+  const [pairs, verdicts] = await Promise.all([
+    loadPairs(supabase, ownStoreId, compStoreId),
+    loadVerdicts(supabase, userId, ownStoreId, compStoreId),
+  ]);
+  return compareMatched(theirs, own, activeMatches(pairs, verdicts));
+}
+
 const ownProducts = cache(async (): Promise<CatalogProduct[] | null> => {
   const { supabase, ownStoreId } = await me();
   if (!ownStoreId) return null;
@@ -309,7 +323,7 @@ export async function getCompetitorOverview(id: string): Promise<CompetitorOverv
     s.platform === "shopify" ? snapshotProducts(s.latest_snapshot_id) : Promise.resolve(null),
     ownProducts(),
   ]);
-  const comparison = theirs && own ? compareCatalogs(theirs, own) : null;
+  const compared = theirs && own ? await comparison(s.id, theirs, own) : null;
   return {
     ...toRow(c, week.length, interval, since.get(s.id)),
     movesThisWeek: week.length,
@@ -317,8 +331,60 @@ export async function getCompetitorOverview(id: string): Promise<CompetitorOverv
     catalog: toStats(s.catalog_stats),
     checkIntervalHours: interval,
     pages,
-    comparison: comparison ? { similar: comparison.similar, cheaper: comparison.cheaper.length } : null,
+    comparison: compared ? { similar: compared.similar, cheaper: compared.cheaper.length } : null,
   };
+}
+
+// ------------------------------------------------------------------ product matches
+
+export type MatchListItem = {
+  theirs: { id: string; title: string; price: number | null };
+  yours: { id: string; title: string; price: number | null };
+  confidence: number | null;
+  reason: string;
+  status: "active" | "possible";
+  linkedByYou: boolean;
+};
+
+/**
+ * One competitor's products matched to yours, for a matches view (no design
+ * yet): active matches and the "possible" ones waiting for your confirmation.
+ */
+export async function getMatches(competitorId: string): Promise<MatchListItem[] | null> {
+  const { supabase, userId, ownStoreId } = await me();
+  const c = (await followed()).find((x) => x.id === competitorId);
+  if (!c || !ownStoreId) return null;
+  const [pairs, verdicts, theirs, own] = await Promise.all([
+    loadPairs(supabase, ownStoreId, c.store.id),
+    loadVerdicts(supabase, userId, ownStoreId, c.store.id),
+    snapshotProducts(c.store.latest_snapshot_id),
+    ownProducts(),
+  ]);
+  if (!theirs || !own) return [];
+  const theirById = new Map(theirs.map((p) => [p.id, p]));
+  const ownById = new Map(own.map((p) => [p.id, p]));
+  const active = activeMatches(pairs, verdicts);
+  const activeKeys = new Set([...active.values()].map((p) => verdictKey(p.ownProductId, p.compProductId)));
+  const rows = [...active.values(), ...pairs.filter((p) => !activeKeys.has(verdictKey(p.ownProductId, p.compProductId)))];
+  return rows.flatMap((p) => {
+    const t = theirById.get(p.compProductId);
+    const o = ownById.get(p.ownProductId);
+    const key = verdictKey(p.ownProductId, p.compProductId);
+    const status = matchStatus(p.confidence, verdicts.get(key));
+    if (!t || !o || (status !== "active" && status !== "possible")) return [];
+    // A product's possible matches only matter while it has no active one.
+    if (status === "possible" && active.has(p.compProductId)) return [];
+    return [
+      {
+        theirs: { id: t.id, title: t.title, price: headlinePrice(t) },
+        yours: { id: o.id, title: o.title, price: headlinePrice(o) },
+        confidence: p.confidence,
+        reason: p.reason,
+        status,
+        linkedByYou: verdicts.get(key) === "confirmed",
+      },
+    ];
+  });
 }
 
 // ------------------------------------------------------------------ first report
@@ -374,7 +440,7 @@ export async function getFirstReport(competitorId: string): Promise<FirstReportR
       recentlyLaunched: { items: built.recentlyLaunched.map(toItem), total: built.totals.recentlyLaunched },
       onSale: { items: built.onSaleNow.map(toItem), total: built.totals.onSaleNow },
       soldOut: { items: built.soldOut.map(toItem), total: built.totals.soldOut },
-      cheaperThanYours: own ? compareCatalogs(products, own).cheaper.slice(0, 50) : null,
+      cheaperThanYours: own ? ((await comparison(c.store.id, products, own))?.cheaper.slice(0, 50) ?? []) : null,
     },
     reading: false,
     error: false,

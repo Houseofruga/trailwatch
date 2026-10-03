@@ -14,7 +14,7 @@ export type ContextFor = (userId: string, eventIndex: number) => Record<string, 
  * Phase 3): events are global, generated once per store; each follower gets a
  * user_events row saying where it goes (instant alert or briefing) for their
  * plan. Low-severity events are stored but reach no one. An event with
- * `forUserId` (Phase 5's price_undercut — it's about one user's catalog) goes
+ * `forUserId` (Phase 5's price_position_change — it's about one user's catalog) goes
  * only to that user. `contextFor` attaches per-user context to fan-out rows.
  * Service role only.
  */

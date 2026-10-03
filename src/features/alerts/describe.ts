@@ -1,5 +1,6 @@
 import { money } from "@/features/email/shell";
 import type { EventType } from "@/features/events/types";
+import { unitPriceText } from "@/features/matching/units";
 
 type Payload = Record<string, unknown>;
 
@@ -56,13 +57,26 @@ export function describeEvent(type: EventType, payload: Payload, storeName: stri
       ].filter(Boolean);
       return `${storeName} is running a sitewide sale${parts.length ? `: ${parts.join(", ")}` : ""}.`;
     }
-    case "price_undercut": {
+    case "price_position_change": {
+      // "Luna Skin's new Vitamin C Serum (30ml) is $38, or $1.27/ml. Your Radiance Serum is $1.47/ml."
       const theirs = num(payload.competitorPrice);
-      const ours = num(payload.ownPrice);
-      const pct = num(payload.pctBelow);
       const own = str(payload.ownTitle, "your comparable product");
-      if (theirs === null || ours === null) return `${storeName}'s ${title} is now priced below your ${own}.`;
-      return `${storeName}'s ${title} is now ${money(theirs)}, ${pct !== null ? `${pct}% ` : ""}below your ${own} (${money(ours)}).`;
+      const isNew = payload.trigger === "product_launched" ? "new " : "";
+      const theirSize = str(payload.competitorSize);
+      const ownSize = str(payload.ownSize);
+      const unit = (["ml", "g", "count"] as const).find((u) => u === payload.unit) ?? null;
+      const tu = num(payload.competitorUnitPrice);
+      const ou = num(payload.ownUnitPrice);
+      const pct = num(payload.pctBelow);
+      const name = `${storeName}'s ${isNew}${title}${theirSize ? ` (${theirSize})` : ""}`;
+      if (theirs === null) return `${name} is now priced below your ${own}.`;
+      if (payload.basis === "unit" && tu !== null && ou !== null) {
+        return `${name} is ${money(theirs)}, or ${unitPriceText(tu, unit)}. Your ${own} is ${unitPriceText(ou, unit)}${pct !== null ? `, ${pct}% more` : ""}.`;
+      }
+      const ours = num(payload.ownPrice);
+      // Same named size or one-size items: "…(Queen) is $249, 11% below your Core Sheet Set (Queen) at $279."
+      const yours = `your ${own}${ownSize ? ` (${ownSize})` : ""}${ours !== null ? ` at ${money(ours)}` : ""}`;
+      return `${name} is ${money(theirs)}, ${pct !== null ? `${pct}% ` : ""}below ${yours}.`;
     }
     default:
       // Page events: the classifier's one-sentence summary.
@@ -82,7 +96,7 @@ export const CATEGORY: Record<EventType, BriefingCategory | null> = {
   sale_ended: "pricing",
   sitewide_sale_detected: "pricing",
   promo_launched: "pricing",
-  price_undercut: "pricing",
+  price_position_change: "pricing",
   sold_out: "stock",
   restocked: "stock",
   positioning_shift: "positioning",
@@ -101,7 +115,7 @@ export const CATEGORY_LABEL: Record<BriefingCategory, string> = {
 const LEAD_ORDER: EventType[] = [
   "sitewide_sale_detected",
   "promo_launched",
-  "price_undercut",
+  "price_position_change",
   "sale_started",
   "sold_out",
   "product_launched",
@@ -127,7 +141,7 @@ export function suggestedAction(type: EventType, payload: Payload): string {
     case "sitewide_sale_detected":
     case "promo_launched":
       return `Their ${pct ? `${pct}%-off ` : ""}promotion is live now; consider a counter-offer to your email list before the weekend, or lean on bundles or free shipping if you'd rather not discount.`;
-    case "price_undercut":
+    case "price_position_change":
       return `Decide whether to match on ${str(payload.ownTitle, "your product")}, or defend the price with a bundle, a gift with purchase, or a sharper reason to pay more.`;
     case "sale_started":
       return `If ${title} competes with one of your products, decide now whether to match, bundle, or hold your price.`;

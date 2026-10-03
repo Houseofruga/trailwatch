@@ -8,7 +8,7 @@ export const USAGE_CONFIG = {
   maxAiCallsPerStorePerDay: Number(process.env.MAX_AI_CALLS_PER_STORE_PER_DAY) || 20,
 };
 
-export type AiFeature = "classify" | "briefing" | "meaning";
+export type AiFeature = "classify" | "briefing" | "meaning" | "match_classify" | "match_judge";
 
 export type AiUsageRow = {
   feature: AiFeature;

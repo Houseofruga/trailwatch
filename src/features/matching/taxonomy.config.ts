@@ -1,0 +1,54 @@
+// The fixed product taxonomy (matching prompt A1). The classifier must pick from
+// these; anything else becomes "other". Add subcategories here, never at runtime.
+
+export const TAXONOMY = {
+  skincare: ["cleanser", "toner", "serum", "moisturizer", "eye care", "sunscreen", "mask", "exfoliator", "face oil", "lip care", "body care", "skincare set"],
+  haircare: ["shampoo", "conditioner", "hair treatment", "styling", "hair oil", "scalp care", "hair tools", "haircare set"],
+  makeup: ["foundation", "concealer", "powder", "blush", "bronzer", "highlighter", "eyeshadow", "eyeliner", "mascara", "brows", "lipstick", "lip gloss", "makeup tools", "makeup set"],
+  supplements: ["multivitamin", "vitamins", "protein", "collagen", "probiotics", "greens", "sleep", "energy", "beauty supplements", "gut health", "supplement bundle"],
+  apparel: ["tops", "bottoms", "dresses", "outerwear", "activewear", "loungewear", "sleepwear", "underwear", "socks", "shoes", "accessories", "robes"],
+  home: ["sheets", "duvet covers", "comforters", "duvet inserts", "quilts", "blankets", "pillows", "pillowcases", "pillow protectors", "mattress protectors", "mattress toppers", "mattresses", "towels", "bath mats", "shower curtains", "candles", "home fragrance", "decor", "kitchen", "table linens", "furniture", "laundry", "baby bedding"],
+  pet: ["dog food", "cat food", "dog treats", "cat treats", "pet supplements", "calming", "toys", "beds", "grooming", "collars and leashes", "pet accessories"],
+  "food & drink": ["coffee", "tea", "snacks", "pantry", "sauces", "beverages", "alcohol", "sweets", "baking", "meal kits"],
+} as const;
+
+export type Category = keyof typeof TAXONOMY | "other";
+
+export const PACK_TYPES = ["single", "bundle", "kit", "travel size", "subscription"] as const;
+export type PackType = (typeof PACK_TYPES)[number];
+
+// Pack types that can be compared with each other (a bundle with a kit, never
+// a bundle with a single).
+export const PACK_GROUP: Record<PackType, string> = {
+  single: "single",
+  bundle: "multi",
+  kit: "multi",
+  "travel size": "travel",
+  subscription: "subscription",
+};
+
+const singular = (w: string) => w.replace(/(ies)$/, "y").replace(/(es|s)$/, "");
+const norm = (s: string) => s.trim().toLowerCase().split(/\s+/).map(singular).join(" ");
+
+/**
+ * Keep a classifier answer only when it's in the taxonomy. Near misses snap to
+ * the closest subcategory ("hand towels" → towels, "sheet set" → sheets); an
+ * unknown category is recovered when the subcategory names exactly one.
+ */
+export function validClass(category: string, subcategory: string): { category: Category; subcategory: string } {
+  const c = category.trim().toLowerCase();
+  const s = norm(subcategory);
+  const find = (subs: readonly string[]) =>
+    subs.find((x) => norm(x) === s) ??
+    subs.find((x) => s.split(" ").includes(norm(x)) || norm(x).split(" ").includes(s)) ??
+    subs.find((x) => s.includes(norm(x)) || norm(x).includes(s));
+  if (c in TAXONOMY) {
+    const hit = s ? find(TAXONOMY[c as keyof typeof TAXONOMY]) : undefined;
+    if (hit) return { category: c as Category, subcategory: hit };
+  }
+  const owners = Object.entries(TAXONOMY).flatMap(([cat, subs]) =>
+    (subs as readonly string[]).filter((x) => s && norm(x) === s).map((x) => ({ category: cat as Category, subcategory: x })),
+  );
+  if (owners.length === 1) return owners[0];
+  return { category: "other", subcategory: "other" };
+}

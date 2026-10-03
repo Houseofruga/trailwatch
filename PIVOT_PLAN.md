@@ -183,6 +183,7 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
 - Beta trust signals (2026-10-01):
   - Migration **`0017_user_role.sql`** adds `users.role`, the optional "What's your role?" answer from onboarding step 1, shown on `/admin`. Apply it after 0016. Until it's applied, the question is shown but the answer isn't saved.
   - Migration **`0018_competitor_suggestions.sql`** adds `users.suggestions`, `suggestions_store` and `suggestions_at`: the in-app competitor finder's cached result (a week per own store). Apply it after 0017. Until it's applied, suggestions still work but every open runs a fresh search.
+  - Migration **`0019_product_matching.sql`** adds comparable-product matching: `product_classes`, `product_matches`, `match_state`, `match_feedback` and `stores.classified_snapshot_id`; renames `price_undercut` events, muted types and frozen briefing inputs to `price_position_change`; allows the `match_classify` / `match_judge` AI usage features. Apply it after 0018 and **before deploying** the matching code (the cron's matching step and the new event type need it).
   - No new env vars. Sign-up refuses throwaway inboxes using the `disposable-email-domains` npm list (MIT).
 
 ## 0. Git preservation (done 2026-09-30)

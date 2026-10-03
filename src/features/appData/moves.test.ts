@@ -31,7 +31,7 @@ describe("moveSummary", () => {
       "Sitewide sale: 34% of products discounted, up to −60%",
     );
     expect(moveSummary("sold_out", { title: "Wideboy Clock" })).toBe("Wideboy Clock sold out");
-    expect(moveSummary("price_undercut", { title: "Linen Duvet Cover", competitorPrice: 16900, ownPrice: 18900 })).toBe(
+    expect(moveSummary("price_position_change", { title: "Linen Duvet Cover", competitorPrice: 16900, ownPrice: 18900 })).toBe(
       "Cheaper than you: Linen Duvet Cover is $169, yours is $189",
     );
     expect(moveSummary("policy_change", { summary: "Changed the returns policy." })).toBe("Changed the returns policy");
@@ -40,7 +40,7 @@ describe("moveSummary", () => {
   it("maps every type to a filter kind", () => {
     expect(kindOf("restocked")).toBe("stock");
     expect(kindOf("positioning_shift")).toBe("promo");
-    expect(kindOf("price_undercut")).toBe("undercut");
+    expect(kindOf("price_position_change")).toBe("undercut");
   });
 });
 

@@ -139,7 +139,7 @@ export type HomeSummary = {
 export type MutableAlertType =
   | "sitewide_sale_detected"
   | "promo_launched"
-  | "price_undercut"
+  | "price_position_change"
   | "sale_started"
   | "product_launched"
   | "sold_out";

@@ -15,7 +15,7 @@ const id = z.union([z.string(), z.number()]).transform(String);
 const text = z.string().nullish().transform((s) => s?.trim() ?? "");
 const date = z.string().nullish().transform((s) => s ?? null);
 
-// Only the fields we keep; everything else (body_html, options, ...) is dropped.
+// Only the fields we keep; everything else (options, ...) is dropped.
 // Shopify has served tags both as an array and as a comma-separated string.
 const rawVariant = z.object({
   id,
@@ -32,6 +32,7 @@ const rawProduct = z.object({
   title: text,
   product_type: text,
   vendor: text,
+  body_html: z.string().nullish(),
   tags: z.union([z.array(z.string()), z.string()]).nullish(),
   created_at: date,
   published_at: date,
@@ -39,6 +40,23 @@ const rawProduct = z.object({
   // Parsed one by one below, so a single malformed variant doesn't drop the product.
   variants: z.array(z.unknown()).nullish(),
 });
+
+// Enough description for the product classifier; snapshots stay small.
+const DESCRIPTION_CHARS = 240;
+
+/** HTML → the first `max` characters of plain text. */
+export function plainText(html: string, max: number): string {
+  return html
+    .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&#39;|&rsquo;/g, "'")
+    .replace(/&[a-z]+;|&#\d+;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, max);
+}
 
 /** One raw /products.json product → our shape, or null if it's malformed. */
 export function normalizeShopifyProduct(raw: unknown): CatalogProduct | null {
@@ -83,6 +101,7 @@ export function normalizeShopifyProduct(raw: unknown): CatalogProduct | null {
     createdAt: p.created_at,
     publishedAt: p.published_at,
     image: p.images?.[0]?.src ?? null,
+    ...(p.body_html ? { description: plainText(p.body_html, DESCRIPTION_CHARS) } : {}),
     variants,
   };
 }

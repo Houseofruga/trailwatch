@@ -18,7 +18,7 @@ export const DEFAULT_ALERT_SETTINGS: AlertSettings = { emailInstant: true, slack
 export const MUTABLE_TYPES = [
   "sitewide_sale_detected",
   "promo_launched",
-  "price_undercut",
+  "price_position_change",
   "sale_started",
   "product_launched",
   "sold_out",
