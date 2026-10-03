@@ -89,6 +89,8 @@ function StatusBadge({ status }: { status: Added["status"] }) {
 // Picks from the homepage finder, saved before signup (CompetitorFinder.tsx).
 const PENDING_COMPETITORS = "tw_pending_competitors";
 const PENDING_COMPANY = "tw_pending_company";
+// Set by the homepage widget's "Join the beta" (CompetitorLookup.tsx).
+const PENDING_PREVIEW = "tw_pending_preview";
 
 function takePending(): { company: string | null; urls: string[] } {
   try {
@@ -141,6 +143,21 @@ export function WelcomeView({
   // their store fills step 1, their competitors are added (once, then cleared).
   useEffect(() => {
     if (!live || live.added.length > 0) return;
+    // A competitor looked up in the homepage widget on this browser: claim it
+    // (the sign-up link normally does this; this covers other ways in).
+    try {
+      const raw = localStorage.getItem(PENDING_PREVIEW);
+      if (raw) {
+        localStorage.removeItem(PENDING_PREVIEW);
+        const { previewId, domain } = JSON.parse(raw) as { previewId?: string | null; domain?: string | null };
+        const qs = new URLSearchParams();
+        if (previewId) qs.set("preview", previewId);
+        if (domain) qs.set("domain", domain);
+        if (qs.size > 0) return router.replace(`/claim?${qs}`);
+      }
+    } catch {
+      /* storage blocked or junk: carry on with normal onboarding */
+    }
     void (async () => {
       const pending = takePending();
       if (pending.company && !live.ownDomain) setStore(pending.company);
@@ -157,7 +174,7 @@ export function WelcomeView({
       setAdded(await onboardingStatus());
       setAdding(false);
     })();
-  }, [live]);
+  }, [live, router]);
 
   // Live: poll each store's first read while any is still reading.
   useEffect(() => {

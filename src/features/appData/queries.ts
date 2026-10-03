@@ -18,7 +18,7 @@ import { compareMatched } from "@/features/matching/compare";
 import { loadPairs, loadVerdicts } from "@/features/matching/store";
 import { headlinePrice } from "@/features/matching/units";
 import { resolvePlan } from "@/features/plan/comp";
-import { PLANS } from "@/features/plan/limits";
+import { LIMITS, PLANS } from "@/features/plan/limits";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { shortDate } from "./format";
@@ -332,6 +332,38 @@ export async function getCompetitorOverview(id: string): Promise<CompetitorOverv
     checkIntervalHours: interval,
     pages,
     comparison: compared ? { similar: compared.similar, cheaper: compared.cheaper.length } : null,
+  };
+}
+
+// ------------------------------------------------------------------ widget onboarding
+
+export type WidgetOnboarding = {
+  /** Null once they said "it's my store" and it moved to their own store. */
+  competitor: { id: string; name: string; domain: string } | null;
+  first: FirstReportResult | null;
+  ownStore: OwnStore | null;
+  added: OnboardingItem[];
+  limit: number;
+  /** ISO time of the first Monday briefing, or null when briefings are off. */
+  nextBriefing: string | null;
+};
+
+/** Everything onboarding-from-the-widget needs (DESIGN 10-onboard), for the competitor they claimed. */
+export async function getWidgetOnboarding(competitorId: string | null): Promise<WidgetOnboarding> {
+  const { plan, briefing } = await me();
+  const c = competitorId ? (await followed()).find((x) => x.id === competitorId) : undefined;
+  const [first, ownStore, added] = await Promise.all([
+    c ? getFirstReport(c.id) : Promise.resolve(null),
+    getOwnStore(),
+    getOnboardingStatus(),
+  ]);
+  return {
+    competitor: c ? { id: c.id, name: c.name, domain: c.store.domain } : null,
+    first,
+    ownStore,
+    added,
+    limit: LIMITS[plan].competitors,
+    nextBriefing: briefing.enabled ? nextBriefingAt(new Date(), briefing.hour, briefing.timeZone).toISOString() : null,
   };
 }
 

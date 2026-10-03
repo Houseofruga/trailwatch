@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { DividerWithLabel } from "@/components/ui/Feedback";
 import { TextField } from "@/components/ui/TextField";
 import { SIGNUP_CAP_MESSAGE } from "@/features/usage/signupCap";
+import { claimPathFor } from "@/features/preview/claimPath";
 import { logIn, resendConfirmation, signInWithGoogle, signUp, type AuthState } from "./actions";
 import { AuthCard, AuthHeading } from "./AuthShell";
 import styles from "./AuthShell.module.css";
@@ -96,7 +97,7 @@ function Fields({ mode, state, forcePending, disabled }: { mode: Mode; state: Au
   );
 }
 
-function CheckInbox({ email, onUseDifferent }: { email: string; onUseDifferent: () => void }) {
+function CheckInbox({ email, onUseDifferent, next }: { email: string; onUseDifferent: () => void; next?: string }) {
   const [sending, start] = useTransition();
   const [sent, setSent] = useState(false);
   return (
@@ -112,7 +113,7 @@ function CheckInbox({ email, onUseDifferent }: { email: string; onUseDifferent: 
       {sent ? <Banner tone="success">Sent again. It can take a minute to arrive.</Banner> : null}
       <p style={{ margin: 0, fontSize: 13, color: "var(--ink-3)" }}>Didn&rsquo;t get it? Check spam, or send it again.</p>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <Button loading={sending} onClick={() => start(async () => setSent((await resendConfirmation(email)).ok))}>
+        <Button loading={sending} onClick={() => start(async () => setSent((await resendConfirmation(email, next)).ok))}>
           Resend email
         </Button>
         <Button variant="plain" onClick={onUseDifferent}>
@@ -129,6 +130,12 @@ export function AuthForm({ initialMode, preview = "default" }: { initialMode: Mo
   const [state, formAction] = useActionState<AuthState, FormData>(mode === "signup" ? signUp : logIn, PREVIEW_STATE[preview] ?? null);
   const [dismissedInbox, setDismissedInbox] = useState(false);
 
+  // From the homepage widget (?preview=…): every way in ends at /claim, which
+  // adds that competitor (email form, Google, the confirmation link, logging in).
+  const claimPath = claimPathFor(searchParams.get("preview"), searchParams.get("domain"));
+  const claimQuery = claimPath?.slice("/claim?".length) ?? "";
+  const carry = claimQuery ? `&${claimQuery}` : "";
+
   const errorCode = searchParams.get("error");
   const linkError =
     errorCode === "link"
@@ -142,17 +149,17 @@ export function AuthForm({ initialMode, preview = "default" }: { initialMode: Mo
   const message = state?.error ?? linkError;
 
   if (mode === "signup" && state?.checkEmail && !dismissedInbox) {
-    return <CheckInbox email={state.checkEmail} onUseDifferent={() => setDismissedInbox(true)} />;
+    return <CheckInbox email={state.checkEmail} onUseDifferent={() => setDismissedInbox(true)} next={claimPath} />;
   }
 
   const switchLink =
     mode === "signup" ? (
       <>
-        Already have an account? <Link href="/login">Log in</Link>
+        Already have an account? <Link href={claimQuery ? `/login?${claimQuery}` : "/login"}>Log in</Link>
       </>
     ) : (
       <>
-        New here? <Link href="/login?mode=signup">Create an account</Link>
+        New here? <Link href={`/login?mode=signup${carry}`}>Create an account</Link>
       </>
     );
 
@@ -167,11 +174,12 @@ export function AuthForm({ initialMode, preview = "default" }: { initialMode: Mo
       ) : null}
       <form action={signInWithGoogle}>
         {/* Sign-ups land on onboarding; log-ins on Home. */}
-        <input type="hidden" name="next" value={mode === "signup" ? "/welcome" : "/dashboard"} />
+        <input type="hidden" name="next" value={claimPath ?? (mode === "signup" ? "/welcome" : "/dashboard")} />
         <GoogleButton disabled={capacity} />
       </form>
       <DividerWithLabel>or</DividerWithLabel>
       <form action={formAction} noValidate>
+        {claimPath ? <input type="hidden" name="next" value={claimPath} /> : null}
         <Fields mode={mode} state={state} forcePending={preview === "submitting"} disabled={capacity} />
       </form>
     </AuthCard>

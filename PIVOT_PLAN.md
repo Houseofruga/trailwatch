@@ -186,6 +186,7 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
   - Migration **`0019_product_matching.sql`** adds comparable-product matching: `product_classes`, `product_matches`, `match_state`, `match_feedback` and `stores.classified_snapshot_id`; renames `price_undercut` events, muted types and frozen briefing inputs to `price_position_change`; allows the `match_classify` / `match_judge` AI usage features. Apply it after 0018 and **before deploying** the matching code (the cron's matching step and the new event type need it).
   - Migration **`0020_previews.sql`** adds `previews` (homepage competitor lookups, claimable for 7 days) and `preview_lookups` (per-lookup log with a salted IP hash, for rate limits, the daily cap and `/admin` totals). Apply it after 0019, before deploying `/api/preview`. Optional env vars: `PREVIEW_IP_SALT` (falls back to `CRON_SECRET`), `PREVIEW_PER_IP_PER_DAY` (default 3), `PREVIEW_FRESH_PER_DAY` (default 300).
   - Migration **`0021_preview_cta.sql`** adds `previews.cta_clicked_at` (the widget's "Join the beta" click). Apply it after 0020.
+  - Migration **`0022_preview_onboarding.sql`** adds `previews.completed_at` (onboarding finished after signing up from the widget; `claimed_by` already marks the sign-up). Apply it after 0021.
   - No new env vars. Sign-up refuses throwaway inboxes using the `disposable-email-domains` npm list (MIT).
 
 ## 0. Git preservation (done 2026-09-30)

@@ -63,7 +63,8 @@ export async function proxy(request: NextRequest) {
 
   if (user && SIGNED_OUT_ONLY.includes(pathname)) {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    // Signed in and coming from the homepage widget: add that competitor.
+    url.pathname = pathname === "/login" && request.nextUrl.searchParams.has("preview") ? "/claim" : "/dashboard";
     return NextResponse.redirect(url);
   }
 

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { claimNext } from "@/features/preview/claimPath";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -62,11 +63,13 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
     process.env.NEXT_PUBLIC_SITE_URL ??
     (await headers()).get("origin") ??
     "http://localhost:3000";
+  // From the homepage widget, sign-up ends by claiming that competitor.
+  const next = claimNext(formData.get("next")) ?? "/welcome";
   const { data, error } = await supabase.auth.signUp({
     ...parsed.data,
     // If email confirmation is on, the link lands on onboarding (not the
     // dashboard) so a fresh account goes straight into setup.
-    options: { emailRedirectTo: `${origin}/auth/confirm?next=/welcome` },
+    options: { emailRedirectTo: `${origin}/auth/confirm?next=${encodeURIComponent(next)}` },
   });
 
   if (error) return { error: error.message };
@@ -84,9 +87,9 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   }
 
   revalidatePath("/", "layout");
-  // New account → onboarding. /welcome pre-seeds any competitors the visitor
-  // picked on the homepage and bounces to /dashboard if they already have some.
-  redirect("/welcome");
+  // New account → onboarding (or the widget's claim). /welcome pre-seeds any
+  // competitors the visitor picked on the homepage.
+  redirect(next);
 }
 
 export async function logIn(_prev: AuthState, formData: FormData): Promise<AuthState> {
@@ -101,7 +104,7 @@ export async function logIn(_prev: AuthState, formData: FormData): Promise<AuthS
   if (error) return { error: "That email and password don't match." };
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  redirect(claimNext(formData.get("next")) ?? "/dashboard");
 }
 
 export async function signInWithGoogle(formData: FormData) {
@@ -138,7 +141,7 @@ export async function signInWithGoogle(formData: FormData) {
 }
 
 /** Sends the sign-up confirmation email again ("Check your inbox" → Resend). */
-export async function resendConfirmation(email: string): Promise<{ ok: boolean }> {
+export async function resendConfirmation(email: string, nextPath?: string): Promise<{ ok: boolean }> {
   const parsed = z.email().safeParse(email);
   if (!parsed.success) return { ok: false };
   const supabase = await createClient();
@@ -149,7 +152,7 @@ export async function resendConfirmation(email: string): Promise<{ ok: boolean }
   const { error } = await supabase.auth.resend({
     type: "signup",
     email: parsed.data,
-    options: { emailRedirectTo: `${origin}/auth/confirm?next=/welcome` },
+    options: { emailRedirectTo: `${origin}/auth/confirm?next=${encodeURIComponent(claimNext(nextPath) ?? "/welcome")}` },
   });
   return { ok: !error };
 }

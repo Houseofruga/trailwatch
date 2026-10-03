@@ -135,8 +135,11 @@ function Loading({ domain, startedAt }: { domain: string; startedAt: number }) {
   );
 }
 
-function signupHref(previewId?: string) {
-  return `/login?mode=signup&src=widget${previewId ? `&preview=${previewId}` : ""}`;
+function signupHref(previewId?: string, domain?: string) {
+  const qs = new URLSearchParams({ mode: "signup", src: "widget" });
+  if (previewId) qs.set("preview", previewId);
+  if (domain) qs.set("domain", domain);
+  return `/login?${qs}`;
 }
 
 function Results({ teaser, previewId, onJoin }: { teaser: Teaser; previewId?: string; onJoin: () => void }) {
@@ -195,7 +198,7 @@ function Results({ teaser, previewId, onJoin }: { teaser: Teaser; previewId?: st
         ) : null}
         <p className={s.gateText}>See the full snapshot, and get an alert the moment they start their next sale.</p>
         <p className={s.gateNote}>Free during beta · No card required</p>
-        <Button variant="primary" tall full href={signupHref(previewId)} onClick={onJoin}>
+        <Button variant="primary" tall full href={signupHref(previewId, teaser.domain)} onClick={onJoin}>
           Join the beta
         </Button>
       </div>
@@ -318,7 +321,7 @@ export function CompetitorLookup() {
             <Message
               icon={<IconInfo />}
               action={
-                <Button variant="primary" tall href={signupHref(res.previewId)} onClick={() => join(res.previewId, res.domain)}>
+                <Button variant="primary" tall href={signupHref(res.previewId, res.domain)} onClick={() => join(res.previewId, res.domain)}>
                   Join the beta
                 </Button>
               }

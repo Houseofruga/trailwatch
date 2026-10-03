@@ -20,6 +20,7 @@ import {
 import { addCompetitorByDomain, deleteCompetitor } from "@/features/competitors/actions";
 import { resolvePlan } from "@/features/plan/comp";
 import { PLANS } from "@/features/plan/limits";
+import { canonicalStoreHost } from "@/features/stores/domain";
 import { clearOwnStore, setOwnStore } from "@/features/stores/ownStore";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -104,9 +105,13 @@ export type SuggestResult =
  * ("Find more") searches again, at most once a minute. Stores the user already
  * follows are skipped.
  */
-export async function suggestCompetitors(opts: { refresh?: boolean } = {}): Promise<SuggestResult> {
+export async function suggestCompetitors(opts: { refresh?: boolean; basis?: string } = {}): Promise<SuggestResult> {
   const { supabase, user } = await currentUser();
-  const own = await getOwnStore();
+  const ownStore = await getOwnStore();
+  // Widget onboarding: no store of their own yet, so suggest from the
+  // competitor they looked up (a competitor's competitors share their market).
+  const basis = !ownStore && opts.basis ? canonicalStoreHost(opts.basis) : null;
+  const own = ownStore ?? (basis ? { domain: basis } : null);
   if (!own) return { ok: false, reason: "no-store", message: "Add your store in Settings to get suggestions." };
 
   const { data: rows } = await supabase.from("competitors").select("stores(domain)").not("store_id", "is", null);
@@ -208,6 +213,18 @@ export async function rejectMatch(input: unknown) {
 
 export async function linkProducts(input: unknown) {
   return setMatchVerdict(input, "confirmed", true);
+}
+
+// ------------------------------------------------------------ widget onboarding
+
+/** onboarding_completed_from_widget: stamp the preview this user claimed. Best-effort. */
+export async function finishWidgetOnboarding(): Promise<void> {
+  const { user } = await currentUser();
+  await createServiceClient()
+    .from("previews")
+    .update({ completed_at: new Date().toISOString() })
+    .eq("claimed_by", user.id)
+    .is("completed_at", null);
 }
 
 // ------------------------------------------------------------ settings
