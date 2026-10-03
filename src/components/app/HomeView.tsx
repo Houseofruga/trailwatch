@@ -40,7 +40,7 @@ export function HomeView({
   competitors: CompetitorRow[];
   briefing: BriefingPanel;
 }) {
-  const [modal, setModal] = useState(state === "add-competitor-modal");
+  const [modal, setModal] = useState(state.startsWith("add-competitor-modal"));
   const [guideDismissed, setGuideDismissed] = useState(false);
   const [filters, setFilters] = useState<Filters>(
     state === "filters-match-nothing" ? { competitor: "dewlane", type: "launch", priority: "high" } : NO_FILTERS,
@@ -250,6 +250,9 @@ export function HomeView({
         open={modal}
         onClose={() => setModal(false)}
         remaining={BETA_LIMIT - competitors.length}
+        preview={
+          state === "add-competitor-modal" ? "ready" : state === "add-competitor-modal-no-store" ? "no-store" : undefined
+        }
       />
     </PageBody>
   );

@@ -21,6 +21,7 @@ const STATES = [
   "briefing-quiet",
   "briefing-first",
   "add-competitor-modal",
+  "add-competitor-modal-no-store",
 ] as const;
 export type HomeState = (typeof STATES)[number];
 

@@ -18,6 +18,10 @@ const STATES = [
   "step-2-already-added",
   "step-2-own-store",
   "step-2-limit-reached",
+  "step-2-suggestions-loading",
+  "step-2-suggestions-none",
+  "step-2-suggestions-failed",
+  "step-2-no-own-store",
   "building-report",
   "slow",
 ] as const;

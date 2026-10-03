@@ -131,7 +131,7 @@ export async function suggestCompetitors(opts: { refresh?: boolean } = {}): Prom
   }
   if (saved.at && Date.now() - new Date(saved.at).getTime() < SUGGEST_CONFIG.refreshCooldownMs) {
     const shown = pickSuggestions(savedList, exclude);
-    return shown.length > 0
+    return shown.length > 0 && !opts.refresh
       ? { ok: true, suggestions: shown }
       : { ok: false, reason: "busy", message: "Give it a minute, then try again." };
   }
@@ -140,7 +140,7 @@ export async function suggestCompetitors(opts: { refresh?: boolean } = {}): Prom
   try {
     found = await runFind(own.domain, 8);
   } catch {
-    return { ok: false, reason: "error", message: "We couldn't search just now. Try again, or add stores you know below." };
+    return { ok: false, reason: "error", message: "We couldn't search just now. Try again, or add stores you know above." };
   }
   // Merge with what we had, so "Find more" never loses earlier suggestions.
   const fresh = found.ok ? toSuggestions(found.result.competitors) : [];
@@ -158,7 +158,7 @@ export async function suggestCompetitors(opts: { refresh?: boolean } = {}): Prom
   return {
     ok: false,
     reason: "none",
-    message: "We couldn't find Shopify stores that compete with yours. Add the ones you know below.",
+    message: "We couldn't find Shopify stores that compete with yours. Add the ones you know above.",
   };
 }
 

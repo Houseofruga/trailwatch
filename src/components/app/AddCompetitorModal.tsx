@@ -7,16 +7,25 @@ import { Modal } from "@/components/ui/Modal";
 import { TextField } from "@/components/ui/TextField";
 import { useToast } from "@/components/ui/Toast";
 import { addCompetitor } from "@/features/appData/actions";
+import { CompetitorSuggestions, type SuggestPreview } from "./CompetitorSuggestions";
+import styles from "./AddCompetitorModal.module.css";
 
-/** "Add competitor" dialog (04-Home / add-competitor modal), shared by Home and Competitors. */
+/**
+ * "Add competitor" dialog (04-Home / add-competitor modal, with suggestions from
+ * 02b-Suggestions), shared by Home and Competitors. Typing a known store stays
+ * the main path; a suggestion is added in place and the dialog stays open.
+ */
 export function AddCompetitorModal({
   open,
   onClose,
   remaining,
+  preview,
 }: {
   open: boolean;
   onClose: () => void;
   remaining: number;
+  /** Design-review previews show mock suggestions instead of searching. */
+  preview?: SuggestPreview;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -41,21 +50,35 @@ export function AddCompetitorModal({
     router.push(`/competitors/${res.competitorId}/report`);
   }
 
+  async function addSuggestion(domain: string): Promise<{ ok: true } | { ok: false; error: string }> {
+    const res = await addCompetitor(domain);
+    if (!res.ok) return res;
+    toast("Competitor added");
+    router.refresh();
+    return { ok: true };
+  }
+
   return (
     <Modal
       open={open}
       title="Add competitor"
       onClose={close}
+      width={560}
       footer={
         <>
           <Button onClick={close}>Cancel</Button>
-          <Button variant="primary" type="submit" form="add-competitor-form" loading={busy} disabled={remaining <= 0}>
+          <Button
+            variant="primary"
+            type="submit"
+            form="add-competitor-form"
+            loading={busy}
+            disabled={remaining <= 0 || !value.trim()}
+          >
             Add competitor
           </Button>
         </>
       }
     >
-      <p>Add a Shopify store, using the brand&rsquo;s own website, not an Amazon or Etsy page. We&rsquo;ll read their catalog and key pages; it takes about a minute.</p>
       <form id="add-competitor-form" onSubmit={submit} noValidate>
         <TextField
           id="add-competitor-url"
@@ -67,10 +90,22 @@ export function AddCompetitorModal({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           error={error}
-          help={remaining > 0 ? `You can add ${remaining} more during the beta.` : "That's the beta limit. Remove one to add another."}
+          help={
+            remaining > 0
+              ? "Use the store’s own website, not an Amazon or Etsy page."
+              : "That's the beta limit. Remove one to add another."
+          }
           disabled={remaining <= 0}
         />
       </form>
+      {open ? (
+        <CompetitorSuggestions
+          className={styles.suggestions}
+          full={remaining <= 0}
+          preview={preview}
+          onAdd={addSuggestion}
+        />
+      ) : null}
     </Modal>
   );
 }

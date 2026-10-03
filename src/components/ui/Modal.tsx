@@ -11,8 +11,11 @@ export function Modal({
   onClose,
   children,
   footer,
+  width,
 }: {
   open: boolean;
+  /** Wider than the default 480px (Add competitor with suggestions: 560). */
+  width?: number;
   title: string;
   onClose: () => void;
   children: React.ReactNode;
@@ -39,7 +42,7 @@ export function Modal({
   if (!open) return null;
   return (
     <div className={styles.overlay} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div ref={panel} className={styles.modal} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
+      <div ref={panel} className={styles.modal} style={width ? { width } : undefined} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
         <div className={styles.head}>
           <h2 id={titleId} className={styles.title}>
             {title}

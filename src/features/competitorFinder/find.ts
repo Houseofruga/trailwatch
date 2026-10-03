@@ -107,7 +107,11 @@ async function isShopifyStore(url: string): Promise<boolean> {
   const host = canonicalStoreHost(url);
   if (!host) return false;
   const res = await safeFetch(`https://${host}/products.json?limit=1`, { maxBytes: 200_000, timeoutMs: 5_000 });
-  return res.ok && isProductsJson(res.html);
+  // Shopify throttles a busy IP across all its stores with a 429 (seen
+  // 2026-10-03: every Shopify store 429'd while other sites loaded). Keep the
+  // suggestion: adding it runs the full Shopify check anyway.
+  if (!res.ok) return res.status === 429;
+  return isProductsJson(res.html);
 }
 
 // Suggestions shown on the homepage, after the Shopify check (the model offers

@@ -80,6 +80,12 @@ export const IconPlus = (p: IconProps) => (
     <path d="M12 5v14M5 12h14" />
   </Svg>
 );
+export const IconSearch = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="11" cy="11" r="7" />
+    <path d="M20 20l-3.5-3.5" />
+  </Svg>
+);
 export const IconExternal = (p: IconProps) => (
   <Svg {...p}>
     <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />

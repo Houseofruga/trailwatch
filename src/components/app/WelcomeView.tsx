@@ -18,6 +18,7 @@ import { addCompetitor, onboardingStatus, removeCompetitor, saveOwnStore, saveRo
 import { ADD_MESSAGES, checkStoreInput } from "@/features/appData/mockAdd";
 import { ROLES, type UserRole } from "@/features/appData/roles";
 import type { OnboardingItem } from "@/features/appData/types";
+import { CompetitorSuggestions, type SuggestPreview } from "./CompetitorSuggestions";
 import styles from "./WelcomeView.module.css";
 
 const LIMIT = 10;
@@ -59,6 +60,18 @@ const PRESETS: Partial<Record<WelcomeState, { added: Added[]; value?: string; er
   "step-2-already-added": { added: [HP, DW], value: "hearthandpine.com", error: ADD_MESSAGES.duplicate("Hearth & Pine") },
   "step-2-own-store": { added: [HP], value: "glowfield.com", error: ADD_MESSAGES.own },
   "step-2-limit-reached": { added: [HP, DW, NK, OG, PT, ...MORE] },
+  "step-2-suggestions-loading": { added: [] },
+  "step-2-suggestions-none": { added: [] },
+  "step-2-suggestions-failed": { added: [] },
+  "step-2-no-own-store": { added: [] },
+};
+
+// Which suggestions state each preview shows (02b-Suggestions); the rest show the list.
+const SUGGEST_PREVIEW: Partial<Record<WelcomeState, SuggestPreview>> = {
+  "step-2-suggestions-loading": "loading",
+  "step-2-suggestions-none": "none",
+  "step-2-suggestions-failed": "failed",
+  "step-2-no-own-store": "no-store",
 };
 
 function StatusBadge({ status }: { status: Added["status"] }) {
@@ -214,6 +227,13 @@ export function WelcomeView({
     setAdding(false);
   }
 
+  async function addSuggestion(domain: string): Promise<{ ok: true } | { ok: false; error: string }> {
+    const res = await addCompetitor(domain);
+    if (!res.ok) return res;
+    setAdded(await onboardingStatus());
+    return { ok: true };
+  }
+
   async function remove(a: Added) {
     setAdded((list) => list.filter((x) => x.id !== a.id));
     if (live) await removeCompetitor(a.id);
@@ -327,6 +347,14 @@ export function WelcomeView({
                 ) : null}
               </>
             ) : null}
+
+            <CompetitorSuggestions
+              className={styles.suggestions}
+              full={full}
+              hideWithoutStore
+              preview={live ? undefined : (SUGGEST_PREVIEW[state] ?? "ready")}
+              onAdd={addSuggestion}
+            />
 
             <div className={styles.spacer} />
             <div className={styles.actions}>
