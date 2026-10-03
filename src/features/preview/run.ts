@@ -91,10 +91,10 @@ async function cachedPreview(service: SupabaseClient, domain: string): Promise<{
   if (!store?.latest_snapshot_id || store.platform !== "shopify") return null;
   const { data: snap } = await service
     .from("catalog_snapshots")
-    .select("storage_path, created_at, complete")
+    .select("storage_path, fetched_at")
     .eq("id", store.latest_snapshot_id)
     .single();
-  const readAt = store.check_status === "ok" && store.last_checked_at ? store.last_checked_at : snap?.created_at;
+  const readAt = store.check_status === "ok" && store.last_checked_at ? store.last_checked_at : snap?.fetched_at;
   if (!snap || !isFresh(readAt)) return null;
   const catalog = await downloadSnapshot(service, snap.storage_path);
   if (!catalog) return null;
