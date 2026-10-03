@@ -20,10 +20,24 @@ export type FullPreview = {
   readAt: string;
 };
 
-export type Finding = { kind: "launched" | "on_sale" | "sold_out"; count: number; text: string };
+export type FindingExample = { title: string; price: number | null; compareAtPrice?: number | null; image: string | null };
+export type Finding = { kind: "launched" | "on_sale" | "sold_out"; count: number; text: string; example: FindingExample | null };
 
-/** What an anonymous visitor sees: counts and one line per finding, no product names. */
-export type Teaser = { domain: string; name: string; productCount: number; complete: boolean; findings: Finding[] };
+/**
+ * Real price changes, only for a store we already track (one snapshot can't
+ * show change). Shown blurred behind the sign-up gate.
+ */
+export type PriceChanges = { count: number; example: { title: string; oldPrice: number; newPrice: number } | null };
+
+/** What an anonymous visitor sees: counts, one line and one example product per finding. */
+export type Teaser = {
+  domain: string;
+  name: string;
+  productCount: number;
+  complete: boolean;
+  findings: Finding[];
+  priceChanges?: PriceChanges;
+};
 
 const toItem = (i: ReportItem): PreviewItem => ({
   title: i.title,
@@ -62,14 +76,18 @@ export function buildPreview(input: {
 
 const products = (count: number) => `${count.toLocaleString("en-US")} ${count === 1 ? "product" : "products"}`;
 
-/** The teaser: one finding per group, empty groups skipped. */
-export function teaserOf(full: FullPreview): Teaser {
+const example = (items: PreviewItem[]): FindingExample | null =>
+  items[0] ? { title: items[0].title, price: items[0].price, image: items[0].image, ...(items[0].compareAtPrice ? { compareAtPrice: items[0].compareAtPrice } : {}) } : null;
+
+/** The teaser: one finding per group (with its top example), empty groups skipped. */
+export function teaserOf(full: FullPreview, priceChanges?: PriceChanges): Teaser {
   const findings: Finding[] = [];
   if (full.launched.count > 0) {
     findings.push({
       kind: "launched",
       count: full.launched.count,
       text: `Launched ${products(full.launched.count)} in the last ${PREVIEW_CONFIG.recentDays} days`,
+      example: example(full.launched.items),
     });
   }
   if (full.onSale.count > 0) {
@@ -77,11 +95,24 @@ export function teaserOf(full: FullPreview): Teaser {
     findings.push({
       kind: "on_sale",
       count: full.onSale.count,
-      text: `${products(full.onSale.count)} on sale right now${off ? `, ${full.onSale.count === 1 ? "" : "up to "}${off}% off` : ""}`,
+      text: `${products(full.onSale.count)} on sale right now${off ? ` · ${full.onSale.count === 1 ? "" : "up to "}${off}% off` : ""}`,
+      example: example(full.onSale.items),
     });
   }
   if (full.soldOut.count > 0) {
-    findings.push({ kind: "sold_out", count: full.soldOut.count, text: `${products(full.soldOut.count)} sold out right now` });
+    findings.push({
+      kind: "sold_out",
+      count: full.soldOut.count,
+      text: `${products(full.soldOut.count)} sold out right now`,
+      example: example(full.soldOut.items),
+    });
   }
-  return { domain: full.domain, name: full.name, productCount: full.productCount, complete: full.complete, findings };
+  return {
+    domain: full.domain,
+    name: full.name,
+    productCount: full.productCount,
+    complete: full.complete,
+    findings,
+    ...(priceChanges && priceChanges.count > 0 ? { priceChanges } : {}),
+  };
 }

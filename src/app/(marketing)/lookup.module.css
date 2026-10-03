@@ -1,0 +1,323 @@
+/* "Try it on a competitor" (DESIGN 09-widget), inside the existing hero card
+   (.finder in home.module.css), so the landing page keeps its look. Same
+   tokens and shapes as that card: 8px rows on the soft surface. */
+
+.title {
+  margin: 0 0 14px;
+  font-size: 1rem;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.fieldError {
+  margin: 8px 2px 0;
+  font-size: 0.85rem;
+  color: var(--ui-critical-ink);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.zone {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Store header: favicon, name, domain, product count */
+.store {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.storeText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 160px;
+}
+
+.storeName {
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: var(--ink);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.storeDomain {
+  font-size: 0.82rem;
+  color: var(--ink-3);
+  overflow-wrap: anywhere;
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--ink-3);
+  font-size: 12px;
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+/* Loading */
+.bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: var(--ink);
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--ink-3);
+}
+
+.stepActive {
+  color: var(--ink);
+  font-weight: 550;
+}
+
+.stepDone {
+  color: var(--ink);
+}
+
+.dot,
+.check {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.dot {
+  border: 1.5px solid var(--ink-4);
+}
+
+.check {
+  background: var(--ink);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Findings */
+.findings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.finding {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-alt);
+}
+
+.findingIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--surface-sunken);
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.findingBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  flex-grow: 1;
+}
+
+.findingText {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.example {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--surface-sunken);
+  box-shadow: inset 0 0 0 1px var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-4);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.exampleText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex-grow: 1;
+}
+
+.exampleLabel {
+  font-size: 0.75rem;
+  color: var(--ink-3);
+}
+
+.exampleTitle {
+  font-size: 0.82rem;
+  color: var(--ink);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.price {
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.was {
+  color: var(--ink-3);
+  text-decoration: line-through;
+  margin-right: 6px;
+}
+
+.now {
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.muted {
+  color: var(--ink-3);
+}
+
+.note {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-3);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Gate */
+.gate {
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.locked {
+  opacity: 0.45;
+  filter: blur(0.6px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.gateText {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+.gateNote {
+  margin: -6px 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-3);
+}
+
+/* Messages (not supported, marketplace, rate limited, error) */
+.message {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.messageIcon {
+  display: flex;
+  padding-top: 2px;
+  color: var(--ink-2);
+}
+
+.messageBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+/* Phones: the button goes full width under the field (09-widget, 375). */
+@media (max-width: 600px) {
+  .row {
+    flex-direction: column;
+  }
+  .row > * {
+    width: 100%;
+    flex: none;
+  }
+}

@@ -57,21 +57,31 @@ describe("teaser", () => {
     expect(full.soldOut.count).toBe(1);
   });
 
-  it("says state, not change, and gives no product names", () => {
+  it("says state, not change, with one example product per finding", () => {
     const teaser = teaserOf(full);
     expect(teaser.findings.map((f) => f.text)).toEqual([
       "Launched 2 products in the last 30 days",
-      "2 products on sale right now, up to 30% off",
+      "2 products on sale right now · up to 30% off",
       "1 product sold out right now",
     ]);
-    expect(JSON.stringify(teaser)).not.toContain("Linen Sheet Set");
+    expect(teaser.findings.map((f) => f.example?.title)).toEqual(["Linen Sheet Set", "Quilt", "Old Pillow"]);
+    expect(teaser.findings[1].example).toMatchObject({ price: 7000, compareAtPrice: 10000 });
+    expect(JSON.stringify(teaser)).not.toContain("Waffle Robe"); // only the top example
+    expect(teaser.priceChanges).toBeUndefined();
+  });
+
+  it("shows price changes only when real tracked events exist", () => {
+    expect(teaserOf(full, { count: 0, example: null }).priceChanges).toBeUndefined();
+    expect(teaserOf(full, { count: 12, example: { title: "Quilt", oldPrice: 12900, newPrice: 14500 } }).priceChanges?.count).toBe(12);
   });
 
   it("skips empty groups", () => {
     const quiet = buildPreview({ domain: "northknot.com", name: "Northknot", products: [product("Beanie")], complete: true, now: NOW });
     expect(teaserOf(quiet).findings).toEqual([]);
     const oneSale = buildPreview({ domain: "northknot.com", name: "Northknot", products: [product("Scarf", { price: 4000, compareAt: 5000 })], complete: true, now: NOW });
-    expect(teaserOf(oneSale).findings).toEqual([{ kind: "on_sale", count: 1, text: "1 product on sale right now, 20% off" }]);
+    expect(teaserOf(oneSale).findings).toEqual([
+      { kind: "on_sale", count: 1, text: "1 product on sale right now · 20% off", example: { title: "Scarf", price: 4000, compareAtPrice: 5000, image: null } },
+    ]);
   });
 });
 
@@ -157,7 +167,7 @@ describe("lookupPreview", () => {
       syncBudgetMs: 1000,
     });
     expect(res.status).toBe("ready");
-    expect(res.teaser?.findings[0].text).toBe("1 product on sale right now, 30% off");
+    expect(res.teaser?.findings[0].text).toBe("1 product on sale right now · 30% off");
     expect(fresh).toBe(0);
     expect(tables.preview_lookups.at(-1)).toMatchObject({ status: "ready", cached: true });
     expect(tables.previews[0]).toMatchObject({ status: "ready", domain: "dewlane.com" });
@@ -167,7 +177,7 @@ describe("lookupPreview", () => {
     const { db, tables } = fakeDb();
     const res = await lookupPreview(db, "www.dewlane.com", "1.1.1.1", () => {}, {
       cachedPreview: none,
-      freshRead: async () => ({ status: "ready", full: FULL, products: 1 }) as Work,
+      freshRead: async () => ({ status: "ready", full: FULL, products: 1, storeId: null }) as Work,
       syncBudgetMs: 1000,
     });
     expect(res).toMatchObject({ status: "ready", domain: "dewlane.com" });
@@ -187,7 +197,7 @@ describe("lookupPreview", () => {
     expect(res.status).toBe("processing");
     expect(res.previewId).toMatch(/^[0-9a-f]{32}$/);
     expect(deferred).not.toBeNull();
-    release({ status: "ready", full: FULL, products: 1 });
+    release({ status: "ready", full: FULL, products: 1, storeId: null });
     await deferred!();
   });
 
@@ -195,7 +205,7 @@ describe("lookupPreview", () => {
     const { hashIp } = await import("./guard");
     const recent = (s: number) => ({ ip_hash: hashIp("2.2.2.2"), created_at: new Date(Date.now() - s * 1000).toISOString(), status: "ready", cached: true });
     const limited = fakeDb({ lookups: [recent(60), recent(120), recent(180)] });
-    const deps = { cachedPreview: none, freshRead: async () => ({ status: "ready", full: FULL, products: 1 }) as Work, syncBudgetMs: 1000 };
+    const deps = { cachedPreview: none, freshRead: async () => ({ status: "ready", full: FULL, products: 1, storeId: null }) as Work, syncBudgetMs: 1000 };
     expect(await lookupPreview(limited.db, "dewlane.com", "2.2.2.2", () => {}, deps)).toMatchObject({ status: "rate_limited", reason: "per_ip_daily" });
 
     const busy = fakeDb({

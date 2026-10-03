@@ -9,7 +9,7 @@ import { canonicalStoreHost } from "@/features/stores/domain";
 import { isMarketplace } from "@/features/stores/denylist.config";
 import { resolveStore } from "@/features/stores/resolveStore";
 import { recordFetches } from "@/features/usage/record";
-import { buildPreview, teaserOf, type FullPreview, type Teaser } from "./compute";
+import { buildPreview, teaserOf, type FullPreview, type PriceChanges, type Teaser } from "./compute";
 import { PREVIEW_CONFIG } from "./config";
 import { hashIp, ipVerdict, isFresh, newPreviewId, underGlobalCap } from "./guard";
 
@@ -36,7 +36,7 @@ export type PreviewResponse = {
   message?: string;
 };
 
-export type Work = { status: "ready"; full: FullPreview; products: number } | { status: "instant_not_supported" | "error"; reason: string; message: string };
+export type Work = { status: "ready"; full: FullPreview; products: number; storeId: string | null } | { status: "instant_not_supported" | "error"; reason: string; message: string };
 
 const MESSAGES = {
   invalid: "Enter a store's website, like dewlane.com.",
@@ -62,6 +62,27 @@ async function logLookup(
     products: row.products ?? null,
   });
   if (error) console.error(`Couldn't log a preview lookup: ${error.message}`);
+}
+
+/** Price changes we actually recorded for a tracked store in the last 30 days, or undefined. */
+async function trackedPriceChanges(service: SupabaseClient, storeId: string | null): Promise<PriceChanges | undefined> {
+  if (!storeId) return undefined;
+  const since = new Date(Date.now() - PREVIEW_CONFIG.recentDays * 24 * 60 * 60 * 1000).toISOString();
+  const { data, count } = await service
+    .from("events")
+    .select("payload", { count: "exact" })
+    .eq("store_id", storeId)
+    .eq("type", "price_changed")
+    .gte("detected_at", since)
+    .order("detected_at", { ascending: false })
+    .limit(1);
+  if (!count) return undefined;
+  const p = (data?.[0]?.payload ?? {}) as { title?: unknown; oldPrice?: unknown; newPrice?: unknown };
+  const example =
+    typeof p.title === "string" && typeof p.oldPrice === "number" && typeof p.newPrice === "number"
+      ? { title: p.title, oldPrice: p.oldPrice, newPrice: p.newPrice }
+      : null;
+  return { count, example };
 }
 
 const expiresAt = () => new Date(Date.now() + PREVIEW_CONFIG.ttlDays * 24 * 60 * 60 * 1000).toISOString();
@@ -179,7 +200,7 @@ async function freshRead(service: SupabaseClient, previewId: string, domain: str
     }
 
     const full = buildPreview({ domain, name: store.name, products: catalog.products, complete: catalog.complete });
-    return finish({ status: "ready", full, products: catalog.products.length }, { store_id: store.id, snapshot_id: snapshot?.id ?? null });
+    return finish({ status: "ready", full, products: catalog.products.length, storeId: store.id }, { store_id: store.id, snapshot_id: snapshot?.id ?? null });
   } catch (err) {
     console.error(`Preview for ${domain} failed:`, err);
     return finish({ status: "error", reason: "exception", message: MESSAGES.error });
@@ -250,7 +271,7 @@ export async function lookupPreview(
       expires_at: expiresAt(),
     });
     await log("ready", true, cached.full.productCount);
-    return { status: "ready", domain, previewId, teaser: teaserOf(cached.full) };
+    return { status: "ready", domain, previewId, teaser: teaserOf(cached.full, await trackedPriceChanges(service, cached.storeId)) };
   }
 
   const dayStart = new Date();
@@ -279,7 +300,7 @@ export async function lookupPreview(
     return { status: "processing", domain, previewId };
   }
   await log(done.status, false, done.status === "ready" ? done.products : null);
-  if (done.status === "ready") return { status: "ready", domain, previewId, teaser: teaserOf(done.full) };
+  if (done.status === "ready") return { status: "ready", domain, previewId, teaser: teaserOf(done.full, await trackedPriceChanges(service, done.storeId)) };
   if (done.status === "instant_not_supported") return { status: done.status, domain, previewId, reason: done.reason, message: done.message };
   return {
     status: done.reason === "invalid" || done.reason === "unreachable" || done.reason === "not_store" ? "invalid_domain" : "error",
@@ -292,9 +313,11 @@ export async function lookupPreview(
 /** GET /api/preview/:id — the teaser for a preview (polling), never the full snapshot. */
 export async function readPreview(service: SupabaseClient, id: string): Promise<PreviewResponse | null> {
   if (!/^[0-9a-f]{32}$/.test(id)) return null;
-  const { data } = await service.from("previews").select("domain, status, reason, result, expires_at").eq("id", id).maybeSingle();
+  const { data } = await service.from("previews").select("domain, status, reason, result, expires_at, store_id").eq("id", id).maybeSingle();
   if (!data || Date.parse(data.expires_at) < Date.now()) return null;
-  if (data.status === "ready" && data.result) return { status: "ready", domain: data.domain, previewId: id, teaser: teaserOf(data.result as FullPreview) };
+  if (data.status === "ready" && data.result) {
+    return { status: "ready", domain: data.domain, previewId: id, teaser: teaserOf(data.result as FullPreview, await trackedPriceChanges(service, data.store_id)) };
+  }
   if (data.status === "instant_not_supported") {
     return { status: data.status, domain: data.domain, previewId: id, reason: data.reason ?? undefined, message: data.reason === "catalog_hidden" ? MESSAGES.hidden : MESSAGES.notShopify };
   }

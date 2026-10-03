@@ -102,6 +102,9 @@
 /* --- The finder tool card (square, opaque white over the sky) --- */
 .heroTool {
   width: 100%;
+  /* A grid item: let long product names in the widget ellipsize instead of
+     widening the column on phones. */
+  min-width: 0;
 }
 
 .finder {

@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SiteHeader } from "@/components/SiteHeader";
 import { JsonLd } from "@/components/JsonLd";
 import { Button } from "@/components/ui/Button";
-import { CompetitorFinder } from "./CompetitorFinder";
+import { CompetitorLookup } from "./CompetitorLookup";
 import { MarketingSections } from "./MarketingSections";
 import { structuredData } from "./structuredData";
 import styles from "./home.module.css";
@@ -67,7 +67,7 @@ export default async function RootPage() {
           </div>
 
           <div className={styles.heroTool}>
-            <CompetitorFinder />
+            <CompetitorLookup />
           </div>
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
