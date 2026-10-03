@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getAccount } from "@/features/account/queries";
-import { getMonthlyReport, isAdminEmail, listAdminUsers, monthRange } from "@/features/usage/report";
+import { getMonthlyReport, isAdminEmail, listAdminUsers, listPreviewDays, monthRange, type PreviewDay } from "@/features/usage/report";
 import { createServiceClient } from "@/lib/supabase/service";
 import styles from "./page.module.css";
 
@@ -28,9 +28,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
 
   let report;
   let users;
+  let previews: PreviewDay[] | null = null;
   try {
     const service = createServiceClient();
-    [report, users] = await Promise.all([getMonthlyReport(service, month), listAdminUsers(service)]);
+    [report, users, previews] = await Promise.all([getMonthlyReport(service, month), listAdminUsers(service), listPreviewDays(service)]);
   } catch (err) {
     return (
       <div className={styles.wrap}>
@@ -122,6 +123,42 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 <td className={styles.num}>{u.signedUp.slice(0, 10)}</td>
               </tr>
             ))}
+          </tbody>
+        </table>
+      </div>
+
+      <h2 className={styles.section}>Competitor previews (homepage, last 14 days)</h2>
+      <div className={styles.card}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Day (UTC)</th>
+              <th className={styles.num}>Lookups</th>
+              <th className={styles.num}>From cache</th>
+              <th className={styles.num}>Fresh reads</th>
+              <th className={styles.num}>Products fetched</th>
+              <th className={styles.num}>Avg time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {!previews || previews.length === 0 ? (
+              <tr>
+                <td colSpan={6} className={styles.empty}>
+                  {previews ? "No lookups yet." : "Apply migration 0020 to log previews."}
+                </td>
+              </tr>
+            ) : (
+              previews.map((d) => (
+                <tr key={d.day}>
+                  <td className={styles.mono}>{d.day}</td>
+                  <td className={styles.num}>{d.lookups}</td>
+                  <td className={styles.num}>{d.cached}</td>
+                  <td className={styles.num}>{d.fresh}</td>
+                  <td className={styles.num}>{d.products.toLocaleString("en-US")}</td>
+                  <td className={styles.num}>{d.avgMs === null ? "—" : `${(d.avgMs / 1000).toFixed(1)}s`}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

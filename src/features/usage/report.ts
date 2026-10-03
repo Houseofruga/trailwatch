@@ -154,3 +154,39 @@ export async function listAdminUsers(service: SupabaseClient): Promise<AdminUser
     return { email: u.email, ownStore, verified: emailMatchesStore(u.email, ownStore), role: roleLabel(u.role), signedUp: u.created_at };
   });
 }
+
+export type PreviewDay = { day: string; lookups: number; cached: number; fresh: number; products: number; avgMs: number | null };
+type LookupRow = { created_at: string; cached: boolean; status: string; duration_ms: number | null; products: number | null };
+
+/** Pure: homepage preview lookups per UTC day, newest first. */
+export function summarizeLookups(rows: LookupRow[]): PreviewDay[] {
+  const days = new Map<string, PreviewDay & { msTotal: number; msCount: number }>();
+  for (const r of rows) {
+    const day = r.created_at.slice(0, 10);
+    const d = days.get(day) ?? { day, lookups: 0, cached: 0, fresh: 0, products: 0, avgMs: null, msTotal: 0, msCount: 0 };
+    d.lookups += 1;
+    if (r.cached) d.cached += 1;
+    else if (["ready", "instant_not_supported", "error"].includes(r.status)) d.fresh += 1;
+    if (!r.cached) d.products += r.products ?? 0;
+    if (r.duration_ms !== null) {
+      d.msTotal += r.duration_ms;
+      d.msCount += 1;
+    }
+    days.set(day, d);
+  }
+  return [...days.values()]
+    .map(({ msTotal, msCount, ...d }) => ({ ...d, avgMs: msCount ? Math.round(msTotal / msCount) : null }))
+    .sort((a, b) => b.day.localeCompare(a.day));
+}
+
+/** The last two weeks of preview lookups (admin). Null when migration 0020 isn't applied yet. */
+export async function listPreviewDays(service: SupabaseClient): Promise<PreviewDay[] | null> {
+  const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+  const { data, error } = await service
+    .from("preview_lookups")
+    .select("created_at, cached, status, duration_ms, products")
+    .gte("created_at", since)
+    .limit(10_000);
+  if (error) return null;
+  return summarizeLookups((data ?? []) as LookupRow[]);
+}
