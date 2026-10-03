@@ -50,8 +50,14 @@ For each product return:
 - a: up to 4 key attributes that matter for comparison: main ingredient or material, format, target (dog, cat, men, women, baby) only if stated. No sizes, colors or prices.
 - p: pack type, one of: ${PACK_TYPES.join(", ")}. "bundle" = several different products sold together; "kit" = a set meant to be used together; "travel size" = mini or travel version; a set of identical items (2 towels) is "single".
 
+The product type is usually the best clue. Ignore words like "Last Call" or "sale": a discounted duvet cover is still a duvet cover.
 Use only what the text says. Do not guess.
 Reply with JSON only: {"items":[{"i":0,"c":"","s":"","u":"","a":[],"p":""}]}`;
+
+// Store-system tags ("Discount Amount: 75", "DY Category 1: Bedding", "Active
+// Last Call", feed flags) drown the real ones and made the model answer "other".
+const NOISE_TAG = /:|\b(discount|feed|feedonomics|active|allow|pdp|returns?|last call|sale|new ?arrivals?|exclude|include|hidden|badge|yotpo|klaviyo|gift ?wrap)\b/i;
+export const usefulTags = (tags: string[]) => tags.filter((t) => t.length <= 30 && !NOISE_TAG.test(t)).slice(0, 8);
 
 /** One product as the model sees it: short, and only what helps. */
 export function classifyLine(i: number, p: CatalogProduct): string {
@@ -59,7 +65,7 @@ export function classifyLine(i: number, p: CatalogProduct): string {
   const parts = [
     `${i}. ${p.title}`,
     p.productType ? `type: ${p.productType}` : "",
-    p.tags.length ? `tags: ${p.tags.slice(0, 8).join(", ")}` : "",
+    usefulTags(p.tags).length ? `tags: ${usefulTags(p.tags).join(", ")}` : "",
     variants.length ? `options: ${variants.join(" | ")}` : "",
     p.description ? `about: ${p.description.slice(0, MATCHING_CONFIG.descriptionChars)}` : "",
   ];
@@ -95,8 +101,11 @@ export function parseClassReply(text: string, count: number): Map<number, Produc
     const pack = (PACK_TYPES as readonly string[]).includes(item.p.trim().toLowerCase())
       ? (item.p.trim().toLowerCase() as PackType)
       : "single";
+    // "other" with a clear use ("sham set", "duvet cover"): recover it from the use.
+    const direct = validClass(item.c, item.s);
+    const cls = direct.category === "other" && item.u ? validClass(item.c, item.u) : direct;
     out.set(item.i, {
-      ...validClass(item.c, item.s),
+      ...cls,
       use: item.u.trim().toLowerCase().slice(0, 60),
       attributes: item.a.map((a) => a.trim().toLowerCase()).filter(Boolean).slice(0, 4),
       packType: pack,

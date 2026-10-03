@@ -27,6 +27,24 @@ export const PACK_GROUP: Record<PackType, string> = {
   subscription: "subscription",
 };
 
+// Common names for a subcategory, so the model's wording still lands.
+const SYNONYMS: Record<string, [string, string]> = {
+  sham: ["home", "pillowcases"],
+  "sham set": ["home", "pillowcases"],
+  throw: ["home", "blankets"],
+  "throw blanket": ["home", "blankets"],
+  bathrobe: ["apparel", "robes"],
+  robe: ["apparel", "robes"],
+  "bath sheet": ["home", "towels"],
+  washcloth: ["home", "towels"],
+  "duvet cover set": ["home", "duvet covers"],
+  "sheet set": ["home", "sheets"],
+  "quilt set": ["home", "quilts"],
+  tote: ["apparel", "accessories"],
+  "tote bag": ["apparel", "accessories"],
+  hat: ["apparel", "accessories"],
+};
+
 const singular = (w: string) => w.replace(/(ies)$/, "y").replace(/(es|s)$/, "");
 const norm = (s: string) => s.trim().toLowerCase().split(/\s+/).map(singular).join(" ");
 
@@ -41,11 +59,13 @@ export function validClass(category: string, subcategory: string): { category: C
   const find = (subs: readonly string[]) =>
     subs.find((x) => norm(x) === s) ??
     subs.find((x) => s.split(" ").includes(norm(x)) || norm(x).split(" ").includes(s)) ??
-    subs.find((x) => s.includes(norm(x)) || norm(x).includes(s));
+    (s.length >= 4 ? subs.find((x) => s.includes(norm(x)) || norm(x).includes(s)) : undefined);
   if (c in TAXONOMY) {
     const hit = s ? find(TAXONOMY[c as keyof typeof TAXONOMY]) : undefined;
     if (hit) return { category: c as Category, subcategory: hit };
   }
+  const syn = SYNONYMS[s] ?? SYNONYMS[s.split(" ").slice(-2).join(" ")] ?? SYNONYMS[s.split(" ").slice(-1)[0]];
+  if (syn) return { category: syn[0] as Category, subcategory: syn[1] };
   const owners = Object.entries(TAXONOMY).flatMap(([cat, subs]) =>
     (subs as readonly string[]).filter((x) => s && norm(x) === s).map((x) => ({ category: cat as Category, subcategory: x })),
   );
