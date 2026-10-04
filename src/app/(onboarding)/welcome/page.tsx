@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { WelcomeView } from "@/components/app/WelcomeView";
 import { DevStateBar } from "@/components/ui/DevStateBar";
 import { previewEnabled, previewState } from "@/features/appData/devState";
-import { getOnboardingStatus, getOwnStore, getRole } from "@/features/appData/queries";
+import * as mock from "@/features/appData/mock";
+import { getBetaStatus, getOnboardingStatus, getOwnStore, getRole } from "@/features/appData/queries";
 
 export const metadata: Metadata = { title: "Set up TrailWatch" };
 
@@ -40,7 +41,7 @@ export default async function WelcomePage({ searchParams }: { searchParams: Prom
         }));
   return (
     <>
-      <WelcomeView key={state} state={state} live={live} />
+      <WelcomeView key={state} state={state} live={live} beta={live ? await getBetaStatus() : await mock.getBetaStatus(0)} />
       <DevStateBar states={STATES} current={state} />
     </>
   );

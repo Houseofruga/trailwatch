@@ -8,7 +8,21 @@ import { Avatar } from "./Avatar";
 import { Badge } from "./Badge";
 import { PopoverMenu } from "./Overlay";
 import { ToastProvider } from "./Toast";
-import { IconChevronDown, IconEye, IconHelp, IconHome, IconLogOut, IconMenu, IconSliders, IconTrendUp, IconX } from "./icons";
+import { FeedbackModal } from "@/components/app/FeedbackModal";
+import { SidebarCallPrompt } from "@/components/app/BetaParts";
+import type { BetaStatus } from "@/features/appData/types";
+import {
+  IconChevronDown,
+  IconEye,
+  IconHelp,
+  IconHome,
+  IconLogOut,
+  IconMenu,
+  IconMessage,
+  IconSliders,
+  IconTrendUp,
+  IconX,
+} from "./icons";
 import styles from "./AppFrame.module.css";
 
 export const SUPPORT_EMAIL = "trailwatch@houseofruga.com";
@@ -26,12 +40,20 @@ type Props = {
   competitorCount: number;
   /** Open opportunities (nav badge); 0 hides it. */
   opportunityCount?: number;
+  /** Beta-member status: the sidebar call prompt. */
+  beta?: BetaStatus | null;
   /** Onboarding: nav items shown but not usable. */
   navDisabled?: boolean;
   children: React.ReactNode;
 };
 
-function Logo({ height = 22, light = false }: { height?: number; light?: boolean }) {
+function Logo({
+  height = 22,
+  light = false,
+}: {
+  height?: number;
+  light?: boolean;
+}) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -49,15 +71,26 @@ function Sidebar({
   ownStore,
   competitorCount,
   opportunityCount = 0,
+  beta,
   navDisabled,
   onNavigate,
-}: Omit<Props, "account" | "children"> & { pathname: string; onNavigate?: () => void }) {
-  const counts: Record<string, number> = { Competitors: competitorCount, Opportunities: opportunityCount };
+  onFeedback,
+}: Omit<Props, "account" | "children"> & {
+  pathname: string;
+  onNavigate?: () => void;
+  onFeedback?: () => void;
+}) {
+  const counts: Record<string, number> = {
+    Competitors: competitorCount,
+    Opportunities: opportunityCount,
+  };
   return (
     <nav aria-label="Main" className={styles.nav}>
       <ul className={styles.navList}>
         {NAV.map(({ href, label, Icon }) => {
-          const current = !navDisabled && (pathname === href || pathname.startsWith(`${href}/`));
+          const current =
+            !navDisabled &&
+            (pathname === href || pathname.startsWith(`${href}/`));
           return (
             <li key={href}>
               <Link
@@ -70,39 +103,70 @@ function Sidebar({
               >
                 <Icon size={18} />
                 <span>{label}</span>
-                {counts[label] > 0 ? <span className={styles.count}>{counts[label]}</span> : null}
+                {counts[label] > 0 ? (
+                  <span className={styles.count}>{counts[label]}</span>
+                ) : null}
               </Link>
             </li>
           );
         })}
       </ul>
-      <div className={styles.store}>
-        <span className={styles.storeLabel}>Your store</span>
-        {ownStore ? (
-          <span className={styles.storeName}>
-            {ownStore.domain}{" "}
-            {ownStore.products !== null ? (
-              <span className={styles.storeCount}>· {ownStore.products.toLocaleString("en-US")} products</span>
-            ) : null}
+      <div className={styles.bottom}>
+        {/* Beta (DESIGN 12-Beta): call prompt above the store card, feedback link below. */}
+        {beta && !navDisabled ? <SidebarCallPrompt beta={beta} /> : null}
+        <div className={styles.store}>
+          <span className={styles.storeLabel}>Your store</span>
+          {ownStore ? (
+            <span className={styles.storeName}>
+              {ownStore.domain}{" "}
+              {ownStore.products !== null ? (
+                <span className={styles.storeCount}>
+                  · {ownStore.products.toLocaleString("en-US")} products
+                </span>
+              ) : null}
+            </span>
+          ) : (
+            <Link
+              href="/settings#your-store"
+              className={styles.storeAdd}
+              onClick={onNavigate}
+            >
+              Add your store
+            </Link>
+          )}
+          <span className={styles.storeBadge}>
+            <Badge tone="success">Free beta</Badge>
           </span>
-        ) : (
-          <Link href="/settings#your-store" className={styles.storeAdd} onClick={onNavigate}>
-            Add your store
-          </Link>
-        )}
-        <span className={styles.storeBadge}>
-          <Badge tone="success">Free beta</Badge>
-        </span>
+        </div>
+        {onFeedback && !navDisabled ? (
+          <button
+            type="button"
+            className={styles.feedbackLink}
+            onClick={onFeedback}
+          >
+            <IconMessage size={16} />
+            Send feedback
+          </button>
+        ) : null}
       </div>
     </nav>
   );
 }
 
 /** Top bar + left sidebar (a drawer on phones) around every signed-in screen. */
-export function AppFrame({ account, ownStore, competitorCount, opportunityCount, navDisabled, children }: Props) {
+export function AppFrame({
+  account,
+  ownStore,
+  competitorCount,
+  opportunityCount,
+  beta,
+  navDisabled,
+  children,
+}: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [drawer, setDrawer] = useState(false);
+  const [feedback, setFeedback] = useState(false);
 
   useEffect(() => {
     if (!drawer) return;
@@ -113,14 +177,37 @@ export function AppFrame({ account, ownStore, competitorCount, opportunityCount,
 
   const menu = (
     <PopoverMenu
-      width={200}
+      width={220}
       items={[
-        { label: "Settings", icon: <IconSliders />, onSelect: () => router.push("/settings") },
-        { label: "Help", icon: <IconHelp />, onSelect: () => (window.location.href = `mailto:${SUPPORT_EMAIL}`) },
-        { label: "Log out", icon: <IconLogOut />, onSelect: () => void logOut(), separated: true },
+        {
+          label: "Settings",
+          icon: <IconSliders />,
+          onSelect: () => router.push("/settings"),
+        },
+        {
+          label: "Send feedback",
+          icon: <IconMessage />,
+          onSelect: () => setFeedback(true),
+        },
+        {
+          label: "Help",
+          icon: <IconHelp />,
+          onSelect: () => (window.location.href = `mailto:${SUPPORT_EMAIL}`),
+        },
+        {
+          label: "Log out",
+          icon: <IconLogOut />,
+          onSelect: () => void logOut(),
+          separated: true,
+        },
       ]}
       trigger={(p) => (
-        <button type="button" className={styles.account} aria-label={`Account menu for ${account.name}`} {...p}>
+        <button
+          type="button"
+          className={styles.account}
+          aria-label={`Account menu for ${account.name}`}
+          {...p}
+        >
           <Avatar name={account.name} person size={28} />
           <span className={styles.accountName}>{account.name}</span>
           <IconChevronDown size={14} />
@@ -133,10 +220,19 @@ export function AppFrame({ account, ownStore, competitorCount, opportunityCount,
     <ToastProvider>
       <div className={`ui ${styles.frame}`}>
         <header className={styles.top}>
-          <button type="button" aria-label="Open menu" className={styles.menuButton} onClick={() => setDrawer(true)}>
+          <button
+            type="button"
+            aria-label="Open menu"
+            className={styles.menuButton}
+            onClick={() => setDrawer(true)}
+          >
             <IconMenu size={20} />
           </button>
-          <Link href="/dashboard" className={styles.logoLink} aria-label="TrailWatch home">
+          <Link
+            href="/dashboard"
+            className={styles.logoLink}
+            aria-label="TrailWatch home"
+          >
             <Logo light />
           </Link>
           <span className={styles.spacer} />
@@ -149,18 +245,35 @@ export function AppFrame({ account, ownStore, competitorCount, opportunityCount,
               ownStore={ownStore}
               competitorCount={competitorCount}
               opportunityCount={opportunityCount}
+              beta={beta}
               navDisabled={navDisabled}
+              onFeedback={() => setFeedback(true)}
             />
           </div>
           <main className={styles.main}>{children}</main>
         </div>
 
         {drawer ? (
-          <div className={styles.drawerOverlay} onMouseDown={(e) => e.target === e.currentTarget && setDrawer(false)}>
-            <div className={styles.drawer} role="dialog" aria-modal="true" aria-label="Menu">
+          <div
+            className={styles.drawerOverlay}
+            onMouseDown={(e) =>
+              e.target === e.currentTarget && setDrawer(false)
+            }
+          >
+            <div
+              className={styles.drawer}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menu"
+            >
               <div className={styles.drawerHead}>
                 <Logo height={20} />
-                <button type="button" aria-label="Close menu" className={styles.menuButton} onClick={() => setDrawer(false)}>
+                <button
+                  type="button"
+                  aria-label="Close menu"
+                  className={styles.menuButton}
+                  onClick={() => setDrawer(false)}
+                >
                   <IconX size={20} />
                 </button>
               </div>
@@ -169,13 +282,19 @@ export function AppFrame({ account, ownStore, competitorCount, opportunityCount,
                 ownStore={ownStore}
                 competitorCount={competitorCount}
                 opportunityCount={opportunityCount}
+                beta={beta}
                 navDisabled={navDisabled}
                 onNavigate={() => setDrawer(false)}
+                onFeedback={() => {
+                  setDrawer(false);
+                  setFeedback(true);
+                }}
               />
             </div>
           </div>
         ) : null}
       </div>
+      <FeedbackModal open={feedback} onClose={() => setFeedback(false)} />
     </ToastProvider>
   );
 }

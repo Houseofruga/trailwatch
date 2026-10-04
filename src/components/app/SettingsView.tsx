@@ -19,6 +19,7 @@ import { deleteAccount } from "@/features/account/actions";
 import * as actions from "@/features/appData/actions";
 import { ago } from "@/features/appData/format";
 import type { MutableAlertType, Settings } from "@/features/appData/types";
+import { BetaPlanCard } from "./BetaParts";
 import styles from "./SettingsView.module.css";
 
 const ALERT_TYPES: { type: MutableAlertType; label: string; description: string }[] = [
@@ -323,17 +324,7 @@ export function SettingsView({
 
         <Section id="plan" title="Plan" description="Your beta plan.">
           <Card>
-            <div className={styles.plan}>
-              <div className={styles.planTitle}>
-                <p>Free beta</p>
-                {initial.plan.foundingMember ? <Badge tone="success">Beta member</Badge> : null}
-              </div>
-              <p className={styles.planLimits}>
-                {initial.plan.competitors} competitors · checks every {initial.plan.checkIntervalHours} hours · instant alerts
-                {initial.plan.slack ? " · Slack" : ""}
-              </p>
-              <p className={styles.planNote}>Free while we&rsquo;re in beta. Beta members keep 40% off for life when paid plans start (early-access pricing).</p>
-            </div>
+            <BetaPlanCard beta={initial.beta} />
           </Card>
         </Section>
 

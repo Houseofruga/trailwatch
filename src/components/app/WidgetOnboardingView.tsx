@@ -16,6 +16,8 @@ import type { WidgetOnboarding } from "@/features/appData/queries";
 import type { ReportList } from "@/features/appData/types";
 import type { Suggestion } from "@/features/competitorFinder/suggest";
 import { sameStore } from "@/features/preview/claimPath";
+import type { BetaStatus } from "@/features/appData/types";
+import { BetaNote } from "./BetaParts";
 import styles from "./WidgetOnboardingView.module.css";
 
 // Onboarding for a visitor who came from the homepage widget (DESIGN
@@ -461,7 +463,7 @@ function Competitors({ data, next, demo }: { data: WidgetOnboarding; next: () =>
   );
 }
 
-function Done({ data, demo }: { data: WidgetOnboarding; demo?: boolean }) {
+function Done({ data, demo, beta }: { data: WidgetOnboarding; demo?: boolean; beta?: BetaStatus | null }) {
   useEffect(() => {
     if (!demo) void finishWidgetOnboarding();
   }, [demo]);
@@ -489,6 +491,7 @@ function Done({ data, demo }: { data: WidgetOnboarding; demo?: boolean }) {
             </li>
           </ul>
         </div>
+        {beta ? <BetaNote beta={beta} /> : null}
         <div className={styles.actions}>
           <Button variant="primary" href="/dashboard">
             Go to Home
@@ -504,9 +507,12 @@ export function WidgetOnboardingView({
   data,
   demoSameDomain,
   demoSuggestions,
+  beta,
 }: {
   step: WidgetStep;
   data: WidgetOnboarding;
+  /** Beta-member note on the Done step (DESIGN 12-Beta 12d). */
+  beta?: BetaStatus | null;
   /** Design review only: open "Is this your store?" (10-onboard 2b). */
   demoSameDomain?: boolean;
   /** Design review only: suggestions without calling the finder. */
@@ -528,7 +534,7 @@ export function WidgetOnboardingView({
       ) : step === "competitors" ? (
         <Competitors data={data} next={() => go("done")} demo={demoSuggestions} />
       ) : (
-        <Done data={data} demo={!!demoSuggestions} />
+        <Done data={data} demo={!!demoSuggestions} beta={beta} />
       )}
     </PageBody>
   );

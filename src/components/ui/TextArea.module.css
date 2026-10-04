@@ -1,0 +1,48 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--ink);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.area {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  border: 0.66px solid var(--border-input);
+  border-top-color: var(--border-input-top);
+  border-radius: 8px;
+  background: var(--ui-input-bg);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.area:focus {
+  outline: none;
+  border-color: var(--link);
+  box-shadow: var(--ui-focus-ring);
+}
+
+.help {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-3);
+}

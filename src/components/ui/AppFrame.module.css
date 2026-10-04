@@ -258,3 +258,31 @@
     padding: 20px 16px 48px 16px;
   }
 }
+
+/* Sidebar bottom (DESIGN 12-Beta): call prompt, store card, feedback link. */
+.bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feedbackLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 550;
+  text-align: left;
+  cursor: pointer;
+}
+
+.feedbackLink:hover {
+  background: rgba(0, 0, 0, 0.05);
+}

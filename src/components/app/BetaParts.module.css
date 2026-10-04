@@ -1,0 +1,148 @@
+/* DESIGN 12-Beta */
+
+/* 12c plan card */
+.plan {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.planOff {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.planHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.planName {
+  font-size: 16px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.planLine {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.offer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--ui-subdued);
+}
+
+.offerDone {
+  gap: 6px;
+}
+
+.locked {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.locked svg {
+  color: var(--ui-success-icon);
+}
+
+.thanks {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.muted {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+/* 12d onboarding note */
+.note {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--ui-subdued);
+}
+
+.noteTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.noteText {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
+
+/* Sidebar call prompt */
+.prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.promptTitle {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.promptLine {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink-3);
+}
+
+.promptButton,
+.promptButton:hover {
+  width: 100%;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 550;
+  text-decoration: none;
+  box-shadow:
+    inset 0 -1px 0 #b5b5b5,
+    inset 0 0 0 1px rgba(0, 0, 0, 0.1),
+    inset 0 0.5px 0 1.5px #ffffff;
+}
+
+.promptButton:hover {
+  background: var(--surface-sunken);
+}
+
+@media (max-width: 767px) {
+  .promptButton {
+    height: 40px;
+  }
+}

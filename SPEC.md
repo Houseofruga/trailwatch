@@ -74,7 +74,7 @@ The legacy `pages / snapshots / changes / page_insights` tables become read-only
 
 - Annual pricing is 10× monthly (2 months free): Starter $290/yr, Pro $790/yr.
 - **Beta members** (decided 2026-10-04; stored as `is_founding_member`, always called "beta members" to users): the first **25** sign-ups (`app_settings.founding_member_cap`, enforced at sign-up). Offer, always stated with its condition: **up to 40% off for life**: 10% when they join, plus 30% more after **3 short feedback calls** with the founder (counted on `/admin`). Once earned it stays. The price locks in when paid plans start on **January 1, 2027**. Paddle discounts (10% and 40%) are created in the Paddle dashboard when billing turns on. Knobs: `src/features/beta/config.ts`.
-- **Beta relationship:** every email's reply-to is the founder (`founder@gettrailwatch.com`); a founder welcome email after sign-up; one-click "Was this useful?" on the briefing and "Useful / Noise" on alerts; in-app "Send feedback / request a feature" (UI pending its artboard).
+- **Beta relationship:** every email's reply-to is the founder (`founder@gettrailwatch.com`); a founder welcome email after sign-up; one-click "Was this useful?" on the briefing and "Useful / Noise" on alerts; in-app "Send feedback / request a feature" (account menu and sidebar), a beta-member card in Settings and onboarding, and a sidebar "Talk to Chandan" call prompt (DESIGN 12-Beta).
 - **Beta:** the app runs as a free beta. Plans are visible, billing is disabled (`BILLING_ENABLED=false`), and beta users are flagged as founding members.
 - Limits count **competitors only**. Page counts are gone.
 - Limits are enforced server-side and never trusted from the client.

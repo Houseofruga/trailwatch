@@ -12,6 +12,7 @@ import type {
   BriefingPanel,
   BriefingTopMove,
   Account,
+  BetaStatus,
   CompetitorOverview,
   CompetitorRow,
   FirstReport,
@@ -462,6 +463,7 @@ export async function getSettings(): Promise<Settings> {
     briefing: { enabled: true, hour: 8, timeZone: "America/New_York" },
     ownStore: MOCK_OWN_STORE,
     plan: { label: "Free beta", foundingMember: true, competitors: 10, checkIntervalHours: 2, slack: true },
+    beta: { member: true, callsDone: 1, callsNeeded: 3, bookingUrl: "https://calendar.app.google/example" },
     account: MOCK_ACCOUNT,
   };
 }
@@ -548,4 +550,8 @@ export async function listDismissedOpportunities(): Promise<OpportunityView[]> {
 
 export async function countOpenOpportunities(): Promise<number> {
   return OPPORTUNITIES.length;
+}
+
+export async function getBetaStatus(callsDone = 1): Promise<BetaStatus> {
+  return { member: true, callsDone, callsNeeded: 3, bookingUrl: "https://calendar.app.google/example" };
 }

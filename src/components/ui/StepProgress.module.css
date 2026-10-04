@@ -1,0 +1,46 @@
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--ink);
+}
+
+.bars {
+  display: flex;
+  gap: 4px;
+  max-width: 280px;
+}
+
+.bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ui-grey);
+}
+
+.done {
+  background: var(--ink);
+}
+
+/* Sidebar call prompt */
+.compact {
+  gap: 4px;
+}
+
+.compact .label {
+  font-size: 12px;
+}
+
+.compact .bars {
+  gap: 3px;
+  max-width: none;
+}
+
+.compact .bar {
+  height: 4px;
+}

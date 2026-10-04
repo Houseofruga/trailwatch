@@ -19,6 +19,8 @@ import { ADD_MESSAGES, checkStoreInput } from "@/features/appData/mockAdd";
 import { ROLES, type UserRole } from "@/features/appData/roles";
 import type { OnboardingItem } from "@/features/appData/types";
 import { CompetitorSuggestions, type SuggestPreview } from "./CompetitorSuggestions";
+import type { BetaStatus } from "@/features/appData/types";
+import { BetaNote } from "./BetaParts";
 import styles from "./WelcomeView.module.css";
 
 const LIMIT = 10;
@@ -111,10 +113,13 @@ const reportTarget = (list: Added[]) => list.find((a) => a.status !== "pages") ?
 export function WelcomeView({
   state,
   live,
+  beta,
 }: {
   state: WelcomeState;
   /** Real data; null on a design-review preview. */
   live: { ownDomain: string | null; added: Added[]; role: UserRole | null } | null;
+  /** Beta-member note on the last step (DESIGN 12-Beta 12d). */
+  beta?: BetaStatus | null;
 }) {
   const router = useRouter();
   const preset = live ? undefined : PRESETS[state];
@@ -372,6 +377,8 @@ export function WelcomeView({
               preview={live ? undefined : (SUGGEST_PREVIEW[state] ?? "ready")}
               onAdd={addSuggestion}
             />
+
+            {beta ? <BetaNote beta={beta} /> : null}
 
             <div className={styles.spacer} />
             <div className={styles.actions}>

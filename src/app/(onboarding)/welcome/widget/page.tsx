@@ -6,7 +6,7 @@ import { DevStateBar } from "@/components/ui/DevStateBar";
 import { previewEnabled, previewState } from "@/features/appData/devState";
 import * as mock from "@/features/appData/mock";
 import { DEFAULT_BRIEFING, nextBriefingAt } from "@/features/briefing/schedule";
-import { getWidgetOnboarding, type WidgetOnboarding } from "@/features/appData/queries";
+import { getBetaStatus, getWidgetOnboarding, type WidgetOnboarding } from "@/features/appData/queries";
 
 export const metadata: Metadata = { title: "Set up TrailWatch" };
 
@@ -31,6 +31,7 @@ export default async function WidgetOnboardingPage({
           data={await mockData(state)}
           demoSameDomain={state === "store-same-domain"}
           demoSuggestions={DEMO_SUGGESTIONS}
+          beta={await mock.getBetaStatus(0)}
         />
         <DevStateBar states={STATES} current={state} />
       </>
@@ -43,7 +44,7 @@ export default async function WidgetOnboardingPage({
   const reading = step === "snapshot" ? !!data.first?.reading : step === "competitors" && !!data.ownStore && data.ownStore.products === null;
   return (
     <>
-      <WidgetOnboardingView step={step} data={data} />
+      <WidgetOnboardingView step={step} data={data} beta={step === "done" ? await getBetaStatus() : null} />
       {/* The competitor's (or your own) first read is still running: refresh until it lands. */}
       {reading ? <AutoRefresh everyMs={5000} /> : null}
     </>

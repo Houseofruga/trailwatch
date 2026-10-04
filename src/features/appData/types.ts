@@ -154,6 +154,8 @@ export type Settings = {
   briefing: { enabled: boolean; hour: number; timeZone: string };
   ownStore: OwnStore | null;
   plan: { label: string; foundingMember: boolean; competitors: number; checkIntervalHours: number; slack: boolean };
+  /** Beta-member card (DESIGN 12-Beta 12c). */
+  beta: BetaStatus;
   account: Account;
 };
 
@@ -175,4 +177,13 @@ export type OpportunitiesPage = {
   dismissedCount: number;
   /** Per competitor store in the evidence: favicon domain, and whether its Best Sellers list is readable. */
   stores: Record<string, { domain: string | null; bestsellersUnavailable: boolean }>;
+};
+
+/** Beta-member status for the sidebar prompt, Settings and onboarding (DESIGN 12-Beta). */
+export type BetaStatus = {
+  member: boolean;
+  callsDone: number;
+  callsNeeded: number;
+  /** The founder's booking page; booking buttons hide when null. */
+  bookingUrl: string | null;
 };

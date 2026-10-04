@@ -5,6 +5,7 @@
 
 import { redirect } from "next/navigation";
 import { cache } from "react";
+import { BETA_CONFIG, bookingUrl } from "@/features/beta/config";
 import { DEFAULT_ALERT_SETTINGS, loadAlertSettings, movesCaughtThisMonth, MUTABLE_TYPES } from "@/features/alerts/settings";
 import { fallbackInterpretation, rankEvents, type BriefingInput, type BriefingInterpretation } from "@/features/briefing/content";
 import { DEFAULT_BRIEFING, nextBriefingAt } from "@/features/briefing/schedule";
@@ -27,6 +28,7 @@ import { toMoves, type FeedRow } from "./moves";
 import type { UserRole } from "./roles";
 import type {
   Account,
+  BetaStatus,
   Briefing,
   BriefingPanel,
   CatalogStats,
@@ -66,7 +68,7 @@ const me = cache(async () => {
   if (!user) redirect("/login");
   const { data: profile } = await supabase
     .from("users")
-    .select("email, plan, own_store_id, digest_enabled, briefing_hour, briefing_time_zone, is_founding_member")
+    .select("email, plan, own_store_id, digest_enabled, briefing_hour, briefing_time_zone, is_founding_member, founder_calls")
     .eq("id", user.id)
     .single();
   const email = profile?.email ?? user.email ?? "";
@@ -87,9 +89,21 @@ const me = cache(async () => {
       hour: profile?.briefing_hour ?? DEFAULT_BRIEFING.hour,
       timeZone: profile?.briefing_time_zone ?? DEFAULT_BRIEFING.timeZone,
     },
-    foundingMember: profile?.is_founding_member ?? true,
+    foundingMember: profile?.is_founding_member ?? false,
+    founderCalls: (profile?.founder_calls as number | null | undefined) ?? 0,
   };
 });
+
+/** Beta-member status (DESIGN 12-Beta): calls done toward the full discount, and the booking link. */
+export async function getBetaStatus(): Promise<BetaStatus> {
+  const { foundingMember, founderCalls } = await me();
+  return {
+    member: foundingMember,
+    callsDone: Math.min(founderCalls, BETA_CONFIG.callsNeeded),
+    callsNeeded: BETA_CONFIG.callsNeeded,
+    bookingUrl: bookingUrl(),
+  };
+}
 
 export async function getAccount(): Promise<Account> {
   return (await me()).account;
@@ -591,6 +605,7 @@ export async function getSettings(): Promise<Settings> {
       checkIntervalHours: config.checkIntervalHours,
       slack: config.slack,
     },
+    beta: await getBetaStatus(),
     account,
   };
 }

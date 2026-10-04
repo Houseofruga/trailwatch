@@ -91,41 +91,6 @@
   color: var(--ink-3);
 }
 
-.plan {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.plan p {
-  margin: 0;
-}
-
-.planTitle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.planTitle p {
-  font-size: 16px;
-  font-weight: 650;
-  line-height: 1.45;
-}
-
-.planLimits {
-  font-size: 14px;
-  line-height: 1.45;
-  color: var(--ink-2);
-}
-
-.planNote {
-  font-size: 13px;
-  line-height: 1.45;
-  color: var(--ink-3);
-}
-
 .rowAction {
   display: flex;
   align-items: center;
