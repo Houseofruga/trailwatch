@@ -18,7 +18,7 @@ export async function submitFeedback(
   const { error } = await service.from("feedback").insert({ user_id: user.id, kind: input.kind, message, page: input.page ?? null });
   if (error) return false;
   const label = input.kind === "feature" ? "Feature request" : "Feedback";
-  await getMailer().send(
+  const sent = await getMailer().send(
     BETA_CONFIG.founderEmail,
     {
       subject: `${label} from ${user.email}`,
@@ -28,5 +28,7 @@ export async function submitFeedback(
     undefined,
     { replyTo: user.email },
   );
+  // Saved either way (it's in /admin); the reason shows in the Vercel logs.
+  if (!sent.sent) console.error(`feedback email to ${BETA_CONFIG.founderEmail} failed: ${sent.reason}`);
   return true;
 }
