@@ -72,10 +72,11 @@ export function BetaNote({ beta }: { beta: BetaStatus }) {
         <Badge tone="success">Beta member</Badge>
       </div>
       <p className={styles.noteTitle}>
-        You&rsquo;re one of our first {C.foundingCap} beta members: up to {MAX}% off for life.
+        You&rsquo;re one of our first {C.foundingCap} beta members: up to {MAX}% off for life once paid plans start.
       </p>
       <p className={styles.noteText}>
-        {C.baseDiscountPct}% now, {C.callsDiscountPct}% more after {C.callsNeeded} short feedback calls with {C.founderName}.
+        TrailWatch is free during the beta. You have {C.baseDiscountPct}% already, and {C.callsDiscountPct}% more after {C.callsNeeded} short feedback calls with{" "}
+        {C.founderName}.
       </p>
       {beta.bookingUrl ? (
         <div>
@@ -94,7 +95,9 @@ export function SidebarCallPrompt({ beta }: { beta: BetaStatus }) {
     <div className={styles.prompt}>
       <span className={styles.promptTitle}>Talk to {C.founderName}</span>
       <span className={styles.promptLine}>
-        {left === beta.callsNeeded ? `${beta.callsNeeded} calls unlock` : left === 1 ? "1 more call unlocks" : `${left} more calls unlock`} {MAX}% off for life.
+        Free during the beta.{" "}
+        {left === beta.callsNeeded ? `${beta.callsNeeded} feedback calls get` : left === 1 ? "1 more feedback call gets" : `${left} more feedback calls get`} you {MAX}% off
+        for life once paid plans start.
       </span>
       <StepProgress compact label={`${beta.callsDone} of ${beta.callsNeeded} calls`} done={beta.callsDone} total={beta.callsNeeded} />
       <a href={beta.bookingUrl} target="_blank" rel="noopener noreferrer" className={styles.promptButton} aria-label={`Book a ${C.callMinutes}-min call (opens in a new tab)`}>
