@@ -15,6 +15,8 @@ export const BETA_CONFIG = {
   baseDiscountPct: 10,
   callsDiscountPct: 30,
   callsNeeded: 3,
+  // Length of a founder call (the booking page's slot).
+  callMinutes: 30,
 };
 
 /** The founder's booking page (Cal.com or similar); booking buttons hide until it's set. */

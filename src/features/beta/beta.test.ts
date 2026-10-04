@@ -68,6 +68,7 @@ describe("founder welcome email", () => {
     const founding = renderWelcomeEmail({ founding: true, booking: "https://cal.example/founder" });
     expect(founding.text).toContain("You're one of our first 25 beta members");
     expect(founding.text).toContain("10% is already yours, and 30% more unlocks after 3 short feedback calls with me.");
+    expect(founding.text).toContain("Or grab 30 minutes and I'll set up your competitors with you");
     expect(founding.text).toContain("https://cal.example/founder");
     expect(founding.html).toContain('href="https://cal.example/founder"');
   });
@@ -75,7 +76,7 @@ describe("founder welcome email", () => {
   it("leaves the offer and booking out when they don't apply", () => {
     const plain = renderWelcomeEmail({ founding: false, booking: null });
     expect(plain.text).not.toContain("beta members");
-    expect(plain.text).not.toContain("grab 20 minutes");
+    expect(plain.text).not.toContain("grab 30 minutes");
     expect(plain.text).toContain("who do you compete with most? Just hit reply.");
   });
 });

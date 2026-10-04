@@ -18,7 +18,7 @@ export function renderWelcomeEmail(opts: { founding: boolean; booking: string | 
       : []),
     "A quick question: who do you compete with most? Just hit reply. This comes straight to me, and I read every one.",
     ...(opts.booking
-      ? [`Or grab 20 minutes and I'll set up your competitors with you and walk you through what they did in the last 30 days: ${opts.booking}`]
+      ? [`Or grab ${C.callMinutes} minutes and I'll set up your competitors with you and walk you through what they did in the last 30 days: ${opts.booking}`]
       : []),
   ];
   const sign = [C.founderName, "Founder, TrailWatch"];
