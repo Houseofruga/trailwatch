@@ -14,7 +14,12 @@ export type FastReply = { text: string; call: ModelCall };
  * key is set (legacy fallback). Replies are expected as a JSON object.
  * Null when no provider is configured.
  */
-export async function callFastModel(system: string, user: string, maxTokens: number): Promise<FastReply | null> {
+export async function callFastModel(
+  system: string,
+  user: string,
+  maxTokens: number,
+  groqModel: string = GROQ_SMALL_MODEL,
+): Promise<FastReply | null> {
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   const groqKey = process.env.GROQ_API_KEY;
   if (anthropicKey) {
@@ -43,11 +48,15 @@ export async function callFastModel(system: string, user: string, maxTokens: num
     };
   }
   if (groqKey) {
+    const gptOss = groqModel.startsWith("openai/gpt-oss");
     const response = await new OpenAI({ apiKey: groqKey, baseURL: GROQ_BASE_URL }).chat.completions.create({
-      model: GROQ_SMALL_MODEL,
-      // Reasoning model: keep effort low and leave headroom (see summaries/groq.ts).
-      reasoning_effort: "low",
-      max_tokens: Math.max(800, maxTokens * 3),
+      model: groqModel,
+      // gpt-oss always reasons: keep effort low and leave headroom (see
+      // summaries/groq.ts). Other models answer directly with reasoning off.
+      reasoning_effort: gptOss ? "low" : "none",
+      // Other free-tier models cap output at 1,000 tokens a minute; a larger
+      // max_tokens is refused outright.
+      max_tokens: gptOss ? Math.max(800, maxTokens * 3) : Math.min(1000, Math.max(400, Math.ceil(maxTokens * 1.5))),
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: system },
@@ -59,7 +68,7 @@ export async function callFastModel(system: string, user: string, maxTokens: num
       text: (response.choices[0]?.message?.content ?? "").replace(/[‐‑]/g, "-"),
       call: {
         provider: "groq",
-        model: GROQ_SMALL_MODEL,
+        model: groqModel,
         usage: { inputTokens: response.usage?.prompt_tokens ?? 0, outputTokens: response.usage?.completion_tokens ?? 0 },
       },
     };

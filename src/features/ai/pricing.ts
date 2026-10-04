@@ -4,7 +4,8 @@ import { ANTHROPIC_FAST_MODEL, ANTHROPIC_SMART_MODEL, GROQ_LARGE_MODEL, GROQ_SMA
 // billing. VERIFY against the providers' pricing pages when a model changes:
 // Anthropic (anthropic.com/pricing) and Groq (groq.com/pricing). Groq's free
 // tier actually costs $0; list price is logged so the admin view shows what
-// usage would cost at paid rates.
+// usage would cost at paid rates. GROQ_MATCH_MODEL has no listed price yet, so
+// its calls log tokens at $0.
 export const MODEL_PRICES: Record<string, { input: number; output: number }> = {
   [ANTHROPIC_FAST_MODEL]: { input: 1, output: 5 },
   [ANTHROPIC_SMART_MODEL]: { input: 3, output: 15 },

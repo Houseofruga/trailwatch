@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { CatalogProduct, CatalogVariant } from "@/features/catalog/types";
 import { annotateForUser, positionEvent } from "./annotate";
 import { activeMatches, compatible, matchStatus, shortlist, type Classified, type PairRow, type Verdict } from "./candidates";
-import { classInputHash, obviousClass, parseClassReply } from "./classify";
+import { classInputHash, obviousClass, parseClassReply, relevantFirst } from "./classify";
 import { compareMatched } from "./compare";
 import { MATCHING_CONFIG as MATCHING_DEFAULTS } from "./config";
 import { parseJudgeReply } from "./judge";
@@ -285,5 +285,18 @@ describe("noisy store data", () => {
     expect(out.get(0)).toMatchObject({ category: "home", subcategory: "pillowcases" });
     expect(out.get(1)).toMatchObject({ category: "home", subcategory: "duvet covers" });
     expect(out.get(2)).toMatchObject({ category: "other" });
+  });
+});
+
+describe("free-tier pacing", () => {
+  it("classifies a competitor's products of the kinds you sell first", () => {
+    const sheets = product("Dewlane Percale Sheet Set", [v("Queen", 120)], { productType: "Sheets" });
+    const candle = product("Dewlane Fig Candle", [v("Default Title", 38)], { productType: "Candles" });
+    const towels = product("Dewlane Bath Towels", [v("Set of 2", 60)], { productType: " towels " });
+    expect(relevantFirst([candle, sheets, towels], new Set(["sheets", "towels"])).map((p) => p.title)).toEqual([
+      "Dewlane Percale Sheet Set",
+      "Dewlane Bath Towels",
+      "Dewlane Fig Candle",
+    ]);
   });
 });

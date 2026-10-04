@@ -2,10 +2,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ModelCall } from "@/features/ai/fastModel";
 import { recordEvents } from "@/features/events/record";
 import type { NewEvent } from "@/features/events/types";
-import { recordAiUsage, type AiFeature } from "@/features/usage/record";
+import { aiTokensToday, recordAiUsage, type AiFeature } from "@/features/usage/record";
 import { positionEvent } from "./annotate";
 import { matchStatus, shortlist, verdictKey, type Classified } from "./candidates";
-import { classifyBatch, classInputHash, obviousClass, type ProductClass } from "./classify";
+import { classifyBatch, classInputHash, obviousClass, relevantFirst, type ProductClass } from "./classify";
 import { MATCHING_CONFIG } from "./config";
 import { judgeBatch } from "./judge";
 import { loadClasses, loadPairs, loadVerdicts, matchingOwners, saveClasses, snapshotProducts } from "./store";
@@ -45,13 +45,30 @@ export async function runMatchingTick(service: SupabaseClient, budgetMs = MATCHI
     return products.get(s.id) ?? null;
   };
 
+  // Daily token budget (free tier): checked before every model call.
+  let tokensUsed = await aiTokensToday(service, ["match_classify", "match_judge"]);
+  const outOfTokens = () => tokensUsed + MATCHING_CONFIG.callTokenReserve > MATCHING_CONFIG.dailyTokenBudget;
+  const spend = (calls: ModelCall[]) => {
+    for (const c of calls) tokensUsed += c.usage.inputTokens + c.usage.outputTokens;
+  };
+
+  // Own stores first, then competitors with the kinds of products you sell first.
+  const ownIds = new Set(owners.map((o) => o.ownStoreId));
+  const ownTypes = new Set<string>();
+  for (const id of ownIds) {
+    const s = byId.get(id);
+    for (const p of (s && (await productsOf(s))) ?? []) if (p.productType.trim()) ownTypes.add(p.productType.trim().toLowerCase());
+  }
+  const storeOrder = [...byId.values()].sort((a, b) => Number(ownIds.has(b.id)) - Number(ownIds.has(a.id)));
+
   try {
     // 1. Classify each store's latest catalog.
-    for (const s of byId.values()) {
+    for (const s of storeOrder) {
       if (!s.latest_snapshot_id || s.latest_snapshot_id === s.classified_snapshot_id) continue;
       if (Date.now() > deadline) return { ...result, stopped: "budget" };
-      const catalog = await productsOf(s);
-      if (!catalog) continue;
+      const latest = await productsOf(s);
+      if (!latest) continue;
+      const catalog = ownIds.has(s.id) ? latest : relevantFirst(latest, ownTypes);
       const known = await loadClasses(service, s.id);
       const todo = catalog.filter((p) => known.get(p.id)?.hash !== classInputHash(p));
 
@@ -69,8 +86,10 @@ export async function runMatchingTick(service: SupabaseClient, budgetMs = MATCHI
           done = false;
           break;
         }
+        if (outOfTokens()) return { ...result, stopped: "daily tokens" };
         const batch = rest.slice(i, i + MATCHING_CONFIG.classifyBatch);
         const { classes, calls } = await classifyBatch(batch);
+        spend(calls);
         await logCalls(service, "match_classify", s.id, calls);
         if (classes.size === 0) {
           done = false; // the call failed outright: try the batch again next tick
@@ -144,8 +163,14 @@ export async function runMatchingTick(service: SupabaseClient, budgetMs = MATCHI
           done = false;
           break;
         }
+        if (outOfTokens()) {
+          done = false;
+          result.stopped = "daily tokens";
+          break;
+        }
         const batch = todo.slice(i, i + MATCHING_CONFIG.judgeBatch);
         const { judgements, calls } = await judgeBatch(batch);
+        spend(calls);
         await logCalls(service, "match_judge", comp, calls);
         if (judgements.size === 0) {
           done = false; // the call failed outright: try again next tick

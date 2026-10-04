@@ -187,6 +187,7 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
   - Migration **`0020_previews.sql`** adds `previews` (homepage competitor lookups, claimable for 7 days) and `preview_lookups` (per-lookup log with a salted IP hash, for rate limits, the daily cap and `/admin` totals). Apply it after 0019, before deploying `/api/preview`. Optional env vars: `PREVIEW_IP_SALT` (falls back to `CRON_SECRET`), `PREVIEW_PER_IP_PER_DAY` (default 3), `PREVIEW_FRESH_PER_DAY` (default 300).
   - Migration **`0021_preview_cta.sql`** adds `previews.cta_clicked_at` (the widget's "Join the beta" click). Apply it after 0020.
   - Migration **`0022_preview_onboarding.sql`** adds `previews.completed_at` (onboarding finished after signing up from the widget; `claimed_by` already marks the sign-up). Apply it after 0021.
+  - Matching stays on Groq's free tier (2026-10-04): it runs on its own model, `qwen/qwen3.8-27b`, which has its own 200K-tokens-a-day allowance, so it can't use up the tokens page classification and "what it means" need on `gpt-oss-20b`. It stops for the day at a token budget. Optional env var: `MATCHING_DAILY_TOKENS` (default 150000). No migration.
   - No new env vars. Sign-up refuses throwaway inboxes using the `disposable-email-domains` npm list (MIT).
 
 ## 0. Git preservation (done 2026-09-30)

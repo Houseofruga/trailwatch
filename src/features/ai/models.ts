@@ -11,5 +11,10 @@ export const ANTHROPIC_SMART_MODEL = "claude-sonnet-5";
 export const GROQ_BASE_URL = "https://api.groq.com/openai/v1";
 // Small reasoning model: summaries, insights, teardowns.
 export const GROQ_SMALL_MODEL = "openai/gpt-oss-20b";
+// Product matching (classify + judge). Groq's free limits are per model, so
+// matching gets its own model and can't use up the daily tokens that page
+// classification and "what it means" rely on. Not a reasoning model by
+// default: called with reasoning off, so no tokens go on thinking.
+export const GROQ_MATCH_MODEL = "qwen/qwen3.8-27b";
 // Larger model: competitor finder recall (see competitorFinder/groq.ts for why).
 export const GROQ_LARGE_MODEL = "openai/gpt-oss-120b";

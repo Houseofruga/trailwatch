@@ -18,10 +18,17 @@ export const MATCHING_CONFIG = {
   // after it was published.
   launchWindowDays: 14,
   // Model batches: products per classification call, pairs per judgement call.
-  classifyBatch: 20,
-  judgeBatch: 10,
-  // Description text sent to the classifier.
-  descriptionChars: 240,
+  // Sized to the matching model's free-tier output cap (1,000 tokens a minute):
+  // about 40 output tokens per product, 25 per pair.
+  classifyBatch: 15,
+  judgeBatch: 15,
+  // Description text sent to the classifier, only when there's no product type.
+  descriptionChars: 160,
+  // Tokens matching may use per UTC day, so it stays on Groq's free tier
+  // (200K/day for the matching model). Past it, work resumes tomorrow.
+  dailyTokenBudget: Number(process.env.MATCHING_DAILY_TOKENS) || 150_000,
+  // Room kept for one more call before the budget, so a batch can't overshoot.
+  callTokenReserve: 6_000,
   // Time the cron tick gives matching work; the rest resumes next tick.
   tickBudgetMs: 60_000,
   // Own-store products we never price-compare: clearance stock isn't your price.

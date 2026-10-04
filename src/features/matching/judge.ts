@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { callFastModel, type ModelCall } from "@/features/ai/fastModel";
+import { GROQ_MATCH_MODEL } from "@/features/ai/models";
 import type { Candidate, Classified } from "./candidates";
 import { typicalQuantity } from "./units";
 
@@ -14,7 +15,7 @@ For each numbered pair, score 0 to 1:
 - below 0.5: a different product, use or target
 Write a reason of at most 12 words naming what they share or how they differ, e.g. "Both are 30ml vitamin C brightening serums" or "Duvet cover vs full bedding set".
 
-Reply with JSON only: {"pairs":[{"i":0,"score":0.0,"reason":""}]}`;
+Reply with compact JSON on one line, no indentation: {"pairs":[{"i":0,"score":0.0,"reason":""}]}`;
 
 function describe(c: Classified): string {
   const q = typicalQuantity(c.product);
@@ -56,7 +57,7 @@ export async function judgeBatch(pairs: Candidate[]): Promise<{ judgements: Map<
   const calls: ModelCall[] = [];
   let judgements = new Map<number, Judgement>();
   for (let attempt = 0; attempt < 2 && judgements.size < pairs.length; attempt++) {
-    const res = await callFastModel(JUDGE_SYSTEM, user, 40 * pairs.length);
+    const res = await callFastModel(JUDGE_SYSTEM, user, 40 * pairs.length, GROQ_MATCH_MODEL);
     if (!res) break;
     calls.push(res.call);
     const parsed = parseJudgeReply(res.text, pairs.length);

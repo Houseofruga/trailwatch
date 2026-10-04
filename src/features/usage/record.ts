@@ -55,6 +55,18 @@ export async function recordFetches(
   if (error) console.error(`Couldn't log fetches: ${error.message}`);
 }
 
+/** Tokens (in + out) the given features have used today (UTC), across all stores. */
+export async function aiTokensToday(service: SupabaseClient, features: AiFeature[]): Promise<number> {
+  const dayStart = new Date();
+  dayStart.setUTCHours(0, 0, 0, 0);
+  const { data } = await service
+    .from("ai_usage")
+    .select("input_tokens, output_tokens")
+    .in("feature", features)
+    .gte("created_at", dayStart.toISOString());
+  return (data ?? []).reduce((sum, r) => sum + (r.input_tokens ?? 0) + (r.output_tokens ?? 0), 0);
+}
+
 /** How many AI calls of a kind a store has used today (UTC). */
 export async function aiCallsToday(service: SupabaseClient, storeId: string, feature: AiFeature): Promise<number> {
   const dayStart = new Date();

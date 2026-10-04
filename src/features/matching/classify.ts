@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { callFastModel, type ModelCall } from "@/features/ai/fastModel";
+import { GROQ_MATCH_MODEL } from "@/features/ai/models";
 import { CATALOG_CONFIG } from "@/features/catalog/config";
 import type { CatalogProduct } from "@/features/catalog/types";
 import { hashContent } from "@/features/checks/hash";
@@ -25,6 +26,15 @@ export function classInputHash(p: CatalogProduct): string {
   );
 }
 
+/**
+ * A competitor's products of the kinds you sell (same product type) go first,
+ * so the first matches arrive before the rest of a big catalog is classified.
+ */
+export function relevantFirst(products: CatalogProduct[], ownTypes: Set<string>): CatalogProduct[] {
+  const relevant = (p: CatalogProduct) => ownTypes.has(p.productType.trim().toLowerCase());
+  return [...products.filter(relevant), ...products.filter((p) => !relevant(p))];
+}
+
 const NOT_MERCHANDISE = /\b(gift ?card|e-?gift|gift certificate|sample request|donation)\b/i;
 
 /** Products that need no model call: gift cards and checkout add-ons are "other". */
@@ -41,7 +51,7 @@ const TAXONOMY_TEXT = Object.entries(TAXONOMY)
 
 export const CLASSIFY_SYSTEM = `You sort products from online stores into a fixed taxonomy so comparable products from different brands can be matched.
 
-Taxonomy (category: subcategories). Use these exact names; pick the closest subcategory (hand towels → towels, sheet set → sheets). Use "other" only when nothing in the taxonomy fits.
+Taxonomy (category: subcategories). Use these exact names; pick the closest subcategory (hand towels → towels, sheet set → sheets, sham set → pillowcases). Use "other" only when nothing in the taxonomy fits.
 ${TAXONOMY_TEXT}
 
 For each product return:
@@ -52,22 +62,23 @@ For each product return:
 
 The product type is usually the best clue. Ignore words like "Last Call" or "sale": a discounted duvet cover is still a duvet cover.
 Use only what the text says. Do not guess.
-Reply with JSON only: {"items":[{"i":0,"c":"","s":"","u":"","a":[],"p":""}]}`;
+Reply with compact JSON on one line, no indentation: {"items":[{"i":0,"c":"","s":"","u":"","a":[],"p":""}]}`;
 
 // Store-system tags ("Discount Amount: 75", "DY Category 1: Bedding", "Active
 // Last Call", feed flags) drown the real ones and made the model answer "other".
 const NOISE_TAG = /:|\b(discount|feed|feedonomics|active|allow|pdp|returns?|last call|sale|new ?arrivals?|exclude|include|hidden|badge|yotpo|klaviyo|gift ?wrap)\b/i;
-export const usefulTags = (tags: string[]) => tags.filter((t) => t.length <= 30 && !NOISE_TAG.test(t)).slice(0, 8);
+export const usefulTags = (tags: string[]) => tags.filter((t) => t.length <= 30 && !NOISE_TAG.test(t)).slice(0, 5);
 
 /** One product as the model sees it: short, and only what helps. */
 export function classifyLine(i: number, p: CatalogProduct): string {
-  const variants = [...new Set(p.variants.map((v) => v.title).filter((t) => t && t !== "Default Title"))].slice(0, 6);
+  const variants = [...new Set(p.variants.map((v) => v.title).filter((t) => t && t !== "Default Title"))].slice(0, 3);
   const parts = [
     `${i}. ${p.title}`,
     p.productType ? `type: ${p.productType}` : "",
     usefulTags(p.tags).length ? `tags: ${usefulTags(p.tags).join(", ")}` : "",
     variants.length ? `options: ${variants.join(" | ")}` : "",
-    p.description ? `about: ${p.description.slice(0, MATCHING_CONFIG.descriptionChars)}` : "",
+    // The product type usually says enough; the description is for when it's missing.
+    p.description && !p.productType ? `about: ${p.description.slice(0, MATCHING_CONFIG.descriptionChars)}` : "",
   ];
   return parts.filter(Boolean).join(" — ");
 }
@@ -124,7 +135,7 @@ export async function classifyBatch(products: CatalogProduct[]): Promise<{ class
   const calls: ModelCall[] = [];
   let classes = new Map<number, ProductClass>();
   for (let attempt = 0; attempt < 2 && classes.size < products.length; attempt++) {
-    const res = await callFastModel(CLASSIFY_SYSTEM, user, 60 * products.length);
+    const res = await callFastModel(CLASSIFY_SYSTEM, user, 60 * products.length, GROQ_MATCH_MODEL);
     if (!res) break;
     calls.push(res.call);
     const parsed = parseClassReply(res.text, products.length);
