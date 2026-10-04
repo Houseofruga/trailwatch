@@ -1,4 +1,5 @@
-// Beta relationship (2026-10-04): the founding-member offer and how beta users
+// Beta relationship (2026-10-04): the beta-member offer (users call them "beta
+// members"; the code and DB say "founding") and how beta users
 // reach the founder. Every knob in one place. The founding cohort size itself
 // is enforced by the database (app_settings.founding_member_cap, migration 0025);
 // `foundingCap` here is only for copy.

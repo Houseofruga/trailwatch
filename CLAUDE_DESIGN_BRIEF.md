@@ -118,7 +118,7 @@ Red is only for errors.
   - "Price change: Luxe Sateen Flat Sheet $86 → $77.40" · Dewlane · Normal · Sep 26
   - "New messaging on the homepage: 'Sleep cooler all year'" · Hearth & Pine · Normal · Sep 25
 - **Numbers:** moves caught this month **37**; high priority this week **4**; next briefing **Mon, Oct
-  5, 8:00 AM**; plan **Free beta · Founding member**, limit **10 competitors**, checks **every 2 hours**.
+  5, 8:00 AM**; plan **Free beta · Beta member**, limit **10 competitors**, checks **every 2 hours**.
 
 ## 5. Screens and states
 
@@ -225,8 +225,8 @@ Name artboards `NN-Screen / state`, for example `04-Home / empty`.
   product) · New products · Best-sellers selling out.
 - **Monday briefing:** toggle, Time (6–11 AM), Time zone.
 - **Your store:** field + "214 products · checked 3 h ago" + Remove.
-- **Plan:** "Free beta · Founding member" (success badge); "10 competitors · checks every 2 hours ·
-  instant alerts · Slack"; "Free while we're in beta. Founding members keep a discount when paid plans
+- **Plan:** "Free beta · Beta member" (success badge); "10 competitors · checks every 2 hours ·
+  instant alerts · Slack"; "Free while we're in beta. Beta members keep a discount when paid plans
   start." No upgrade button.
 - **Account:** Name, Email (read-only), Change password, **Delete account** (critical; the modal asks you to
   type "delete").

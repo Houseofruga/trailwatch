@@ -1,6 +1,6 @@
 import { BETA_CONFIG as C } from "./config";
 
-// The founding-member offer for one user. Pure.
+// The beta-member offer for one user (stored as `is_founding_member`). Pure.
 
 export type FoundingOffer = {
   founding: boolean;
@@ -28,4 +28,4 @@ export function foundingOffer(founding: boolean, calls: number): FoundingOffer {
 }
 
 /** The offer in one honest line: the headline with its condition. */
-export const OFFER_LINE = `Up to ${C.baseDiscountPct + C.callsDiscountPct}% off for life as a founding member: ${C.baseDiscountPct}% when you join, plus ${C.callsDiscountPct}% more after ${C.callsNeeded} short feedback calls with the founder.`;
+export const OFFER_LINE = `Up to ${C.baseDiscountPct + C.callsDiscountPct}% off for life as a beta member: ${C.baseDiscountPct}% when you join, plus ${C.callsDiscountPct}% more after ${C.callsNeeded} short feedback calls with the founder.`;

@@ -138,7 +138,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <>
           <div className={styles.stats}>
             <div className={styles.stat}>
-              <div className={styles.statLabel}>Founding spots</div>
+              <div className={styles.statLabel}>Beta member spots</div>
               <div className={styles.statValue}>
                 {beta.foundingUsed} / {beta.foundingCap}
               </div>
@@ -159,7 +159,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               <thead>
                 <tr>
                   <th>User</th>
-                  <th>Founding member</th>
+                  <th>Beta member</th>
                   <th className={styles.num}>Calls done</th>
                   <th className={styles.num}>Discount</th>
                 </tr>
@@ -174,7 +174,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                         <input type="hidden" name="founding" value={m.founding ? "false" : "true"} />
                         {m.founding ? "Yes" : "No"}{" "}
                         <button type="submit" className={styles.mini}>
-                          {m.founding ? "Remove" : "Make founding"}
+                          {m.founding ? "Remove" : "Make beta member"}
                         </button>
                       </form>
                     </td>

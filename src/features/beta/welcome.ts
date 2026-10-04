@@ -13,7 +13,7 @@ export function renderWelcomeEmail(opts: { founding: boolean; booking: string | 
     `I'm ${C.founderName}, the founder of TrailWatch. Thanks for joining the beta.`,
     ...(opts.founding
       ? [
-          `You're one of our first ${C.foundingCap} founding members. That means up to ${C.baseDiscountPct + C.callsDiscountPct}% off for life when paid plans start on ${betaEndsLabel()}: ${C.baseDiscountPct}% is already yours, and ${C.callsDiscountPct}% more unlocks after ${C.callsNeeded} short feedback calls with me.`,
+          `You're one of our first ${C.foundingCap} beta members. That means up to ${C.baseDiscountPct + C.callsDiscountPct}% off for life when paid plans start on ${betaEndsLabel()}: ${C.baseDiscountPct}% is already yours, and ${C.callsDiscountPct}% more unlocks after ${C.callsNeeded} short feedback calls with me.`,
         ]
       : []),
     "A quick question: who do you compete with most? Just hit reply. This comes straight to me, and I read every one.",

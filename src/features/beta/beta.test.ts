@@ -18,7 +18,7 @@ describe("founding-member offer", () => {
   });
 
   it("states the condition next to the headline", () => {
-    expect(OFFER_LINE).toBe("Up to 40% off for life as a founding member: 10% when you join, plus 30% more after 3 short feedback calls with the founder.");
+    expect(OFFER_LINE).toBe("Up to 40% off for life as a beta member: 10% when you join, plus 30% more after 3 short feedback calls with the founder.");
   });
 });
 
@@ -66,7 +66,7 @@ describe("rating links", () => {
 describe("founder welcome email", () => {
   it("tells founding members the offer, and links the booking page when there is one", () => {
     const founding = renderWelcomeEmail({ founding: true, booking: "https://cal.example/founder" });
-    expect(founding.text).toContain("You're one of our first 25 founding members");
+    expect(founding.text).toContain("You're one of our first 25 beta members");
     expect(founding.text).toContain("10% is already yours, and 30% more unlocks after 3 short feedback calls with me.");
     expect(founding.text).toContain("https://cal.example/founder");
     expect(founding.html).toContain('href="https://cal.example/founder"');
@@ -74,7 +74,7 @@ describe("founder welcome email", () => {
 
   it("leaves the offer and booking out when they don't apply", () => {
     const plain = renderWelcomeEmail({ founding: false, booking: null });
-    expect(plain.text).not.toContain("founding");
+    expect(plain.text).not.toContain("beta members");
     expect(plain.text).not.toContain("grab 20 minutes");
     expect(plain.text).toContain("who do you compete with most? Just hit reply.");
   });
