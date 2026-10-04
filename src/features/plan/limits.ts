@@ -10,18 +10,20 @@ export type PlanConfig = {
   instantAlerts: boolean;
   slack: boolean;
   ownStore: boolean;
+  // Opportunities (gaps, competitor momentum, demand) in the app and briefing.
+  opportunities: boolean;
   checkIntervalHours: number;
   // False = behind a feature flag, not offered yet.
   launched: boolean;
 };
 
 export const PLANS: Record<Plan, PlanConfig> = {
-  free: { label: "Free", monthlyUsd: 0, competitors: 1, instantAlerts: false, slack: false, ownStore: false, checkIntervalHours: 24, launched: true },
-  starter: { label: "Starter", monthlyUsd: 29, competitors: 3, instantAlerts: true, slack: false, ownStore: false, checkIntervalHours: 6, launched: true },
-  pro: { label: "Pro", monthlyUsd: 79, competitors: 10, instantAlerts: true, slack: true, ownStore: true, checkIntervalHours: 2, launched: true },
+  free: { label: "Free", monthlyUsd: 0, competitors: 1, instantAlerts: false, slack: false, ownStore: false, opportunities: false, checkIntervalHours: 24, launched: true },
+  starter: { label: "Starter", monthlyUsd: 29, competitors: 3, instantAlerts: true, slack: false, ownStore: false, opportunities: false, checkIntervalHours: 6, launched: true },
+  pro: { label: "Pro", monthlyUsd: 79, competitors: 10, instantAlerts: true, slack: true, ownStore: true, opportunities: true, checkIntervalHours: 2, launched: true },
   // Not launched (AGENCY_ENABLED). The spec sets only its price, so it mirrors
   // Pro's limits until those are decided.
-  agency: { label: "Agency", monthlyUsd: 199, competitors: 10, instantAlerts: true, slack: true, ownStore: true, checkIntervalHours: 2, launched: false },
+  agency: { label: "Agency", monthlyUsd: 199, competitors: 10, instantAlerts: true, slack: true, ownStore: true, opportunities: true, checkIntervalHours: 2, launched: false },
 };
 
 export const PLAN_ORDER: Plan[] = ["free", "starter", "pro", "agency"];

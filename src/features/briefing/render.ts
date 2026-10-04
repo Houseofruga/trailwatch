@@ -91,6 +91,16 @@ export function renderBriefingEmail(opts: {
   const countFor = (x: (typeof perCompetitor)[number]) =>
     `${x.moves.length} ${plural(x.moves.length, "move", "moves")}${x.high ? ` · ${x.high} high` : ""}`;
 
+  // Opportunities (Part B): briefing only, at most three, each with evidence and one action.
+  const opportunities = (input.opportunities ?? []).slice(0, 3);
+  const opportunitiesText = opportunities.length
+    ? [
+        `OPPORTUNITIES`,
+        ...opportunities.flatMap((o) => [`• ${o.noticed}`, ...(o.evidence ? [`  Evidence: ${o.evidence}`] : []), `  Try: ${o.action}`]),
+        ``,
+      ]
+    : [];
+
   // -------------------------------------------------------------- text
   const text = [
     `TRAILWATCH · MONDAY BRIEFING · ${weekLabel(input.weekOf).toUpperCase()}`,
@@ -104,6 +114,7 @@ export function renderBriefingEmail(opts: {
           ...top.map((m) => `• [${m.priority}] ${m.competitorName}: ${m.summary}\n  ${moveUrl(m)}`),
           ``,
         ]),
+    ...opportunitiesText,
     `BY COMPETITOR`,
     ...perCompetitor.flatMap((x) =>
       x.moves.length
@@ -151,8 +162,24 @@ export function renderBriefingEmail(opts: {
       )
       .join("");
 
+  const opportunitiesCard = opportunities.length
+    ? card(
+        eyebrow("Opportunities") +
+          opportunities
+            .map(
+              (o) => `<div style="padding:12px 0;${rule}">
+  <div style="font-size:15px;line-height:1.45;color:#303030;font-weight:600;">${escapeHtml(o.noticed)}</div>
+  ${o.evidence ? `<div style="margin-top:4px;font-size:13px;line-height:1.45;color:#616161;">${escapeHtml(o.evidence)}</div>` : ""}
+  <div style="margin-top:6px;font-size:14px;line-height:1.45;color:#4a4a4a;"><strong>Try:</strong> ${escapeHtml(o.action)}</div>
+</div>`,
+            )
+            .join(""),
+        // No link yet: the Opportunities screen waits for its design.
+      )
+    : "";
+
   const cards = quiet
-    ? [card(heading("A quiet week") + paragraph(quietLine, { muted: true })), card(byCompetitor)]
+    ? [card(heading("A quiet week") + paragraph(quietLine, { muted: true })), opportunitiesCard, card(byCompetitor)]
     : [
         ai.whatThisMeans ? card(eyebrow("What this means for you") + paragraph(ai.whatThisMeans, { size: 16 })) : "",
         ai.suggestedMove ? card(eyebrow("One move for this week", true) + paragraph(ai.suggestedMove, { size: 16, bold: true }), "grey") : "",
@@ -169,6 +196,7 @@ export function renderBriefingEmail(opts: {
               )
               .join(""),
         ),
+        opportunitiesCard,
         card(byCompetitor),
       ];
 

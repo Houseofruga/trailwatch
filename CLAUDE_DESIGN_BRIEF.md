@@ -240,6 +240,65 @@ Name artboards `NN-Screen / state`, for example `04-Home / empty`.
     and in your Monday briefing.")
   - loading
 
+### 08 Opportunities (added 2026-10-04; nav item "Opportunities" under Home)
+
+**Purpose:** gaps and momentum worth acting on, as opposed to Home's feed of moves. Each item says what
+we noticed, shows the evidence, and suggests one action. It's for Pro, and for everyone during the beta.
+Signals are never presented as sales data: "#4 in their Best Sellers", never "sells 400 a week".
+
+**Kinds** (a small label on each card):
+- Category gap: competitors sell a type of product you don't
+- Format gap: travel sizes, bundles, kits or subscriptions
+- Entry price: competitors have products under $25 and you don't
+- Rising product: a competitor's product climbing their Best Sellers list
+- Demand: repeated sell-outs and restocks, a launch selling out fast, or weeks on their homepage
+
+**Content per card:**
+1. Kind label.
+2. "What we noticed" in one or two sentences, bold.
+3. Evidence: the competitors involved (favicon + name) and up to 3 of their products. Each product has a
+   thumbnail, title, price, and small signal chips: "#4 in Best Sellers", "Launched 9 days ago",
+   "Restocked 3× in 90 days", "On homepage 30 days".
+4. **Try:** one suggested action.
+5. Actions: **Dismiss** ("comes back only if the evidence gets much stronger") and **Not relevant to
+   me** (never comes back). A "Show dismissed" link at the bottom lists dismissed items, each with
+   **Restore**.
+
+Ordered strongest first. At most about 20 cards.
+
+**States:**
+- list (3–6 cards)
+- one card expanded with full evidence
+- dismissed (toast with Undo)
+- "Show dismissed" view
+- **empty: no own store.** "Add your store to see gaps. Rising products and demand signals still show
+  up here." with an **Add your store** button.
+- **empty: not enough data yet.** "We're still learning these stores. Best Sellers movement needs a few
+  daily reads, and restock patterns need a few weeks."
+- **Best Sellers unavailable** note on a competitor ("Boll & Branch doesn't publish a Best Sellers list
+  we can read")
+- loading
+- not on plan (upgrade note; hidden during the beta)
+
+**Sample data (fictional brands):**
+- *Format gap:* "3 of your 5 competitors offer travel sizes, and you don't. Fernwood's Mini Linen Kit is
+  #4 in their Best Sellers." Evidence: Fernwood (Mini Linen Kit, $38, "#4 in Best Sellers", "Launched 12
+  days ago"), Hearth & Pine (Travel Pillowcase, $24), Dewlane (Weekender Set, $45). Try: "Consider
+  testing a travel-size version of your best-seller, for trial or gifting."
+- *Rising product:* "Hearth & Pine's new Waffle Robe, launched 6 days ago, is already #2 in their Best
+  Sellers." Try: "Check how your comparable robes compare on price and product page; this is the one
+  Hearth & Pine is pushing."
+- *Demand:* "Dewlane's Linen Duvet Cover sold out and was restocked 3 times in the last 90 days." Try:
+  "Make sure your comparable duvet covers are in stock and easy to find; there's demand Dewlane can't
+  always meet."
+- *Entry price:* "2 of your 5 competitors have products under $25; your lowest regular price is $68."
+  Try: "Consider an entry product under $25 to lower the cost of a first order."
+
+**Monday briefing (E2):** a new **Opportunities** card after Top moves, with at most 3 items. Each has
+the noticed line in bold, one grey evidence line ("Fernwood, Hearth & Pine · Mini Linen Kit: #4 in
+Fernwood's Best Sellers") and "**Try:** …". It also appears in the quiet-week variant. Add a "See all
+opportunities" link once this screen exists.
+
 ## 6. Emails (a separate section; these are not app screens)
 
 Email-safe: **single column, 600px max, mobile-first**. Simple blocks only; no fancy layout, no web fonts

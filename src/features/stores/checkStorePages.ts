@@ -9,6 +9,7 @@ import { recordEvents } from "@/features/events/record";
 import { severityFor } from "@/features/events/severity.config";
 import type { NewEvent } from "@/features/events/types";
 import { aiCallsToday, recordAiUsage, recordFetches, USAGE_CONFIG } from "@/features/usage/record";
+import { nextFeaturedSince } from "@/features/opportunities/demand";
 import { featuredProductHandles } from "./discoverPages";
 
 const EXCERPT_CAP = 1000;
@@ -53,9 +54,15 @@ export async function checkStorePages(service: SupabaseClient, storeId: string):
     }
 
     if (page.kind === "homepage") {
+      const featured = featuredProductHandles(fetched.html, new URL(page.url).origin);
+      const { data: prev } = await service.from("stores").select("featured_since").eq("id", storeId).single();
       await service
         .from("stores")
-        .update({ featured_handles: featuredProductHandles(fetched.html, new URL(page.url).origin) })
+        .update({
+          featured_handles: featured,
+          // How long each stays featured (Opportunities B2).
+          featured_since: nextFeaturedSince((prev?.featured_since ?? {}) as Record<string, string>, featured, new Date().toISOString()),
+        })
         .eq("id", storeId);
     }
 

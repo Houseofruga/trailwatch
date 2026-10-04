@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { CATEGORY, CATEGORY_LABEL, describeEvent, leadEvent, suggestedAction, type BriefingCategory } from "@/features/alerts/describe";
 import type { EventType, Severity } from "@/features/events/types";
+import type { BriefingOpportunity } from "@/features/opportunities/queries";
 
 // What a briefing is built from: one user's week of events, frozen on the
 // briefing row when it's prepared so the email matches what the model saw.
@@ -18,7 +19,13 @@ export type BriefingEvent = {
   ownMatch?: { title: string; price: number | null } | null;
 };
 
-export type BriefingInput = { weekOf: string; events: BriefingEvent[] };
+export type BriefingInput = {
+  weekOf: string;
+  events: BriefingEvent[];
+  // Up to three Opportunities (Part B), frozen with the week; normal severity,
+  // briefing only. Absent on briefings prepared before 2026-10-04.
+  opportunities?: BriefingOpportunity[];
+};
 
 // The model's part: interpretation only. Facts (the per-competitor lists) are
 // rendered from the events themselves, so the model can't invent any.

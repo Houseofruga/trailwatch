@@ -188,6 +188,14 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
   - Migration **`0021_preview_cta.sql`** adds `previews.cta_clicked_at` (the widget's "Join the beta" click). Apply it after 0020.
   - Migration **`0022_preview_onboarding.sql`** adds `previews.completed_at` (onboarding finished after signing up from the widget; `claimed_by` already marks the sign-up). Apply it after 0021.
   - Matching stays on Groq's free tier (2026-10-04): it runs on its own model, `qwen/qwen3.8-27b`, which has its own 200K-tokens-a-day allowance, so it can't use up the tokens page classification and "what it means" need on `gpt-oss-20b`. It stops for the day at a token budget. Optional env var: `MATCHING_DAILY_TOKENS` (default 150000). No migration.
+  - Migration **`0023_opportunities.sql`** adds Opportunities (matching prompt Part B):
+    - `stores.bestseller_collection`, `bestseller_status`, `bestseller_checked_at` and `featured_since`
+    - `bestseller_snapshots`: a daily read of each competitor's own Best Sellers collection. The best-selling sort is disallowed by Shopify's default robots.txt on 10 of 10 stores tested, so we use the store's own list.
+    - `opportunities`: per user, with dismissal state
+    - `users.opportunities_at`
+    - Apply it after 0022 and **before deploying** the Opportunities code: the homepage check writes `featured_since`.
+    - No new env vars; knobs are in `src/features/opportunities/config.ts`.
+  - Embeds between `stores` and `users` must name the foreign key (`users!users_own_store_id_fkey`). Since `match_feedback` (0019) links both tables, a bare `users!inner` is ambiguous, and it broke the cron tick from 0019 until hotfix `be4160d`.
   - No new env vars. Sign-up refuses throwaway inboxes using the `disposable-email-domains` npm list (MIT).
 
 ## 0. Git preservation (done 2026-09-30)

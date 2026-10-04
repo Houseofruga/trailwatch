@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { CATALOG_CONFIG } from "./config";
 import { runCatalogCheck, type CatalogCheckResult } from "./runCatalogCheck";
 import { checkStorePages, type StorePagesResult } from "@/features/stores/checkStorePages";
+import { crawlBestsellers } from "@/features/opportunities/crawl";
 import { resolvePlan } from "@/features/plan/comp";
 import { storeCheckIntervalHours } from "@/features/plan/limits";
 
@@ -53,6 +54,12 @@ export async function checkStoreIfDue(
       pages = await checkStorePages(service, storeId);
     } catch (err) {
       console.error(`Page checks failed for store ${storeId}:`, err);
+    }
+    // Their Best Sellers list, once a day (Opportunities B1).
+    try {
+      await crawlBestsellers(service, storeId);
+    } catch (err) {
+      console.error(`Best Sellers read failed for store ${storeId}:`, err);
     }
   }
 

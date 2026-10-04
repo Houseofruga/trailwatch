@@ -5,6 +5,8 @@ import { CATALOG_CONFIG } from "@/features/catalog/config";
 import { runCatalogTick } from "@/features/catalog/schedule";
 import { MATCHING_CONFIG } from "@/features/matching/config";
 import { runMatchingTick } from "@/features/matching/work";
+import { OPPORTUNITIES_CONFIG } from "@/features/opportunities/config";
+import { runOpportunitiesTick } from "@/features/opportunities/run";
 import { createServiceClient } from "@/lib/supabase/service";
 
 // The pivot's heartbeat, called every ~10 min by Supabase pg_cron (see
@@ -14,6 +16,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 //   2. advance the Monday briefing (time-gated, US Eastern; usually a no-op)
 //   3. check due stores
 //   4. product matching (classify, judge pairs) with what's left, up to a minute
+//   5. refresh opportunities (daily per user; no fetching, no AI)
 // Same CRON_SECRET guard as the other cron routes.
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -35,7 +38,7 @@ export async function GET(request: Request): Promise<Response> {
   // A failure in one stage mustn't stop the others.
   const alerts = await runAlertSender(service).catch((err) => ({ error: String(err) }));
   const briefing = await runBriefingStep(service).catch((err) => ({ error: String(err) }));
-  const checks = await runCatalogTick(Math.max(0, CATALOG_CONFIG.tickBudgetMs - (Date.now() - started)));
+  const checks = await runCatalogTick(Math.max(0, CATALOG_CONFIG.tickBudgetMs - (Date.now() - started))).catch((err) => ({ error: String(err) }));
   // Stop well before maxDuration (300s); unfinished matching resumes next tick.
   const matchingBudget = Math.min(MATCHING_CONFIG.tickBudgetMs, 270_000 - (Date.now() - started));
   const matching =
@@ -43,5 +46,11 @@ export async function GET(request: Request): Promise<Response> {
       ? await runMatchingTick(service, matchingBudget).catch((err) => ({ error: String(err) }))
       : { skipped: "no time left" };
 
-  return NextResponse.json({ ok: true, alerts, briefing, checks, matching });
+  const opportunitiesBudget = Math.min(OPPORTUNITIES_CONFIG.tickBudgetMs, 285_000 - (Date.now() - started));
+  const opportunities =
+    opportunitiesBudget > 5_000
+      ? await runOpportunitiesTick(service, opportunitiesBudget).catch((err) => ({ error: String(err) }))
+      : { skipped: "no time left" };
+
+  return NextResponse.json({ ok: true, alerts, briefing, checks, matching, opportunities });
 }

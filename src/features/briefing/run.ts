@@ -3,6 +3,9 @@ import { loadAlertSettings, movesCaughtThisMonth } from "@/features/alerts/setti
 import { getMailer } from "@/features/digest/mailer";
 import { unsubscribeUrl } from "@/features/digest/unsubscribe";
 import type { EventType, Severity } from "@/features/events/types";
+import { markBriefed, opportunitiesForBriefing } from "@/features/opportunities/queries";
+import { resolvePlan } from "@/features/plan/comp";
+import { PLANS } from "@/features/plan/limits";
 import { recordAiUsage } from "@/features/usage/record";
 import { batchAvailable, BRIEFING_MODEL, collectBriefingBatch, submitBriefingBatch } from "./batch";
 import { fallbackInterpretation, type BriefingEvent, type BriefingInput, type BriefingInterpretation } from "./content";
@@ -88,7 +91,7 @@ async function prepare(service: SupabaseClient, week: string, now: Date): Promis
 
   const [{ data: users }, { data: existing }, { data: previous }] = await Promise.all([
     // The Monday email honors the existing weekly-email opt-out.
-    service.from("users").select("id").in("id", userIds).eq("digest_enabled", true),
+    service.from("users").select("id, email, plan").in("id", userIds).eq("digest_enabled", true),
     service.from("briefings").select("user_id").eq("week_start", week).in("user_id", userIds),
     service
       .from("briefings")
@@ -98,6 +101,7 @@ async function prepare(service: SupabaseClient, week: string, now: Date): Promis
       .order("week_start", { ascending: false }),
   ]);
   const optedIn = new Set((users ?? []).map((u) => u.id));
+  const withOpportunities = new Set((users ?? []).filter((u) => PLANS[resolvePlan(u.email, u.plan)].opportunities).map((u) => u.id));
   const done = new Set((existing ?? []).map((b) => b.user_id));
   // Each briefing starts where the user's last one ended: no gaps, no repeats.
   const lastEnd = new Map<string, string>();
@@ -122,7 +126,8 @@ async function prepare(service: SupabaseClient, week: string, now: Date): Promis
         detectedAt: r.events!.detected_at,
         ownMatch: r.context?.ownMatch ? { title: r.context.ownMatch.title, price: r.context.ownMatch.price } : null,
       }));
-    const input: BriefingInput = { weekOf: week, events };
+    const opportunities = withOpportunities.has(userId) ? await opportunitiesForBriefing(service, userId, now) : [];
+    const input: BriefingInput = { weekOf: week, events, ...(opportunities.length ? { opportunities } : {}) };
     // A quiet week needs no model: it's ready to send as the quiet-week email.
     const { error: insertError } = await service.from("briefings").insert({
       user_id: userId,
@@ -135,6 +140,7 @@ async function prepare(service: SupabaseClient, week: string, now: Date): Promis
     });
     // 23505: another runner prepared it first — fine.
     if (insertError && insertError.code !== "23505") throw new Error(`Couldn't prepare briefing: ${insertError.message}`);
+    if (!insertError) await markBriefed(service, opportunities.map((o) => o.id), now);
     if (!insertError && events.length) prepared += 1;
   }
   return prepared;
