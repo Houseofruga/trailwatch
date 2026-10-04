@@ -139,7 +139,7 @@ export async function runFind(
     if (own.ok && own.verdict !== "shopify" && own.verdict !== "unknown") {
       return {
         ok: false,
-        reason: `${own.host} isn't a Shopify store. TrailWatch is for Shopify brands, so enter your Shopify store's website.`,
+        reason: `${own.host} isn't a Shopify store. Trailwatch is for Shopify brands, so enter your Shopify store's website.`,
       };
     }
     if (extracted.ok) {
@@ -162,7 +162,7 @@ export async function runFind(
   if (!outcome.ok) return { ok: false, reason: outcome.reason };
 
   // Prefer real live-search domains over the model's guesses, then DNS-verify,
-  // then keep only confirmed Shopify stores (the only ones TrailWatch tracks).
+  // then keep only confirmed Shopify stores (the only ones Trailwatch tracks).
   const corrected = correctUrls(outcome.result.competitors, exaContext?.candidates ?? []);
   const resolved = (await verifyUrls(corrected)).filter((c) => c.url && !isMarketplace(c.url));
   const checks = await Promise.all(resolved.map((c) => isShopifyStore(c.url)));

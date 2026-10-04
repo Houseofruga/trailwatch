@@ -115,7 +115,7 @@ export function renderAlertEmail(
     ``,
     `What you could do: ${suggestion}`,
     ``,
-    `See it in TrailWatch: ${href}`,
+    `See it in Trailwatch: ${href}`,
     ``,
     ...(rating ? [`Was this alert useful? Useful: ${rating.useful}  ·  Noise: ${rating.notUseful}`, ``] : []),
     `—`,
@@ -137,7 +137,7 @@ export function renderAlertEmail(
     `<div style="height:16px;line-height:16px;font-size:0;">&nbsp;</div>`,
     eyebrow("What you could do"),
     paragraph(suggestion, { margin: "0 0 20px 0" }),
-    button(href, "See it in TrailWatch"),
+    button(href, "See it in Trailwatch"),
   ].join("");
 
   const html = renderShell({
@@ -168,9 +168,9 @@ export function renderAlertSlack(b: AlertBundle, siteUrl: string): { text: strin
   return {
     text: subjectFor(b),
     blocks: [
-      { type: "section", text: { type: "mrkdwn", text: `*TrailWatch — ${esc(b.storeName)}*\n${lines.join("\n")}` } },
+      { type: "section", text: { type: "mrkdwn", text: `*Trailwatch — ${esc(b.storeName)}*\n${lines.join("\n")}` } },
       { type: "section", text: { type: "mrkdwn", text: `*Suggested move:* ${suggestion}` } },
-      { type: "context", elements: [{ type: "mrkdwn", text: `<${link}|See ${esc(b.storeName)} on TrailWatch>` }] },
+      { type: "context", elements: [{ type: "mrkdwn", text: `<${link}|See ${esc(b.storeName)} on Trailwatch>` }] },
     ],
   };
 }

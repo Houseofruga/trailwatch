@@ -1,9 +1,9 @@
-# TrailWatch: UX spec (Shopify-admin-style web app)
+# Trailwatch: UX spec (Shopify-admin-style web app)
 
 Status: **approved 2026-09-30**. All open questions in §7 were resolved as recommended; see the
 **Decisions** list there. This is Step 2 of `trailwatch-shopify-ui-prompt.md`. There is no app code in this step.
 
-TrailWatch stays a standalone web app, with its own domain, login and billing. The UI adopts the
+Trailwatch stays a standalone web app, with its own domain, login and billing. The UI adopts the
 **patterns** of the Shopify admin, so Shopify merchants feel at home, but it's built from **our own
 components and tokens**. That was the Step 1 decision (see `PIVOT_PLAN.md`). No Shopify code, token
 values, logo, name or wording.
@@ -48,7 +48,7 @@ Edge cases the design must survive (all real):
 
 **App frame** (every signed-in screen):
 
-- **Top bar** (full width, fixed): TrailWatch logo on the left. On the right, **account menu** (avatar
+- **Top bar** (full width, fixed): Trailwatch logo on the left. On the right, **account menu** (avatar
   initials + name) with *Settings*, *Help* and *Log out*. On mobile, a **menu button** on the left
   opens the sidebar as a drawer.
 - **Left sidebar** (fixed on desktop, drawer on mobile):
@@ -140,7 +140,7 @@ screen needs that doesn't exist yet.
 
 **Purpose:** get in fast. Uses the existing auth; this is a restyle only.
 
-**Layout:** no app frame. A centred card on the neutral background, with the TrailWatch logo above it.
+**Layout:** no app frame. A centred card on the neutral background, with the Trailwatch logo above it.
 
 **Content (sign up):**
 1. Heading "Create your account". Sub-line: "Know what your competitors change, as soon as they change it."
@@ -151,7 +151,7 @@ screen needs that doesn't exist yet.
 6. Footer link: "Already have an account? Log in". Small print linking to Terms and Privacy.
 
 **Log in:** same card with "Log in", **Forgot password?** link under the password, footer "New to
-TrailWatch? Create an account". **Forgot / reset password** use the same card.
+Trailwatch? Create an account". **Forgot / reset password** use the same card.
 
 **Backend:** `signUp`, `logIn`, `signInWithGoogle`, `requestPasswordReset`, `updatePassword`
 (existing).
@@ -438,12 +438,12 @@ Settings and to the unsubscribe link.
 **Subject:** "Hearth & Pine started a sale: up to 60% off"
 
 1. **Preheader:** "12 products on sale, including Honeycomb Duvet Cover."
-2. **Header:** TrailWatch · "Instant alert".
+2. **Header:** Trailwatch · "Instant alert".
 3. **Card:** **High** pill · "Hearth & Pine started a sale" · "12 products, up to −60%. Honeycomb Duvet
    Cover is now $108 (was $269)."
 4. **Compared with yours** (when matched): "Your Waffle Duvet Cover is $189, $81 more."
 5. **What you could do:** one line.
-6. **Button:** **See it in TrailWatch**.
+6. **Button:** **See it in Trailwatch**.
 7. **Footer:** "Moves caught this month: 37" · Change alerts · Unsubscribe.
 
 **Bundled variant:** "Hearth & Pine launched 5 products", with a list of 5 names and prices.
@@ -462,7 +462,7 @@ Settings and to the unsubscribe link.
 5. **Top moves:** up to 5, each with a pill, a one-line summary and a link.
 6. **By competitor:** one card per competitor, with counts ("38 moves · 5 new products · 12 sales"),
    their top 3 lines and "See all 38". A quiet competitor gets one line: "Dewlane: quiet week, nothing changed."
-7. **Button:** **Open TrailWatch** → Home.
+7. **Button:** **Open Trailwatch** → Home.
 8. **Footer:** same as the alert.
 
 **Quiet-week variant:** "A quiet week. None of your 3 competitors made a big move." + snapshot links.
@@ -475,7 +475,7 @@ Settings and to the unsubscribe link.
 1. Briefing stays on **Monday**; users pick the **time and time zone**.
 2. Removal list confirmed: billing and account move into Settings, `/admin` is unchanged, and the
    founder-edition screens are removed.
-3. Keep TrailWatch's current **lime accent** (`--accent` #9ff50a) and **DM Sans** from `tokens.css`.
+3. Keep Trailwatch's current **lime accent** (`--accent` #9ff50a) and **DM Sans** from `tokens.css`.
    Both are clearly distinct from Shopify's look.
 4. Support email: **to be decided**. The design uses a placeholder.
 5. Watched pages are **read-only**.
@@ -493,7 +493,7 @@ The original questions:
 2. **Screens not in the brief.** As agreed: billing and account fold into Settings, `/admin` is
    unchanged, and the founder-edition screens are removed. Confirm the removal list (page-change
    detail, the modal routes, the per-page add/edit flows). The marketing site's free tools stay untouched.
-3. **Accent colour.** The design uses a neutral palette with one accent. Keep TrailWatch's current
+3. **Accent colour.** The design uses a neutral palette with one accent. Keep Trailwatch's current
    accent from `tokens.css`, or pick a new one in Claude Design? It must not be Shopify green.
 4. **Support email** for the footer and "Help" menu item.
 5. **Watched pages.** Read-only for now (auto-picked homepage, sale page and policies), or should users

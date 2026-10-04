@@ -111,7 +111,7 @@ export function FounderReveal() {
       <img
         className={styles.revealImg}
         src="/chandanoriginal.webp"
-        alt="Chandan, founder of TrailWatch"
+        alt="Chandan, founder of Trailwatch"
         draggable={false}
       />
       {/* Top layer: the Ghibli version, clipped to the handle position. */}

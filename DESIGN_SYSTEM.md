@@ -1,4 +1,4 @@
-# DESIGN_SYSTEM.md — TrailWatch in-app UI
+# DESIGN_SYSTEM.md — Trailwatch in-app UI
 
 This file documents the system **as it exists in code today** (pivot Phase 0). It adds no new values. Anything marked *(pending design)* is a gap that gets filled from the Claude Design output (`DESIGN_BRIEF_FOR_CLAUDE_DESIGN.md`), not invented in code.
 

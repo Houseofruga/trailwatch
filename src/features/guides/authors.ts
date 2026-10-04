@@ -2,7 +2,7 @@
 export const AUTHORS = {
   chandan: {
     name: "Chandan Dongre",
-    role: "Founder of TrailWatch",
+    role: "Founder of Trailwatch",
     photo: "/chandanoriginal.webp",
   },
 } as const;

@@ -61,7 +61,7 @@ function Reason({ text }: { text: string }) {
 export function ShopifyChecker() {
   const check = useSiteCheck<Omit<Result, "ok">>(checkShopifyAction);
   const { checking, result } = check;
-  // TrailWatch tracks Shopify stores only.
+  // Trailwatch tracks Shopify stores only.
   const trackable = result?.verdict === "shopify";
 
   return (
@@ -99,12 +99,12 @@ export function ShopifyChecker() {
               <p className={styles.catalogNote}>
                 {result.catalogPublic ? (
                   <>
-                    <strong>Catalog: public.</strong> Its catalog is public, so TrailWatch can track every product, price and
+                    <strong>Catalog: public.</strong> Its catalog is public, so Trailwatch can track every product, price and
                     stock change.
                   </>
                 ) : (
                   <>
-                    <strong>Catalog: not public.</strong> Its catalog isn’t public, so TrailWatch tracks its key pages
+                    <strong>Catalog: not public.</strong> Its catalog isn’t public, so Trailwatch tracks its key pages
                     instead.
                   </>
                 )}
@@ -123,7 +123,7 @@ export function ShopifyChecker() {
               }
             />
           ) : result.verdict === "other-store" ? (
-            <p className={styles.resultFoot}>TrailWatch tracks Shopify stores, so it can’t track {result.name}.</p>
+            <p className={styles.resultFoot}>Trailwatch tracks Shopify stores, so it can’t track {result.name}.</p>
           ) : result.verdict === "not-a-store" ? (
             <p className={styles.resultFoot}>Checked a blog or a brand site? Try the store’s shop address instead.</p>
           ) : (

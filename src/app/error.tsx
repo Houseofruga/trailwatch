@@ -25,7 +25,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
               <Button variant="primary" onClick={reset}>
                 Try again
               </Button>
-              <Button href="/">Go to TrailWatch</Button>
+              <Button href="/">Go to Trailwatch</Button>
             </>
           }
         >

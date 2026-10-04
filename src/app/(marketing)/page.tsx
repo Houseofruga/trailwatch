@@ -13,7 +13,7 @@ import styles from "./home.module.css";
 // — the product's own onboarding — then converts. The animated landing variant
 // was retired 2026-10-01. This is the indexed, canonical `/` and carries the
 // site's structured data.
-const TITLE = "TrailWatch — competitor briefings for Shopify brands";
+const TITLE = "Trailwatch — competitor briefings for Shopify brands";
 const DESCRIPTION =
   "Your competitors' launches, price cuts, sales and sell-outs, in your inbox within hours, plus a plain-English briefing every Monday. Free during beta.";
 
@@ -53,7 +53,7 @@ export default async function RootPage() {
               Your competitor started a sale on Thursday. You found out on Monday.
             </h1>
             <p className={styles.body}>
-              TrailWatch watches the stores you compete with: every launch, price cut, sale and
+              Trailwatch watches the stores you compete with: every launch, price cut, sale and
               sell-out. Big moves reach you within hours. Everything else arrives in one
               plain-English briefing every Monday, with what it means for your store and what
               to do about it.

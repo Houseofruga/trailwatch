@@ -7,7 +7,7 @@ import styles from "../legal.module.css";
 export const metadata: Metadata = {
   title: "Terms of Service",
   description:
-    "The terms governing your use of TrailWatch, the competitor-tracking service by House of Ruga LLP.",
+    "The terms governing your use of Trailwatch, the competitor-tracking service by House of Ruga LLP.",
   alternates: { canonical: "/terms" },
 };
 
@@ -38,16 +38,16 @@ export default function TermsPage() {
       <p className={styles.updated}>Last updated: October 1, 2026</p>
 
       <p className={styles.lead}>
-        These terms govern your use of TrailWatch. TrailWatch is operated by House
+        These terms govern your use of Trailwatch. Trailwatch is operated by House
         of Ruga LLP (&ldquo;House of Ruga&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;).
         By creating an account or using the service you agree to these terms. If you
-        do not agree, please do not use TrailWatch.
+        do not agree, please do not use Trailwatch.
       </p>
 
       <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>1. What TrailWatch does</h2>
+        <h2 className={styles.sectionTitle}>1. What Trailwatch does</h2>
         <p className={styles.para}>
-          TrailWatch tracks the public websites of Shopify stores you add, typically your
+          Trailwatch tracks the public websites of Shopify stores you add, typically your
           competitors&rsquo;: their products, prices, sales and stock, and a few key pages. It
           checks them on a recurring basis and tells you about meaningful changes through
           instant alerts (by email, or Slack if you connect it) and a Monday briefing that
@@ -60,7 +60,7 @@ export default function TermsPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>2. Your account</h2>
         <p className={styles.para}>
-          You need an account to use TrailWatch. You are responsible for keeping your
+          You need an account to use Trailwatch. You are responsible for keeping your
           login credentials secure and for all activity under your account. You must
           provide an accurate email address and be at least 18 years old, or the age of
           majority in your jurisdiction. Notify us promptly at {CONTACT} if you suspect
@@ -70,7 +70,7 @@ export default function TermsPage() {
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>3. Acceptable use</h2>
-        <p className={styles.para}>You agree not to use TrailWatch to:</p>
+        <p className={styles.para}>You agree not to use Trailwatch to:</p>
         <ul className={styles.list}>
           <li>
             track pages that require a login, sit behind a paywall, or are otherwise not
@@ -89,7 +89,7 @@ export default function TermsPage() {
           </li>
         </ul>
         <p className={styles.para}>
-          TrailWatch only retrieves publicly available pages, respects robots.txt, and
+          Trailwatch only retrieves publicly available pages, respects robots.txt, and
           identifies itself with a descriptive User-Agent. We may refuse websites that
           aren&rsquo;t Shopify stores, marketplaces, and addresses we can&rsquo;t read. You are
           responsible for ensuring the stores you add are ones you are permitted to track.
@@ -99,7 +99,7 @@ export default function TermsPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>4. Plans, limits &amp; billing</h2>
         <p className={styles.para}>
-          TrailWatch is free during the beta, with a limit on the number of stores you can
+          Trailwatch is free during the beta, with a limit on the number of stores you can
           follow (currently 10). We will tell you before paid plans launch and will never
           charge you without your agreement. Paid subscriptions will be billed through our
           payment provider, Paddle, which acts as the merchant of record for your purchase.
@@ -125,7 +125,7 @@ export default function TermsPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>6. Intellectual property</h2>
         <p className={styles.para}>
-          TrailWatch, its branding, and its software are owned by House of Ruga LLP.
+          Trailwatch, its branding, and its software are owned by House of Ruga LLP.
           These terms do not transfer any of our intellectual property to you. You may
           not copy, modify, reverse-engineer, or create derivative works from the service
           except as permitted by law.
@@ -135,7 +135,7 @@ export default function TermsPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>7. Third-party services &amp; websites</h2>
         <p className={styles.para}>
-          TrailWatch monitors third-party websites we do not control and relies on
+          Trailwatch monitors third-party websites we do not control and relies on
           third-party providers to operate. We are not responsible for the content,
           accuracy, or availability of the stores you track, nor for outages or changes in
           the services we depend on. Moves, explanations and briefings are generated with
@@ -147,7 +147,7 @@ export default function TermsPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>8. Disclaimers &amp; limitation of liability</h2>
         <p className={styles.para}>
-          To the maximum extent permitted by law, TrailWatch is provided without
+          To the maximum extent permitted by law, Trailwatch is provided without
           warranties of any kind, and House of Ruga LLP is not liable for any indirect,
           incidental, or consequential damages, or for any loss arising from missed
           moves, inaccurate explanations, or service interruptions. Our total liability for
@@ -160,7 +160,7 @@ export default function TermsPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>9. Suspension &amp; termination</h2>
         <p className={styles.para}>
-          You may stop using TrailWatch and delete your account at any time. We may
+          You may stop using Trailwatch and delete your account at any time. We may
           suspend or terminate accounts that violate these terms or that we reasonably
           believe create legal or security risk. Deleting your account removes your data
           as described in our{" "}
@@ -176,7 +176,7 @@ export default function TermsPage() {
         <p className={styles.para}>
           We may update these terms as the service evolves. When we make material changes
           we will update the date above and, where appropriate, notify you by email.
-          Continuing to use TrailWatch after a change means you accept the updated terms.
+          Continuing to use Trailwatch after a change means you accept the updated terms.
         </p>
       </section>
 

@@ -44,7 +44,7 @@ export function BetaPlanCard({ beta }: { beta: BetaStatus }) {
           {unlocked ? MAX : C.baseDiscountPct}% off for life, locked in
         </span>
         {unlocked ? (
-          <span className={styles.thanks}>Thanks for the three calls. Your feedback is shaping what TrailWatch becomes.</span>
+          <span className={styles.thanks}>Thanks for the three calls. Your feedback is shaping what Trailwatch becomes.</span>
         ) : (
           <>
             <StepProgress label={`Feedback calls: ${beta.callsDone} of ${beta.callsNeeded}`} done={beta.callsDone} total={beta.callsNeeded} />
@@ -75,7 +75,7 @@ export function BetaNote({ beta }: { beta: BetaStatus }) {
         You&rsquo;re one of our first {C.foundingCap} beta members: up to {MAX}% off for life once paid plans start.
       </p>
       <p className={styles.noteText}>
-        TrailWatch is free during the beta. You have {C.baseDiscountPct}% already, and {C.callsDiscountPct}% more after {C.callsNeeded} short feedback calls with{" "}
+        Trailwatch is free during the beta. You have {C.baseDiscountPct}% already, and {C.callsDiscountPct}% more after {C.callsNeeded} short feedback calls with{" "}
         {C.founderName}.
       </p>
       {beta.bookingUrl ? (

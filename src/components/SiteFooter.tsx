@@ -12,12 +12,12 @@ export function SiteFooter() {
       <div className={styles.inner}>
         <div className={styles.top}>
           <div className={styles.brand}>
-            <Link href="/" aria-label="TrailWatch home">
+            <Link href="/" aria-label="Trailwatch home">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 className={styles.brandLogo}
                 src="/logo.svg"
-                alt="TrailWatch"
+                alt="Trailwatch"
               />
             </Link>
             <div className={styles.brandTag}>Competitor briefings for Shopify brands.</div>
@@ -57,7 +57,7 @@ export function SiteFooter() {
         </div>
 
         <div className={styles.copyright}>
-          © 2026 House of Ruga. All rights reserved. TrailWatch is an independent product and isn’t affiliated with
+          © 2026 House of Ruga. All rights reserved. Trailwatch is an independent product and isn’t affiliated with
           or endorsed by Shopify.
         </div>
       </div>

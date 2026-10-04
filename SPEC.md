@@ -1,4 +1,4 @@
-# SPEC.md — TrailWatch: competitive briefings for Shopify DTC brands
+# SPEC.md — Trailwatch: competitive briefings for Shopify DTC brands
 
 > Source of truth for scope and behavior, from pivot Phase 0 (2026-09-30) onward.
 > Derived from `trailwatch-ecommerce-pivot-prompt.md` plus the decisions recorded in

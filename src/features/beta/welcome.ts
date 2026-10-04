@@ -10,7 +10,7 @@ import { BETA_CONFIG as C, betaEndsLabel, bookingUrl } from "./config";
 export function renderWelcomeEmail(opts: { founding: boolean; booking: string | null }): RenderedEmail {
   const lines: string[] = [
     "Hi there,",
-    `I'm ${C.founderName}, the founder of TrailWatch. Thanks for joining the beta.`,
+    `I'm ${C.founderName}, the founder of Trailwatch. Thanks for joining the beta.`,
     ...(opts.founding
       ? [
           `You're one of our first ${C.foundingCap} beta members. That means up to ${C.baseDiscountPct + C.callsDiscountPct}% off for life when paid plans start on ${betaEndsLabel()}: ${C.baseDiscountPct}% is already yours, and ${C.callsDiscountPct}% more unlocks after ${C.callsNeeded} short feedback calls with me.`,
@@ -21,7 +21,7 @@ export function renderWelcomeEmail(opts: { founding: boolean; booking: string | 
       ? [`Or grab ${C.callMinutes} minutes and I'll set up your competitors with you and walk you through what they did in the last 30 days: ${opts.booking}`]
       : []),
   ];
-  const sign = [C.founderName, "Founder, TrailWatch"];
+  const sign = [C.founderName, "Founder, Trailwatch"];
   const text = [...lines, sign.join("\n")].join("\n\n");
   const html = `<!doctype html><html><body style="margin:0;padding:24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#303030;background:#ffffff;">
 <div style="max-width:560px;">
@@ -33,7 +33,7 @@ ${lines
   .join("\n")}
 <p style="margin:24px 0 0 0;">${escapeHtml(sign[0])}<br><span style="color:#616161;">${escapeHtml(sign[1])}</span></p>
 </div></body></html>`;
-  return { subject: "Welcome to TrailWatch (and a quick question)", html, text };
+  return { subject: "Welcome to Trailwatch (and a quick question)", html, text };
 }
 
 /**

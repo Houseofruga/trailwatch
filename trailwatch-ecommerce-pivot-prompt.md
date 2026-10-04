@@ -1,8 +1,8 @@
-# TrailWatch → E-commerce Pivot (paste into Claude Code)
+# Trailwatch → E-commerce Pivot (paste into Claude Code)
 
-You are working on TrailWatch, an existing, working SaaS app. Today it lets a user add competitors, pick specific pages per competitor (X pages per competitor), crawls those pages on a schedule, diffs them, and sends a weekly AI-summarized email of meaningful changes. Plans today: Free (2 competitors / 6 pages) and Pro $19/mo (10 competitors / 100 pages, daily checks). Payments are integrated but not live yet.
+You are working on Trailwatch, an existing, working SaaS app. Today it lets a user add competitors, pick specific pages per competitor (X pages per competitor), crawls those pages on a schedule, diffs them, and sends a weekly AI-summarized email of meaningful changes. Plans today: Free (2 competitors / 6 pages) and Pro $19/mo (10 competitors / 100 pages, daily checks). Payments are integrated but not live yet.
 
-We are pivoting TrailWatch from "competitor website monitoring for founders" to **"competitive briefings for US Shopify DTC brands."** Reuse the existing crawler, diffing, AI summary, email, auth and billing code wherever possible. This is an adaptation, not a rewrite.
+We are pivoting Trailwatch from "competitor website monitoring for founders" to **"competitive briefings for US Shopify DTC brands."** Reuse the existing crawler, diffing, AI summary, email, auth and billing code wherever possible. This is an adaptation, not a rewrite.
 
 ## How to work
 
@@ -85,7 +85,7 @@ Tell me which case applies, with evidence (file paths), in `PIVOT_PLAN.md`.
 
 ## Phase 2: Catalog tracking (Shopify competitors)
 
-- Fetch the full catalog via `https://<domain>/products.json?limit=250&page=N`, paginating until an empty page. Respect rate limits: small delay between pages, polite User-Agent identifying TrailWatch, back off on 429/5xx, respect robots.txt.
+- Fetch the full catalog via `https://<domain>/products.json?limit=250&page=N`, paginating until an empty page. Respect rate limits: small delay between pages, polite User-Agent identifying Trailwatch, back off on 429/5xx, respect robots.txt.
 - Store a **snapshot per competitor per check** (keep all snapshots; history is a future moat). Normalize to: product id, handle, title, product_type, tags, vendor, created_at, published_at, image URL, and per variant: id, title, sku, price, compare_at_price, available.
 - **Diff snapshots in code (no AI)** to produce typed events:
   - `product_launched` (new product id)

@@ -10,7 +10,7 @@ const DESCRIPTION =
   "Free Shopify store checker: enter any website to see if it runs on Shopify, and how we can tell. No sign-up.";
 
 export const metadata: Metadata = {
-  title: { absolute: "Is this site on Shopify? Free Shopify store checker — TrailWatch" },
+  title: { absolute: "Is this site on Shopify? Free Shopify store checker — Trailwatch" },
   description: DESCRIPTION,
   alternates: { canonical: "/tools/shopify-store-checker" },
   openGraph: { title: "Is this site on Shopify?", description: DESCRIPTION, url: "/tools/shopify-store-checker" },
@@ -51,7 +51,7 @@ export default function ShopifyStoreCheckerPage() {
         },
         {
           q: "What does “public catalog” mean?",
-          a: "Most Shopify stores list their products, prices and stock at /products.json, an address any visitor can open. When it’s public, TrailWatch can track every product, price and stock change. Some stores switch it off; for those, TrailWatch watches key pages like the homepage and sale page instead.",
+          a: "Most Shopify stores list their products, prices and stock at /products.json, an address any visitor can open. When it’s public, Trailwatch can track every product, price and stock change. Some stores switch it off; for those, Trailwatch watches key pages like the homepage and sale page instead.",
         },
         {
           q: "Why does it say “couldn’t tell”?",

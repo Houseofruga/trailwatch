@@ -7,7 +7,7 @@ import styles from "../legal.module.css";
 export const metadata: Metadata = {
   title: "Refund Policy",
   description:
-    "TrailWatch's billing, cancellation, and refund terms, by House of Ruga LLP.",
+    "Trailwatch's billing, cancellation, and refund terms, by House of Ruga LLP.",
   alternates: { canonical: "/refunds" },
 };
 
@@ -38,7 +38,7 @@ export default function RefundsPage() {
       <p className={styles.updated}>Last updated: October 1, 2026</p>
 
       <p className={styles.lead}>
-        TrailWatch is free during the beta: there is nothing to pay and nothing to refund.
+        Trailwatch is free during the beta: there is nothing to pay and nothing to refund.
         This policy explains how billing, cancellations, and refunds will work once paid
         plans launch. We will tell you before that happens and will never charge you
         without your agreement.
@@ -76,7 +76,7 @@ export default function RefundsPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>3. Refunds</h2>
         <p className={styles.para}>
-          Because you can try TrailWatch for free before paying, subscription fees
+          Because you can try Trailwatch for free before paying, subscription fees
           are generally non-refundable for time already elapsed. That said, we deal with
           refund requests in good faith:
         </p>

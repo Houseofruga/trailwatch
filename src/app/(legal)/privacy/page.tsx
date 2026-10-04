@@ -7,7 +7,7 @@ import styles from "../legal.module.css";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "How TrailWatch, by House of Ruga LLP, collects, uses, and protects your data.",
+    "How Trailwatch, by House of Ruga LLP, collects, uses, and protects your data.",
   alternates: { canonical: "/privacy" },
 };
 
@@ -38,8 +38,8 @@ export default function PrivacyPage() {
       <p className={styles.updated}>Last updated: October 1, 2026</p>
 
       <p className={styles.lead}>
-        This policy explains what data TrailWatch collects, why, and what you can do
-        about it. TrailWatch is operated by House of Ruga LLP (&ldquo;we&rdquo;,
+        This policy explains what data Trailwatch collects, why, and what you can do
+        about it. Trailwatch is operated by House of Ruga LLP (&ldquo;we&rdquo;,
         &ldquo;us&rdquo;), which is the data controller for your account information. We
         collect as little as we can to run the service.
       </p>
@@ -73,7 +73,7 @@ export default function PrivacyPage() {
             type in, to suggest competitors.
           </li>
           <li>
-            <strong>Billing data:</strong> TrailWatch is free during the beta. When paid plans
+            <strong>Billing data:</strong> Trailwatch is free during the beta. When paid plans
             launch, payments will be handled by Paddle, our payment provider. We will receive
             your plan status and a customer reference, but we will not see or store your full
             card details.
@@ -111,7 +111,7 @@ export default function PrivacyPage() {
             To keep the service secure and prevent abuse (for example, by refusing throwaway
             email addresses at sign-up), debug issues, and comply with the law.
           </li>
-          <li>To understand who uses TrailWatch during the beta, using the role you give us.</li>
+          <li>To understand who uses Trailwatch during the beta, using the role you give us.</li>
         </ul>
         <p className={styles.para}>
           We do not sell your data, and we do not use it for third-party advertising.
@@ -121,7 +121,7 @@ export default function PrivacyPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>3. Service providers we share data with</h2>
         <p className={styles.para}>
-          We rely on a small set of trusted providers (sub-processors) to run TrailWatch.
+          We rely on a small set of trusted providers (sub-processors) to run Trailwatch.
           They only process data on our behalf to deliver their part of the service:
         </p>
         <ul className={styles.list}>
@@ -209,7 +209,7 @@ export default function PrivacyPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>8. Children</h2>
         <p className={styles.para}>
-          TrailWatch is not intended for anyone under 18, and we do not knowingly collect
+          Trailwatch is not intended for anyone under 18, and we do not knowingly collect
           data from children.
         </p>
       </section>

@@ -166,7 +166,7 @@ export function AuthForm({ initialMode, preview = "default" }: { initialMode: Mo
   return (
     <AuthCard footer={switchLink}>
       <AuthHeading
-        title={mode === "signup" ? "Create your account" : "Log in to TrailWatch"}
+        title={mode === "signup" ? "Create your account" : "Log in to Trailwatch"}
         sub={mode === "signup" ? "Know what your competitors change, as soon as they change it." : undefined}
       />
       {message ? (

@@ -55,7 +55,7 @@ describe("renderDigest", () => {
   it("uses the logo image with an alt fallback, not the plain word", () => {
     expect(email.html).toContain("/email-logo-dark.png");
     expect(email.html).toContain("/email-logo-light.png");
-    expect(email.html).toContain('alt="TrailWatch"');
+    expect(email.html).toContain('alt="Trailwatch"');
   });
 
   it("includes every summary, page type, path, and domain in both bodies", () => {

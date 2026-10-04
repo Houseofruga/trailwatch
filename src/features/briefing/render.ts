@@ -130,7 +130,7 @@ export function renderBriefingEmail(opts: {
         : [`${x.c.name}: quiet week, nothing changed.`],
     ),
     ``,
-    `Open TrailWatch: ${siteUrl}/dashboard`,
+    `Open Trailwatch: ${siteUrl}/dashboard`,
     ``,
     ...(opts.rating ? [`Was this briefing useful? Yes: ${opts.rating.useful}  ·  No: ${opts.rating.notUseful}`, ``] : []),
     `—`,
@@ -211,7 +211,7 @@ export function renderBriefingEmail(opts: {
     preheader,
     label: `Monday briefing · ${weekLabel(input.weekOf)}`,
     cards: cards.join("") + (opts.rating ? ratingRow("Was this briefing useful?", opts.rating) : ""),
-    cta: { html: button(`${siteUrl}/dashboard`, "Open TrailWatch"), center: true },
+    cta: { html: button(`${siteUrl}/dashboard`, "Open Trailwatch"), center: true },
     footerHtml: footerLine(siteUrl, opts.movesThisMonth, unsubHref),
     sentTo: opts.sentTo,
   });

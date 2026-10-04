@@ -1,4 +1,4 @@
-# LAUNCH-COPY.md — TrailWatch marketing copy kit (Stage 0.4)
+# LAUNCH-COPY.md — Trailwatch marketing copy kit (Stage 0.4)
 
 Reusable copy for the distribution runbook (`DISTRIBUTION.md`). Drafts — edit
 freely; they're written in the landing's voice (plain, specific, honest, low-
@@ -6,7 +6,7 @@ noise, founder-first — no hype, no "revolutionary"). Everything here is truthf
 to the product; keep it that way.
 
 **Product facts (source of truth — keep copy consistent with these):**
-- TrailWatch watches competitors' **pricing, homepage, and changelog** pages,
+- Trailwatch watches competitors' **pricing, homepage, and changelog** pages,
   **daily**, filters out trivial edits, AI-summarizes the meaningful ones, and
   sends **one plain-English digest email a week**. Low noise is the whole edge.
 - **Free:** $0, no card — 2 competitors, 6 pages, weekly digest, **AI summaries
@@ -25,18 +25,18 @@ to the product; keep it that way.
 > Competitor tracking for founders — one email a week
 
 **Elevator (1 sentence):**
-> TrailWatch watches your competitors' pricing, homepage, and changelog pages and
+> Trailwatch watches your competitors' pricing, homepage, and changelog pages and
 > emails you one plain-English digest a week on what actually changed.
 
 **~50 words:**
-> TrailWatch is competitor tracking built for founders, not enterprise sales
+> Trailwatch is competitor tracking built for founders, not enterprise sales
 > teams. Add your competitors' pricing, homepage, and changelog pages; we check
 > them daily, filter out the trivial edits, and email you one plain-English digest
 > a week on what actually changed. AI summaries on every plan — even free.
 
 **~100 words:**
-> TrailWatch is competitor tracking built for founders and small teams. Add the
-> competitor pages you care about — pricing, homepage, changelog — and TrailWatch
+> Trailwatch is competitor tracking built for founders and small teams. Add the
+> competitor pages you care about — pricing, homepage, changelog — and Trailwatch
 > checks them every day, filters out the cosmetic noise (reworded boilerplate,
 > moved buttons), and emails you one short, plain-English digest a week on what
 > actually changed: a repriced plan, a new feature, a shift in messaging. The AI
@@ -48,7 +48,7 @@ to the product; keep it that way.
 
 ## 2. Product Hunt kit
 
-**Name:** TrailWatch
+**Name:** Trailwatch
 
 **Tagline options (≤60 chars — pick one):**
 - Competitor tracking for founders — one email a week _(51)_
@@ -59,13 +59,13 @@ to the product; keep it that way.
 **Topics:** Artificial Intelligence · SaaS · Marketing · Productivity · Sales
 
 **Description (the listing blurb):**
-> TrailWatch watches your competitors' pricing, homepage, and changelog pages
+> Trailwatch watches your competitors' pricing, homepage, and changelog pages
 > every day, filters out the trivial edits, and emails you one plain-English digest
 > a week on what actually changed. AI summaries on every plan, even free. Built by
 > a solo founder, for founders — flat pricing, no dashboard to babysit.
 
 **Maker's first comment (post as Chandan, immediately after launch):**
-> Hey Product Hunt 👋 I'm Chandan, the (solo) founder of TrailWatch.
+> Hey Product Hunt 👋 I'm Chandan, the (solo) founder of Trailwatch.
 >
 > I kept trying to keep an eye on competitors and it always ended the same way:
 > either pay enterprise money for a competitive-intelligence suite built for sales
@@ -73,7 +73,7 @@ to the product; keep it that way.
 > fixed a typo. Both gave me more noise, not more insight.
 >
 > So I built the thing I actually wanted. You add a competitor's pricing, homepage,
-> or changelog pages. TrailWatch checks them daily, throws away the cosmetic edits,
+> or changelog pages. Trailwatch checks them daily, throws away the cosmetic edits,
 > and once a week emails you a short, plain-English summary of what actually
 > changed — a repriced plan, a new feature, a change in positioning. That's the
 > whole product: one low-noise email a week.
@@ -106,14 +106,14 @@ to the product; keep it that way.
 ## 3. AlternativeTo listings
 
 **Product description (the main listing):**
-> TrailWatch is competitor tracking for founders and small teams. It watches your
+> Trailwatch is competitor tracking for founders and small teams. It watches your
 > competitors' pricing, homepage, and changelog pages daily, filters out trivial
 > changes, and emails one plain-English AI summary a week of what actually changed.
 > AI summaries are included on every plan, including a free tier. Flat pricing, no
 > dashboard, no enterprise sales process.
 
 **"Alternative to Visualping" note:**
-> Like Visualping, TrailWatch monitors web pages for changes — but it's
+> Like Visualping, Trailwatch monitors web pages for changes — but it's
 > purpose-built for tracking competitors, not general page-watching. Instead of
 > visual diffs and a dashboard, you get one low-noise weekly email with
 > plain-English AI summaries, trivial edits filtered out. AI on every plan,
@@ -121,7 +121,7 @@ to the product; keep it that way.
 
 **"Alternative to Crayon" note:**
 > A lightweight alternative to enterprise competitive-intelligence platforms like
-> Crayon. TrailWatch skips battlecards, sales enablement, and annual contracts — it
+> Crayon. Trailwatch skips battlecards, sales enablement, and annual contracts — it
 > does one job for founders: tells you what your competitors changed, in one
 > plain-English email a week. Self-serve, flat pricing, free tier. More:
 > /compare/crayon-alternative
@@ -158,7 +158,7 @@ homepage link, and the teardown-tool link where a "free tool" field exists.
 > cheaper page-change monitors went the other way: they'd alert me every time a
 > competitor fixed a typo or reordered a section. I ended up ignoring both.
 >
-> So I built TrailWatch. You add a competitor's pricing / homepage / changelog
+> So I built Trailwatch. You add a competitor's pricing / homepage / changelog
 > pages; it checks them daily, filters out the trivial edits, and emails you one
 > plain-English summary a week of what actually changed. The whole design goal was
 > *low noise* — a readable email, never a raw diff.
@@ -184,7 +184,7 @@ astroturf, never pose as a neutral third party. Use each sub's weekly
 promo/feedback thread; keep ~90% of your activity non-promotional.**
 
 **Feedback-thread / Show-off post (short, disclosed):**
-> I'm a solo founder and I built TrailWatch — competitor tracking that sends one
+> I'm a solo founder and I built Trailwatch — competitor tracking that sends one
 > plain-English email a week instead of a stream of alerts. You add a competitor's
 > pricing/homepage/changelog pages, it checks daily, filters out the cosmetic
 > edits, and summarizes what actually changed. AI summaries are on every plan,
@@ -201,7 +201,7 @@ keep track of competitors?"):**
 > A few options depending on how deep you want to go: [genuinely useful, neutral
 > advice — e.g. set up page-change monitoring, watch their changelog/pricing,
 > follow their releases]. Full disclosure, I built a small tool for exactly this —
-> TrailWatch, it emails a weekly plain-English summary of what changed — so take
+> Trailwatch, it emails a weekly plain-English summary of what changed — so take
 > that with the appropriate grain of salt, but happy to share how I approach it.
 
 _(Never drop the link without the disclosure, and don't paste the same comment
@@ -215,13 +215,13 @@ repeatedly — write it fresh each time.)_
 > I got tired of either paying enterprise money to track competitors or drowning in
 > page-change alerts, so I built the in-between:
 >
-> TrailWatch → one plain-English email a week on what your competitors actually
+> Trailwatch → one plain-English email a week on what your competitors actually
 > changed. AI summaries on every plan, even free.
 >
 > Live on Product Hunt today 👇 [link]
 
 **Demo post (the output is the ad):**
-> Pasted [well-known product]'s URL into the free TrailWatch teardown. 10 seconds
+> Pasted [well-known product]'s URL into the free Trailwatch teardown. 10 seconds
 > later: their positioning, pricing tiers, and what to keep an eye on. No signup.
 > Try it on a competitor of yours: [teardown link]
 
@@ -229,10 +229,10 @@ repeatedly — write it fresh each time.)_
 
 ## 8. Show HN (bonus, only with a real angle)
 
-**Title:** Show HN: TrailWatch – a low-noise competitor tracker (one weekly email, not raw diffs)
+**Title:** Show HN: Trailwatch – a low-noise competitor tracker (one weekly email, not raw diffs)
 
 **Text:**
-> I'm a solo founder. TrailWatch watches competitors' pricing/homepage/changelog
+> I'm a solo founder. Trailwatch watches competitors' pricing/homepage/changelog
 > pages daily, filters out trivial edits with a pure, testable noise filter, and
 > emails a weekly plain-English AI summary of what changed. The interesting part
 > was the noise filter — deciding what counts as a "meaningful" change so the email

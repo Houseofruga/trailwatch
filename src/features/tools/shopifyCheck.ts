@@ -24,7 +24,7 @@ export type ShopifyCheck =
       platformName: string | null;
       /** Plain-English reasons, strongest first. */
       evidence: string[];
-      /** Shopify with a public catalog: TrailWatch can track every product. */
+      /** Shopify with a public catalog: Trailwatch can track every product. */
       catalogPublic: boolean;
     }
   | { ok: false; message: string };

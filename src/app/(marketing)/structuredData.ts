@@ -7,12 +7,12 @@ const SITE_URL =
 
 export const FAQ: Array<{ q: string; a: string }> = [
   {
-    q: "What does TrailWatch do?",
-    a: "You add the stores you compete with. TrailWatch tracks their products, prices, sales, stock and key pages, alerts you when they make a big move, and sends a plain-English briefing every Monday on what changed, what it means for you, and what to do about it.",
+    q: "What does Trailwatch do?",
+    a: "You add the stores you compete with. Trailwatch tracks their products, prices, sales, stock and key pages, alerts you when they make a big move, and sends a plain-English briefing every Monday on what changed, what it means for you, and what to do about it.",
   },
   {
     q: "How is this different from price trackers or spy tools?",
-    a: "Price trackers are built to reprice identical products, and spy tools give dropshippers raw numbers. TrailWatch is for brands selling their own products: it explains what competitors are doing (launches, promos, positioning) instead of handing you a spreadsheet.",
+    a: "Price trackers are built to reprice identical products, and spy tools give dropshippers raw numbers. Trailwatch is for brands selling their own products: it explains what competitors are doing (launches, promos, positioning) instead of handing you a spreadsheet.",
   },
   {
     q: "Which stores can I track?",
@@ -24,11 +24,11 @@ export const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "Do I need to install anything on my store?",
-    a: "No. TrailWatch only looks at competitors' public storefronts. Nothing is installed on your store or theirs.",
+    a: "No. Trailwatch only looks at competitors' public storefronts. Nothing is installed on your store or theirs.",
   },
   {
     q: "Will my competitors know I'm watching them?",
-    a: "No. TrailWatch only reads their public storefront, the same pages any visitor sees. Nothing is installed on their store, they aren't notified, and they can't see who's tracking them.",
+    a: "No. Trailwatch only reads their public storefront, the same pages any visitor sees. Nothing is installed on their store, they aren't notified, and they can't see who's tracking them.",
   },
   {
     q: "Is the beta really free? What happens after?",
@@ -46,12 +46,12 @@ export function structuredData(): Record<string, unknown> {
         "@id": `${SITE_URL}/#organization`,
         name: "House of Ruga",
         url: "https://houseofruga.com",
-        brand: "TrailWatch",
+        brand: "Trailwatch",
         email: "trailwatch@houseofruga.com",
       },
       {
         "@type": "SoftwareApplication",
-        name: "TrailWatch",
+        name: "Trailwatch",
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         url: SITE_URL,

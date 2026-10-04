@@ -16,7 +16,7 @@ It shares the digest's chrome and the same logo treatment:
   `email-logo-light.png` (light-ink wordmark) in dark mode, swapped by
   `prefers-color-scheme`. Both live in `/public` and are served at
   `https://gettrailwatch.com/email-logo-*.png` (referenced absolutely in the
-  template). `alt="TrailWatch"` keeps the brand legible when images are blocked.
+  template). `alt="Trailwatch"` keeps the brand legible when images are blocked.
 
 The design source (all digest variants, quiet-week, dark/light) came from the
 Claude Design canvas; only the digest variants are wired into code. The

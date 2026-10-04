@@ -24,7 +24,7 @@ const geistMono = Geist_Mono({
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://gettrailwatch.com";
 
-const TITLE = "TrailWatch — competitor briefings for Shopify brands";
+const TITLE = "Trailwatch — competitor briefings for Shopify brands";
 const DESCRIPTION =
   "Your competitors' launches, price cuts, sales and sell-outs, in your inbox within hours, plus a plain-English briefing every Monday. Free during beta.";
 
@@ -32,13 +32,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: TITLE,
-    template: "%s — TrailWatch",
+    template: "%s — Trailwatch",
   },
   description: DESCRIPTION,
-  applicationName: "TrailWatch",
+  applicationName: "Trailwatch",
   openGraph: {
     type: "website",
-    siteName: "TrailWatch",
+    siteName: "Trailwatch",
     url: SITE_URL,
     title: TITLE,
     description: DESCRIPTION,

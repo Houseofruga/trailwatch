@@ -63,7 +63,7 @@ function Logo({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={light ? "/logo-light.svg" : "/logo.svg"}
-      alt="TrailWatch"
+      alt="Trailwatch"
       height={height}
       width={Math.round(height * 4.52)}
       className={styles.logo}
@@ -238,7 +238,7 @@ export function AppFrame({
           <Link
             href="/dashboard"
             className={styles.logoLink}
-            aria-label="TrailWatch home"
+            aria-label="Trailwatch home"
           >
             <Logo light />
           </Link>

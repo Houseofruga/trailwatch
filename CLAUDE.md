@@ -1,4 +1,4 @@
-# CLAUDE.md — TrailWatch (DTC pivot)
+# CLAUDE.md — Trailwatch (DTC pivot)
 
 Persistent context for Claude Code. Read `SPEC.md` before starting any feature,
 `PIVOT_PLAN.md` for the phase plan and recorded decisions, and `HANDOFF.md` for the

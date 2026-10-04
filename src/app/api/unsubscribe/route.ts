@@ -11,7 +11,7 @@ function page(title: string, body: string, status = 200): Response {
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>${title} — TrailWatch</title>
+<title>${title} — Trailwatch</title>
 <style>
   body{margin:0;background:#f5f5f5;color:#1a1a17;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:24px}
   .card{background:#fff;border:1px solid #e6e2da;max-width:440px;width:100%;padding:32px;text-align:center}

@@ -328,7 +328,7 @@ export function CompetitorLookup() {
             >
               {res.reason === "catalog_hidden"
                 ? "We can’t read this store’s catalog instantly. Join the beta and we’ll track its key pages instead."
-                : `We can’t read this store’s catalog instantly: ${done!.domain} isn’t on Shopify, and TrailWatch tracks Shopify stores.`}
+                : `We can’t read this store’s catalog instantly: ${done!.domain} isn’t on Shopify, and Trailwatch tracks Shopify stores.`}
             </Message>
           </div>
         ) : res?.status === "marketplace_blocked" ? (

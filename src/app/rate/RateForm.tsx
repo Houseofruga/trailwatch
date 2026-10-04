@@ -33,9 +33,9 @@ export function RateForm({ claim }: { claim: Claim | null }) {
     return (
       <section className={styles.card}>
         <h1 className={styles.title}>This link isn&rsquo;t valid</h1>
-        <p className={styles.sub}>You can always reply to any TrailWatch email instead; it comes straight to the founder.</p>
+        <p className={styles.sub}>You can always reply to any Trailwatch email instead; it comes straight to the founder.</p>
         <div className={styles.linkRow}>
-          <a href="/dashboard">Go to TrailWatch</a>
+          <a href="/dashboard">Go to Trailwatch</a>
         </div>
       </section>
     );

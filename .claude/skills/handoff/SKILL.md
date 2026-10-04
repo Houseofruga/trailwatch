@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: Refresh HANDOFF.md with the current build state, then commit and push it, so a different Claude account or a fresh session can continue the TrailWatch/Competitor Radar build without prior chat memory. Use when the user types /handoff, or asks to "update the handoff", "save build state", or "hand off before switching accounts".
+description: Refresh HANDOFF.md with the current build state, then commit and push it, so a different Claude account or a fresh session can continue the Trailwatch/Competitor Radar build without prior chat memory. Use when the user types /handoff, or asks to "update the handoff", "save build state", or "hand off before switching accounts".
 ---
 
 # /handoff — update the cross-session build state

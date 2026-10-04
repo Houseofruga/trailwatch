@@ -13,7 +13,7 @@ import styles from "./StepsScroller.module.css";
 const STEPS = [
   {
     num: "01",
-    body: "Paste a competitor’s store address. TrailWatch reads their whole catalog on the spot: every product, price, discount and sold-out item.",
+    body: "Paste a competitor’s store address. Trailwatch reads their whole catalog on the spot: every product, price, discount and sold-out item.",
   },
   {
     num: "02",
@@ -240,7 +240,7 @@ export function StepsScroller() {
                             </svg>
                           </span>
                           <div className={styles.mailSenderText}>
-                            <div className={styles.mailSender}>TrailWatch</div>
+                            <div className={styles.mailSender}>Trailwatch</div>
                             <div className={styles.mailAddr}>
                               weekly@gettrailwatch.com
                             </div>

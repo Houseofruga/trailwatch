@@ -1,4 +1,4 @@
-# DISTRIBUTION.md — TrailWatch off-site distribution & backlink playbook
+# DISTRIBUTION.md — Trailwatch off-site distribution & backlink playbook
 
 The execution side of `SEO.md`: on-page work is done (foundation + free tool +
 three compare pages), but nothing links to those assets yet and the subdomain
@@ -61,7 +61,7 @@ one's current terms when you get there.
 
 These are durable backlinks + steady discovery. Start here — no timing needed.
 
-- [ ] **[Free] AlternativeTo** — list TrailWatch as an alternative to
+- [ ] **[Free] AlternativeTo** — list Trailwatch as an alternative to
       **Visualping, Crayon, and Kompyte**. Directly reinforces the three compare
       pages; high relevance. (Highest priority — do first.)
 - [ ] **[Free] SaaSHub** — same "alternative to" angle + a product listing (paid
@@ -159,7 +159,7 @@ drops get removed.
 # Step-by-step runbook (start here)
 
 The phases above are the catalog; this is the ordered, do-this-then-that plan,
-tuned to where TrailWatch actually is.
+tuned to where Trailwatch actually is.
 
 **Two facts set the order:**
 - The app is **deployed but not launch-tested** — the pre-launch blockers below
@@ -225,7 +225,7 @@ wastes the launch and the backlinks.
 
 ## Stage 2 — Evergreen listings · after launch-ready · all free
 Email = the gmail; paste the prepped blurbs; skip anything that charges to list.
-1. **AlternativeTo ×3 (you)** — TrailWatch page + list it as an alternative to
+1. **AlternativeTo ×3 (you)** — Trailwatch page + list it as an alternative to
    Visualping, Crayon, Kompyte; link the matching `/compare/*` page in each.
 2. **SaaSHub (you)** — product + the same three "alternative to" entries.
 3. **G2 + Capterra (you)** — claim the basic free listing.
@@ -242,7 +242,7 @@ Email = the gmail; paste the prepped blurbs; skip anything that charges to list.
 ## Stage 4 — Product Hunt launch · the big moment · free
 Only after Stages 1–3, with a few genuine supporters lined up.
 1. Schedule **Tue–Thu, 12:01 AM PT**.
-2. Launch **TrailWatch (the product)** with the **teardown tool as the interactive
+2. Launch **Trailwatch (the product)** with the **teardown tool as the interactive
    hook** — first gallery image "try it now, paste a URL," the GIF, maker
    first-comment = the indie-founder story. Product is the headline; the tool is
    the demo.

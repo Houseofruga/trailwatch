@@ -35,7 +35,7 @@ export function MarketingSections() {
           through their sites, their newsletter in your inbox, a customer mentioning a cheaper
           alternative. The tools that do this properly are built for enterprise teams, with
           sales calls and budgets to match, or for dropshippers who want raw numbers.
-          TrailWatch is built for brands like yours. It tells you what changed, what it means,
+          Trailwatch is built for brands like yours. It tells you what changed, what it means,
           and what to do about it.
         </p>
         <div className={styles.callout}>
@@ -47,7 +47,7 @@ export function MarketingSections() {
             <div className={styles.compareCell}>The big tools</div>
             <div className={`${styles.compareCell} ${styles.tw}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className={styles.compareLogo} src="/logo.svg" alt="TrailWatch" />
+              <img className={styles.compareLogo} src="/logo.svg" alt="Trailwatch" />
             </div>
           </div>
           <div className={styles.compareRow}>
@@ -145,7 +145,7 @@ export function MarketingSections() {
               Built by one indie founder, not a faceless enterprise.
             </h2>
             <p className={styles.finalBody}>
-              TrailWatch is built and run by one person who answers every email. Honest pricing,
+              Trailwatch is built and run by one person who answers every email. Honest pricing,
               no dark patterns, and if something’s missing, you can tell the person who’ll build
               it.
             </p>
@@ -164,7 +164,7 @@ export function MarketingSections() {
             <figcaption className={styles.portraitCaption}>
               <span className={styles.portraitName}>Chandan Dongre</span>
               <span className={styles.portraitRole}>
-                Indie founder, TrailWatch
+                Indie founder, Trailwatch
               </span>
               <a
                 className={styles.portraitSocial}

@@ -1,17 +1,17 @@
-# Claude Design brief: TrailWatch web app (Shopify-admin style)
+# Claude Design brief: Trailwatch web app (Shopify-admin style)
 
 > **How to use:** paste everything below the line into Claude Design. Attach `public/logo.svg` (the
-> TrailWatch logo). Replaces the older `DESIGN_BRIEF_FOR_CLAUDE_DESIGN.md`. Source of truth for
+> Trailwatch logo). Replaces the older `DESIGN_BRIEF_FOR_CLAUDE_DESIGN.md`. Source of truth for
 > behaviour: `UX_SPEC.md`.
 
 ---
 
-Design the signed-in web app and two emails for **TrailWatch**. Please produce one artboard per
+Design the signed-in web app and two emails for **Trailwatch**. Please produce one artboard per
 screen *and per state* listed below, at **desktop (1440px)** and **mobile (390px)** widths.
 
 ## 1. Product
 
-TrailWatch tells US Shopify brands what their competitors are doing. You add competitor stores by
+Trailwatch tells US Shopify brands what their competitors are doing. You add competitor stores by
 their website; we watch their catalogs (new products, prices, sales, stock) and key pages
 (homepage, sale page, policies). Big moves trigger an **instant alert** by email or Slack; everything
 else is summed up in a **Monday briefing** that explains what it means for your products.
@@ -19,7 +19,7 @@ else is summed up in a **Monday briefing** that explains what it means for your 
 **Promise:** "Instant alerts when a competitor moves, a briefing every Monday."
 
 **User:** a busy founder or marketing lead of a US direct-to-consumer brand on Shopify (bedding,
-apparel, beauty, home). Not technical. They open TrailWatch from an alert email, often on their
+apparel, beauty, home). Not technical. They open Trailwatch from an alert email, often on their
 phone, and want to know in ten seconds what changed and whether to act.
 
 **Tone:** calm, plain, useful. Short sentences, verbs first. We say "move", never "event"; "High
@@ -33,7 +33,7 @@ priority", never "severity".
   the left and the card on the right, and a save bar for unsaved changes. Dense but calm, with plenty of alignment and
   little decoration.
 - **It must not be a copy of Shopify.** No Shopify logo, name, icons, green, or wording that suggests
-  TrailWatch is made by or part of Shopify. Use **TrailWatch's own logo, colours and font** (below).
+  Trailwatch is made by or part of Shopify. Use **Trailwatch's own logo, colours and font** (below).
   The feeling is "familiar", not "clone".
 - **Colours (use these values):**
   - Page background `#f5f5f5`, card `#ffffff`, sunken/subdued surfaces `#efede8`
@@ -308,12 +308,12 @@ or the attached logo. Design both at 600px and 375px.
 
 **E1 Instant alert.** Subject "Hearth & Pine started a sale: up to 60% off".
 1. Preheader
-2. Header: "TrailWatch · Instant alert"
+2. Header: "Trailwatch · Instant alert"
 3. Card: High pill, "Hearth & Pine started a sale", "12 products, up to −60%. Honeycomb Duvet Cover is
    now $108 (was $269)."
 4. "Compared with yours: your Waffle Duvet Cover is $189, $81 more."
 5. "What you could do": one line
-6. Button **See it in TrailWatch**
+6. Button **See it in Trailwatch**
 7. Footer: "Moves caught this month: 37 · Change alerts · Unsubscribe"
 
 Also design the **bundled variant**: "Hearth & Pine launched 5 products", listing 5 names with prices.
@@ -327,7 +327,7 @@ Also design the **bundled variant**: "Hearth & Pine launched 5 products", listin
 4. **Top moves** (5, each with a pill + link)
 5. **By competitor**: a card each with counts, top 3 lines and "See all 38"; Dewlane shows "Quiet week,
    nothing changed."
-6. Button **Open TrailWatch**
+6. Button **Open Trailwatch**
 7. Footer
 
 Also design the **quiet-week variant**: "A quiet week. None of your 3 competitors made a big move."

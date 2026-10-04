@@ -1,4 +1,4 @@
-# PIVOT_PLAN.md — TrailWatch → competitive briefings for US Shopify DTC brands
+# PIVOT_PLAN.md — Trailwatch → competitive briefings for US Shopify DTC brands
 
 Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
 

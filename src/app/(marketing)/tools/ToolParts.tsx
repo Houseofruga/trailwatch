@@ -144,7 +144,7 @@ export function AuthorLine() {
       {/* eslint-disable-next-line @next/next/no-img-element -- small static portrait */}
       <img src={a.photo} alt="" />
       <span>
-        Built by <strong>{a.name}</strong>, founder of TrailWatch
+        Built by <strong>{a.name}</strong>, founder of Trailwatch
       </span>
     </p>
   );

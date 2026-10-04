@@ -6,9 +6,9 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <div className={`ui ${styles.page}`}>
       <div className={styles.column}>
-        <Link href="/" className={styles.logoLink} aria-label="TrailWatch home">
+        <Link href="/" className={styles.logoLink} aria-label="Trailwatch home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="TrailWatch" width={136} height={30} className={styles.logo} />
+          <img src="/logo.svg" alt="Trailwatch" width={136} height={30} className={styles.logo} />
         </Link>
         {children}
         <div className={styles.legal}>

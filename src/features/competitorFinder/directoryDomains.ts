@@ -4,7 +4,7 @@ import { isMarketplace } from "@/features/stores/denylist.config";
 // surfaces when asked for a company's competitors — a LinkedIn company page, a
 // Crunchbase or G2 profile, a Wikipedia article — because they rank highly. None
 // of them is ever a SaaS competitor's own homepage, so they must not become a
-// competitor's tracked URL: if one did and the user selected it as-is, TrailWatch
+// competitor's tracked URL: if one did and the user selected it as-is, Trailwatch
 // would baseline and monitor (say) that LinkedIn page instead of the competitor,
 // reporting changes that have nothing to do with them.
 //

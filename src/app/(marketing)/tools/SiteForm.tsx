@@ -150,7 +150,7 @@ export function NextStep({ title, host, name }: { title: string; host: string; n
     <div className={styles.nextStep}>
       <div className={styles.nextStepText}>
         <p className={styles.nextStepTitle}>{title}</p>
-        <p className={styles.nextStepSub}>Track it free with TrailWatch.</p>
+        <p className={styles.nextStepSub}>Track it free with Trailwatch.</p>
       </div>
       <Button variant="primary" href="/login?mode=signup" onClick={() => rememberStore(host, name)}>
         Join the beta

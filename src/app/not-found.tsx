@@ -17,7 +17,7 @@ export default function NotFound() {
           title="We can’t find that page"
           actions={
             <Button variant="primary" href="/">
-              Go to TrailWatch
+              Go to Trailwatch
             </Button>
           }
         >

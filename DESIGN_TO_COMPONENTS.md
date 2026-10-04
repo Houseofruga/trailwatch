@@ -1,6 +1,6 @@
 # Design → components map
 
-Step 4 of `trailwatch-shopify-ui-prompt.md`. Source: the owner's Claude Design canvas **"TrailWatch web
+Step 4 of `trailwatch-shopify-ui-prompt.md`. Source: the owner's Claude Design canvas **"Trailwatch web
 app"** (https://claude.ai/artifact/Tjog93X7x5Ffbe5tym7MGr), read 2026-09-30. It has 137 artboards on 9
 pages: a component sheet, a "New components" list, screens 01–07 at 1440 and 390, and emails E1–E2
 at 600 and 375.

@@ -11,7 +11,7 @@ const DESCRIPTION =
   "Free competitor finder for Shopify brands: enter your store and get a list of the stores you compete with. No sign-up.";
 
 export const metadata: Metadata = {
-  title: { absolute: "Find your Shopify store’s competitors — free competitor finder — TrailWatch" },
+  title: { absolute: "Find your Shopify store’s competitors — free competitor finder — Trailwatch" },
   description: DESCRIPTION,
   alternates: { canonical: "/tools/competitor-finder" },
   openGraph: { title: "Find your store’s competitors", description: DESCRIPTION, url: "/tools/competitor-finder" },
@@ -56,7 +56,7 @@ export default function CompetitorFinderPage() {
         },
         {
           q: "What happens after I pick competitors?",
-          a: "Join the beta and they’re added to your account, ready to track. TrailWatch then tells you when they launch products, change prices, start a sale or sell out.",
+          a: "Join the beta and they’re added to your account, ready to track. Trailwatch then tells you when they launch products, change prices, start a sale or sell out.",
         },
         {
           q: "Is this free?",

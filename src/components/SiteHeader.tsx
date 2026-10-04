@@ -10,9 +10,9 @@ export function SiteHeader({ onDark = false }: { onDark?: boolean }) {
   return (
     <header className={`ui ${styles.header} ${onDark ? styles.onDark : ""}`}>
       <div className={styles.inner}>
-        <Link href="/" aria-label="TrailWatch home">
+        <Link href="/" aria-label="Trailwatch home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className={styles.logo} src="/logo.svg" alt="TrailWatch" />
+          <img className={styles.logo} src="/logo.svg" alt="Trailwatch" />
         </Link>
         <div className={styles.actions}>
           <Button variant="plainDark" href="/login" className={styles.login}>

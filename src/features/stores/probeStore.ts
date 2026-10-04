@@ -37,10 +37,10 @@ export type StoreProbe =
 const PRODUCTS_JSON_PROBE = "/products.json?limit=1";
 
 export const notShopifyMessage = (host: string) =>
-  `${host} isn't a Shopify store. TrailWatch tracks Shopify stores, where we can read every product, price and sale.`;
+  `${host} isn't a Shopify store. Trailwatch tracks Shopify stores, where we can read every product, price and sale.`;
 
 export const notStoreMessage = (host: string) =>
-  `${host} doesn't look like an online store. TrailWatch tracks Shopify stores.`;
+  `${host} doesn't look like an online store. Trailwatch tracks Shopify stores.`;
 
 /** Validate a domain the user typed; null when it's fine to probe. */
 export function storeInputError(input: string): StoreProbeError | null {

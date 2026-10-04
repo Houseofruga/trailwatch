@@ -5,7 +5,7 @@ import { previewEnabled, previewState } from "@/features/appData/devState";
 import * as mock from "@/features/appData/mock";
 import { getBetaStatus, getRole, getWidgetOnboarding } from "@/features/appData/queries";
 
-export const metadata: Metadata = { title: "Set up TrailWatch" };
+export const metadata: Metadata = { title: "Set up Trailwatch" };
 
 const STATES = [
   "step-1-your-store",

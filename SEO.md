@@ -1,4 +1,4 @@
-# SEO.md — TrailWatch growth & SEO roadmap
+# SEO.md — Trailwatch growth & SEO roadmap
 
 A plan, not a spec. It captures the SEO + free-tool traction strategy so it can be
 executed in later sessions. Nothing here is built yet. Build order and honest
@@ -19,11 +19,11 @@ pricing, and website change detection.
 
 ## Structural note (read first)
 
-TrailWatch lives on a **subdomain**, which Google treats as largely its own site
+Trailwatch lives on a **subdomain**, which Google treats as largely its own site
 for authority purposes — it builds SEO from scratch, separate from
 `houseofruga.com`. That's fine, but it means:
 
-- TrailWatch-specific tools/content should live on the **TrailWatch subdomain**
+- Trailwatch-specific tools/content should live on the **Trailwatch subdomain**
   under `/tools/*` and `/compare/*`, so topical relevance and internal links stay
   tight and every page funnels to signup.
 - Broad, off-topic tools (that would bring non-converting traffic) are out of
@@ -44,7 +44,7 @@ Highest ROI. A week of tool-building is wasted if nothing is indexed.
       auth screens, and `/api/`; points at the sitemap.
 - [x] **Per-page metadata** — root layout sets `metadataBase`, a title template,
       and OG/Twitter defaults; landing uses an absolute title + canonical; legal
-      pages use short titles (template appends "— TrailWatch") + canonicals.
+      pages use short titles (template appends "— Trailwatch") + canonicals.
 - [x] **OG images** — templated `src/app/opengraph-image.tsx` via `next/og`
       (1200×630), applied site-wide by the file convention.
 - [x] **JSON-LD structured data** — `Organization` + `SoftwareApplication` +
@@ -64,7 +64,7 @@ Highest ROI. A week of tool-building is wasted if nothing is indexed.
 ### AI crawler / GEO policy — decided 2026-08-31 (owner)
 
 **We ALLOW AI crawlers** (GPTBot, ClaudeBot, Google-Extended, PerplexityBot, etc.)
-so TrailWatch can be cited in AI answers (GEO). Rationale: the site is public
+so Trailwatch can be cited in AI answers (GEO). Rationale: the site is public
 marketing we *want* discovered; the authed app/API is separately protected (auth +
 `robots.ts` disallows), so there's no sensitive exposure.
 
@@ -84,7 +84,7 @@ be surprised. Verify anytime by fetching `/robots.txt`: it should contain only o
 
 ## Layer 2 — Free-tool + content engine
 
-Filter for every idea: (a) real search demand, (b) demos TrailWatch's actual
+Filter for every idea: (a) real search demand, (b) demos Trailwatch's actual
 value, (c) reuses code we already have (page fetch + diff/normalize in
 `src/features/checks`, LLM summaries in `src/features/summaries`, email via
 Resend). Ranked best-first.
@@ -128,7 +128,7 @@ out-convert the tools per visitor.
 
 - `Visualping alternative` — Visualping is the incumbent in page-change
   monitoring; a real recurring query.
-- `TrailWatch vs Crayon`, `Kompyte alternative` — enterprise tools our audience
+- `Trailwatch vs Crayon`, `Kompyte alternative` — enterprise tools our audience
   bounces off of; lean into "built for founders, not enterprise sales teams".
 - Keep them honest and specific (real differences, our low-noise angle), not
   keyword-stuffed boilerplate.

@@ -9,7 +9,7 @@ const DESCRIPTION =
   "Free sale checker: find out if any Shopify store is running a sale right now, how much of its catalog is discounted and how deep the discounts go.";
 
 export const metadata: Metadata = {
-  title: { absolute: "Is this store having a sale? Free sale checker — TrailWatch" },
+  title: { absolute: "Is this store having a sale? Free sale checker — Trailwatch" },
   description: DESCRIPTION,
   alternates: { canonical: "/tools/sale-checker" },
   openGraph: { title: "Is this store having a sale?", description: DESCRIPTION, url: "/tools/sale-checker" },
@@ -58,7 +58,7 @@ export default function SaleCheckerPage() {
         },
         {
           q: "Can I get told when a sale starts?",
-          a: "Yes, with TrailWatch: it checks your competitors’ stores every couple of hours and sends an alert as soon as a sitewide sale starts. It’s free during the beta.",
+          a: "Yes, with Trailwatch: it checks your competitors’ stores every couple of hours and sends an alert as soon as a sitewide sale starts. It’s free during the beta.",
         },
       ]}
     >

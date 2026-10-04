@@ -96,7 +96,7 @@ describe("renderAlertEmail", () => {
     ]) {
       expect(email.text).toContain(part);
     }
-    expect(email.html).toContain("See it in TrailWatch");
+    expect(email.html).toContain("See it in Trailwatch");
     expect(email.html).toContain(">High<");
   });
 
@@ -138,6 +138,6 @@ describe("renderAlertSlack", () => {
     expect(msg.text).toBe("A&B <Co> made 2 big moves");
     const body = JSON.stringify(msg.blocks);
     expect(body).toContain("A&amp;B &lt;Co&gt;");
-    expect(body).toContain("<https://x.test/competitors/c1|See A&amp;B &lt;Co&gt; on TrailWatch>");
+    expect(body).toContain("<https://x.test/competitors/c1|See A&amp;B &lt;Co&gt; on Trailwatch>");
   });
 });

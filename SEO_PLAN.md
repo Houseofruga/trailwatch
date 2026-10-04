@@ -69,12 +69,12 @@ Guardrails for public tools:
 
 | # | Page | Why | Status |
 |---|---|---|---|
-| C1 | TrailWatch vs Visualping | General page-change monitor store owners already try | Rewrite existing |
-| C2 | TrailWatch vs Prisync | Price tracking for e-commerce | New |
-| C3 | TrailWatch vs Price2Spy | Price tracking for e-commerce | New |
-| C4 | TrailWatch vs Particl | E-commerce competitor intelligence; verify positioning first | New |
-| C5 | TrailWatch vs tracking competitors in a spreadsheet | The most common "alternative" | New |
-| C6 | TrailWatch vs Google Alerts | Free and familiar; good contrast | New |
+| C1 | Trailwatch vs Visualping | General page-change monitor store owners already try | Rewrite existing |
+| C2 | Trailwatch vs Prisync | Price tracking for e-commerce | New |
+| C3 | Trailwatch vs Price2Spy | Price tracking for e-commerce | New |
+| C4 | Trailwatch vs Particl | E-commerce competitor intelligence; verify positioning first | New |
+| C5 | Trailwatch vs tracking competitors in a spreadsheet | The most common "alternative" | New |
+| C6 | Trailwatch vs Google Alerts | Free and familiar; good contrast | New |
 | — | Crayon, Kompyte | B2B sales tools, wrong audience | Retire (see Step 0) |
 
 ## Order of work
@@ -93,5 +93,5 @@ Search Console (impressions, clicks, position per page), tool runs, and tool →
 
 ## Open questions for the owner
 
-1. Should guides carry an author name and photo (better for trust), or "TrailWatch team"?
+1. Should guides carry an author name and photo (better for trust), or "Trailwatch team"?
 2. Is a monthly "category report" from our own data (e.g. "how bedding brands discounted in October") something we want later, once the beta has enough stores?

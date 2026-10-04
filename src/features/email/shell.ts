@@ -132,7 +132,7 @@ export function renderShell(input: ShellInput): string {
       <tr><td class="tw-wrap" style="padding:24px 32px 32px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
           <tr><td style="padding:0 0 16px 0;font-family:${SANS};font-size:14px;color:${SUBDUED};">
-            <a href="${site}" style="text-decoration:none;"><img src="${site}/email-logo-dark.png" width="91" height="20" alt="TrailWatch" style="border:0;outline:none;display:inline-block;vertical-align:middle;height:20px;width:91px;"></a>
+            <a href="${site}" style="text-decoration:none;"><img src="${site}/email-logo-dark.png" width="91" height="20" alt="Trailwatch" style="border:0;outline:none;display:inline-block;vertical-align:middle;height:20px;width:91px;"></a>
             <span style="vertical-align:middle;">&nbsp;&middot; ${escapeHtml(input.label)}</span>
           </td></tr>
           ${input.cards}
@@ -142,7 +142,7 @@ export function renderShell(input: ShellInput): string {
               : ""
           }
           <tr><td align="center" style="padding:8px 0 0 0;font-family:${SANS};font-size:12px;line-height:1.6;color:${SUBDUED};">
-            ${input.footerHtml}${input.sentTo ? `<br>TrailWatch &middot; Sent to ${escapeHtml(input.sentTo)}` : ""}
+            ${input.footerHtml}${input.sentTo ? `<br>Trailwatch &middot; Sent to ${escapeHtml(input.sentTo)}` : ""}
             <br>&copy; 2026 House of Ruga LLP
           </td></tr>
         </table>

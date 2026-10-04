@@ -7,7 +7,7 @@ import styles from "./tools.module.css";
 // The free tools hub (DESIGN 08 · /tools).
 
 export const metadata: Metadata = {
-  title: { absolute: "Free tools for Shopify brands — TrailWatch" },
+  title: { absolute: "Free tools for Shopify brands — Trailwatch" },
   description: "Quick checks you can run on any store: see if a site is on Shopify, and more. Free, with no sign-up.",
   alternates: { canonical: "/tools" },
 };

@@ -1,4 +1,4 @@
-# BACKLOG.md — Competitor Radar / TrailWatch
+# BACKLOG.md — Competitor Radar / Trailwatch
 
 Post-MVP items intentionally deferred. Newest at top. When you pick one up, move
 the reasoning into a commit, not here.

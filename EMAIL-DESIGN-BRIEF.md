@@ -1,4 +1,4 @@
-# TrailWatch — Email design brief
+# Trailwatch — Email design brief
 
 A complete spec of the product's emails and, for the weekly digest, **every
 variant and state** — written to hand to Claude Design so the emails get
@@ -68,7 +68,7 @@ per email:
 
 - **Preheader** (hidden preview text): e.g. "3 changes across 2 competitors this
   week." — design must specify this; it's the inbox snippet.
-- **Header:** TrailWatch wordmark/logo (plain — no "by House of Ruga"), thin rule,
+- **Header:** Trailwatch wordmark/logo (plain — no "by House of Ruga"), thin rule,
   optional week range ("Week of Sep 8–14").
 - **Greeting / lead:** "Here's what moved this week." (+ optional first-name).
 - **Body:** the grouped changes (§4).

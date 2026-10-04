@@ -42,7 +42,7 @@ Checking one or two competitors by hand is manageable. Checking five every morni
 
 ## 5. Get an alert the moment it starts
 
-[TrailWatch](/) reads each competitor's public product catalog several times a day. When a large share of a competitor's in-stock products are discounted in a single check, it sends you an alert straight away, so you hear about the sale within hours, not days. It also catches launches, price changes and sell-outs, and sends a plain-English briefing every Monday on what your competitors did that week.
+[Trailwatch](/) reads each competitor's public product catalog several times a day. When a large share of a competitor's in-stock products are discounted in a single check, it sends you an alert straight away, so you hear about the sale within hours, not days. It also catches launches, price changes and sell-outs, and sends a plain-English briefing every Monday on what your competitors did that week.
 
 It's free during the beta. [Join the beta](/login?mode=signup) and add your competitors before November.
 
@@ -60,7 +60,7 @@ Knowing the date is only useful if you act on it. A few options, depending on yo
 It varies by brand and year, which is why checking each competitor's own history (step 1) is more useful than an industry average.
 
 **Is it OK to watch a competitor's prices?**
-Checking competitors' public websites is everyday practice in retail: prices, products and sale banners are shown to every visitor. TrailWatch only reads public pages, never logs in, and respects each site's robots.txt.
+Checking competitors' public websites is everyday practice in retail: prices, products and sale banners are shown to every visitor. Trailwatch only reads public pages, never logs in, and respects each site's robots.txt.
 
 **Does this only work for Shopify stores?**
-Steps 1–4 work for any store. TrailWatch's automatic sale alerts need the store's public product catalog, which most Shopify stores have; for other stores it watches their homepage and sale page instead.
+Steps 1–4 work for any store. Trailwatch's automatic sale alerts need the store's public product catalog, which most Shopify stores have; for other stores it watches their homepage and sale page instead.

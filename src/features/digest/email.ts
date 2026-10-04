@@ -183,11 +183,11 @@ function renderUpgradeNudge(digest: UserDigest, siteUrl: string): string {
 
 // The logo lockup: a dark-ink wordmark for light backgrounds, a light-ink one
 // for dark backgrounds, swapped by the same prefers-color-scheme mechanism the
-// rest of the email uses. alt="TrailWatch" keeps the brand legible with images
+// rest of the email uses. alt="Trailwatch" keeps the brand legible with images
 // off. Outlook (mso) only ever sees the light-background logo, which is right
 // for it.
 function renderLogo(siteUrl: string): string {
-  const common = `width="132" height="29" alt="TrailWatch" style="border:0;outline:none;text-decoration:none;height:29px;width:132px;`;
+  const common = `width="132" height="29" alt="Trailwatch" style="border:0;outline:none;text-decoration:none;height:29px;width:132px;`;
   return `<a href="${escapeHtml(siteUrl)}" style="text-decoration:none;">
           <img src="${escapeHtml(siteUrl)}/email-logo-dark.png" class="tw-logo-light" ${common}display:block;">
           <!--[if !mso]><!-->
@@ -259,7 +259,7 @@ export function renderDigest(
     ...(digest.plan === "free" ? [`Upgrade to Pro: ${siteUrl}/billing`] : []),
     ``,
     `—`,
-    `You're getting this because you track competitors on TrailWatch (${planLabel}).`,
+    `You're getting this because you track competitors on Trailwatch (${planLabel}).`,
     `Unsubscribe: ${unsubHref}   ·   Manage: ${siteUrl}/settings`,
     `© 2026 House of Ruga LLP`,
   ].join("\n");
@@ -341,7 +341,7 @@ export function renderDigest(
   <tr><td style="padding:28px 30px 30px;">
     <div class="tw-hr" style="height:1px;background:#ece9e2;font-size:0;line-height:0;">&nbsp;</div>
     <div class="tw-faint" style="font-family:${SANS};font-size:11.5px;line-height:1.7;color:#8b877e;margin-top:16px;">
-      You're getting this because you track competitors on TrailWatch<span class="tw-faint" style="color:#8b877e;"> · ${escapeHtml(planLabel)}</span>.<br>
+      You're getting this because you track competitors on Trailwatch<span class="tw-faint" style="color:#8b877e;"> · ${escapeHtml(planLabel)}</span>.<br>
       <a href="${escapeHtml(unsubHref)}" class="tw-faint" style="color:#8b877e;text-decoration:underline;">Unsubscribe from the weekly digest</a> &nbsp;·&nbsp; <a href="${escapeHtml(siteUrl)}/settings" class="tw-faint" style="color:#8b877e;text-decoration:underline;">manage in Settings</a>
     </div>
     <div class="tw-faint" style="font-family:${SANS};font-size:11px;line-height:1.6;color:#8b877e;margin-top:12px;">&copy; 2026 House of Ruga LLP</div>

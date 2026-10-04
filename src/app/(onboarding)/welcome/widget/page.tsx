@@ -8,7 +8,7 @@ import * as mock from "@/features/appData/mock";
 import { DEFAULT_BRIEFING, nextBriefingAt } from "@/features/briefing/schedule";
 import { getBetaStatus, getWidgetOnboarding, type WidgetOnboarding } from "@/features/appData/queries";
 
-export const metadata: Metadata = { title: "Set up TrailWatch" };
+export const metadata: Metadata = { title: "Set up Trailwatch" };
 
 const STEPS: WidgetStep[] = ["store", "competitors", "done"];
 // Design-review states (dev `?state=` only), 10-onboard.

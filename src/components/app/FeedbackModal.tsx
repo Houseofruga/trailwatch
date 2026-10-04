@@ -16,7 +16,7 @@ type Kind = "feedback" | "feature";
 
 const PLACEHOLDER: Record<Kind, string> = {
   feedback: "What’s working, what isn’t, what’s confusing…",
-  feature: "What would you like TrailWatch to do?",
+  feature: "What would you like Trailwatch to do?",
 };
 
 /** "Send feedback" (DESIGN 12-Beta 12b): goes straight to the founder. `demo` saves nothing (preview states). */

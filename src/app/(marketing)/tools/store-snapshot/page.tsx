@@ -9,7 +9,7 @@ const DESCRIPTION =
   "Free Shopify store analyzer: see how many products a store sells, its price range, what's on sale, what's sold out and what's new. No sign-up.";
 
 export const metadata: Metadata = {
-  title: { absolute: "Shopify store analyzer: see what any store sells — TrailWatch" },
+  title: { absolute: "Shopify store analyzer: see what any store sells — Trailwatch" },
   description: DESCRIPTION,
   alternates: { canonical: "/tools/store-snapshot" },
   openGraph: { title: "See what any Shopify store sells", description: DESCRIPTION, url: "/tools/store-snapshot" },
@@ -58,7 +58,7 @@ export default function StoreSnapshotPage() {
         },
         {
           q: "Can I track changes over time?",
-          a: "Not here: this is a one-off snapshot. TrailWatch checks a store every couple of hours and tells you when it launches products, changes prices, starts a sale or sells out. It’s free during the beta.",
+          a: "Not here: this is a one-off snapshot. Trailwatch checks a store every couple of hours and tells you when it launches products, changes prices, starts a sale or sells out. It’s free during the beta.",
         },
       ]}
     >

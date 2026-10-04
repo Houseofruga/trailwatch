@@ -372,7 +372,7 @@ export async function sendSlackTest(): Promise<SlackActionResult> {
     .maybeSingle();
   if (!data?.slack_webhook_url) return { ok: false, error: "Slack isn't connected." };
   const res = await postToSlack(data.slack_webhook_url, {
-    text: "TrailWatch is connected. Big competitor moves will show up in this channel.",
+    text: "Trailwatch is connected. Big competitor moves will show up in this channel.",
   });
   return res.sent ? { ok: true } : { ok: false, error: "Slack test failed" };
 }

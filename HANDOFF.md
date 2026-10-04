@@ -1,4 +1,4 @@
-# HANDOFF.md — TrailWatch (DTC pivot)
+# HANDOFF.md — Trailwatch (DTC pivot)
 
 Cross-session build state, written so a fresh Claude Code session (or a different
 account) can continue without prior chat memory. **Read `CLAUDE.md` (working rules)

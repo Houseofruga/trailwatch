@@ -1,6 +1,6 @@
-# TrailWatch v2 → design update: everything shipped in dev since v2
+# Trailwatch v2 → design update: everything shipped in dev since v2
 
-Context: You already have the **TrailWatch v2** design file. Since v2, we built and
+Context: You already have the **Trailwatch v2** design file. Since v2, we built and
 hosted a batch of new features and states in dev. I need you to design/redesign the
 screens below **in the v2 visual language** so I can bring them back and build them
 1:1. Don't reinvent the look — extend it.
