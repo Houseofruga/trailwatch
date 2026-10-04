@@ -119,7 +119,9 @@ async function dueStores(service: SupabaseClient): Promise<{ id: string; next_ch
       .returns<{ id: string; next_check_at: string }[]>();
   const [followed, owned] = await Promise.all([
     due("id, next_check_at, competitors!inner(id)"),
-    due("id, next_check_at, users!inner(id)"),
+    // Named FK: since match_feedback (0019) links stores and users too, a bare
+    // users!inner is ambiguous (PGRST201) and the whole tick failed.
+    due("id, next_check_at, users!users_own_store_id_fkey!inner(id)"),
   ]);
   if (followed.error) throw followed.error;
   if (owned.error) throw owned.error;
