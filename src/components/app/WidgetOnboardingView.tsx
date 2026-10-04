@@ -188,10 +188,13 @@ function Snapshot({ data, next }: { data: WidgetOnboarding; next: () => void }) 
 function YourStore({
   data,
   next,
+  back,
   demoSameDomain,
 }: {
   data: WidgetOnboarding;
   next: (competitorGone?: boolean) => void;
+  /** Absent when there's no snapshot to go back to. */
+  back?: () => void;
   demoSameDomain?: boolean;
 }) {
   const c = data.competitor;
@@ -288,6 +291,11 @@ function YourStore({
           <Button variant="primary" type="submit" loading={busy && !askMine} disabled={askMine}>
             Add my store
           </Button>
+          {back ? (
+            <Button variant="plainDark" onClick={back}>
+              Back
+            </Button>
+          ) : null}
         </div>
       </form>
     </Card>
@@ -296,7 +304,7 @@ function YourStore({
 
 type Pick = Suggestion & { on: boolean };
 
-function Competitors({ data, next, demo }: { data: WidgetOnboarding; next: () => void; demo?: Suggestion[] }) {
+function Competitors({ data, next, back, demo }: { data: WidgetOnboarding; next: () => void; back: () => void; demo?: Suggestion[] }) {
   const router = useRouter();
   const c = data.competitor;
   const [picks, setPicks] = useState<Pick[] | null>(demo ? demo.map((s, i) => ({ ...s, on: i === 0 })) : null);
@@ -453,6 +461,9 @@ function Competitors({ data, next, demo }: { data: WidgetOnboarding; next: () =>
             <Button variant="primary" loading={busy} onClick={() => void start()}>
               Start tracking
             </Button>
+            <Button variant="plainDark" onClick={back}>
+              Back
+            </Button>
           </div>
         </div>
       </Card>
@@ -460,7 +471,7 @@ function Competitors({ data, next, demo }: { data: WidgetOnboarding; next: () =>
   );
 }
 
-function Done({ data, demo, beta }: { data: WidgetOnboarding; demo?: boolean; beta?: BetaStatus | null }) {
+function Done({ data, back, demo, beta }: { data: WidgetOnboarding; back: () => void; demo?: boolean; beta?: BetaStatus | null }) {
   useEffect(() => {
     if (!demo) void finishWidgetOnboarding();
   }, [demo]);
@@ -492,6 +503,9 @@ function Done({ data, demo, beta }: { data: WidgetOnboarding; demo?: boolean; be
         <div className={styles.actions}>
           <Button variant="primary" href="/dashboard">
             Go to Home
+          </Button>
+          <Button variant="plainDark" onClick={back}>
+            Back
           </Button>
         </div>
       </div>
@@ -527,11 +541,16 @@ export function WidgetOnboardingView({
       {step === "snapshot" && data.competitor ? (
         <Snapshot data={data} next={() => go("store")} />
       ) : step === "store" ? (
-        <YourStore data={data} next={(gone) => go("competitors", gone)} demoSameDomain={demoSameDomain} />
+        <YourStore
+          data={data}
+          next={(gone) => go("competitors", gone)}
+          back={data.competitor ? () => go("snapshot") : undefined}
+          demoSameDomain={demoSameDomain}
+        />
       ) : step === "competitors" ? (
-        <Competitors data={data} next={() => go("done")} demo={demoSuggestions} />
+        <Competitors data={data} next={() => go("done")} back={() => go("store")} demo={demoSuggestions} />
       ) : (
-        <Done data={data} demo={!!demoSuggestions} beta={beta} />
+        <Done data={data} back={() => go("competitors")} demo={!!demoSuggestions} beta={beta} />
       )}
     </PageBody>
   );

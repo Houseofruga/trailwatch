@@ -202,6 +202,23 @@ export function WelcomeView({
     return () => clearTimeout(t);
   }, [live, buildingSince]);
 
+  // Each step gets a history entry, so the browser's back and forward move
+  // between steps instead of leaving onboarding. Step 3 replaces its entry:
+  // back from the report it opens lands on step 2, not a rebuild.
+  function goStep(to: 1 | 2 | 3) {
+    setStep(to);
+    if (!live) return;
+    const url = to === 1 ? window.location.pathname : `${window.location.pathname}?step=${to}`;
+    if (to === 3) window.history.replaceState(null, "", url);
+    else window.history.pushState(null, "", url);
+  }
+  useEffect(() => {
+    if (!live) return;
+    const onPop = () => setStep(new URLSearchParams(window.location.search).get("step") === "2" ? 2 : 1);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [live]);
+
   // The optional role answer is saved whichever way they leave step 1.
   function keepRole() {
     if (live && role && role !== (live.role ?? "")) void saveRole(role);
@@ -212,13 +229,13 @@ export function WelcomeView({
     // Your store is required (beta members compare against it).
     if (!store.trim()) return setStoreError("Enter your store’s website, like yourstore.com.");
     keepRole();
-    if (!live || store.trim() === (live.ownDomain ?? "")) return setStep(2);
+    if (!live || store.trim() === (live.ownDomain ?? "")) return goStep(2);
     setSavingStore(true);
     const res = await saveOwnStore(store);
     setSavingStore(false);
     if (!res.ok) return setStoreError(res.error);
     setStoreError(null);
-    setStep(2);
+    goStep(2);
   }
 
   async function add(e: React.FormEvent) {
@@ -259,7 +276,7 @@ export function WelcomeView({
   }
 
   function seeReport() {
-    setStep(3);
+    goStep(3);
     setBuildingSince(Date.now());
   }
 
@@ -379,7 +396,7 @@ export function WelcomeView({
               <Button variant="primary" disabled={added.length === 0} onClick={seeReport}>
                 See your first report
               </Button>
-              <Button variant="plainDark" onClick={() => setStep(1)}>
+              <Button variant="plainDark" onClick={() => goStep(1)}>
                 Back
               </Button>
             </div>
