@@ -68,11 +68,19 @@ Plan and status: `SEO_PLAN.md`. Live so far: `/tools` hub and all four free tool
 
 ## UX / marketing site
 
-- **Legal pages' contact sections still use bare `mailto:`.** The footer Contact
-  link now copies the address to the clipboard on click (`ContactLink`), but the
-  inline `mailto:` links inside the Terms/Privacy/Refund pages don't — a
-  webmail-only visitor clicking those still gets nothing visible. Low priority;
-  fold them into the same treatment (or a `/contact` page) if we build one.
+- **Bring back a Contact link in the footer.** Removed from the footer's Legal
+  column on 2026-10-05 at the owner's request; the old `ContactLink` component
+  (mailto plus copy-to-clipboard) was deleted with it and is in git history
+  (before this change) if we want it back. Options when we return to it:
+  1. A `/contact` page with the support address and a short form that sends
+     through Resend (needs an artboard). Best for visitors on webmail, where a
+     bare `mailto:` does nothing visible.
+  2. Restore the copy-to-clipboard link as it was.
+  Decide which address it shows first: the footer used
+  `trailwatch@houseofruga.com`, while replies and feedback go to
+  `founder@gettrailwatch.com`.
+  The Terms/Privacy/Refund pages still have inline `mailto:` links in their
+  contact sections; give them the same treatment at that point.
 
 ## Legal / compliance
 

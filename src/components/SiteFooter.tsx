@@ -1,10 +1,15 @@
 import Link from "next/link";
 import styles from "./SiteFooter.module.css";
-import { ContactLink } from "./ContactLink";
 
-const SUPPORT_EMAIL = "trailwatch@houseofruga.com";
+// Listed by hand: ToolParts imports this footer, so importing TOOLS would be circular.
+const FREE_TOOLS = [
+  { href: "/tools/shopify-store-checker", name: "Shopify store checker" },
+  { href: "/tools/store-snapshot", name: "Store snapshot" },
+  { href: "/tools/sale-checker", name: "Sale checker" },
+  { href: "/tools/competitor-finder", name: "Competitor finder" },
+];
 
-/** Shared site footer — brand line, legal links, copyright. Used on the
+/** Shared site footer — brand line, link columns, copyright. Used on the
  *  marketing landing and the legal document pages. */
 export function SiteFooter() {
   return (
@@ -24,17 +29,25 @@ export function SiteFooter() {
           </div>
 
           <div className={styles.cols}>
+            <nav className={styles.legal} aria-label="Free tools">
+              <div className={styles.legalHead}>Free tools</div>
+              <ul className={styles.legalLinks}>
+                {FREE_TOOLS.map((t) => (
+                  <li key={t.href}>
+                    <Link href={t.href}>{t.name}</Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
             <nav className={styles.legal} aria-label="Resources">
               <div className={styles.legalHead}>Resources</div>
               <ul className={styles.legalLinks}>
                 <li>
-                  <Link href="/tools/shopify-store-checker">Shopify store checker</Link>
+                  <Link href="/guides">Guides</Link>
                 </li>
                 <li>
                   <Link href="/tools">All free tools</Link>
-                </li>
-                <li>
-                  <Link href="/guides">Guides</Link>
                 </li>
               </ul>
             </nav>
@@ -50,9 +63,6 @@ export function SiteFooter() {
                 </li>
                 <li>
                   <Link href="/refunds">Refund Policy</Link>
-                </li>
-                <li>
-                  <ContactLink email={SUPPORT_EMAIL} />
                 </li>
               </ul>
             </nav>
