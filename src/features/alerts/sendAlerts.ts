@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { ratingUrls } from "@/features/beta/ratings";
 import { getMailer } from "@/features/digest/mailer";
 import { planInstantAlerts, routingConfig, type PendingAlert } from "@/features/events/routing";
 import type { EventType, Severity } from "@/features/events/types";
@@ -148,15 +149,20 @@ export async function runAlertSender(service: SupabaseClient, now: Date = new Da
         }),
       };
 
+      // The bundle id is also what the email's "Useful / Noise" links rate.
+      const bundleId = randomUUID();
+      const rating = ratingUrls(siteUrl, userId, "alert", bundleId);
       const results = await Promise.all([
-        settings.emailInstant ? mailer.send(settings.sendTo ?? user.email, renderAlertEmail(bundle, siteUrl, counter, settings.sendTo ?? user.email)) : null,
+        settings.emailInstant
+          ? mailer.send(settings.sendTo ?? user.email, renderAlertEmail(bundle, siteUrl, counter, settings.sendTo ?? user.email, rating))
+          : null,
         slackUrl ? postToSlack(slackUrl, renderAlertSlack(bundle, siteUrl)) : null,
       ]);
       const ids = group.map((a) => a.userEventId);
       if (results.some((r) => r?.sent)) {
         await service
           .from("user_events")
-          .update({ status: "sent", bundle_id: randomUUID(), delivered_at: now.toISOString() })
+          .update({ status: "sent", bundle_id: bundleId, delivered_at: now.toISOString() })
           .in("id", ids);
         totals.sent += 1;
       } else {

@@ -11,6 +11,7 @@ import {
   heading,
   note,
   paragraph,
+  ratingRow,
   renderShell,
   rows,
 } from "@/features/email/shell";
@@ -83,7 +84,14 @@ const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
  * when several launched or went on sale together, how it compares with the
  * reader's product, one thing they could do, and a link to the move in the app.
  */
-export function renderAlertEmail(b: AlertBundle, siteUrl: string, movesThisMonth: number, sentTo?: string): RenderedEmail {
+export function renderAlertEmail(
+  b: AlertBundle,
+  siteUrl: string,
+  movesThisMonth: number,
+  sentTo?: string,
+  /** Beta: one-click "Useful / Noise" links (left out when unsigned). */
+  rating?: { useful: string; notUseful: string } | null,
+): RenderedEmail {
   const moves = alertMoves(b);
   const lead = moves[0];
   const leadEv = leadEvent(b.events);
@@ -109,6 +117,7 @@ export function renderAlertEmail(b: AlertBundle, siteUrl: string, movesThisMonth
     ``,
     `See it in TrailWatch: ${href}`,
     ``,
+    ...(rating ? [`Was this alert useful? Useful: ${rating.useful}  ·  Noise: ${rating.notUseful}`, ``] : []),
     `—`,
     `Moves caught this month: ${movesThisMonth}`,
     `Change alerts: ${siteUrl}/settings`,
@@ -136,7 +145,7 @@ export function renderAlertEmail(b: AlertBundle, siteUrl: string, movesThisMonth
     subject,
     preheader: lead.meaning ?? lead.comparedWithYours ?? suggestion,
     label: "Instant alert",
-    cards: card(inner),
+    cards: card(inner) + (rating ? ratingRow("Was this alert useful?", rating, ["Useful", "Noise"]) : ""),
     footerHtml: footerLine(siteUrl, movesThisMonth, `${siteUrl}/settings`),
     sentTo,
   });

@@ -1,6 +1,8 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
+import { sendWelcomeOnce } from "@/features/beta/welcome";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 
 // Landing point for EMAIL links: password recovery, signup confirmation, email
 // change. Unlike the OAuth PKCE code flow at /auth/callback, verifyOtp with a
@@ -22,10 +24,14 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+  const { data, error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
   if (error) {
     return NextResponse.redirect(`${origin}/login?error=link`);
   }
+  // A confirmed sign-up gets the founder's welcome email (once; a no-op for
+  // anyone already welcomed, e.g. a password reset).
+  const userId = data.user?.id;
+  if (userId) after(() => sendWelcomeOnce(createServiceClient(), userId));
 
   return NextResponse.redirect(`${origin}${dest}`);
 }

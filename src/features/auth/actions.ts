@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { after } from "next/server";
+import { sendWelcomeOnce } from "@/features/beta/welcome";
 import { claimNext } from "@/features/preview/claimPath";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
@@ -85,6 +87,10 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
   if (!data.session) {
     return { checkEmail: parsed.data.email };
   }
+
+  // No email confirmation: the account is live now, so welcome it now.
+  const newUserId = data.user?.id;
+  if (newUserId) after(() => sendWelcomeOnce(createServiceClient(), newUserId));
 
   revalidatePath("/", "layout");
   // New account → onboarding (or the widget's claim). /welcome pre-seeds any

@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { getAccount } from "@/features/account/queries";
 import { getMonthlyReport, isAdminEmail, listAdminUsers, listPreviewDays, monthRange, type PreviewDay } from "@/features/usage/report";
+import { changeFounderCalls, setFoundingMember } from "@/features/beta/adminActions";
+import { BETA_CONFIG } from "@/features/beta/config";
+import { getBetaReport, type BetaReport } from "@/features/beta/report";
 import { createServiceClient } from "@/lib/supabase/service";
 import styles from "./page.module.css";
 
@@ -29,9 +32,12 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   let report;
   let users;
   let previews: PreviewDay[] | null = null;
+  let beta: BetaReport | null = null;
   try {
     const service = createServiceClient();
     [report, users, previews] = await Promise.all([getMonthlyReport(service, month), listAdminUsers(service), listPreviewDays(service)]);
+    // Separate so the cost view still loads before migration 0025.
+    beta = await getBetaReport(service).catch(() => null);
   } catch (err) {
     return (
       <div className={styles.wrap}>
@@ -126,6 +132,113 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           </tbody>
         </table>
       </div>
+
+      <h2 className={styles.section}>Beta</h2>
+      {beta ? (
+        <>
+          <div className={styles.stats}>
+            <div className={styles.stat}>
+              <div className={styles.statLabel}>Founding spots</div>
+              <div className={styles.statValue}>
+                {beta.foundingUsed} / {beta.foundingCap}
+              </div>
+            </div>
+            {beta.ratings.map((r) => (
+              <div key={r.target} className={styles.stat}>
+                <div className={styles.statLabel}>{r.target === "briefing" ? "Briefings rated useful" : "Alerts rated useful"}</div>
+                <div className={styles.statValue}>
+                  {r.useful + r.notUseful ? `${Math.round((r.useful / (r.useful + r.notUseful)) * 100)}%` : "—"}
+                  <span className={styles.statNote}> of {r.useful + r.notUseful}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.card}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Founding member</th>
+                  <th className={styles.num}>Calls done</th>
+                  <th className={styles.num}>Discount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {beta.members.map((m) => (
+                  <tr key={m.id}>
+                    <td className={styles.mono}>{m.email}</td>
+                    <td>
+                      <form action={setFoundingMember} className={styles.inline}>
+                        <input type="hidden" name="userId" value={m.id} />
+                        <input type="hidden" name="founding" value={m.founding ? "false" : "true"} />
+                        {m.founding ? "Yes" : "No"}{" "}
+                        <button type="submit" className={styles.mini}>
+                          {m.founding ? "Remove" : "Make founding"}
+                        </button>
+                      </form>
+                    </td>
+                    <td className={styles.num}>
+                      {m.founding ? (
+                        <span className={styles.inline}>
+                          <form action={changeFounderCalls}>
+                            <input type="hidden" name="userId" value={m.id} />
+                            <input type="hidden" name="delta" value="-1" />
+                            <button type="submit" className={styles.mini} aria-label={`One call fewer for ${m.email}`} disabled={m.calls === 0}>
+                              −
+                            </button>
+                          </form>
+                          {m.calls} / {BETA_CONFIG.callsNeeded}
+                          <form action={changeFounderCalls}>
+                            <input type="hidden" name="userId" value={m.id} />
+                            <input type="hidden" name="delta" value="1" />
+                            <button type="submit" className={styles.mini} aria-label={`One more call for ${m.email}`}>
+                              +
+                            </button>
+                          </form>
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td className={styles.num}>{m.founding ? `${m.discountPct}%` : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <h2 className={styles.section}>Feedback and rating notes</h2>
+          <div className={styles.card}>
+            {beta.notes.length ? (
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>When</th>
+                    <th>What</th>
+                    <th>From</th>
+                    <th>Message</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {beta.notes.map((n, i) => (
+                    <tr key={i}>
+                      <td className={styles.mono}>{n.at.slice(0, 10)}</td>
+                      <td>{n.kind}</td>
+                      <td className={styles.mono}>{n.email}</td>
+                      <td className={styles.message}>{n.message}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className={styles.empty}>No feedback yet.</p>
+            )}
+          </div>
+        </>
+      ) : (
+        <p className={styles.sub}>Beta data isn&rsquo;t available. Is migration 0025 applied?</p>
+      )}
 
       <h2 className={styles.section}>Competitor previews (homepage, last 14 days)</h2>
       <div className={styles.card}>

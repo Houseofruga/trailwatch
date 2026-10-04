@@ -17,6 +17,7 @@ import {
   toSuggestions,
   type Suggestion,
 } from "@/features/competitorFinder/suggest";
+import { submitFeedback } from "@/features/beta/feedback";
 import { addCompetitorByDomain, deleteCompetitor } from "@/features/competitors/actions";
 import { setOpportunityStatus, type StatusAction } from "@/features/opportunities/queries";
 import { resolvePlan } from "@/features/plan/comp";
@@ -240,6 +241,23 @@ export async function markOpportunityNotRelevant(id: unknown) {
 
 export async function restoreOpportunity(id: unknown) {
   return setOpportunity(id, "restore");
+}
+
+// ------------------------------------------------------------ feedback (beta)
+
+const feedbackInput = z.object({
+  kind: z.enum(["feedback", "feature"]),
+  message: z.string().trim().min(1).max(4000),
+  page: z.string().max(200).optional(),
+});
+
+/** "Send feedback / request a feature": saved and emailed to the founder (reply-to: the user). */
+export async function sendFeedback(input: unknown): Promise<{ ok: boolean }> {
+  const { user, email } = await currentUser();
+  const parsed = feedbackInput.safeParse(input);
+  if (!parsed.success) return { ok: false };
+  const ok = await submitFeedback(createServiceClient(), { id: user.id, email }, parsed.data);
+  return { ok };
 }
 
 // ------------------------------------------------------------ widget onboarding

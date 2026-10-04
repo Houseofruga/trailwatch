@@ -1,5 +1,7 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
+import { sendWelcomeOnce } from "@/features/beta/welcome";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 
 // Google OAuth and password-recovery links both land here with a code to
 // exchange for a session. `next` lets recovery send the user on to
@@ -17,11 +19,14 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
     return NextResponse.redirect(`${origin}/login?error=oauth`);
   }
+  // A new Google account gets the founder's welcome email (once).
+  const userId = data.user?.id;
+  if (userId) after(() => sendWelcomeOnce(createServiceClient(), userId));
 
   // Only allow internal relative paths, so `next` can't become an open redirect.
   const dest = next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";

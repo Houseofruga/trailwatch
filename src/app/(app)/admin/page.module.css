@@ -106,3 +106,43 @@
     padding: 28px 16px 60px 16px;
   }
 }
+
+/* Beta section */
+.statNote {
+  font-size: 12px;
+  color: var(--ink-4);
+}
+
+.inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mini {
+  font: inherit;
+  font-size: 12px;
+  padding: 2px 8px;
+  border: 1px solid var(--border-input);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.mini:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.message {
+  white-space: pre-wrap;
+  max-width: 420px;
+}
+
+.empty {
+  margin: 0;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--ink-3);
+}

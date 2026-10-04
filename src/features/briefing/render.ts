@@ -12,6 +12,7 @@ import {
   link,
   paragraph,
   plural,
+  ratingRow,
   renderShell,
 } from "@/features/email/shell";
 import type { BriefingInput, BriefingInterpretation } from "./content";
@@ -43,6 +44,8 @@ export function renderBriefingEmail(opts: {
   /** Everyone the reader follows; defaults to the stores in this week's events. */
   competitors?: BriefingCompetitor[];
   sentTo?: string;
+  /** Beta: one-click "Was this useful?" links (left out when unsigned). */
+  rating?: { useful: string; notUseful: string } | null;
 }): RenderedEmail {
   const { input, interpretation: ai, siteUrl } = opts;
   const competitors: BriefingCompetitor[] =
@@ -129,6 +132,7 @@ export function renderBriefingEmail(opts: {
     ``,
     `Open TrailWatch: ${siteUrl}/dashboard`,
     ``,
+    ...(opts.rating ? [`Was this briefing useful? Yes: ${opts.rating.useful}  ·  No: ${opts.rating.notUseful}`, ``] : []),
     `—`,
     `Moves caught this month: ${opts.movesThisMonth}`,
     `Change alerts: ${siteUrl}/settings   ·   Unsubscribe: ${unsubHref}`,
@@ -206,7 +210,7 @@ export function renderBriefingEmail(opts: {
     subject,
     preheader,
     label: `Monday briefing · ${weekLabel(input.weekOf)}`,
-    cards: cards.join(""),
+    cards: cards.join("") + (opts.rating ? ratingRow("Was this briefing useful?", opts.rating) : ""),
     cta: { html: button(`${siteUrl}/dashboard`, "Open TrailWatch"), center: true },
     footerHtml: footerLine(siteUrl, opts.movesThisMonth, unsubHref),
     sentTo: opts.sentTo,

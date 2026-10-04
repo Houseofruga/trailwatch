@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { BETA_CONFIG } from "@/features/beta/config";
 import type { RenderedEmail } from "./email";
 
 // The send seam. Same graceful-degradation shape as the summarizer: if no key
@@ -9,7 +10,8 @@ import type { RenderedEmail } from "./email";
 export type SendResult = { sent: true } | { sent: false; reason: string };
 
 export interface Mailer {
-  send(to: string, email: RenderedEmail, headers?: Record<string, string>): Promise<SendResult>;
+  /** Replies go to `opts.replyTo`, else the founder (beta: every email is a line to the founder). */
+  send(to: string, email: RenderedEmail, headers?: Record<string, string>, opts?: { replyTo?: string }): Promise<SendResult>;
 }
 
 // From address is env-configurable. Resend requires a verified domain in
@@ -21,10 +23,11 @@ function createResendMailer(apiKey: string): Mailer {
   const from = process.env.EMAIL_FROM || DEFAULT_FROM;
 
   return {
-    async send(to, email, headers) {
+    async send(to, email, headers, opts) {
       const { error } = await resend.emails.send({
         from,
         to,
+        replyTo: opts?.replyTo ?? (process.env.EMAIL_REPLY_TO || BETA_CONFIG.founderEmail),
         subject: email.subject,
         html: email.html,
         text: email.text,

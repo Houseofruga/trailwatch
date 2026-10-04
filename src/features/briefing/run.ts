@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { loadAlertSettings, movesCaughtThisMonth } from "@/features/alerts/settings";
+import { ratingUrls } from "@/features/beta/ratings";
 import { getMailer } from "@/features/digest/mailer";
 import { unsubscribeUrl } from "@/features/digest/unsubscribe";
 import type { EventType, Severity } from "@/features/events/types";
@@ -293,6 +294,7 @@ async function send(service: SupabaseClient, week: string, now: Date): Promise<{
         .filter((c) => c.user_id === b.user_id)
         .map((c) => ({ id: c.id as string, name: c.name as string, storeId: c.store_id as string })),
       sentTo: email,
+      rating: ratingUrls(siteUrl, b.user_id, "briefing", b.id),
     });
     // One-click unsubscribe (RFC 8058), as on the digest.
     const headers = unsub

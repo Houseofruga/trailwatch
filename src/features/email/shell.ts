@@ -161,3 +161,13 @@ export function footerLine(siteUrl: string, movesThisMonth: number, unsubscribeH
     `<a href="${escapeHtml(href)}" style="color:${INK_2};text-decoration:underline;">${escapeHtml(text)}</a>`;
   return `Moves caught this month: ${movesThisMonth} &middot; ${a(`${siteUrl}/settings`, "Change alerts")} &middot; ${a(unsubscribeHref, "Unsubscribe")}`;
 }
+
+/**
+ * One-click rating row (beta): "Was this briefing useful?  Yes · No". Two
+ * plain button-links, so it works with images off and in every client.
+ */
+export function ratingRow(question: string, urls: { useful: string; notUseful: string }, labels: [string, string] = ["Yes", "No"]): string {
+  const pill = (href: string, text: string) =>
+    `<a href="${escapeHtml(href)}" style="display:inline-block;padding:6px 14px;margin:0 4px;border:1px solid #d4d4d4;border-radius:8px;color:#303030;text-decoration:none;font-weight:600;font-size:14px;">${escapeHtml(text)}</a>`;
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="padding:4px 0 20px 0;font-family:${SANS};font-size:14px;color:${SUBDUED};">${escapeHtml(question)}&nbsp; ${pill(urls.useful, labels[0])}${pill(urls.notUseful, labels[1])}</td></tr></table>`;
+}
