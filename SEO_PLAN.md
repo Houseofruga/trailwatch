@@ -65,6 +65,10 @@ Guardrails for public tools:
 | G8 | How to find your Shopify store's real competitors | "find ecommerce competitors" (pairs with T4) |
 | G9 | Competitive analysis for DTC brands: a practical template | "dtc competitive analysis template" |
 
+**Status (2026-10-05):** G1 to G9 are all published under `/guides` (content in
+`src/features/guides/content/`). Titles differ slightly from the tables above; the search
+intents are the same.
+
 ## 3. Comparisons
 
 | # | Page | Why | Status |

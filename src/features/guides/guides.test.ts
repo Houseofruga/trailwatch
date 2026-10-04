@@ -24,6 +24,11 @@ describe("guides", () => {
     for (const g of GUIDES) expect(relatedGuides(g).map((r) => r.slug)).not.toContain(g.slug);
   });
 
+  it("only link to guides and tools that exist", () => {
+    const slugs = new Set(GUIDES.map((g) => g.slug));
+    for (const g of GUIDES) for (const r of g.related) expect(slugs.has(r), `${g.slug} -> ${r}`).toBe(true);
+  });
+
   it("formats dates the same in every time zone", () => {
     expect(guideDate("2026-10-02")).toBe("Oct 2, 2026");
   });

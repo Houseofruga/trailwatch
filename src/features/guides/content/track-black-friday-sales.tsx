@@ -15,7 +15,7 @@ export const trackBlackFridaySales: Guide = {
   date: "2026-10-05",
   readMinutes: 7,
   author: "chandan",
-  related: [],
+  related: ["black-friday-competitor-checklist", "real-price-cut-vs-fake-sale"],
   blocks: [
     { type: "h2", id: "why", text: "Why Black Friday is different" },
     {

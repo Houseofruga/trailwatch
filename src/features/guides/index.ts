@@ -1,8 +1,26 @@
 import type { Guide, GuideGroup } from "./types";
+import { blackFridayChecklist } from "./content/black-friday-checklist";
+import { competitorOutOfStock } from "./content/competitor-out-of-stock";
+import { dtcCompetitiveAnalysisTemplate } from "./content/dtc-competitive-analysis-template";
+import { findCompetitorBestSellers } from "./content/find-competitor-best-sellers";
+import { findShopifyStoreCompetitors } from "./content/find-shopify-store-competitors";
+import { realPriceCutVsFakeSale } from "./content/real-price-cut-vs-fake-sale";
+import { seeCompetitorNewProducts } from "./content/see-competitor-new-products";
 import { trackBlackFridaySales } from "./content/track-black-friday-sales";
+import { trackCompetitorPrices } from "./content/track-competitor-prices";
 
-// Every published guide, newest first within its group.
-export const GUIDES: Guide[] = [trackBlackFridaySales];
+// Every published guide, in the order the hub shows them within each group.
+export const GUIDES: Guide[] = [
+  trackBlackFridaySales,
+  blackFridayChecklist,
+  realPriceCutVsFakeSale,
+  trackCompetitorPrices,
+  seeCompetitorNewProducts,
+  findCompetitorBestSellers,
+  competitorOutOfStock,
+  findShopifyStoreCompetitors,
+  dtcCompetitiveAnalysisTemplate,
+];
 
 export const GUIDE_GROUPS: { id: GuideGroup; title: string; lead: string }[] = [
   { id: "black-friday", title: "Black Friday", lead: "Get ready for the busiest month of the year." },
