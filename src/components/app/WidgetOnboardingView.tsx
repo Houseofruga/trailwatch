@@ -314,12 +314,10 @@ function Competitors({ data, next, back, demo }: { data: WidgetOnboarding; next:
   );
 }
 
-function Done({ data, back, demo, beta }: { data: WidgetOnboarding; back: () => void; demo?: boolean; beta?: BetaStatus | null }) {
-  useEffect(() => {
-    if (!demo) void finishWidgetOnboarding();
-  }, [demo]);
-  const when = data.nextBriefing
-    ? new Date(data.nextBriefing).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })
+/** The last step of both onboardings (DESIGN 10-onboard 4, 12-Beta 12d). */
+export function AllSetCard({ nextBriefing, back, beta }: { nextBriefing: string | null; back: () => void; beta?: BetaStatus | null }) {
+  const when = nextBriefing
+    ? new Date(nextBriefing).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })
     : null;
   return (
     <Card>
@@ -354,6 +352,13 @@ function Done({ data, back, demo, beta }: { data: WidgetOnboarding; back: () => 
       </div>
     </Card>
   );
+}
+
+function Done({ data, back, demo, beta }: { data: WidgetOnboarding; back: () => void; demo?: boolean; beta?: BetaStatus | null }) {
+  useEffect(() => {
+    if (!demo) void finishWidgetOnboarding();
+  }, [demo]);
+  return <AllSetCard nextBriefing={data.nextBriefing} back={back} beta={beta} />;
 }
 
 export function WidgetOnboardingView({

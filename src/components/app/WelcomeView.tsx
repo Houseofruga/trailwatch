@@ -8,9 +8,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { ProgressBar } from "@/components/ui/Feedback";
 import { Stepper } from "@/components/ui/Guides";
-import { IconCheck, IconClock, IconX, SpinnerIcon } from "@/components/ui/icons";
+import { IconX } from "@/components/ui/icons";
 import { PageBody } from "@/components/ui/Page";
 import { FormSelect } from "@/components/ui/Select";
 import { TextField } from "@/components/ui/TextField";
@@ -20,14 +19,12 @@ import { ROLES, type UserRole } from "@/features/appData/roles";
 import type { OnboardingItem } from "@/features/appData/types";
 import { CompetitorSuggestions, type SuggestPreview } from "./CompetitorSuggestions";
 import type { BetaStatus } from "@/features/appData/types";
-import { BetaNote } from "./BetaParts";
+import { AllSetCard } from "./WidgetOnboardingView";
 import styles from "./WelcomeView.module.css";
 
 const LIMIT = 10;
 const LIST_PREVIEW = 5;
 const POLL_MS = 3000;
-/** After this long on "Building your first report", show the slow state. */
-const SLOW_MS = 60_000;
 
 type Added = OnboardingItem;
 
@@ -107,8 +104,8 @@ function takePending(): { company: string | null; urls: string[] } {
   }
 }
 
-/** The store whose report opens first: the first one added with a catalog, else the first one. */
-const reportTarget = (list: Added[]) => list.find((a) => a.status !== "pages") ?? list[0];
+// Design review: a Monday about a week out.
+const PREVIEW_BRIEFING = "2026-10-12T12:00:00.000Z";
 
 export function WelcomeView({
   state,
@@ -117,8 +114,8 @@ export function WelcomeView({
 }: {
   state: WelcomeState;
   /** Real data; null on a design-review preview. */
-  live: { ownDomain: string | null; added: Added[]; role: UserRole | null } | null;
-  /** Beta-member note on the last step (DESIGN 12-Beta 12d). */
+  live: { ownDomain: string | null; added: Added[]; role: UserRole | null; nextBriefing: string | null } | null;
+  /** Beta-member note on the last step (DESIGN 12-Beta 12d), on the all-set card. */
   beta?: BetaStatus | null;
 }) {
   const router = useRouter();
@@ -137,11 +134,8 @@ export function WelcomeView({
   const [error, setError] = useState<string | null>(preset?.error ?? null);
   const [adding, setAdding] = useState(state === "step-2-adding" && !live);
   const [showAll, setShowAll] = useState(false);
-  const [buildingSince, setBuildingSince] = useState<number | null>(null);
-  const [slowNow, setSlowNow] = useState(false);
 
   const full = added.length >= LIMIT;
-  const slow = live ? slowNow : state === "slow";
   const reading = added.some((a) => a.status === "reading");
 
   // Live: carry over what the visitor picked on the homepage before signing up —
@@ -188,33 +182,19 @@ export function WelcomeView({
     return () => clearInterval(t);
   }, [live, step, reading]);
 
-  // Live: open the first report once its store is read (or its read failed).
-  const target = reportTarget(added);
-  useEffect(() => {
-    if (!live || step !== 3 || !target) return;
-    if (target.status !== "reading") router.push(`/competitors/${target.id}/report`);
-  }, [live, step, target, router]);
-
-  // Live: switch to the slow state after a minute.
-  useEffect(() => {
-    if (!live || buildingSince === null) return;
-    const t = setTimeout(() => setSlowNow(true), Math.max(0, buildingSince + SLOW_MS - Date.now()));
-    return () => clearTimeout(t);
-  }, [live, buildingSince]);
-
   // Each step gets a history entry, so the browser's back and forward move
-  // between steps instead of leaving onboarding. Step 3 replaces its entry:
-  // back from the report it opens lands on step 2, not a rebuild.
+  // between steps instead of leaving onboarding.
   function goStep(to: 1 | 2 | 3) {
     setStep(to);
     if (!live) return;
-    const url = to === 1 ? window.location.pathname : `${window.location.pathname}?step=${to}`;
-    if (to === 3) window.history.replaceState(null, "", url);
-    else window.history.pushState(null, "", url);
+    window.history.pushState(null, "", to === 1 ? window.location.pathname : `${window.location.pathname}?step=${to}`);
   }
   useEffect(() => {
     if (!live) return;
-    const onPop = () => setStep(new URLSearchParams(window.location.search).get("step") === "2" ? 2 : 1);
+    const onPop = () => {
+      const n = new URLSearchParams(window.location.search).get("step");
+      setStep(n === "3" ? 3 : n === "2" ? 2 : 1);
+    };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, [live]);
@@ -275,13 +255,8 @@ export function WelcomeView({
     if (live) await removeCompetitor(a.id);
   }
 
-  function seeReport() {
-    goStep(3);
-    setBuildingSince(Date.now());
-  }
 
   const shown = showAll ? added : added.slice(0, LIST_PREVIEW);
-  const done = added.filter((a) => a.status !== "reading").length;
 
   return (
     <PageBody narrow>
@@ -389,12 +364,10 @@ export function WelcomeView({
               onAdd={addSuggestion}
             />
 
-            {beta ? <BetaNote beta={beta} /> : null}
-
             <div className={styles.spacer} />
             <div className={styles.actions}>
-              <Button variant="primary" disabled={added.length === 0} onClick={seeReport}>
-                See your first report
+              <Button variant="primary" disabled={added.length === 0} onClick={() => goStep(3)}>
+                Continue
               </Button>
               <Button variant="plainDark" onClick={() => goStep(1)}>
                 Back
@@ -403,65 +376,7 @@ export function WelcomeView({
           </div>
         </Card>
       ) : (
-        <Card>
-          <div className={styles.card}>
-            <h1 className={styles.title}>Building your first report</h1>
-            {!slow ? <p className={styles.lead}>This usually takes under a minute.</p> : null}
-            {live ? (
-              // We don't know a catalog's size until it's read, so progress is per store.
-              <ProgressBar
-                label={target ? `Reading ${target.name}’s catalog` : "Reading catalogs"}
-                value={done}
-                max={Math.max(1, added.length)}
-              />
-            ) : slow ? (
-              <ProgressBar label="Reading Hearth & Pine’s catalog: 410 of 1,632 products" value={410} max={1632} />
-            ) : (
-              <ProgressBar label="Reading Dewlane’s catalog: 250 of 313 products" value={250} max={313} />
-            )}
-            {slow ? (
-              <>
-                <Banner tone="info">Big catalogs take a minute. We&rsquo;ll email you when it&rsquo;s ready.</Banner>
-                <div className={styles.actions}>
-                  <Button variant="primary" href="/dashboard">
-                    Go to Home
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <ul className={styles.progressList}>
-                {(live
-                  ? added
-                  : [
-                      { ...HP, status: "ready" as const },
-                      { ...DW, status: "reading" as const },
-                      OG,
-                    ]
-                ).map((a) => (
-                  <li key={a.id}>
-                    {a.status === "ready" ? (
-                      <>
-                        <IconCheck /> {a.name}: {a.products !== null ? `${a.products.toLocaleString("en-US")} products read` : "read"}
-                      </>
-                    ) : a.status === "reading" ? (
-                      <>
-                        <SpinnerIcon tone="#4a4a4a" /> {a.name}: reading catalog
-                      </>
-                    ) : a.status === "failed" ? (
-                      <>
-                        <IconX /> {a.name}: couldn&rsquo;t read, we&rsquo;ll try again
-                      </>
-                    ) : (
-                      <>
-                        <IconClock /> {a.name}: pages next
-                      </>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </Card>
+        <AllSetCard nextBriefing={live ? live.nextBriefing : PREVIEW_BRIEFING} beta={beta} back={() => goStep(2)} />
       )}
     </PageBody>
   );

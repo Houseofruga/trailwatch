@@ -3,7 +3,7 @@ import { WelcomeView } from "@/components/app/WelcomeView";
 import { DevStateBar } from "@/components/ui/DevStateBar";
 import { previewEnabled, previewState } from "@/features/appData/devState";
 import * as mock from "@/features/appData/mock";
-import { getBetaStatus, getOnboardingStatus, getOwnStore, getRole } from "@/features/appData/queries";
+import { getBetaStatus, getRole, getWidgetOnboarding } from "@/features/appData/queries";
 
 export const metadata: Metadata = { title: "Set up TrailWatch" };
 
@@ -23,8 +23,7 @@ const STATES = [
   "step-2-suggestions-none",
   "step-2-suggestions-failed",
   "step-2-no-own-store",
-  "building-report",
-  "slow",
+  "done",
 ] as const;
 export type WelcomeState = (typeof STATES)[number];
 
@@ -34,10 +33,11 @@ export default async function WelcomePage({ searchParams }: { searchParams: Prom
   const live =
     previewEnabled && raw
       ? null
-      : await Promise.all([getOwnStore(), getOnboardingStatus(), getRole()]).then(([own, added, role]) => ({
-          ownDomain: own?.domain ?? null,
-          added,
+      : await Promise.all([getWidgetOnboarding(null), getRole()]).then(([w, role]) => ({
+          ownDomain: w.ownStore?.domain ?? null,
+          added: w.added,
           role,
+          nextBriefing: w.nextBriefing,
         }));
   return (
     <>
