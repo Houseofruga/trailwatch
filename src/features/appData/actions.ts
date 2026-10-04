@@ -23,7 +23,7 @@ import { setOpportunityStatus, type StatusAction } from "@/features/opportunitie
 import { resolvePlan } from "@/features/plan/comp";
 import { PLANS } from "@/features/plan/limits";
 import { canonicalStoreHost } from "@/features/stores/domain";
-import { clearOwnStore, setOwnStore } from "@/features/stores/ownStore";
+import { setOwnStore } from "@/features/stores/ownStore";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getOnboardingStatus, getOwnStore } from "./queries";
@@ -75,11 +75,8 @@ export type StoreResult = { ok: true } | { ok: false; error: string };
 
 /** Set (or with "" clear) the user's own store. */
 export async function saveOwnStore(domain: string): Promise<StoreResult> {
-  if (!domain.trim()) {
-    await clearOwnStore();
-    revalidateApp();
-    return { ok: true };
-  }
+  // Required: there's no removing your store, only changing it.
+  if (!domain.trim()) return { ok: false, error: "Enter your store’s website, like yourstore.com." };
   const result = await setOwnStore(domain);
   if (!result.ok) return { ok: false, error: result.message };
   revalidateApp();

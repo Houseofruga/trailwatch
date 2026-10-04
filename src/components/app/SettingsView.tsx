@@ -312,9 +312,6 @@ export function SettingsView({
                         ? `${initial.ownStore.products.toLocaleString("en-US")} products · checked ${ago(initial.ownStore.checkedAt)}`
                         : "Reading your catalog…"}
                     </span>
-                    <Button variant="plainDark" onClick={() => set("storeDomain", "")}>
-                      Remove
-                    </Button>
                   </div>
                 ) : null}
               </div>

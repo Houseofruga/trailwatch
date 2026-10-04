@@ -288,9 +288,6 @@ function YourStore({
           <Button variant="primary" type="submit" loading={busy && !askMine} disabled={askMine}>
             Add my store
           </Button>
-          <Button variant="plainDark" onClick={() => next()}>
-            Skip for now
-          </Button>
         </div>
       </form>
     </Card>

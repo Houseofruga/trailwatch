@@ -124,7 +124,7 @@ export function WelcomeView({
   const router = useRouter();
   const preset = live ? undefined : PRESETS[state];
   const [step, setStep] = useState<1 | 2 | 3>(
-    live ? (live.added.length > 0 ? 2 : 1) : state === "step-1-your-store" ? 1 : preset ? 2 : 3,
+    live ? (live.added.length > 0 && live.ownDomain ? 2 : 1) : state === "step-1-your-store" ? 1 : preset ? 2 : 3,
   );
   const [store, setStore] = useState(live ? (live.ownDomain ?? "") : "glowfield.com");
   const [storeError, setStoreError] = useState<string | null>(null);
@@ -207,15 +207,12 @@ export function WelcomeView({
     if (live && role && role !== (live.role ?? "")) void saveRole(role);
   }
 
-  function skipStore() {
-    keepRole();
-    setStep(2);
-  }
-
   async function continueFromStore(e: React.FormEvent) {
     e.preventDefault();
+    // Your store is required (beta members compare against it).
+    if (!store.trim()) return setStoreError("Enter your store’s website, like yourstore.com.");
     keepRole();
-    if (!live || store.trim() === (live.ownDomain ?? "") || !store.trim()) return setStep(2);
+    if (!live || store.trim() === (live.ownDomain ?? "")) return setStep(2);
     setSavingStore(true);
     const res = await saveOwnStore(store);
     setSavingStore(false);
@@ -301,9 +298,6 @@ export function WelcomeView({
             <div className={styles.actions}>
               <Button variant="primary" type="submit" loading={savingStore}>
                 Continue
-              </Button>
-              <Button variant="plain" onClick={skipStore}>
-                Skip for now
               </Button>
             </div>
           </form>

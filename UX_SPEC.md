@@ -82,7 +82,7 @@ Screens that exist today and aren't in the new design:
 
 ```
 Sign up (email + password, or Google) → confirm email
-  → /welcome step 1: your store's domain (optional, skippable)
+  → /welcome step 1: your store's domain (required since 2026-10-04)
   → /welcome step 2: add competitors (1+)
   → "Building your first report" (per competitor, ~10–60s)
   → First report for the first competitor
@@ -479,7 +479,7 @@ Settings and to the unsubscribe link.
    Both are clearly distinct from Shopify's look.
 4. Support email: **to be decided**. The design uses a placeholder.
 5. Watched pages are **read-only**.
-6. Your store is **optional** (skippable in onboarding).
+6. Your store is **required** (since 2026-10-04: beta members compare against it; no skip in onboarding, no remove in Settings).
 7. Both first-report data fixes happen **during the build**.
 8. Mobile is **daily use** for Home, competitor detail and the emails. Every other screen must work at
    narrow widths.

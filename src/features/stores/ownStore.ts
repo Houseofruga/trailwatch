@@ -88,9 +88,3 @@ export async function setOwnStore(domain: string): Promise<SetOwnStoreResult> {
   revalidatePath("/settings");
   return { ok: true, store: resolved.store };
 }
-
-export async function clearOwnStore(): Promise<void> {
-  const { user } = await currentUser();
-  await createServiceClient().from("users").update({ own_store_id: null }).eq("id", user.id);
-  revalidatePath("/settings");
-}

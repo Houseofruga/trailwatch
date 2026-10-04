@@ -41,6 +41,10 @@ export default async function WidgetOnboardingPage({
   const step = STEPS.includes(sp.step as WidgetStep) ? (sp.step as WidgetStep) : "snapshot";
   const data = await getWidgetOnboarding(sp.c ?? null);
   if (step === "snapshot" && !data.competitor) redirect("/welcome");
+  // Your store is required: no going past that step without one.
+  if ((step === "competitors" || step === "done") && !data.ownStore) {
+    redirect(`/welcome/widget?${new URLSearchParams({ step: "store", ...(sp.c ? { c: sp.c } : {}) })}`);
+  }
   const reading = step === "snapshot" ? !!data.first?.reading : step === "competitors" && !!data.ownStore && data.ownStore.products === null;
   return (
     <>
