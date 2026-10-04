@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Avatar, Thumbnail } from "@/components/ui/Avatar";
+import { Badge } from "@/components/ui/Badge";
 import { Banner } from "@/components/ui/Banner";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -224,7 +225,7 @@ function Competitors({ data, next, back, demo }: { data: WidgetOnboarding; next:
           <div>
             <h1 className={styles.title}>Who else do you compete with?</h1>
             <p className={styles.sub}>
-              {c ? `${c.name} is already added. ` : ""}Pick stores you also compete with.
+              Pick other stores you also compete with.
             </p>
           </div>
           <p className={styles.count}>
@@ -234,6 +235,33 @@ function Competitors({ data, next, back, demo }: { data: WidgetOnboarding; next:
             <Banner tone="info" title={`You’ve added ${data.limit} of ${data.limit} competitors`}>
               That&rsquo;s the beta limit. Unselect one to pick a different store.
             </Banner>
+          ) : null}
+          {data.added.length ? (
+            <div>
+              <h2 className={styles.subhead}>Already added</h2>
+              <ul className={styles.items}>
+                {data.added.map((a) => (
+                  <li key={a.id} className={styles.item}>
+                    <Avatar name={a.name} size={32} domain={a.domain} />
+                    <span className={styles.itemText}>
+                      <span className={styles.itemTitle}>{a.name}</span>
+                      <span className={styles.itemSub}>{a.domain}</span>
+                    </span>
+                    {a.status === "reading" ? (
+                      <Badge tone="info" spinner>
+                        Reading catalog…
+                      </Badge>
+                    ) : a.status === "pages" ? (
+                      <Badge>Pages only</Badge>
+                    ) : a.status === "failed" ? (
+                      <Badge tone="critical">Couldn&rsquo;t read</Badge>
+                    ) : (
+                      <Badge tone="success">Tracking</Badge>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
           ) : null}
           <h2 className={styles.subhead}>Suggested stores</h2>
           {picks === null ? (
