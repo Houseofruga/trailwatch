@@ -70,10 +70,10 @@ two daily reads; restock patterns need weeks.
   (`supabase/setup/pg_cron_catalog.sql`). Each tick: alerts → briefing step → store
   checks (pages, catalog, daily Best Sellers read) → matching → opportunities refresh.
   Cloudflare returns 524 to callers after 100 s, but the function keeps running.
-- **The pre-pivot crons are still scheduled in `vercel.json`**: `/api/cron/check`
-  (daily) and `/api/cron/digest` (**Mondays 08:00 UTC, the old weekly digest email**),
-  and old-model data is still live (30 `pages`, 35 changes in the week to 2026-10-04,
-  20 competitors without a store). Needs an owner decision — see next steps.
+- **The pre-pivot crons are retired** (2026-10-04): `vercel.json` no longer schedules
+  `/api/cron/check` or `/api/cron/digest` (the old weekly digest). There were no real
+  users; old-model rows (`pages`, `changes`, competitors without a store) remain but
+  nothing updates or emails them. The routes still exist, guarded by `CRON_SECRET`.
 
 ## Where things live
 
@@ -160,18 +160,14 @@ sessions' `.claude/worktrees`; lint `src` to check this work.
 
 ## Suggested next steps
 
-1. **Decide on the pre-pivot crons** (`/api/cron/check`, `/api/cron/digest` in
-   `vercel.json`). They still run, and the Monday digest may email users alongside
-   the new briefing. Likely: retire them, after checking which users still rely on
-   old-style page tracking.
-2. **Owner walkthroughs:** sign up from the homepage widget (new user, and signed in),
+1. **Owner walkthroughs:** sign up from the homepage widget (new user, and signed in),
    and check `/opportunities` signed in.
-3. **Matching review (A6)** once classification finishes (~2026-10-08): 50 real
+2. **Matching review (A6)** once classification finishes (~2026-10-08): 50 real
    matches with confidence and reason, and the AI cost per store.
-4. **Before real users** (`BACKLOG.md` pre-launch): a separate test environment
+3. **Before real users** (`BACKLOG.md` pre-launch): a separate test environment
    (Supabase, Resend, Paddle sandbox), then the §9 checks there; block direct
    `*.vercel.app` access so the widget's per-IP limit can't be bypassed with a fake
    `cf-connecting-ip` header.
-5. **AI provider decision:** stay on Groq's free tier or add an Anthropic key (paid).
-6. Parked by the owner: SEO/growth work (`BACKLOG.md`), including time-sensitive
+4. **AI provider decision:** stay on Groq's free tier or add an Anthropic key (paid).
+5. Parked by the owner: SEO/growth work (`BACKLOG.md`), including time-sensitive
    Black Friday guides (publish by ~2026-10-20).
