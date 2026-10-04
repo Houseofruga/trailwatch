@@ -6,6 +6,7 @@ import { isMarketplace, MARKETPLACE_MESSAGE } from "./denylist.config";
 import { classifyPlatform, looksLikeStore, type PlatformResult } from "./detectPlatform";
 import {
   findSalePagePath,
+  isNotFoundPage,
   SHOPIFY_POLICY_PATHS,
   SHOPIFY_SALE_FALLBACK_PATHS,
   type StorePageKind,
@@ -132,16 +133,25 @@ export async function probeStore(input: string): Promise<StoreProbe> {
   if (homeAllowed) pages.push({ kind: "homepage", url: `${base}/` });
   else skipped.push({ kind: "homepage", url: `${base}/`, reason: "robots" });
 
+  // A page we'd watch has to open and show real content, not a "Page Not
+  // Found" screen served with a 200.
+  const exists = async (url: string) => {
+    const res = await safeFetch(url);
+    return res.ok && !isNotFoundPage(res.html);
+  };
+
   // Sale page: prefer one the homepage links to; on Shopify, fall back to the
-  // conventional collections if they exist.
+  // conventional sale collection if it exists.
   const linked = home?.ok ? findSalePagePath(home.html, base) : null;
   if (linked) {
-    if (robotsAllows(robots, linked)) pages.push({ kind: "sale", url: `${base}${linked}` });
-    else skipped.push({ kind: "sale", url: `${base}${linked}`, reason: "robots" });
+    const url = `${base}${linked}`;
+    if (!robotsAllows(robots, linked)) skipped.push({ kind: "sale", url, reason: "robots" });
+    else if (await exists(url)) pages.push({ kind: "sale", url });
+    else skipped.push({ kind: "sale", url, reason: "not-found" });
   } else if (platform.platform === "shopify") {
     for (const path of SHOPIFY_SALE_FALLBACK_PATHS) {
       if (!robotsAllows(robots, path)) continue;
-      if ((await safeFetch(`${base}${path}`)).ok) {
+      if (await exists(`${base}${path}`)) {
         pages.push({ kind: "sale", url: `${base}${path}` });
         break;
       }
@@ -153,7 +163,7 @@ export async function probeStore(input: string): Promise<StoreProbe> {
       SHOPIFY_POLICY_PATHS.map(async ({ kind, path }): Promise<WatchedPage | SkippedPage> => {
         const url = `${base}${path}`;
         if (!robotsAllows(robots, path)) return { kind, url, reason: "robots" };
-        return (await safeFetch(url)).ok ? { kind, url } : { kind, url, reason: "not-found" };
+        return (await exists(url)) ? { kind, url } : { kind, url, reason: "not-found" };
       }),
     );
     for (const p of policies) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { featuredProductHandles, findSalePagePath } from "./discoverPages";
+import { featuredProductHandles, findSalePagePath, isNotFoundPage } from "./discoverPages";
 
 const ORIGIN = "https://www.dewlane.com";
 const page = (...hrefs: string[]) => hrefs.map((h) => `<a href="${h}">x</a>`).join("");
@@ -9,7 +9,7 @@ describe("findSalePagePath", () => {
     expect(findSalePagePath(page("/pages/about", "/collections/sale"), ORIGIN)).toBe("/collections/sale");
   });
 
-  it("prefers a literal sale collection over sale-ish ones, and those over clearance and 'all'", () => {
+  it("prefers a literal sale collection over sale-ish ones, and those over clearance", () => {
     const html = page("/collections/all", "/collections/outlet", "/collections/summer-sale", "/collections/sale");
     expect(findSalePagePath(html, ORIGIN)).toBe("/collections/sale");
     expect(findSalePagePath(page("/collections/all", "/collections/summer-sale"), ORIGIN)).toBe(
@@ -18,7 +18,11 @@ describe("findSalePagePath", () => {
     expect(findSalePagePath(page("/collections/all", "/collections/clearance"), ORIGIN)).toBe(
       "/collections/clearance",
     );
-    expect(findSalePagePath(page("/collections/all"), ORIGIN)).toBe("/collections/all");
+  });
+
+  it("doesn't take the 'all products' collection for a sale page", () => {
+    expect(findSalePagePath(page("/collections/all"), ORIGIN)).toBeNull();
+    expect(findSalePagePath(page("/en-in/collections/all"), ORIGIN)).toBeNull();
   });
 
   it("keeps the first link on a tie (nav comes before the footer)", () => {
@@ -28,7 +32,7 @@ describe("findSalePagePath", () => {
   });
 
   it("strips Shopify Markets locale prefixes and trailing slashes", () => {
-    expect(findSalePagePath(page("/en-in/collections/all"), ORIGIN)).toBe("/collections/all");
+    expect(findSalePagePath(page("/en-in/collections/sale"), ORIGIN)).toBe("/collections/sale");
     expect(findSalePagePath(page("/fr/collections/sale/"), ORIGIN)).toBe("/collections/sale");
   });
 
@@ -76,5 +80,21 @@ describe("featuredProductHandles", () => {
 
   it("returns nothing for a page without product links", () => {
     expect(featuredProductHandles(page("/pages/about", "/collections/all"), ORIGIN)).toEqual([]);
+  });
+});
+
+describe("isNotFoundPage", () => {
+  const html = (title: string) => `<html><head><title>${title}</title></head><body>Shop our sale</body></html>`;
+
+  it("spots a not-found screen served as OK", () => {
+    expect(isNotFoundPage(html("Page Not Found - Northwind Knits"))).toBe(true);
+    expect(isNotFoundPage(html("404 Not Found"))).toBe(true);
+    expect(isNotFoundPage(html("\n  404 – Dewlane\n"))).toBe(true);
+  });
+
+  it("leaves real pages alone, whatever the body says", () => {
+    expect(isNotFoundPage(html("Sale – Dewlane"))).toBe(false);
+    expect(isNotFoundPage(html("Products – Dewlane").replace("Shop our sale", "Item not found in cart"))).toBe(false);
+    expect(isNotFoundPage("<html><body>no title here</body></html>")).toBe(false);
   });
 });

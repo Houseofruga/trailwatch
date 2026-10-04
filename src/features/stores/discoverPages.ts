@@ -9,18 +9,29 @@ export const SHOPIFY_POLICY_PATHS: { kind: StorePageKind; path: string }[] = [
   { kind: "refund_policy", path: "/policies/refund-policy" },
 ];
 
-// Probed (in order) on Shopify stores whose homepage links to no sale page.
-export const SHOPIFY_SALE_FALLBACK_PATHS = ["/collections/sale", "/collections/all"];
+// Probed on Shopify stores whose homepage links to no sale page. The catch-all
+// "all products" collection is not a sale page, so it isn't a fallback: a store
+// without a sale collection gets no sale page (sales still show in its catalog).
+export const SHOPIFY_SALE_FALLBACK_PATHS = ["/collections/sale"];
 
 // Lower = better. A literal "sale" collection beats "summer-sale", which beats
-// clearance/outlet-style pages, which beat the catch-all "all" collection.
+// clearance/outlet-style pages.
 function saleRank(slug: string): number | null {
   const s = slug.toLowerCase();
   if (s === "sale" || s === "sales") return 0;
   if (/(^|[-_])sales?($|[-_])/.test(s)) return 1;
   if (/clearance|outlet|offers?|deals?|promo/.test(s)) return 2;
-  if (s === "all") return 3;
   return null;
+}
+
+/**
+ * A "Page Not Found" screen served with a 200 (a soft 404): some storefronts,
+ * headless ones especially, answer OK for addresses that don't exist. Judged by
+ * the page title, where every theme says so.
+ */
+export function isNotFoundPage(html: string): boolean {
+  const title = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(html)?.[1] ?? "";
+  return /\b404\b|not found|page (?:doesn[’']t|does not) exist/i.test(title);
 }
 
 // Optional locale prefix (/en, /en-us) before the collection or top-level path.
@@ -57,9 +68,8 @@ export function featuredProductHandles(homepageHtml: string, origin: string): st
 /**
  * Find the store's sale/collection page from the links on its homepage (nav,
  * banners, footer). Only same-host links count. Shopify collection URLs are
- * matched by handle; other platforms by a top-level /sale-style path — except
- * "all", which is only meaningful as a Shopify collection. Returns the best
- * path (without query/hash) or null.
+ * matched by handle; other platforms by a top-level /sale-style path. Returns
+ * the best path (without query/hash) or null.
  */
 export function findSalePagePath(homepageHtml: string, origin: string): string | null {
   const $ = cheerio.load(homepageHtml);
@@ -88,7 +98,7 @@ export function findSalePagePath(homepageHtml: string, origin: string): string |
       return; // malformed %-escape
     }
     const rank = saleRank(decoded);
-    if (rank === null || (topLevel && rank === 3)) return;
+    if (rank === null) return;
     // Shopify Markets serves locale-prefixed links (/en-in/collections/all) based
     // on where the request came from; store the unprefixed collection so we
     // watch the store's default storefront, not whichever market we landed in.
