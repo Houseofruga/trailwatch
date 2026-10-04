@@ -285,7 +285,7 @@ export function WelcomeView({
 
   return (
     <PageBody narrow>
-      <Stepper steps={["Your store", "Competitors"]} current={step === 1 ? 0 : 1} />
+      <Stepper steps={["Your store", "Competitors", "Done"]} current={step - 1} />
 
       {step === 1 ? (
         <Card>
