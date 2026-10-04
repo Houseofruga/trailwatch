@@ -10,9 +10,9 @@ import { getBetaStatus, getWidgetOnboarding, type WidgetOnboarding } from "@/fea
 
 export const metadata: Metadata = { title: "Set up TrailWatch" };
 
-const STEPS: WidgetStep[] = ["snapshot", "store", "competitors", "done"];
+const STEPS: WidgetStep[] = ["store", "competitors", "done"];
 // Design-review states (dev `?state=` only), 10-onboard.
-const STATES = ["snapshot", "snapshot-reading", "snapshot-pages-only", "store", "store-same-domain", "competitors", "done"] as const;
+const STATES = ["store", "store-same-domain", "competitors", "done"] as const;
 
 export default async function WidgetOnboardingPage({
   searchParams,
@@ -21,7 +21,7 @@ export default async function WidgetOnboardingPage({
 }) {
   const sp = await searchParams;
   if (previewEnabled && sp.state) {
-    const state = previewState(sp.state, STATES, "snapshot");
+    const state = previewState(sp.state, STATES, "store");
     const step = state.split("-")[0] as WidgetStep;
     return (
       <>
@@ -38,18 +38,17 @@ export default async function WidgetOnboardingPage({
     );
   }
 
-  const step = STEPS.includes(sp.step as WidgetStep) ? (sp.step as WidgetStep) : "snapshot";
+  const step = STEPS.includes(sp.step as WidgetStep) ? (sp.step as WidgetStep) : "store";
   const data = await getWidgetOnboarding(sp.c ?? null);
-  if (step === "snapshot" && !data.competitor) redirect("/welcome");
   // Your store is required: no going past that step without one.
   if ((step === "competitors" || step === "done") && !data.ownStore) {
     redirect(`/welcome/widget?${new URLSearchParams({ step: "store", ...(sp.c ? { c: sp.c } : {}) })}`);
   }
-  const reading = step === "snapshot" ? !!data.first?.reading : step === "competitors" && !!data.ownStore && data.ownStore.products === null;
+  const reading = step === "competitors" && !!data.ownStore && data.ownStore.products === null;
   return (
     <>
       <WidgetOnboardingView step={step} data={data} beta={step === "done" ? await getBetaStatus() : null} />
-      {/* The competitor's (or your own) first read is still running: refresh until it lands. */}
+      {/* Your store's first read is still running: refresh until it lands. */}
       {reading ? <AutoRefresh everyMs={5000} /> : null}
     </>
   );
@@ -63,11 +62,11 @@ const DEMO_SUGGESTIONS = [
 ];
 
 async function mockData(state: (typeof STATES)[number]): Promise<WidgetOnboarding> {
-  const report = await mock.getFirstReport(state === "snapshot-pages-only" ? "oakline-goods" : "dewlane");
+  const report = await mock.getFirstReport("dewlane");
   const c = report!.competitor;
   return {
     competitor: { id: c.id, name: c.name, domain: c.domain },
-    first: { report, reading: state === "snapshot-reading", error: false },
+    first: { report, reading: false, error: false },
     ownStore: state === "competitors" ? { domain: "glowfield.com", products: null, checkedAt: new Date().toISOString() } : null,
     added: [{ id: c.id, name: c.name, domain: c.domain, status: "ready", products: 313 }],
     limit: 10,

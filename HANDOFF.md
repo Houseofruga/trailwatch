@@ -31,7 +31,9 @@ On top of that, since 2026-10-02:
   judgement with confidence and a one-line reason; users confirm, reject or link
   matches. `price_position_change` replaced `price_undercut`. Runs in the cron tick.
 - **Homepage "Try it on a competitor" widget** (DESIGN 09) and **onboarding from it**
-  (DESIGN 10, `/claim` → `/welcome/widget`).
+  (DESIGN 10, `/claim` → `/welcome/widget`). Since 2026-10-04 it's three steps (Your
+  store, required → Competitors, with theirs already added → Done); the snapshot
+  step was dropped.
 - **Opportunities (Part B)**: each competitor's own Best Sellers collection read
   daily, demand signals, assortment gaps, up to 3 in the Monday briefing, and the
   **Opportunities screen** (DESIGN 11, `/opportunities`, `/opportunities/dismissed`).
