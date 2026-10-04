@@ -82,6 +82,16 @@
   color: var(--ink-3);
 }
 
+/* A table with no rows: a quiet, centred line under the header. */
+.empty {
+  margin: 0;
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
+
 .message {
   white-space: pre-wrap;
   overflow-wrap: anywhere;

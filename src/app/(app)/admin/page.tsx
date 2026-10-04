@@ -269,14 +269,14 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 { label: "Discount", width: 100, align: "right" },
               ]}
               rows={memberRows}
-              empty={<span className={styles.muted}>No users yet.</span>}
+              empty={<p className={styles.empty}>No users yet.</p>}
             />
           </Card>
           <Card title="Feedback and rating notes" titleId="beta-notes" flush>
             <IndexTable
               columns={[{ label: "Date", width: 110 }, { label: "Type", width: 190 }, { label: "From", width: 220 }, { label: "Message" }]}
               rows={noteRows}
-              empty={<span className={styles.muted}>No feedback yet.</span>}
+              empty={<p className={styles.empty}>No feedback yet.</p>}
             />
           </Card>
         </>
@@ -306,7 +306,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             { label: "Total", width: 100, align: "right" },
           ]}
           rows={costRows}
-          empty={<span className={styles.muted}>No AI usage this month.</span>}
+          empty={<p className={styles.empty}>No AI usage this month.</p>}
         />
       </Card>
       <Card title="Stores" titleId="cost-stores" flush>
@@ -319,7 +319,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             { label: "Requests", width: 110, align: "right" },
           ]}
           rows={storeRows}
-          empty={<span className={styles.muted}>No stores yet.</span>}
+          empty={<p className={styles.empty}>No stores yet.</p>}
         />
       </Card>
 
@@ -328,7 +328,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <IndexTable
           columns={[{ label: "User" }, { label: "Role", width: 150 }, { label: "Their store", width: 200 }, { label: "Verified brand", width: 170 }, { label: "Signed up", width: 110 }]}
           rows={userRows}
-          empty={<span className={styles.muted}>No users yet.</span>}
+          empty={<p className={styles.empty}>No users yet.</p>}
         />
       </Card>
       <Card title="Homepage previews (last 14 days)" titleId="previews" flush>
@@ -342,7 +342,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             { label: "Avg time", width: 100, align: "right" },
           ]}
           rows={previewRows}
-          empty={<span className={styles.muted}>{previews ? "No lookups yet." : "Apply migration 0020 to log previews."}</span>}
+          empty={<p className={styles.empty}>{previews ? "No lookups yet." : "Apply migration 0020 to log previews."}</p>}
         />
       </Card>
     </PageBody>
