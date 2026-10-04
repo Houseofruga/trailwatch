@@ -165,6 +165,17 @@ export const IconHash = (p: IconProps) => (
   </Svg>
 );
 
+export const IconShield = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z" />
+    <path d="M9 12l2 2 4-4" />
+  </Svg>
+);
+export const IconMinus = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M5 12h14" />
+  </Svg>
+);
 export const IconStore = (p: IconProps) => (
   <Svg {...p}>
     <path d="M4 10v10h16V10" />

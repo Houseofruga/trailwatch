@@ -19,6 +19,7 @@ import {
   IconLogOut,
   IconMenu,
   IconMessage,
+  IconShield,
   IconSliders,
   IconTrendUp,
   IconX,
@@ -32,7 +33,9 @@ const NAV = [
   { href: "/opportunities", label: "Opportunities", Icon: IconTrendUp },
   { href: "/competitors", label: "Competitors", Icon: IconEye },
   { href: "/settings", label: "Settings", Icon: IconSliders },
-] as const;
+];
+// Only for ADMIN_EMAILS (the page itself 404s for anyone else).
+const ADMIN_NAV = { href: "/admin", label: "Admin space", Icon: IconShield };
 
 type Props = {
   account: { name: string; email: string };
@@ -42,6 +45,8 @@ type Props = {
   opportunityCount?: number;
   /** Beta-member status: the sidebar call prompt. */
   beta?: BetaStatus | null;
+  /** Shows the "Admin space" nav item. */
+  isAdmin?: boolean;
   /** Onboarding: nav items shown but not usable. */
   navDisabled?: boolean;
   children: React.ReactNode;
@@ -72,6 +77,7 @@ function Sidebar({
   competitorCount,
   opportunityCount = 0,
   beta,
+  isAdmin,
   navDisabled,
   onNavigate,
   onFeedback,
@@ -87,7 +93,7 @@ function Sidebar({
   return (
     <nav aria-label="Main" className={styles.nav}>
       <ul className={styles.navList}>
-        {NAV.map(({ href, label, Icon }) => {
+        {(isAdmin ? [...NAV, ADMIN_NAV] : NAV).map(({ href, label, Icon }) => {
           const current =
             !navDisabled &&
             (pathname === href || pathname.startsWith(`${href}/`));
@@ -160,6 +166,7 @@ export function AppFrame({
   competitorCount,
   opportunityCount,
   beta,
+  isAdmin,
   navDisabled,
   children,
 }: Props) {
@@ -246,6 +253,7 @@ export function AppFrame({
               competitorCount={competitorCount}
               opportunityCount={opportunityCount}
               beta={beta}
+              isAdmin={isAdmin}
               navDisabled={navDisabled}
               onFeedback={() => setFeedback(true)}
             />
@@ -283,6 +291,7 @@ export function AppFrame({
                 competitorCount={competitorCount}
                 opportunityCount={opportunityCount}
                 beta={beta}
+                isAdmin={isAdmin}
                 navDisabled={navDisabled}
                 onNavigate={() => setDrawer(false)}
                 onFeedback={() => {

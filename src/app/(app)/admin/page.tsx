@@ -1,25 +1,53 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Badge } from "@/components/ui/Badge";
+import { Banner } from "@/components/ui/Banner";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { IconChevronLeft, IconChevronRight, IconMinus, IconPlus } from "@/components/ui/icons";
+import { IndexTable, type Row } from "@/components/ui/IndexTable";
+import { PageBody, PageHeader } from "@/components/ui/Page";
 import { getAccount } from "@/features/account/queries";
-import { getMonthlyReport, isAdminEmail, listAdminUsers, listPreviewDays, monthRange, type PreviewDay } from "@/features/usage/report";
 import { changeFounderCalls, setFoundingMember } from "@/features/beta/adminActions";
 import { BETA_CONFIG } from "@/features/beta/config";
 import { getBetaReport, type BetaReport } from "@/features/beta/report";
+import { getMonthlyReport, isAdminEmail, listAdminUsers, listPreviewDays, monthRange, type PreviewDay } from "@/features/usage/report";
 import { createServiceClient } from "@/lib/supabase/service";
 import styles from "./page.module.css";
 
+export const metadata: Metadata = { title: "Admin space" };
 export const dynamic = "force-dynamic";
 
-// Internal cost view (SPEC.md §5 Phase 7): AI cost per user per month and
-// crawl volume per store. Visible only to ADMIN_EMAILS — anyone else gets a 404,
-// so the route doesn't even reveal it exists. Built from existing tokens and
-// the settings page's patterns; it's an internal tool, not a customer screen.
+// Admin space: beta members and feedback, AI cost per user and store, users,
+// homepage previews. Visible only to ADMIN_EMAILS; anyone else gets a 404, so
+// the route doesn't reveal it exists. Built from the app's own components
+// (internal tool; no artboard).
 
 const usd = (n: number) => `$${n < 0.01 && n > 0 ? n.toFixed(4) : n.toFixed(2)}`;
+const pct = (useful: number, total: number) => (total ? `${Math.round((useful / total) * 100)}%` : "—");
 
 function shiftMonth(month: string, by: number): string {
   const [y, m] = month.split("-").map(Number);
-  const d = new Date(Date.UTC(y, m - 1 + by, 1));
-  return d.toISOString().slice(0, 7);
+  return new Date(Date.UTC(y, m - 1 + by, 1)).toISOString().slice(0, 7);
+}
+
+const monthLabel = (month: string) =>
+  new Date(`${month}-01T12:00:00Z`).toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+
+function Stat({ label, value, note }: { label: string; value: string; note?: string }) {
+  return (
+    <Card>
+      <div className={styles.stat}>
+        <span className={styles.statLabel}>{label}</span>
+        <span className={styles.statValue}>{value}</span>
+        {note ? <span className={styles.statNote}>{note}</span> : null}
+      </div>
+    </Card>
+  );
+}
+
+function Meta({ children }: { children: React.ReactNode }) {
+  return <div className={styles.meta}>{children}</div>;
 }
 
 export default async function AdminPage({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
@@ -29,284 +57,294 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const { month: requested } = await searchParams;
   const { month } = monthRange(requested);
 
-  let report;
-  let users;
-  let previews: PreviewDay[] | null = null;
-  let beta: BetaReport | null = null;
+  const service = createServiceClient();
+  let loaded;
   try {
-    const service = createServiceClient();
-    [report, users, previews] = await Promise.all([getMonthlyReport(service, month), listAdminUsers(service), listPreviewDays(service)]);
-    // Separate so the cost view still loads before migration 0025.
-    beta = await getBetaReport(service).catch(() => null);
+    loaded = await Promise.all([getMonthlyReport(service, month), listAdminUsers(service), listPreviewDays(service).catch(() => null)]);
   } catch (err) {
     return (
-      <div className={styles.wrap}>
-        <h1 className={styles.heading}>Costs</h1>
-        <p className={styles.sub}>
-          Couldn&rsquo;t load usage ({err instanceof Error ? err.message : "unknown error"}). Is migration 0015 applied?
-        </p>
-      </div>
+      <PageBody>
+        <PageHeader title="Admin space" />
+        <Banner tone="critical" title="Couldn’t load usage">
+          {err instanceof Error ? err.message : "Unknown error"}. Is migration 0015 applied?
+        </Banner>
+      </PageBody>
     );
   }
+  const [report, users, previews] = loaded as [Awaited<ReturnType<typeof getMonthlyReport>>, Awaited<ReturnType<typeof listAdminUsers>>, PreviewDay[] | null];
+  // Separate so the rest still loads before migration 0025.
+  const beta: BetaReport | null = await getBetaReport(service).catch(() => null);
+
+  const monthNav = (
+    <div className={styles.monthNav}>
+      <Button variant="grey" iconOnly aria-label="Previous month" icon={<IconChevronLeft size={16} />} href={`/admin?month=${shiftMonth(month, -1)}`} />
+      <span className={styles.month}>{monthLabel(month)}</span>
+      <Button variant="grey" iconOnly aria-label="Next month" icon={<IconChevronRight size={16} />} href={`/admin?month=${shiftMonth(month, 1)}`} />
+    </div>
+  );
+
+  // ------------------------------------------------------------- beta rows
+  const memberRows: Row[] = (beta?.members ?? []).map((m) => {
+    const founding = (
+      <form action={setFoundingMember} className={styles.inline}>
+        <input type="hidden" name="userId" value={m.id} />
+        <input type="hidden" name="founding" value={m.founding ? "false" : "true"} />
+        {m.founding ? <Badge tone="success">Beta member</Badge> : <span className={styles.muted}>No</span>}
+        <Button type="submit" variant="plain">
+          {m.founding ? "Remove" : "Make beta member"}
+        </Button>
+      </form>
+    );
+    const calls = m.founding ? (
+      <span className={styles.inline}>
+        <form action={changeFounderCalls}>
+          <input type="hidden" name="userId" value={m.id} />
+          <input type="hidden" name="delta" value="-1" />
+          <Button type="submit" variant="grey" iconOnly icon={<IconMinus size={16} />} aria-label={`One call fewer for ${m.email}`} disabled={m.calls === 0} />
+        </form>
+        <span className={styles.num}>
+          {m.calls} / {BETA_CONFIG.callsNeeded}
+        </span>
+        <form action={changeFounderCalls}>
+          <input type="hidden" name="userId" value={m.id} />
+          <input type="hidden" name="delta" value="1" />
+          <Button type="submit" variant="grey" iconOnly icon={<IconPlus size={16} />} aria-label={`One more call for ${m.email}`} />
+        </form>
+      </span>
+    ) : (
+      <span className={styles.muted}>—</span>
+    );
+    const discount = m.founding ? `${m.discountPct}%` : "—";
+    return {
+      id: m.id,
+      cells: [<span key="e" className={styles.email}>{m.email}</span>, founding, calls, discount],
+      mobile: (
+        <>
+          <span className={styles.email}>{m.email}</span>
+          <Meta>
+            {founding}
+            {m.founding ? (
+              <>
+                {calls}
+                <span>{discount} off</span>
+              </>
+            ) : null}
+          </Meta>
+        </>
+      ),
+    };
+  });
+
+  const noteRows: Row[] = (beta?.notes ?? []).map((n, i) => ({
+    id: `n${i}`,
+    cells: [
+      <span key="d" className={styles.muted}>{n.at.slice(0, 10)}</span>,
+      <Badge key="k">{n.kind}</Badge>,
+      <span key="e" className={styles.email}>{n.email}</span>,
+      <span key="m" className={styles.message}>{n.message}</span>,
+    ],
+    mobile: (
+      <>
+        <span className={styles.message}>{n.message}</span>
+        <Meta>
+          <Badge>{n.kind}</Badge>
+          <span>{n.email}</span>
+          <span>{n.at.slice(0, 10)}</span>
+        </Meta>
+      </>
+    ),
+  }));
+
+  // ------------------------------------------------------------- cost rows
+  const costRows: Row[] = report.users.map((u) => ({
+    id: u.userId,
+    cells: [
+      <span key="e" className={styles.email}>{u.email}</span>,
+      <Badge key="p">{u.plan}</Badge>,
+      u.competitors,
+      usd(u.direct),
+      usd(u.shared),
+      <strong key="t">{usd(u.total)}</strong>,
+    ],
+    mobile: (
+      <>
+        <span className={styles.email}>{u.email}</span>
+        <Meta>
+          <strong>{usd(u.total)}</strong>
+          <span>{u.competitors} competitors</span>
+          <Badge>{u.plan}</Badge>
+        </Meta>
+      </>
+    ),
+  }));
+
+  const userRows: Row[] = users.map((u) => ({
+    id: u.email,
+    cells: [
+      <span key="e" className={styles.email}>{u.email}</span>,
+      u.role ?? <span key="r" className={styles.muted}>—</span>,
+      u.ownStore ?? <span key="s" className={styles.muted}>—</span>,
+      u.verified ? <Badge key="v" tone="info">Email matches store</Badge> : "",
+      <span key="d" className={styles.muted}>{u.signedUp.slice(0, 10)}</span>,
+    ],
+    mobile: (
+      <>
+        <span className={styles.email}>{u.email}</span>
+        <Meta>
+          {u.ownStore ? <span>{u.ownStore}</span> : null}
+          {u.role ? <span>{u.role}</span> : null}
+          {u.verified ? <Badge tone="info">Email matches store</Badge> : null}
+          <span>{u.signedUp.slice(0, 10)}</span>
+        </Meta>
+      </>
+    ),
+  }));
+
+  const previewRows: Row[] = (previews ?? []).map((d) => ({
+    id: d.day,
+    cells: [
+      d.day,
+      d.lookups,
+      d.cached,
+      d.fresh,
+      d.products.toLocaleString("en-US"),
+      d.avgMs === null ? "—" : `${(d.avgMs / 1000).toFixed(1)}s`,
+    ],
+    mobile: (
+      <>
+        <strong>{d.day}</strong>
+        <Meta>
+          <span>{d.lookups} lookups</span>
+          <span>{d.fresh} fresh</span>
+          <span>{d.products.toLocaleString("en-US")} products</span>
+        </Meta>
+      </>
+    ),
+  }));
+
+  const storeRows: Row[] = report.stores.map((s) => ({
+    id: s.storeId,
+    cells: [<span key="d" className={styles.email}>{s.domain}</span>, s.followers, s.aiCalls, usd(s.cost), s.requests.toLocaleString("en-US")],
+    mobile: (
+      <>
+        <span className={styles.email}>{s.domain}</span>
+        <Meta>
+          <span>{s.followers} followers</span>
+          <span>{usd(s.cost)}</span>
+          <span>{s.requests.toLocaleString("en-US")} requests</span>
+        </Meta>
+      </>
+    ),
+  }));
+
+  const briefing = beta?.ratings.find((r) => r.target === "briefing");
+  const alert = beta?.ratings.find((r) => r.target === "alert");
 
   return (
-    <div className={styles.wrap}>
-      <h1 className={styles.heading}>Costs</h1>
-      <p className={styles.sub}>
-        <a href={`/admin?month=${shiftMonth(month, -1)}`}>&larr;</a> {month}{" "}
-        <a href={`/admin?month=${shiftMonth(month, 1)}`}>&rarr;</a> · AI at list prices (Groq&rsquo;s free tier
-        actually costs $0) · store work split across its followers
-      </p>
-
-      <div className={styles.stats}>
-        <div className={styles.stat}>
-          <div className={styles.statLabel}>AI cost</div>
-          <div className={styles.statValue}>{usd(report.totalCost)}</div>
-        </div>
-        <div className={styles.stat}>
-          <div className={styles.statLabel}>AI calls</div>
-          <div className={styles.statValue}>{report.aiCalls}</div>
-        </div>
-        <div className={styles.stat}>
-          <div className={styles.statLabel}>Unallocated</div>
-          <div className={styles.statValue}>{usd(report.unallocated)}</div>
-        </div>
-      </div>
-
-      <h2 className={styles.section}>Cost per user</h2>
-      <div className={styles.card}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Plan</th>
-              <th className={styles.num}>Competitors</th>
-              <th className={styles.num}>Own (briefing)</th>
-              <th className={styles.num}>Shared (stores)</th>
-              <th className={styles.num}>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {report.users.length === 0 ? (
-              <tr>
-                <td colSpan={6} className={styles.empty}>No AI usage this month.</td>
-              </tr>
-            ) : (
-              report.users.map((u) => (
-                <tr key={u.userId}>
-                  <td className={styles.mono}>{u.email}</td>
-                  <td>{u.plan}</td>
-                  <td className={styles.num}>{u.competitors}</td>
-                  <td className={styles.num}>{usd(u.direct)}</td>
-                  <td className={styles.num}>{usd(u.shared)}</td>
-                  <td className={styles.num}>{usd(u.total)}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      <h2 className={styles.section}>Users</h2>
-      <div className={styles.card}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Role</th>
-              <th>Their store</th>
-              <th>Verified brand</th>
-              <th className={styles.num}>Signed up</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((u) => (
-              <tr key={u.email}>
-                <td className={styles.mono}>{u.email}</td>
-                <td>{u.role ?? ""}</td>
-                <td className={styles.mono}>{u.ownStore ?? "—"}</td>
-                <td>{u.verified ? "Yes — email matches store" : ""}</td>
-                <td className={styles.num}>{u.signedUp.slice(0, 10)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <PageBody>
+      <PageHeader title="Admin space" subtitle="Beta members, feedback, AI cost and usage. Only admins see this page." />
 
       <h2 className={styles.section}>Beta</h2>
       {beta ? (
         <>
           <div className={styles.stats}>
-            <div className={styles.stat}>
-              <div className={styles.statLabel}>Beta member spots</div>
-              <div className={styles.statValue}>
-                {beta.foundingUsed} / {beta.foundingCap}
-              </div>
-            </div>
-            {beta.ratings.map((r) => (
-              <div key={r.target} className={styles.stat}>
-                <div className={styles.statLabel}>{r.target === "briefing" ? "Briefings rated useful" : "Alerts rated useful"}</div>
-                <div className={styles.statValue}>
-                  {r.useful + r.notUseful ? `${Math.round((r.useful / (r.useful + r.notUseful)) * 100)}%` : "—"}
-                  <span className={styles.statNote}> of {r.useful + r.notUseful}</span>
-                </div>
-              </div>
-            ))}
+            <Stat label="Beta member spots" value={`${beta.foundingUsed} / ${beta.foundingCap}`} />
+            <Stat
+              label="Briefings rated useful"
+              value={pct(briefing?.useful ?? 0, (briefing?.useful ?? 0) + (briefing?.notUseful ?? 0))}
+              note={`${(briefing?.useful ?? 0) + (briefing?.notUseful ?? 0)} ratings`}
+            />
+            <Stat
+              label="Alerts rated useful"
+              value={pct(alert?.useful ?? 0, (alert?.useful ?? 0) + (alert?.notUseful ?? 0))}
+              note={`${(alert?.useful ?? 0) + (alert?.notUseful ?? 0)} ratings`}
+            />
           </div>
-
-          <div className={styles.card}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Beta member</th>
-                  <th className={styles.num}>Calls done</th>
-                  <th className={styles.num}>Discount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {beta.members.map((m) => (
-                  <tr key={m.id}>
-                    <td className={styles.mono}>{m.email}</td>
-                    <td>
-                      <form action={setFoundingMember} className={styles.inline}>
-                        <input type="hidden" name="userId" value={m.id} />
-                        <input type="hidden" name="founding" value={m.founding ? "false" : "true"} />
-                        {m.founding ? "Yes" : "No"}{" "}
-                        <button type="submit" className={styles.mini}>
-                          {m.founding ? "Remove" : "Make beta member"}
-                        </button>
-                      </form>
-                    </td>
-                    <td className={styles.num}>
-                      {m.founding ? (
-                        <span className={styles.inline}>
-                          <form action={changeFounderCalls}>
-                            <input type="hidden" name="userId" value={m.id} />
-                            <input type="hidden" name="delta" value="-1" />
-                            <button type="submit" className={styles.mini} aria-label={`One call fewer for ${m.email}`} disabled={m.calls === 0}>
-                              −
-                            </button>
-                          </form>
-                          {m.calls} / {BETA_CONFIG.callsNeeded}
-                          <form action={changeFounderCalls}>
-                            <input type="hidden" name="userId" value={m.id} />
-                            <input type="hidden" name="delta" value="1" />
-                            <button type="submit" className={styles.mini} aria-label={`One more call for ${m.email}`}>
-                              +
-                            </button>
-                          </form>
-                        </span>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td className={styles.num}>{m.founding ? `${m.discountPct}%` : "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <h2 className={styles.section}>Feedback and rating notes</h2>
-          <div className={styles.card}>
-            {beta.notes.length ? (
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>When</th>
-                    <th>What</th>
-                    <th>From</th>
-                    <th>Message</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {beta.notes.map((n, i) => (
-                    <tr key={i}>
-                      <td className={styles.mono}>{n.at.slice(0, 10)}</td>
-                      <td>{n.kind}</td>
-                      <td className={styles.mono}>{n.email}</td>
-                      <td className={styles.message}>{n.message}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <p className={styles.empty}>No feedback yet.</p>
-            )}
-          </div>
+          <Card title="Beta members" titleId="beta-members" flush>
+            <IndexTable
+              columns={[
+                { label: "User" },
+                { label: "Beta member", width: 260 },
+                { label: "Feedback calls", width: 170 },
+                { label: "Discount", width: 100, align: "right" },
+              ]}
+              rows={memberRows}
+              empty={<span className={styles.muted}>No users yet.</span>}
+            />
+          </Card>
+          <Card title="Feedback and rating notes" titleId="beta-notes" flush>
+            <IndexTable
+              columns={[{ label: "Date", width: 110 }, { label: "Type", width: 190 }, { label: "From", width: 220 }, { label: "Message" }]}
+              rows={noteRows}
+              empty={<span className={styles.muted}>No feedback yet.</span>}
+            />
+          </Card>
         </>
       ) : (
-        <p className={styles.sub}>Beta data isn&rsquo;t available. Is migration 0025 applied?</p>
+        <Banner tone="warning" title="Beta data isn’t available">
+          Is migration 0025 applied?
+        </Banner>
       )}
 
-      <h2 className={styles.section}>Competitor previews (homepage, last 14 days)</h2>
-      <div className={styles.card}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Day (UTC)</th>
-              <th className={styles.num}>Lookups</th>
-              <th className={styles.num}>From cache</th>
-              <th className={styles.num}>Fresh reads</th>
-              <th className={styles.num}>Products fetched</th>
-              <th className={styles.num}>Avg time</th>
-            </tr>
-          </thead>
-          <tbody>
-            {!previews || previews.length === 0 ? (
-              <tr>
-                <td colSpan={6} className={styles.empty}>
-                  {previews ? "No lookups yet." : "Apply migration 0020 to log previews."}
-                </td>
-              </tr>
-            ) : (
-              previews.map((d) => (
-                <tr key={d.day}>
-                  <td className={styles.mono}>{d.day}</td>
-                  <td className={styles.num}>{d.lookups}</td>
-                  <td className={styles.num}>{d.cached}</td>
-                  <td className={styles.num}>{d.fresh}</td>
-                  <td className={styles.num}>{d.products.toLocaleString("en-US")}</td>
-                  <td className={styles.num}>{d.avgMs === null ? "—" : `${(d.avgMs / 1000).toFixed(1)}s`}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      <div className={styles.sectionRow}>
+        <h2 className={styles.section}>AI cost</h2>
+        {monthNav}
       </div>
+      <div className={styles.stats}>
+        <Stat label="AI cost" value={usd(report.totalCost)} note="At list prices; Groq’s free tier costs $0" />
+        <Stat label="AI calls" value={report.aiCalls.toLocaleString("en-US")} />
+        <Stat label="Unallocated" value={usd(report.unallocated)} note="Store work nobody follows yet" />
+      </div>
+      <Card title="Cost per user" titleId="cost-users" flush>
+        <IndexTable
+          columns={[
+            { label: "User" },
+            { label: "Plan", width: 100 },
+            { label: "Competitors", width: 120, align: "right" },
+            { label: "Own (briefing)", width: 130, align: "right" },
+            { label: "Shared (stores)", width: 130, align: "right" },
+            { label: "Total", width: 100, align: "right" },
+          ]}
+          rows={costRows}
+          empty={<span className={styles.muted}>No AI usage this month.</span>}
+        />
+      </Card>
+      <Card title="Stores" titleId="cost-stores" flush>
+        <IndexTable
+          columns={[
+            { label: "Store" },
+            { label: "Followers", width: 110, align: "right" },
+            { label: "AI calls", width: 110, align: "right" },
+            { label: "AI cost", width: 110, align: "right" },
+            { label: "Requests", width: 110, align: "right" },
+          ]}
+          rows={storeRows}
+          empty={<span className={styles.muted}>No stores yet.</span>}
+        />
+      </Card>
 
-      <h2 className={styles.section}>Stores</h2>
-      <div className={styles.card}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Store</th>
-              <th className={styles.num}>Followers</th>
-              <th className={styles.num}>AI calls</th>
-              <th className={styles.num}>AI cost</th>
-              <th className={styles.num}>Requests</th>
-            </tr>
-          </thead>
-          <tbody>
-            {report.stores.length === 0 ? (
-              <tr>
-                <td colSpan={5} className={styles.empty}>No stores yet.</td>
-              </tr>
-            ) : (
-              report.stores.map((s) => (
-                <tr key={s.storeId}>
-                  <td className={styles.mono}>{s.domain}</td>
-                  <td className={styles.num}>{s.followers}</td>
-                  <td className={styles.num}>{s.aiCalls}</td>
-                  <td className={styles.num}>{usd(s.cost)}</td>
-                  <td className={styles.num}>{s.requests}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <h2 className={styles.section}>Users and growth</h2>
+      <Card title="Users" titleId="users" flush>
+        <IndexTable
+          columns={[{ label: "User" }, { label: "Role", width: 150 }, { label: "Their store", width: 200 }, { label: "Verified brand", width: 170 }, { label: "Signed up", width: 110 }]}
+          rows={userRows}
+          empty={<span className={styles.muted}>No users yet.</span>}
+        />
+      </Card>
+      <Card title="Homepage previews (last 14 days)" titleId="previews" flush>
+        <IndexTable
+          columns={[
+            { label: "Day (UTC)" },
+            { label: "Lookups", width: 100, align: "right" },
+            { label: "From cache", width: 110, align: "right" },
+            { label: "Fresh reads", width: 110, align: "right" },
+            { label: "Products fetched", width: 150, align: "right" },
+            { label: "Avg time", width: 100, align: "right" },
+          ]}
+          rows={previewRows}
+          empty={<span className={styles.muted}>{previews ? "No lookups yet." : "Apply migration 0020 to log previews."}</span>}
+        />
+      </Card>
+    </PageBody>
   );
 }
