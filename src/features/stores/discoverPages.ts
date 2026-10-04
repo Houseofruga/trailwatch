@@ -113,3 +113,36 @@ export function findSalePagePath(homepageHtml: string, origin: string): string |
   );
   return best?.path ?? null;
 }
+
+const MAX_LABEL = 60;
+
+/**
+ * The collections a store links from its homepage, in page order (the menu
+ * comes first): its real shopping categories, unlike the hundreds of campaign
+ * and influencer collections a store may publish. Sale pages are left out
+ * (watched separately), as is anything in `exclude`. The label is the link's
+ * own text, when it has any.
+ */
+export function menuCollections(homepageHtml: string, origin: string, exclude: string[] = []): { handle: string; label: string }[] {
+  const $ = cheerio.load(homepageHtml);
+  const host = new URL(origin).hostname.replace(/^www\./, "");
+  const skip = new Set(exclude);
+  const found = new Map<string, string>();
+  $("a[href]").each((_, el) => {
+    let handle: string;
+    try {
+      const url = new URL($(el).attr("href") ?? "", origin);
+      if (url.hostname.replace(/^www\./, "") !== host) return;
+      const match = COLLECTION_PATH.exec(url.pathname);
+      if (!match) return;
+      handle = decodeURIComponent(match[1]).toLowerCase();
+    } catch {
+      return; // malformed href or %-escape
+    }
+    if (skip.has(handle) || saleRank(handle) !== null) return;
+    const label = $(el).text().replace(/\s+/g, " ").trim();
+    const usable = label.length > 0 && label.length <= MAX_LABEL ? label : "";
+    if (!found.has(handle) || (!found.get(handle) && usable)) found.set(handle, usable);
+  });
+  return [...found].map(([handle, label]) => ({ handle, label }));
+}

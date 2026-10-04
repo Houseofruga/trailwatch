@@ -13,6 +13,7 @@ import type {
   BriefingTopMove,
   Account,
   BetaStatus,
+  CategoryView,
   CompetitorOverview,
   CompetitorRow,
   FirstReport,
@@ -42,6 +43,31 @@ const pages = (domain: string): WatchedPage[] => [
   { label: "Shipping policy", url: `https://${domain}/policies/shipping-policy`, changedAt: daysAgoAt(18, "10:05") },
   { label: "Returns policy", url: `https://${domain}/policies/refund-policy`, changedAt: daysAgoAt(31, "14:00") },
 ];
+
+// DESIGN 13-Categories: 14 categories, three with products on sale.
+const CATEGORIES: [string, number, number][] = [
+  ["Bedding", 124, 12],
+  ["Bath", 86, 0],
+  ["Women", 64, 5],
+  ["Men", 48, 0],
+  ["Throws & blankets", 41, 0],
+  ["Pillows", 37, 0],
+  ["Loungewear", 33, 0],
+  ["Kitchen & dining", 28, 0],
+  ["Sleepwear", 24, 3],
+  ["Gifts under $50", 22, 0],
+  ["Kids", 19, 0],
+  ["Candles & home scent", 15, 0],
+  ["Pet", 12, 0],
+  ["Travel", 9, 0],
+];
+const categories = (domain: string): CategoryView[] =>
+  CATEGORIES.map(([title, products, onSale]) => ({
+    title,
+    url: `https://${domain}/collections/${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+    products,
+    onSale,
+  }));
 
 const COMPETITORS: CompetitorOverview[] = [
   {
@@ -264,7 +290,8 @@ export async function listCompetitors(): Promise<CompetitorRow[]> {
 }
 
 export async function getCompetitorOverview(id: string): Promise<CompetitorOverview | null> {
-  return COMPETITORS.find((c) => c.id === id) ?? null;
+  const c = COMPETITORS.find((x) => x.id === id);
+  return c ? { ...c, categories: c.status === "pages_only" ? undefined : categories(c.domain) } : null;
 }
 
 export async function listMoves(opts: { competitorId?: string; busy?: boolean } = {}): Promise<Move[]> {
@@ -403,6 +430,7 @@ export async function getFirstReport(id: string): Promise<FirstReport | null> {
     stats: c.catalog,
     checkIntervalHours: c.checkIntervalHours,
     pages: c.pages,
+    categories: c.status === "pages_only" ? undefined : categories(c.domain),
     recentlyLaunched: {
       total: 8,
       items: [

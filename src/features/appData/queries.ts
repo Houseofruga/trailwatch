@@ -9,6 +9,7 @@ import { BETA_CONFIG, bookingUrl } from "@/features/beta/config";
 import { DEFAULT_ALERT_SETTINGS, loadAlertSettings, movesCaughtThisMonth, MUTABLE_TYPES } from "@/features/alerts/settings";
 import { fallbackInterpretation, rankEvents, type BriefingInput, type BriefingInterpretation } from "@/features/briefing/content";
 import { DEFAULT_BRIEFING, nextBriefingAt } from "@/features/briefing/schedule";
+import type { StoreCategory } from "@/features/categories/summarize";
 import { CATALOG_CONFIG } from "@/features/catalog/config";
 import { buildFirstReport, type CatalogStats as StoredStats } from "@/features/catalog/firstReport";
 import { downloadSnapshot } from "@/features/catalog/snapshots";
@@ -44,6 +45,7 @@ import type {
   ReportItem,
   Settings,
   WatchedPage,
+  CategoryView,
 } from "./types";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -299,6 +301,23 @@ async function watchedPages(storeId: string): Promise<WatchedPage[]> {
     .map((p) => ({ label: PAGE_LABEL[p.kind] ?? p.kind, url: p.url, changedAt: last.get(p.id) ?? null }));
 }
 
+/**
+ * A store's menu categories, largest first; null until they've been read. Its
+ * own query (not in STORE_COLUMNS), so a store row still loads if this fails.
+ */
+async function storeCategories(storeId: string, domain: string): Promise<CategoryView[] | null> {
+  const { supabase } = await me();
+  const { data, error } = await supabase.from("stores").select("categories, categories_checked_at").eq("id", storeId).maybeSingle();
+  if (error || !data?.categories_checked_at) return null;
+  const list = (data.categories as StoreCategory[] | null) ?? [];
+  return list.map((c) => ({
+    title: c.title,
+    url: `https://${domain}/collections/${encodeURIComponent(c.handle)}`,
+    products: c.products,
+    onSale: c.onSale,
+  }));
+}
+
 async function snapshotProducts(snapshotId: string | null): Promise<CatalogProduct[] | null> {
   if (!snapshotId) return null;
   const service = createServiceClient();
@@ -332,10 +351,11 @@ export async function getCompetitorOverview(id: string): Promise<CompetitorOverv
   if (!c) return null;
   const s = c.store;
   const interval = PLANS[plan].checkIntervalHours;
-  const [week, since, pages, theirs, own] = await Promise.all([
+  const [week, since, pages, categories, theirs, own] = await Promise.all([
     listMoves({ competitorId: id, sinceDays: 7 }),
     s.check_status === "error" ? lastGoodRead([s.id]) : Promise.resolve(new Map<string, string>()),
     watchedPages(s.id),
+    s.platform === "shopify" ? storeCategories(s.id, s.domain) : Promise.resolve(undefined),
     s.platform === "shopify" ? snapshotProducts(s.latest_snapshot_id) : Promise.resolve(null),
     ownProducts(),
   ]);
@@ -347,6 +367,7 @@ export async function getCompetitorOverview(id: string): Promise<CompetitorOverv
     catalog: toStats(s.catalog_stats),
     checkIntervalHours: interval,
     pages,
+    categories,
     comparison: compared ? { similar: compared.similar, cheaper: compared.cheaper.length } : null,
   };
 }
@@ -453,6 +474,7 @@ export async function getFirstReport(competitorId: string): Promise<FirstReportR
     onSale: empty,
     cheaperThanYours: null,
     pages: await watchedPages(s.id),
+    categories: s.platform === "shopify" ? await storeCategories(s.id, s.domain) : undefined,
     checkIntervalHours: PLANS[plan].checkIntervalHours,
   };
   if (s.platform !== "shopify") return { report: base, reading: false, error: false };

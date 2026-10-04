@@ -11,7 +11,8 @@ import { Spinner, Stat } from "@/components/ui/Feedback";
 import { IconExternal } from "@/components/ui/icons";
 import { PageBody, PageHeader } from "@/components/ui/Page";
 import { count, money, shortDate } from "@/features/appData/format";
-import type { FirstReport, ReportItem, ReportList } from "@/features/appData/types";
+import type { FirstReport, ReportItem, ReportList, WatchedPage } from "@/features/appData/types";
+import { CategoriesCard } from "./CategoriesCard";
 import styles from "./FirstReportView.module.css";
 
 const PREVIEW = 4;
@@ -76,6 +77,22 @@ function ProductLink({ url, title }: { url: string; title: string }) {
     <a href={url} target="_blank" rel="noopener noreferrer" aria-label={`Open ${title} on their store`} className={styles.pageLink}>
       <IconExternal />
     </a>
+  );
+}
+
+function WatchedPages({ pages }: { pages: WatchedPage[] }) {
+  return (
+    <ul className={styles.list}>
+      {pages.map((p) => (
+        <li key={p.url} className={styles.row}>
+          <ItemText title={p.label} />
+          <span className={styles.itemSub}>{p.changedAt ? `changed ${shortDate(p.changedAt)}` : "no changes yet"}</span>
+          <a href={p.url} target="_blank" rel="noopener noreferrer" aria-label={`Open ${p.label}`} className={styles.pageLink}>
+            <IconExternal />
+          </a>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -154,17 +171,7 @@ export function FirstReportView({ report, reading, error }: { report: FirstRepor
           {report.pages.map((p) => p.label).join(", ")}.
         </Banner>
         <Card title="Watched pages" titleId="watched-pages">
-          <ul className={styles.list}>
-            {report.pages.map((p) => (
-              <li key={p.url} className={styles.row}>
-                <ItemText title={p.label} />
-                <span className={styles.itemSub}>{p.changedAt ? `changed ${shortDate(p.changedAt)}` : "no changes yet"}</span>
-                <a href={p.url} target="_blank" rel="noopener noreferrer" aria-label={`Open ${p.label}`} className={styles.pageLink}>
-                  <IconExternal />
-                </a>
-              </li>
-            ))}
-          </ul>
+          <WatchedPages pages={report.pages} />
         </Card>
         {footer}
       </PageBody>
@@ -263,6 +270,17 @@ export function FirstReportView({ report, reading, error }: { report: FirstRepor
               )}
             </Card>
           ) : null}
+        </div>
+      </div>
+
+      <div className={styles.columns}>
+        <div className={styles.column}>
+          {report.categories !== undefined ? <CategoriesCard categories={reading ? null : report.categories} storeName={c.name} /> : null}
+        </div>
+        <div className={styles.column}>
+          <Card title="Watched pages" titleId="watched-pages">
+            <WatchedPages pages={report.pages} />
+          </Card>
         </div>
       </div>
       {footer}

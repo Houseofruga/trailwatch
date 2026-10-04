@@ -53,6 +53,9 @@ export type CompetitorRow = {
 
 export type WatchedPage = { label: string; url: string; changedAt: string | null };
 
+/** One of a store's menu categories (DESIGN 13-Categories). onSale is null when it wasn't counted. */
+export type CategoryView = { title: string; url: string; products: number; onSale: number | null };
+
 export type CompetitorOverview = CompetitorRow & {
   movesThisWeek: number;
   addedAt: string;
@@ -60,6 +63,8 @@ export type CompetitorOverview = CompetitorRow & {
   checkIntervalHours: number;
   unreachableSince?: string;
   pages: WatchedPage[];
+  /** Shopify stores only. Null until the first categories read. */
+  categories?: CategoryView[] | null;
   comparison: { similar: number; cheaper: number } | null;
 };
 
@@ -87,6 +92,8 @@ export type FirstReport = {
   onSale: ReportList;
   cheaperThanYours: Undercut[] | null;
   pages: WatchedPage[];
+  /** Shopify stores only. Null until the first categories read. */
+  categories?: CategoryView[] | null;
   checkIntervalHours: number;
 };
 

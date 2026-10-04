@@ -19,6 +19,7 @@ import { useToast } from "@/components/ui/Toast";
 import { removeCompetitor } from "@/features/appData/actions";
 import { ago, clockTime, count, dayHeading, dayKey, money, shortDate, when } from "@/features/appData/format";
 import type { CompetitorOverview, Move } from "@/features/appData/types";
+import { CategoriesCard } from "./CategoriesCard";
 import { MoveIcon, PRIORITY_OPTIONS, PriorityBadge, TYPE_OPTIONS } from "./moveParts";
 import styles from "./CompetitorDetailView.module.css";
 
@@ -266,6 +267,10 @@ export function CompetitorDetailView({
                   </div>
                 )}
               </Card>
+            ) : null}
+
+            {!pagesOnly && c.categories !== undefined ? (
+              <CategoriesCard categories={loading ? null : c.categories} storeName={c.name} />
             ) : null}
 
             <Card title="Watched pages" titleId="watched-pages">
