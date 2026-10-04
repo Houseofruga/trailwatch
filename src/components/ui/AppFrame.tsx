@@ -302,8 +302,9 @@ export function AppFrame({
             </div>
           </div>
         ) : null}
+        {/* Inside the .ui scope so it gets the app's tokens and Inter. */}
+        <FeedbackModal open={feedback} onClose={() => setFeedback(false)} />
       </div>
-      <FeedbackModal open={feedback} onClose={() => setFeedback(false)} />
     </ToastProvider>
   );
 }

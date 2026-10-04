@@ -29,7 +29,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={show}>
       {children}
-      <div aria-live="polite" className={styles.viewport}>
+      {/* `ui`: rendered beside the app frame, so it needs the app's tokens and Inter itself. */}
+      <div aria-live="polite" className={`ui ${styles.viewport}`}>
         {message ? (
           <Toast
             key={message.id}
