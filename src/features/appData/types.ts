@@ -65,7 +65,8 @@ export type CompetitorOverview = CompetitorRow & {
   pages: WatchedPage[];
   /** Shopify stores only. Null until the first categories read. */
   categories?: CategoryView[] | null;
-  comparison: { similar: number; cheaper: number } | null;
+  /** pending: their products haven't been compared with yours yet. */
+  comparison: { similar: number; cheaper: number; pending?: boolean } | null;
 };
 
 export type ReportItem = {
@@ -91,6 +92,8 @@ export type FirstReport = {
   soldOut: ReportList;
   onSale: ReportList;
   cheaperThanYours: Undercut[] | null;
+  /** Their products haven't been compared with yours yet (so "nothing cheaper" isn't known). */
+  comparisonPending?: boolean;
   pages: WatchedPage[];
   /** Shopify stores only. Null until the first categories read. */
   categories?: CategoryView[] | null;

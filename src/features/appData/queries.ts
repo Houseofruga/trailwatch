@@ -331,11 +331,16 @@ async function snapshotProducts(snapshotId: string | null): Promise<CatalogProdu
 async function comparison(compStoreId: string, theirs: CatalogProduct[], own: CatalogProduct[]) {
   const { supabase, userId, ownStoreId } = await me();
   if (!ownStoreId) return null;
-  const [pairs, verdicts] = await Promise.all([
+  const [pairs, verdicts, state] = await Promise.all([
     loadPairs(supabase, ownStoreId, compStoreId),
     loadVerdicts(supabase, userId, ownStoreId, compStoreId),
+    // match_state has no client policy (server-only), hence the service client.
+    createServiceClient().from("match_state").select("matched_at").eq("own_store_id", ownStoreId).eq("comp_store_id", compStoreId).maybeSingle(),
   ]);
-  return compareMatched(theirs, own, activeMatches(pairs, verdicts));
+  const compared = compareMatched(theirs, own, activeMatches(pairs, verdicts));
+  // Nothing matched and the pair hasn't been judged yet: "0 similar" would read
+  // as "nothing in common" when the comparison simply hasn't run.
+  return { ...compared, pending: compared.similar === 0 && !state.data };
 }
 
 const ownProducts = cache(async (): Promise<CatalogProduct[] | null> => {
@@ -368,7 +373,7 @@ export async function getCompetitorOverview(id: string): Promise<CompetitorOverv
     checkIntervalHours: interval,
     pages,
     categories,
-    comparison: compared ? { similar: compared.similar, cheaper: compared.cheaper.length } : null,
+    comparison: compared ? { similar: compared.similar, cheaper: compared.cheaper.length, pending: compared.pending } : null,
   };
 }
 
@@ -497,6 +502,7 @@ export async function getFirstReport(competitorId: string): Promise<FirstReportR
     ...(i.pctOff ? { pctOff: i.pctOff } : {}),
     ...(i.launchedAt ? { date: i.launchedAt } : {}),
   });
+  const compared = own ? await comparison(c.store.id, products, own) : null;
   return {
     report: {
       ...base,
@@ -510,7 +516,8 @@ export async function getFirstReport(competitorId: string): Promise<FirstReportR
       recentlyLaunched: { items: built.recentlyLaunched.map(toItem), total: built.totals.recentlyLaunched },
       onSale: { items: built.onSaleNow.map(toItem), total: built.totals.onSaleNow },
       soldOut: { items: built.soldOut.map(toItem), total: built.totals.soldOut },
-      cheaperThanYours: own ? ((await comparison(c.store.id, products, own))?.cheaper.slice(0, 50) ?? []) : null,
+      cheaperThanYours: own ? (compared?.cheaper.slice(0, 50) ?? []) : null,
+      comparisonPending: compared?.pending ?? false,
     },
     reading: false,
     error: false,

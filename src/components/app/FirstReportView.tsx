@@ -252,7 +252,11 @@ export function FirstReportView({ report, reading, error }: { report: FirstRepor
               {reading ? (
                 <Spinner label="Reading cheaper than yours…" />
               ) : report.cheaperThanYours.length === 0 ? (
-                <p className={styles.empty}>Nothing of theirs is priced below a similar product of yours.</p>
+                <p className={styles.empty}>
+                  {report.comparisonPending
+                    ? "We’re still comparing their products with yours. This can take a few days."
+                    : "Nothing of theirs is priced below a similar product of yours."}
+                </p>
               ) : (
                 <ul className={styles.list}>
                   {report.cheaperThanYours.map((u) => (

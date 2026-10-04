@@ -23,6 +23,8 @@ import { CategoriesCard } from "./CategoriesCard";
 import { MoveIcon, PRIORITY_OPTIONS, PriorityBadge, TYPE_OPTIONS } from "./moveParts";
 import styles from "./CompetitorDetailView.module.css";
 
+const COMPARING = "We’re still comparing their products with yours. This can take a few days.";
+
 const DAYS_PER_PAGE = 25;
 
 function subscribeHash(onChange: () => void) {
@@ -293,12 +295,18 @@ export function CompetitorDetailView({
 
             {!loading && !pagesOnly && c.comparison ? (
               <Card title="Compared with your store" titleId="compared">
-                <p className={styles.compare}>
-                  {c.comparison.similar} similar products · {c.comparison.cheaper} cheaper than yours
-                </p>
-                <Button variant="plain" className={styles.compareLink} onClick={() => (setType("undercut"), setPriority("all"))}>
-                  See the comparison
-                </Button>
+                {c.comparison.pending ? (
+                  <p className={styles.comparePending}>{COMPARING}</p>
+                ) : (
+                  <>
+                    <p className={styles.compare}>
+                      {c.comparison.similar} similar products · {c.comparison.cheaper} cheaper than yours
+                    </p>
+                    <Button variant="plain" className={styles.compareLink} onClick={() => (setType("undercut"), setPriority("all"))}>
+                      See the comparison
+                    </Button>
+                  </>
+                )}
               </Card>
             ) : null}
           </aside>
