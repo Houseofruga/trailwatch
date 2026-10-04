@@ -24,14 +24,17 @@ export function SiteFooter() {
           </div>
 
           <div className={styles.cols}>
-            <nav className={styles.legal} aria-label="Free tools">
-              <div className={styles.legalHead}>Free tools</div>
+            <nav className={styles.legal} aria-label="Resources">
+              <div className={styles.legalHead}>Resources</div>
               <ul className={styles.legalLinks}>
                 <li>
                   <Link href="/tools/shopify-store-checker">Shopify store checker</Link>
                 </li>
                 <li>
                   <Link href="/tools">All free tools</Link>
+                </li>
+                <li>
+                  <Link href="/guides">Guides</Link>
                 </li>
               </ul>
             </nav>

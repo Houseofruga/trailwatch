@@ -1,0 +1,1088 @@
+/* Public content pages (DESIGN 14-content): guides hub and guide articles.
+   Same public frame as the free tools (08-tools): site header, grey ground, cards. */
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.main {
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 0 96px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- breadcrumb ---------- */
+.crumbs ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.crumbs li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.crumbs a {
+  color: var(--ink-3);
+  font-weight: 450;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.crumbSep {
+  color: var(--ink-4);
+}
+
+.crumbCurrent {
+  color: var(--ink);
+  font-weight: 550;
+}
+
+/* ---------- headings shared by hubs and articles ---------- */
+.h1 {
+  margin: 0;
+  font-size: 40px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 650;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.lead {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 650;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.sectionLead {
+  margin: 6px 0 0;
+  font-size: 16px;
+  color: var(--ink-3);
+}
+
+.card {
+  background: var(--surface);
+  border-radius: 12px;
+  box-shadow: var(--ui-shadow-card);
+}
+
+/* ---------- hub ---------- */
+.hub {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.hubHead {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.hubIntro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 16px;
+  max-width: 680px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.grid3,
+.grid2 {
+  display: grid;
+  gap: 16px;
+}
+
+.grid3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* ---------- guide card ---------- */
+.guideCard {
+  padding: 20px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.guideCard article {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+}
+
+.guideCard h3 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 650;
+}
+
+.guideCard h3 a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.guideCard h3 a:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.guideCardSummary {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink-3);
+  flex-grow: 1;
+}
+
+.guideCardMeta {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+/* ---------- closing call to action ---------- */
+.ctaWrap {
+  padding-top: 8px;
+}
+
+.cta {
+  padding: 40px;
+}
+
+.ctaInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.ctaTitle {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  font-weight: 650;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.ctaButton {
+  padding-top: 8px;
+}
+
+.ctaNote {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ink-3);
+}
+
+/* ---------- article layout ---------- */
+.articleLayout {
+  display: flex;
+  gap: 80px;
+  align-items: flex-start;
+}
+
+.articleColumn {
+  width: 680px;
+  max-width: 100%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.articleHead {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.articleTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 12px;
+}
+
+.byline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bylinePhoto {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  object-fit: cover;
+  background: var(--ui-avatar);
+  flex-shrink: 0;
+}
+
+.bylineText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bylineName {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.bylineName strong {
+  font-weight: 550;
+}
+
+.bylineMeta {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+/* ---------- article body ---------- */
+.body {
+  display: flex;
+  flex-direction: column;
+}
+
+.body > h2 {
+  margin: 40px 0 0;
+  font-size: 24px;
+  line-height: 1.3;
+  font-weight: 650;
+  color: var(--ink);
+  text-wrap: balance;
+  scroll-margin-top: 24px;
+}
+
+.body > h3 {
+  margin: 24px 0 0;
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.body > p {
+  margin: 16px 0 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.body a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.body a:hover {
+  color: var(--link-hover);
+}
+
+.body strong {
+  font-weight: 650;
+}
+
+.body > ol,
+.body > ul {
+  margin: 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.body > ol {
+  padding-left: 24px;
+  gap: 10px;
+}
+
+.body > ul {
+  padding-left: 22px;
+  gap: 8px;
+}
+
+.body > ol > li,
+.body > ul > li {
+  padding-left: 4px;
+}
+
+.tip {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--ui-info-wash);
+  border: 1px solid var(--ui-info-line);
+}
+
+.tipIcon {
+  display: flex;
+  padding-top: 1px;
+  color: var(--ui-info-icon);
+}
+
+.tipText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.tipText p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.tipText .tipTitle {
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.codeLine {
+  margin-top: 16px;
+  overflow-x: auto;
+  background: var(--surface-sunken);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.codeLine code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 15px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.tableWrap {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.tableWrap table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+}
+
+.tableWrap caption {
+  caption-side: bottom;
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--ink-3);
+  border-top: 1px solid var(--border-soft);
+}
+
+.tableWrap thead th {
+  text-align: left;
+  padding: 12px;
+  background: var(--ui-table-head);
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 550;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.tableWrap tbody th,
+.tableWrap tbody td {
+  text-align: left;
+  padding: 12px;
+  border-top: 1px solid var(--border-soft);
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: 450;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  vertical-align: top;
+}
+
+.tableWrap tbody th {
+  font-weight: 550;
+}
+
+.tableWrap .numeric {
+  text-align: right;
+}
+
+.figure {
+  margin: 24px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.figureFrame {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.figureGround {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.alertCard {
+  background: var(--surface);
+  border-radius: 10px;
+  box-shadow: var(--ui-shadow-card);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.alertHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alertAvatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: #c9d6e3;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 650;
+  flex-shrink: 0;
+}
+
+.alertStore {
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.alertWhen {
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-left: auto;
+}
+
+.alertTitle {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 550;
+}
+
+.alertDetail {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
+
+.figure figcaption {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+/* ---------- inline tool card ---------- */
+.toolWrap {
+  margin-top: 28px;
+}
+
+.tool {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.toolHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.toolTile {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--surface-sunken);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--ink-2);
+}
+
+.toolHeadText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toolName {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.35;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.toolBlurb {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.toolForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toolForm label {
+  font-size: 14px;
+  font-weight: 550;
+  color: var(--ink);
+}
+
+.toolRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.toolField {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  box-sizing: border-box;
+  border: 0.66px solid var(--border-input);
+  border-top-color: var(--border-input-top);
+  border-radius: 8px;
+  background: var(--ui-input-bg);
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.toolField:focus-within {
+  border-color: var(--link);
+  box-shadow: 0 0 0 1px var(--link);
+}
+
+.toolFieldInvalid {
+  border-color: var(--ui-critical);
+}
+
+.toolPrefix {
+  color: var(--ink-3);
+  font-size: 16px;
+  padding-left: 12px;
+}
+
+.toolField input {
+  flex-grow: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0 12px 0 2px;
+  font-family: inherit;
+  font-size: 16px;
+  color: var(--ink);
+  outline: none;
+}
+
+.toolChecking {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--ui-subdued);
+  font-size: 15px;
+  color: var(--ink-2);
+}
+
+.toolError {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--ui-critical-wash);
+}
+
+.toolErrorIcon {
+  display: flex;
+  padding-top: 2px;
+  color: var(--ui-critical-icon);
+}
+
+.toolErrorText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toolErrorTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 550;
+  color: var(--ui-critical-ink);
+}
+
+.toolErrorBody {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.toolResult {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.toolStore {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolStoreAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #c9d6e3;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 650;
+  flex-shrink: 0;
+}
+
+.toolStoreText {
+  display: flex;
+  flex-direction: column;
+}
+
+.toolStoreName {
+  font-size: 16px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.toolStoreMeta {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.toolStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.toolStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toolStatLabel {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.toolStatValue {
+  font-size: 22px;
+  font-weight: 650;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- author card, FAQ ---------- */
+.authorWrap {
+  margin-top: 40px;
+}
+
+.author {
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.authorPhoto {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  object-fit: cover;
+  background: var(--ui-avatar);
+  flex-shrink: 0;
+}
+
+.authorText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.authorName {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.authorBio {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+.faqSection {
+  margin-top: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scroll-margin-top: 24px;
+}
+
+.faq {
+  padding: 4px 12px;
+}
+
+.faq details + details {
+  border-top: 1px solid var(--border-soft);
+}
+
+.faq summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  box-sizing: border-box;
+  padding: 12px 4px;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 550;
+  color: var(--ink);
+}
+
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq summary svg {
+  flex-shrink: 0;
+  color: var(--ink-2);
+  transition: transform 0.15s ease;
+}
+
+.faq details[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.faq details p {
+  margin: 0;
+  padding: 0 4px 18px;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+/* ---------- table of contents ---------- */
+.tocAside {
+  width: 260px;
+  flex-shrink: 0;
+  align-self: stretch;
+  padding-top: 220px;
+}
+
+.toc {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tocTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--ink);
+  padding-left: 14px;
+}
+
+.tocList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tocList a {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 4px 12px;
+  box-sizing: border-box;
+  border-radius: 6px;
+  font-size: 15px;
+  line-height: 1.4;
+  text-decoration: none;
+  color: var(--ink-3);
+  font-weight: 450;
+  border-left: 2px solid var(--border);
+}
+
+.tocList a:hover {
+  color: var(--ink);
+}
+
+.tocList a[aria-current="location"] {
+  color: var(--ink);
+  font-weight: 550;
+  border-left-color: var(--ink);
+}
+
+/* The collapsible version, phones and narrow screens only. */
+.tocMobile {
+  display: none;
+}
+
+.tocMobile summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 0 16px;
+  font-size: 16px;
+  font-weight: 550;
+  color: var(--ink);
+}
+
+.tocMobile summary::-webkit-details-marker {
+  display: none;
+}
+
+.tocMobile summary svg {
+  color: var(--ink-2);
+  transition: transform 0.15s ease;
+}
+
+.tocMobile[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.tocMobileBody {
+  padding: 0 8px 10px;
+}
+
+.tocMobile .tocList a {
+  min-height: 44px;
+}
+
+/* ---------- below the article ---------- */
+.after {
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+  padding-top: 64px;
+}
+
+.page a:focus-visible,
+.page summary:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (max-width: 1140px) {
+  .main {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .articleLayout {
+    gap: 40px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .tocAside {
+    display: none;
+  }
+  .tocMobile {
+    display: block;
+  }
+  .articleColumn {
+    width: 100%;
+    max-width: 680px;
+    flex-shrink: 1;
+  }
+  .grid3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .main {
+    padding: 20px 16px 56px;
+  }
+  .h1 {
+    font-size: 30px;
+  }
+  .lead {
+    font-size: 17px;
+  }
+  .sectionTitle,
+  .body > h2 {
+    font-size: 21px;
+  }
+  .body > h2 {
+    margin-top: 32px;
+  }
+  .body > h3 {
+    font-size: 17px;
+  }
+  .toolField {
+    flex-grow: 0;
+  }
+  .hub {
+    gap: 28px;
+  }
+  .hubHead {
+    gap: 16px;
+  }
+  .hubIntro {
+    padding-top: 8px;
+  }
+  .grid3,
+  .grid2 {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .guideCard {
+    padding: 16px;
+  }
+  .guideCard h3 {
+    font-size: 17px;
+  }
+  .guideCard h3 a,
+  .crumbs a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .cta {
+    padding: 20px;
+  }
+  .ctaInner {
+    padding: 8px 0;
+  }
+  .ctaTitle {
+    font-size: 24px;
+  }
+  .ctaButton {
+    width: 100%;
+  }
+  .articleTitle {
+    padding-top: 8px;
+  }
+  .tool {
+    padding: 16px;
+  }
+  .toolRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .toolStats {
+    gap: 8px;
+  }
+  .toolStatValue {
+    font-size: 19px;
+  }
+  .author {
+    padding: 16px;
+  }
+  .after {
+    gap: 40px;
+    padding-top: 48px;
+  }
+}

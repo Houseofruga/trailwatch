@@ -25,7 +25,17 @@ the reasoning into a commit, not here.
   checkout → plan flips to paid → cancel → reverts to free**. These need the
   owner (account creation + entering the test card can't be automated).
 
-## SEO / growth — parked 2026-10-02 (owner is fixing the product first; bring up when asked)
+## Landing page: rework the content around the USP (added 2026-10-05)
+
+The owner wants the homepage copy reworked to show the USP and how Trailwatch is
+useful for brands. Lead with: "Trailwatch tells you what your competitors changed
+this week and what it means for your own products, in a two-minute Monday email."
+Proof points, in order: it compares similar (not identical) products with yours; it
+says what a move means and what to do; low noise; no setup; founder pricing. Contrast
+with price trackers built for resellers, page monitors, and checking by hand. Marketing
+pages need a design prompt and artboards first. Not started.
+
+## SEO / growth — parked 2026-10-02, resumed 2026-10-04 (content pages built from DESIGN 14-content)
 
 Plan and status: `SEO_PLAN.md`. Live so far: `/tools` hub and all four free tools.
 

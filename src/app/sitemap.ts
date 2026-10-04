@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { GUIDES } from "@/features/guides";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://gettrailwatch.com";
@@ -17,6 +18,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/tools/store-snapshot", priority: 0.8 },
     { path: "/tools/sale-checker", priority: 0.8 },
     { path: "/tools/competitor-finder", priority: 0.8 },
+    { path: "/guides", priority: 0.7 },
+    ...GUIDES.map((g) => ({ path: `/guides/${g.slug}`, priority: 0.8 })),
     { path: "/terms", priority: 0.3 },
     { path: "/privacy", priority: 0.3 },
     { path: "/refunds", priority: 0.3 },
