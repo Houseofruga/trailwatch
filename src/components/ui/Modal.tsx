@@ -23,21 +23,31 @@ export function Modal({
 }) {
   const titleId = useId();
   const panel = useRef<HTMLDivElement>(null);
+  // Latest onClose without re-running the effect: callers pass a new function
+  // each render, and re-running would move focus back to the first field on
+  // every keystroke.
+  const closeRef = useRef(onClose);
+  useEffect(() => {
+    closeRef.current = onClose;
+  });
 
   useEffect(() => {
     if (!open) return;
     const previous = document.activeElement as HTMLElement | null;
-    const first = panel.current?.querySelector<HTMLElement>("input, select, textarea, button:not([aria-label='Close'])");
+    // A text field first (so typing starts there), else the first button.
+    const first =
+      panel.current?.querySelector<HTMLElement>("input:not([type=hidden]), select, textarea") ??
+      panel.current?.querySelector<HTMLElement>("button:not([aria-label='Close'])");
     (first ?? panel.current)?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") closeRef.current();
     };
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("keydown", onKey);
       previous?.focus();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
   return (
