@@ -49,6 +49,10 @@ export async function checkStoreIfDue(
     .from("competitors")
     .select("id", { count: "exact", head: true })
     .eq("store_id", storeId);
+  // A preloaded store (a prospect's, read ahead of sign-up) gets the reads that
+  // cost no AI. Its own query, so a database without the column still works.
+  const { data: flag } = await service.from("stores").select("preload").eq("id", storeId).maybeSingle();
+  const preload = !!(flag as { preload?: boolean } | null)?.preload;
   let pages: StorePagesResult | null = null;
   if (followers) {
     try {
@@ -56,6 +60,8 @@ export async function checkStoreIfDue(
     } catch (err) {
       console.error(`Page checks failed for store ${storeId}:`, err);
     }
+  }
+  if (followers || preload) {
     // Their Best Sellers list, once a day (Opportunities B1).
     try {
       await crawlBestsellers(service, storeId);
@@ -117,9 +123,9 @@ export type CatalogTickResult = {
 };
 
 /**
- * Due stores, oldest first: ones someone follows, plus ones that are someone's
- * own store (their catalog is the matching baseline). A store nobody uses is
- * never crawled.
+ * Due stores, oldest first: ones someone follows, ones that are someone's own
+ * store (their catalog is the matching baseline), and preloaded ones (prospects'
+ * stores, migration 0027). Any other store nobody uses is never crawled.
  */
 async function dueStores(service: SupabaseClient): Promise<{ id: string; next_check_at: string }[]> {
   const now = new Date().toISOString();
@@ -139,8 +145,17 @@ async function dueStores(service: SupabaseClient): Promise<{ id: string; next_ch
   ]);
   if (followed.error) throw followed.error;
   if (owned.error) throw owned.error;
+  // Preloaded stores: a failed query (the column not there yet) just leaves them out.
+  const preloaded = await service
+    .from("stores")
+    .select("id, next_check_at")
+    .eq("preload", true)
+    .lte("next_check_at", now)
+    .order("next_check_at", { ascending: true })
+    .limit(CATALOG_CONFIG.tickBatchSize)
+    .returns<{ id: string; next_check_at: string }[]>();
   const byId = new Map<string, { id: string; next_check_at: string }>();
-  for (const s of [...(followed.data ?? []), ...(owned.data ?? [])]) byId.set(s.id, { id: s.id, next_check_at: s.next_check_at });
+  for (const s of [...(followed.data ?? []), ...(owned.data ?? []), ...(preloaded.data ?? [])]) byId.set(s.id, { id: s.id, next_check_at: s.next_check_at });
   return [...byId.values()]
     .sort((a, b) => Date.parse(a.next_check_at) - Date.parse(b.next_check_at))
     .slice(0, CATALOG_CONFIG.tickBatchSize);

@@ -31,13 +31,19 @@ export async function runMatchingTick(service: SupabaseClient, budgetMs = MATCHI
   const result: MatchingTickResult = { classified: 0, judged: 0, events: 0 };
   const owners = await matchingOwners(service);
   const storeIds = [...new Set(owners.flatMap((o) => [o.ownStoreId, ...o.compStoreIds]))];
-  if (storeIds.length === 0) return result;
-
-  const { data: stores } = await service
+  // Preloaded stores (prospects', migration 0027): classified last, after every
+  // real user's stores and pairs. A failed query just means none.
+  const { data: preloadRows } = await service
     .from("stores")
     .select("id, latest_snapshot_id, classified_snapshot_id")
-    .in("id", storeIds)
+    .eq("preload", true)
     .eq("platform", "shopify");
+  const preloaded = ((preloadRows ?? []) as StoreRow[]).filter((s) => !storeIds.includes(s.id));
+  if (storeIds.length === 0 && preloaded.length === 0) return result;
+
+  const { data: stores } = storeIds.length
+    ? await service.from("stores").select("id, latest_snapshot_id, classified_snapshot_id").in("id", storeIds).eq("platform", "shopify")
+    : { data: [] as StoreRow[] };
   const byId = new Map((stores ?? []).map((s: StoreRow) => [s.id, s]));
   const products = new Map<string, Awaited<ReturnType<typeof snapshotProducts>>>();
   const productsOf = async (s: StoreRow) => {
@@ -61,11 +67,11 @@ export async function runMatchingTick(service: SupabaseClient, budgetMs = MATCHI
   }
   const storeOrder = [...byId.values()].sort((a, b) => Number(ownIds.has(b.id)) - Number(ownIds.has(a.id)));
 
-  try {
-    // 1. Classify each store's latest catalog.
-    for (const s of storeOrder) {
+  // Classify each store's latest catalog; the reason it stopped early, or null.
+  const classifyStores = async (list: StoreRow[]): Promise<"budget" | "daily tokens" | null> => {
+    for (const s of list) {
       if (!s.latest_snapshot_id || s.latest_snapshot_id === s.classified_snapshot_id) continue;
-      if (Date.now() > deadline) return { ...result, stopped: "budget" };
+      if (Date.now() > deadline) return "budget";
       const latest = await productsOf(s);
       if (!latest) continue;
       const catalog = ownIds.has(s.id) ? latest : relevantFirst(latest, ownTypes);
@@ -86,7 +92,7 @@ export async function runMatchingTick(service: SupabaseClient, budgetMs = MATCHI
           done = false;
           break;
         }
-        if (outOfTokens()) return { ...result, stopped: "daily tokens" };
+        if (outOfTokens()) return "daily tokens";
         const batch = rest.slice(i, i + MATCHING_CONFIG.classifyBatch);
         const { classes, calls } = await classifyBatch(batch);
         spend(calls);
@@ -109,9 +115,16 @@ export async function runMatchingTick(service: SupabaseClient, budgetMs = MATCHI
         await service.from("stores").update({ classified_snapshot_id: s.latest_snapshot_id }).eq("id", s.id);
         s.classified_snapshot_id = s.latest_snapshot_id;
       } else if (Date.now() > deadline) {
-        return { ...result, stopped: "budget" };
+        return "budget";
       }
     }
+    return null;
+  };
+
+  try {
+    // 1. Real users' stores.
+    const stopped = await classifyStores(storeOrder);
+    if (stopped) return { ...result, stopped };
 
     // 2. Judge pairs for each (own store, competitor store).
     const pairsToDo = new Map<string, { own: string; comp: string; userIds: string[] }>();
@@ -219,6 +232,12 @@ export async function runMatchingTick(service: SupabaseClient, budgetMs = MATCHI
           matched_at: new Date().toISOString(),
         });
       }
+    }
+
+    // 3. Preloaded stores, with whatever time and tokens are left.
+    if (!result.stopped) {
+      const stopped = await classifyStores(preloaded);
+      if (stopped) return { ...result, stopped };
     }
   } catch (err) {
     // Usually a rate limit: keep what's saved and pick up next tick.
