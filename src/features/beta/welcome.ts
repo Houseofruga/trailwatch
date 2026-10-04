@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { RenderedEmail } from "@/features/digest/email";
 import { getMailer } from "@/features/digest/mailer";
 import { escapeHtml } from "@/features/email/shell";
-import { BETA_CONFIG as C, betaEndsLabel, bookingUrl } from "./config";
+import { BETA_CONFIG as C, betaEndsLabel, bookingUrl, maxDiscountPct } from "./config";
 
 // The founder welcome email: plain and personal (no branded layout), sent once
 // after sign-up. Replies go straight to the founder (the mailer's reply-to).
@@ -13,7 +13,7 @@ export function renderWelcomeEmail(opts: { founding: boolean; booking: string | 
     `I'm ${C.founderName}, the founder of Trailwatch. Thanks for joining the beta.`,
     ...(opts.founding
       ? [
-          `You're one of our first ${C.foundingCap} beta members. That means up to ${C.baseDiscountPct + C.callsDiscountPct}% off for life when paid plans start on ${betaEndsLabel()}: ${C.baseDiscountPct}% is already yours, and ${C.callsDiscountPct}% more unlocks after ${C.callsNeeded} short feedback calls with me.`,
+          `You're one of our first ${C.foundingCap} beta members. That means up to ${maxDiscountPct()}% off for life when paid plans start on ${betaEndsLabel()}: ${C.baseDiscountPct}% is already yours, and each of ${C.callsNeeded} short feedback calls with me adds ${C.perCallDiscountPct}% more. Your price is locked too: it never goes up.`,
         ]
       : []),
     "A quick question: who do you compete with most? Just hit reply. This comes straight to me, and I read every one.",

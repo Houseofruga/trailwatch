@@ -9,16 +9,19 @@ const U = "11111111-1111-4111-8111-111111111111";
 const B = "22222222-2222-4222-8222-222222222222";
 
 describe("founding-member offer", () => {
-  it("is 10% on joining and 40% after 3 calls, locked in once earned", () => {
-    expect(foundingOffer(true, 0)).toMatchObject({ discountPct: 10, maxPct: 40, callsDone: 0, unlocked: false });
-    expect(foundingOffer(true, 2)).toMatchObject({ discountPct: 10, callsDone: 2 });
-    expect(foundingOffer(true, 3)).toMatchObject({ discountPct: 40, unlocked: true });
-    expect(foundingOffer(true, 7)).toMatchObject({ discountPct: 40, callsDone: 3 });
+  it("is 5% on joining and 5% more per call, up to 20% after 3 calls", () => {
+    expect(foundingOffer(true, 0)).toMatchObject({ discountPct: 5, maxPct: 20, callsDone: 0, unlocked: false });
+    expect(foundingOffer(true, 1)).toMatchObject({ discountPct: 10, callsDone: 1, unlocked: false });
+    expect(foundingOffer(true, 2)).toMatchObject({ discountPct: 15, callsDone: 2 });
+    expect(foundingOffer(true, 3)).toMatchObject({ discountPct: 20, unlocked: true });
+    expect(foundingOffer(true, 7)).toMatchObject({ discountPct: 20, callsDone: 3 });
     expect(foundingOffer(false, 3)).toMatchObject({ discountPct: 0, maxPct: 0, unlocked: false });
   });
 
   it("states the condition next to the headline", () => {
-    expect(OFFER_LINE).toBe("Up to 40% off for life as a beta member: 10% when you join, plus 30% more after 3 short feedback calls with the founder.");
+    expect(OFFER_LINE).toBe(
+      "Up to 20% off for life as a beta member: 5% when you join, plus 5% more for each of 3 short feedback calls with the founder. Your price never goes up.",
+    );
   });
 });
 
@@ -67,7 +70,8 @@ describe("founder welcome email", () => {
   it("tells founding members the offer, and links the booking page when there is one", () => {
     const founding = renderWelcomeEmail({ founding: true, booking: "https://cal.example/founder" });
     expect(founding.text).toContain("You're one of our first 25 beta members");
-    expect(founding.text).toContain("10% is already yours, and 30% more unlocks after 3 short feedback calls with me.");
+    expect(founding.text).toContain("up to 20% off for life");
+    expect(founding.text).toContain("5% is already yours, and each of 3 short feedback calls with me adds 5% more. Your price is locked too: it never goes up.");
     expect(founding.text).toContain("Or grab 30 minutes and I'll set up your competitors with you");
     expect(founding.text).toContain("https://cal.example/founder");
     expect(founding.html).toContain('href="https://cal.example/founder"');

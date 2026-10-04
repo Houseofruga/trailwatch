@@ -11,13 +11,18 @@ export const BETA_CONFIG = {
   foundingCap: 25,
   // Paid plans start (and the founding price locks in) on this date.
   betaEndsOn: "2027-01-01",
-  // Founding offer: base discount on joining, more after enough feedback calls.
-  baseDiscountPct: 10,
-  callsDiscountPct: 30,
+  // Beta-member offer (decided 2026-10-05): a base discount on joining, plus the
+  // same again for each feedback call, up to `callsNeeded` calls. 5 + 3 x 5 = 20%.
+  // Their price is also locked: it never goes up.
+  baseDiscountPct: 5,
+  perCallDiscountPct: 5,
   callsNeeded: 3,
   // Length of a founder call (the booking page's slot).
   callMinutes: 30,
 };
+
+/** The most a beta member's discount can reach (percent). */
+export const maxDiscountPct = () => BETA_CONFIG.baseDiscountPct + BETA_CONFIG.perCallDiscountPct * BETA_CONFIG.callsNeeded;
 
 /** The founder's booking page (Cal.com or similar); booking buttons hide until it's set. */
 export function bookingUrl(): string | null {

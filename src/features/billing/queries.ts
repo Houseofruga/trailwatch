@@ -52,7 +52,7 @@ export async function getSubscriptionBillingInfo(
 
 /**
  * Whether the signed-in user is a founding member (joined during the free
- * beta → 40% off for life once billing opens). For the redesigned plan page
+ * beta → up to 20% off for life once billing opens). For the redesigned plan page
  * and checkout discount. Tolerant by design: false on any error, including the
  * column not existing before migration 0014 is applied.
  */

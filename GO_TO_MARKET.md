@@ -27,8 +27,9 @@ there is a paid AI key.
 ## 3. The offer
 
 - Free during the beta. Paid plans start January 1, 2027 (Starter $29, Pro $79 a month).
-- The first 25 brands are beta members: 10% off for life on joining, 30% more after
-  3 short feedback calls. "Up to 40% off for life once paid plans start."
+- The first 25 brands are beta members: 5% off for life on joining, 5% more for each
+  of 3 short feedback calls. "Up to 20% off for life once paid plans start."
+- Price lock: a beta member's price never goes up. Billing is monthly only.
 - We set it up for them: their store and their top 3 competitors, in two minutes.
 
 ## 4. Two channels

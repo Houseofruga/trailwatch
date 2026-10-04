@@ -132,7 +132,7 @@ Extend the v2 system. Don't replace it.
 
 **F. Plan and billing page**
 - Free (1 competitor, weekly briefing, daily checks) · **Starter $29/mo** (3 competitors, instant alerts, checks every 6h) · **Pro $79/mo** (10 competitors, Slack, checks every 2h, own-store matching). Annual = 2 months free.
-- **Beta state:** billing is disabled, plans are visible, and the user is flagged a **Founding member** (40% off for life when billing opens).
+- **Beta state:** billing is disabled, plans are visible, and the user is flagged a **Founding member** (up to 20% off for life when billing opens).
 
 **G. Emails** (email-safe: tables and inline styles, light + dark, desktop + mobile)
 1. **Weekly briefing** (Monday):

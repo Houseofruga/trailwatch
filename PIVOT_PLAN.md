@@ -172,7 +172,7 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
     - `NEXT_PUBLIC_PADDLE_PRICE_STARTER_MONTHLY` / `_ANNUAL`
     - the existing `NEXT_PUBLIC_PADDLE_PRICE_PRO_*` must point at the new **$79 / $790** prices
     - optional: `NEXT_PUBLIC_PADDLE_PRICE_AGENCY_*`, `NEXT_PUBLIC_PADDLE_FOUNDING_DISCOUNT_ID`
-  - **Owner, in the Paddle sandbox:** create the Starter ($29 / $290) and Pro ($79 / $790) prices and a "Founding member" 40%-forever discount.
+  - **Owner, in the Paddle sandbox:** create the Starter ($29 / $290) and Pro ($79 / $790) prices and a "Founding member" 40%-forever discount (superseded 2026-10-05: beta members get 5% to 20%, see SPEC.md §4).
 - Phase 7:
   - Migration **`0015_usage.sql`** adds `ai_usage`, `fetch_log` plus the `increment_fetch_log` RPC, and `app_settings` (seeded with `free_signups_per_day = 50`). It also re-creates `handle_new_user` with the signup-cap check. All service-role only. Apply it after 0014.
   - **New env vars:**

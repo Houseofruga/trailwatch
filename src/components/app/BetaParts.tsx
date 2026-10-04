@@ -2,14 +2,14 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { IconCheckCircle, IconExternal } from "@/components/ui/icons";
 import { StepProgress } from "@/components/ui/StepProgress";
-import { BETA_CONFIG as C, betaEndsLabel } from "@/features/beta/config";
+import { BETA_CONFIG as C, betaEndsLabel, maxDiscountPct } from "@/features/beta/config";
 import type { BetaStatus } from "@/features/appData/types";
 import styles from "./BetaParts.module.css";
 
 // Beta-member pieces (DESIGN 12-Beta): the Settings plan card (12c), the
 // onboarding note (12d) and the sidebar call prompt.
 
-const MAX = C.baseDiscountPct + C.callsDiscountPct;
+const MAX = maxDiscountPct();
 
 function BookButton({ url, label }: { url: string; label: string }) {
   return (
@@ -41,15 +41,16 @@ export function BetaPlanCard({ beta }: { beta: BetaStatus }) {
       <div className={`${styles.offer} ${unlocked ? styles.offerDone : ""}`}>
         <span className={styles.locked}>
           <IconCheckCircle />
-          {unlocked ? MAX : C.baseDiscountPct}% off for life, locked in
+          {C.baseDiscountPct + C.perCallDiscountPct * beta.callsDone}% off for life, locked in
         </span>
+        <span className={styles.muted}>Your price never goes up.</span>
         {unlocked ? (
           <span className={styles.thanks}>Thanks for the three calls. Your feedback is shaping what Trailwatch becomes.</span>
         ) : (
           <>
             <StepProgress label={`Feedback calls: ${beta.callsDone} of ${beta.callsNeeded}`} done={beta.callsDone} total={beta.callsNeeded} />
             <span className={styles.muted}>
-              {beta.callsDone === 0 ? `Do ${left} short calls` : `Do ${left} more`} and it becomes {MAX}% off for life.
+              Each short call adds {C.perCallDiscountPct}%. {left === 1 ? "One more call" : `${left} more calls`} and it becomes {MAX}% off for life.
             </span>
             {beta.bookingUrl ? (
               <div>
@@ -75,8 +76,8 @@ export function BetaNote({ beta }: { beta: BetaStatus }) {
         You&rsquo;re one of our first {C.foundingCap} beta members: up to {MAX}% off for life once paid plans start.
       </p>
       <p className={styles.noteText}>
-        Trailwatch is free during the beta. You have {C.baseDiscountPct}% already, and {C.callsDiscountPct}% more after {C.callsNeeded} short feedback calls with{" "}
-        {C.founderName}.
+        Trailwatch is free during the beta. You have {C.baseDiscountPct}% already, and each of {C.callsNeeded} short feedback calls with {C.founderName} adds{" "}
+        {C.perCallDiscountPct}% more. Your price never goes up.
       </p>
       {beta.bookingUrl ? (
         <div>
@@ -95,9 +96,7 @@ export function SidebarCallPrompt({ beta }: { beta: BetaStatus }) {
     <div className={styles.prompt}>
       <span className={styles.promptTitle}>Talk to {C.founderName}</span>
       <span className={styles.promptLine}>
-        Free during the beta.{" "}
-        {left === beta.callsNeeded ? `${beta.callsNeeded} feedback calls get` : left === 1 ? "1 more feedback call gets" : `${left} more feedback calls get`} you {MAX}% off
-        for life once paid plans start.
+        Free during the beta. Each feedback call adds {C.perCallDiscountPct}% off for life, up to {MAX}%, once paid plans start.
       </span>
       <StepProgress compact label={`${beta.callsDone} of ${beta.callsNeeded} calls`} done={beta.callsDone} total={beta.callsNeeded} />
       <a href={beta.bookingUrl} target="_blank" rel="noopener noreferrer" className={styles.promptButton} aria-label={`Book a ${C.callMinutes}-min call (opens in a new tab)`}>

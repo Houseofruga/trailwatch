@@ -95,7 +95,7 @@ export function MarketingSections() {
               <div>Instant alerts for sales, launches, price changes and sell-outs</div>
               <div>A Monday briefing with one move to make each week</div>
               <div>
-                <b>40% off for life</b> when paid plans launch
+                <b>Up to 20% off for life</b> and a price that never goes up, when paid plans launch
               </div>
             </div>
             <div className={styles.planCta}>

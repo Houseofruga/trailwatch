@@ -32,7 +32,7 @@ export const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "Is the beta really free? What happens after?",
-    a: "Yes, free with no card. When paid plans launch, we'll tell you well in advance, and beta members keep 40% off for life. You can leave anytime.",
+    a: "Yes, free with no card. When paid plans launch, we'll tell you well in advance, and the first 25 beta members get up to 20% off for life, with a price that never goes up. You can leave anytime.",
   },
 ];
 
