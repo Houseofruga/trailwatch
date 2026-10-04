@@ -34,6 +34,12 @@ export const IconEye = (p: IconProps) => (
     <circle cx="12" cy="12" r="3" />
   </Svg>
 );
+export const IconTrendUp = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M3 17l6-6 4 4 8-8" />
+    <path d="M14 7h7v7" />
+  </Svg>
+);
 export const IconSliders = (p: IconProps) => (
   <Svg {...p}>
     <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />
@@ -156,6 +162,20 @@ export const IconImage = (p: IconProps) => (
 export const IconHash = (p: IconProps) => (
   <Svg {...p}>
     <path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16" />
+  </Svg>
+);
+
+export const IconStore = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M4 10v10h16V10" />
+    <path d="M3 10l2-6h14l2 6z" />
+    <path d="M10 20v-5h4v5" />
+  </Svg>
+);
+export const IconLock = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M6 11h12v9H6z" />
+    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
   </Svg>
 );
 

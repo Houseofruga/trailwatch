@@ -2,6 +2,8 @@
 // mock.ts; Step 6 swaps in real queries that return these same shapes.
 // Money is integer cents; times are ISO strings.
 
+import type { OpportunityView } from "@/features/opportunities/queries";
+
 export type Priority = "high" | "normal" | "low";
 
 /** Buckets for the Type filter and the row icon. */
@@ -162,4 +164,15 @@ export type OnboardingItem = {
   domain: string;
   status: "ready" | "reading" | "pages" | "failed";
   products: number | null;
+};
+
+/** The Opportunities screen (DESIGN 11-opps). */
+export type OpportunitiesPage = {
+  /** False: not on the plan (Pro; everyone during the beta). */
+  available: boolean;
+  hasOwnStore: boolean;
+  items: OpportunityView[];
+  dismissedCount: number;
+  /** Per competitor store in the evidence: favicon domain, and whether its Best Sellers list is readable. */
+  stores: Record<string, { domain: string | null; bestsellersUnavailable: boolean }>;
 };

@@ -1,0 +1,459 @@
+/* Opportunities (DESIGN 11-opps). Shopify-admin tokens from tokens.css. */
+
+/* Filter tabs (NEW COMPONENT: Tabs) */
+.tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 450;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tab:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.tabOn,
+.tabOn:hover {
+  background: var(--ui-grey);
+  font-weight: 650;
+}
+
+.tabCount {
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--ink-3);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Opportunity card (NEW COMPONENT: Expandable card) */
+.card {
+  background: var(--surface);
+  border-radius: 12px;
+  box-shadow: var(--ui-shadow-card);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.leaving {
+  opacity: 0.35;
+  transform: translateX(24px) scale(0.98);
+  pointer-events: none;
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.who {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.avatars {
+  display: inline-flex;
+}
+
+.avatarRing {
+  display: inline-flex;
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
+.avatarRing + .avatarRing {
+  margin-left: -6px;
+}
+
+.names {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.noticed {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+  font-weight: 650;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.try {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--ui-subdued);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+.try strong {
+  font-weight: 650;
+}
+
+.cardFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--border-soft);
+  padding-top: 10px;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 550;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.footActions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.linkButton {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.linkButton:hover {
+  color: var(--link-hover);
+}
+
+/* Evidence */
+.evidence {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.evidenceTitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--ink-3);
+}
+
+.products {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.product {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-top: 1px solid var(--border-soft);
+}
+
+.thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: var(--surface-sunken);
+  box-shadow: inset 0 0 0 1px var(--border-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-4);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.productText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex-grow: 1;
+}
+
+.productTitle {
+  font-size: 14px;
+  font-weight: 550;
+  color: var(--ink);
+}
+
+.productMeta {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+/* NEW COMPONENT: Signal chip */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  box-sizing: border-box;
+  padding: 0 7px;
+  border-radius: 6px;
+  background: var(--ui-grey);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 550;
+  white-space: nowrap;
+}
+
+.chip svg {
+  color: var(--ink-2);
+  stroke-width: 2;
+}
+
+.note {
+  margin: 0;
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-3);
+}
+
+.note svg {
+  margin-top: 2px;
+}
+
+/* No own store (11e) */
+.ask {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.askIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.askBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1 1 240px;
+}
+
+.askText {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+/* Not on plan (11i) */
+.plan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 24px 0;
+}
+
+.planIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.planTitle {
+  margin: 6px 0 0 0;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.planText {
+  margin: 0;
+  max-width: 420px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.planLink {
+  font-size: 14px;
+  font-weight: 550;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Loading (11h) */
+.skeleton {
+  gap: 12px;
+}
+
+.bar {
+  display: block;
+  height: 14px;
+  border-radius: 6px;
+  background: var(--ui-grey);
+}
+
+.block {
+  display: block;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--surface-sunken);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.dismissedLink {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+  font-size: 13px;
+}
+
+.dismissedLink a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Dismissed list (11d) */
+.dismissedRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.dismissedRow + .dismissedRow {
+  border-top: 1px solid var(--border-soft);
+}
+
+.dismissedText {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.dismissedMeta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.dismissedNoticed {
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Phones: tabs scroll sideways; controls are 44px tall (11a, 390). */
+@media (max-width: 767px) {
+  .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .tab,
+  .toggle {
+    height: 44px;
+  }
+}

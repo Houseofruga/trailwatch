@@ -33,6 +33,8 @@ export type CompetitorSignals = {
 export type EvidenceProduct = {
   title: string;
   handle: string;
+  // Absent on opportunities saved before the screen (2026-10-04).
+  image?: string | null;
   price: number | null;
   bestsellerPosition: number | null;
   inBestsellers: boolean;
@@ -85,6 +87,7 @@ function evidenceFor(c: Item, s: CompetitorSignals, now: number): EvidenceProduc
   return {
     title: p.title,
     handle,
+    image: p.image,
     price: regularPrice(c),
     bestsellerPosition: s.bestsellers ? positionOf(s.bestsellers, handle) : null,
     inBestsellers: !!s.bestsellers?.members.includes(handle),

@@ -18,6 +18,7 @@ import {
   type Suggestion,
 } from "@/features/competitorFinder/suggest";
 import { addCompetitorByDomain, deleteCompetitor } from "@/features/competitors/actions";
+import { setOpportunityStatus, type StatusAction } from "@/features/opportunities/queries";
 import { resolvePlan } from "@/features/plan/comp";
 import { PLANS } from "@/features/plan/limits";
 import { canonicalStoreHost } from "@/features/stores/domain";
@@ -213,6 +214,32 @@ export async function rejectMatch(input: unknown) {
 
 export async function linkProducts(input: unknown) {
   return setMatchVerdict(input, "confirmed", true);
+}
+
+// ------------------------------------------------------------ opportunities
+
+const opportunityId = z.string().uuid();
+
+/** Dismiss, "not relevant to me" or restore (also the toast's Undo). Server-side, scoped to the user. */
+async function setOpportunity(input: unknown, action: StatusAction): Promise<{ ok: boolean }> {
+  const { user, plan } = await currentUser();
+  const id = opportunityId.safeParse(input);
+  if (!id.success || !PLANS[plan].opportunities) return { ok: false };
+  const ok = await setOpportunityStatus(createServiceClient(), user.id, id.data, action);
+  revalidatePath("/opportunities", "layout");
+  return { ok };
+}
+
+export async function dismissOpportunity(id: unknown) {
+  return setOpportunity(id, "dismiss");
+}
+
+export async function markOpportunityNotRelevant(id: unknown) {
+  return setOpportunity(id, "not_relevant");
+}
+
+export async function restoreOpportunity(id: unknown) {
+  return setOpportunity(id, "restore");
 }
 
 // ------------------------------------------------------------ widget onboarding

@@ -44,7 +44,7 @@ export function PageHeader({
   );
 }
 
-/** Centered content column inside the app frame (1040px, 600px for onboarding). */
-export function PageBody({ children, narrow }: { children: React.ReactNode; narrow?: boolean }) {
-  return <div className={`${styles.body} ${narrow ? styles.narrow : ""}`}>{children}</div>;
+/** Centered content column inside the app frame (1040px; 880px for reading lists; 600px for onboarding). */
+export function PageBody({ children, narrow, medium }: { children: React.ReactNode; narrow?: boolean; medium?: boolean }) {
+  return <div className={`${styles.body} ${narrow ? styles.narrow : ""} ${medium ? styles.medium : ""}`}>{children}</div>;
 }

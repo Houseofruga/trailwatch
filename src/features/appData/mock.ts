@@ -4,6 +4,8 @@
 // Step 6 replaces these functions with real queries of the same shape.
 
 import { nextBriefingAt } from "@/features/briefing/schedule";
+import type { EvidenceProduct } from "@/features/opportunities/build";
+import type { OpportunityView } from "@/features/opportunities/queries";
 import { dayKey, shortDate } from "./format";
 import type {
   Briefing,
@@ -15,6 +17,7 @@ import type {
   FirstReport,
   HomeSummary,
   Move,
+  OpportunitiesPage,
   OwnStore,
   ReportItem,
   Settings,
@@ -461,4 +464,88 @@ export async function getSettings(): Promise<Settings> {
     plan: { label: "Free beta", foundingMember: true, competitors: 10, checkIntervalHours: 2, slack: true },
     account: MOCK_ACCOUNT,
   };
+}
+
+// ------------------------------------------------------------ opportunities (DESIGN 11-opps)
+
+const ev = (title: string, price: number, extra: Partial<EvidenceProduct> = {}): EvidenceProduct => ({
+  title,
+  handle: title.toLowerCase().replace(/\W+/g, "-"),
+  image: null,
+  price,
+  bestsellerPosition: null,
+  inBestsellers: false,
+  launchedDaysAgo: null,
+  restocks90: 0,
+  soldOutAfterDays: null,
+  featuredDays: null,
+  ...extra,
+});
+const opp = (id: string, kind: OpportunityView["kind"], noticed: string, action: string, competitors: OpportunityView["evidence"]["competitors"], extra: Partial<OpportunityView> = {}): OpportunityView => ({
+  id,
+  kind,
+  score: 10,
+  noticed,
+  action,
+  evidence: { competitors, signals: [] },
+  status: "open",
+  dismissedAt: null,
+  detectedAt: hoursAgo(30),
+  updatedAt: hoursAgo(5),
+  ...extra,
+});
+const FERN = { storeId: "s-fernwood", storeName: "Fernwood" };
+const HEARTH = { storeId: "s-hearth", storeName: "Hearth & Pine" };
+const DEW = { storeId: "s-dewlane", storeName: "Dewlane" };
+const OAK = { storeId: "s-oakgrove", storeName: "Oakgrove" };
+
+const OPPORTUNITIES: OpportunityView[] = [
+  opp("00000000-0000-4000-8000-000000000001", "format_gap", "3 of your 5 competitors offer travel sizes, and you don’t. Fernwood’s Mini Linen Kit is #4 in their Best Sellers.", "Consider testing a travel-size version of your best-seller, for trial or gifting.", [
+    { ...FERN, products: [ev("Mini Linen Kit", 3800, { bestsellerPosition: 4, inBestsellers: true, launchedDaysAgo: 12 })] },
+    { ...HEARTH, products: [ev("Travel Pillowcase", 2400)] },
+    { ...DEW, products: [ev("Weekender Set", 4500)] },
+  ]),
+  opp("00000000-0000-4000-8000-000000000002", "rising_product", "Hearth & Pine’s new Waffle Robe, launched 6 days ago, is already #2 in their Best Sellers.", "Check how your comparable robes compare on price and product page; this is the one Hearth & Pine is pushing.", [
+    { ...HEARTH, products: [ev("Waffle Robe", 9800, { bestsellerPosition: 2, inBestsellers: true, launchedDaysAgo: 6 })] },
+  ]),
+  opp("00000000-0000-4000-8000-000000000003", "demand", "Dewlane’s Linen Duvet Cover sold out and was restocked 3 times in the last 90 days. It’s in their Best Sellers.", "Make sure your comparable duvet covers are in stock and easy to find; there’s demand Dewlane can’t always meet.", [
+    { ...DEW, products: [ev("Linen Duvet Cover", 22800, { inBestsellers: true, restocks90: 3 })] },
+  ]),
+  opp("00000000-0000-4000-8000-000000000004", "category_gap", "2 of your 5 competitors sell towels, and you don’t. Fernwood’s Waffle Bath Towel is #7 in their Best Sellers.", "Consider whether towels could fit your range. Fernwood’s Waffle Bath Towel at $42 is a reference point.", [
+    { ...FERN, products: [ev("Waffle Bath Towel", 4200, { bestsellerPosition: 7, inBestsellers: true })] },
+    { ...OAK, products: [ev("Cotton Bath Sheet", 5400)] },
+  ]),
+  opp("00000000-0000-4000-8000-000000000005", "price_tier_gap", "2 of your 5 competitors have products under $25; your lowest regular price is $68.", "Consider an entry product under $25 to lower the cost of a first order.", [
+    { ...HEARTH, products: [ev("Linen Napkin Set", 2200)] },
+    { ...DEW, products: [ev("Lavender Sachet", 1400)] },
+  ]),
+];
+
+const MOCK_OPPORTUNITY_STORES: OpportunitiesPage["stores"] = {
+  "s-fernwood": { domain: null, bestsellersUnavailable: false },
+  "s-hearth": { domain: null, bestsellersUnavailable: false },
+  "s-dewlane": { domain: null, bestsellersUnavailable: false },
+  "s-oakgrove": { domain: null, bestsellersUnavailable: true },
+};
+
+export type OpportunitiesPreview = "list" | "no-own-store" | "still-learning" | "not-on-plan";
+
+export async function getOpportunitiesPage(variant: OpportunitiesPreview = "list"): Promise<OpportunitiesPage> {
+  const base = { available: true, hasOwnStore: true, items: OPPORTUNITIES, dismissedCount: 3, stores: MOCK_OPPORTUNITY_STORES };
+  if (variant === "no-own-store") return { ...base, hasOwnStore: false, items: OPPORTUNITIES.filter((o) => !o.kind.endsWith("_gap")), dismissedCount: 0 };
+  if (variant === "still-learning") return { ...base, items: [], dismissedCount: 0 };
+  if (variant === "not-on-plan") return { ...base, available: false, items: [] };
+  return base;
+}
+
+export async function listDismissedOpportunities(): Promise<OpportunityView[]> {
+  return [
+    opp("00000000-0000-4000-8000-000000000011", "rising_product", "Fernwood’s Linen Pajama Set is #3 in their Best Sellers, 10 days after launch.", "", [], { status: "dismissed", dismissedAt: daysAgoAt(5, "10:00") }),
+    opp("00000000-0000-4000-8000-000000000012", "category_gap", "3 of your 5 competitors sell candles, and you don’t.", "", [], { status: "not_relevant", dismissedAt: daysAgoAt(8, "10:00") }),
+    opp("00000000-0000-4000-8000-000000000013", "demand", "Pinetide’s Percale Sheet Set sold out 2 days after launch.", "", [], { status: "dismissed", dismissedAt: daysAgoAt(12, "10:00") }),
+  ];
+}
+
+export async function countOpenOpportunities(): Promise<number> {
+  return OPPORTUNITIES.length;
 }

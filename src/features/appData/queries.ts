@@ -17,6 +17,7 @@ import { activeMatches, matchStatus, verdictKey } from "@/features/matching/cand
 import { compareMatched } from "@/features/matching/compare";
 import { loadPairs, loadVerdicts } from "@/features/matching/store";
 import { headlinePrice } from "@/features/matching/units";
+import { countOpportunities, listOpportunities, type OpportunityView } from "@/features/opportunities/queries";
 import { resolvePlan } from "@/features/plan/comp";
 import { LIMITS, PLANS } from "@/features/plan/limits";
 import { createClient } from "@/lib/supabase/server";
@@ -36,6 +37,7 @@ import type {
   Move,
   MutableAlertType,
   OnboardingItem,
+  OpportunitiesPage,
   OwnStore,
   ReportItem,
   Settings,
@@ -608,4 +610,35 @@ export async function getOnboardingStatus(): Promise<OnboardingItem[]> {
 /** Added in the last 30 days: an empty timeline reads "No moves yet" rather than "quiet". */
 export function addedThisMonth(addedAt: string): boolean {
   return Date.now() - Date.parse(addedAt) < 30 * DAY;
+}
+
+// ------------------------------------------------------------ opportunities
+
+/** Open opportunities for the nav badge; 0 when the plan doesn't include them. */
+export async function countOpenOpportunities(): Promise<number> {
+  const { supabase, userId, plan } = await me();
+  return PLANS[plan].opportunities ? countOpportunities(supabase, userId, "open") : 0;
+}
+
+export async function getOpportunitiesPage(): Promise<OpportunitiesPage> {
+  const { supabase, userId, plan, ownStoreId } = await me();
+  const empty: OpportunitiesPage = { available: false, hasOwnStore: !!ownStoreId, items: [], dismissedCount: 0, stores: {} };
+  if (!PLANS[plan].opportunities) return empty;
+  const [items, dismissedCount] = await Promise.all([
+    listOpportunities(supabase, userId),
+    countOpportunities(supabase, userId, "dismissed"),
+  ]);
+  const ids = [...new Set(items.flatMap((o) => o.evidence.competitors.map((c) => c.storeId)))];
+  const { data: rows } = ids.length
+    ? await supabase.from("stores").select("id, domain, bestseller_status").in("id", ids)
+    : { data: [] as { id: string; domain: string; bestseller_status: string | null }[] };
+  const stores = Object.fromEntries(
+    (rows ?? []).map((r) => [r.id, { domain: r.domain as string, bestsellersUnavailable: r.bestseller_status === "unavailable" }]),
+  );
+  return { available: true, hasOwnStore: !!ownStoreId, items, dismissedCount, stores };
+}
+
+export async function listDismissedOpportunities(): Promise<OpportunityView[]> {
+  const { supabase, userId, plan } = await me();
+  return PLANS[plan].opportunities ? listOpportunities(supabase, userId, { dismissed: true }) : [];
 }

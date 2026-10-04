@@ -97,6 +97,7 @@ export function renderBriefingEmail(opts: {
     ? [
         `OPPORTUNITIES`,
         ...opportunities.flatMap((o) => [`• ${o.noticed}`, ...(o.evidence ? [`  Evidence: ${o.evidence}`] : []), `  Try: ${o.action}`]),
+        `See all opportunities: ${siteUrl}/opportunities`,
         ``,
       ]
     : [];
@@ -173,8 +174,8 @@ export function renderBriefingEmail(opts: {
   <div style="margin-top:6px;font-size:14px;line-height:1.45;color:#4a4a4a;"><strong>Try:</strong> ${escapeHtml(o.action)}</div>
 </div>`,
             )
-            .join(""),
-        // No link yet: the Opportunities screen waits for its design.
+            .join("") +
+          `<div style="padding-top:8px;font-size:14px;">${link(`${siteUrl}/opportunities`, "See all opportunities")}</div>`,
       )
     : "";
 

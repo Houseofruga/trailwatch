@@ -33,3 +33,22 @@
   cursor: pointer;
   border-radius: 4px;
 }
+
+.text {
+  line-height: 1.4;
+}
+
+/* "Undo" (DESIGN 11-opps 11c): underlined text button, no close icon. */
+.action {
+  border: 0;
+  background: transparent;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  margin-left: 2px;
+}

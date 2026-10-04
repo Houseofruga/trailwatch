@@ -195,6 +195,7 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
     - `users.opportunities_at`
     - Apply it after 0022 and **before deploying** the Opportunities code: the homepage check writes `featured_since`.
     - No new env vars; knobs are in `src/features/opportunities/config.ts`.
+  - Migration **`0024_opportunity_dismissed_at.sql`** adds `opportunities.dismissed_at` for the Opportunities screen's "Show dismissed" list (DESIGN 11-opps). Apply it after 0023 and **before deploying** the screen: its queries read the column.
   - Embeds between `stores` and `users` must name the foreign key (`users!users_own_store_id_fkey`). Since `match_feedback` (0019) links both tables, a bare `users!inner` is ambiguous, and it broke the cron tick from 0019 until hotfix `be4160d`.
   - No new env vars. Sign-up refuses throwaway inboxes using the `disposable-email-domains` npm list (MIT).
 

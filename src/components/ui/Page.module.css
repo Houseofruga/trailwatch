@@ -7,6 +7,10 @@
   gap: 16px;
 }
 
+.medium {
+  width: 880px;
+}
+
 .narrow {
   width: 600px;
   gap: 20px;

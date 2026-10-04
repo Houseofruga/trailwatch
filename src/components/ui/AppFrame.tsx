@@ -8,13 +8,14 @@ import { Avatar } from "./Avatar";
 import { Badge } from "./Badge";
 import { PopoverMenu } from "./Overlay";
 import { ToastProvider } from "./Toast";
-import { IconChevronDown, IconEye, IconHelp, IconHome, IconLogOut, IconMenu, IconSliders, IconX } from "./icons";
+import { IconChevronDown, IconEye, IconHelp, IconHome, IconLogOut, IconMenu, IconSliders, IconTrendUp, IconX } from "./icons";
 import styles from "./AppFrame.module.css";
 
 export const SUPPORT_EMAIL = "trailwatch@houseofruga.com";
 
 const NAV = [
   { href: "/dashboard", label: "Home", Icon: IconHome },
+  { href: "/opportunities", label: "Opportunities", Icon: IconTrendUp },
   { href: "/competitors", label: "Competitors", Icon: IconEye },
   { href: "/settings", label: "Settings", Icon: IconSliders },
 ] as const;
@@ -23,6 +24,8 @@ type Props = {
   account: { name: string; email: string };
   ownStore: { domain: string; products: number | null } | null;
   competitorCount: number;
+  /** Open opportunities (nav badge); 0 hides it. */
+  opportunityCount?: number;
   /** Onboarding: nav items shown but not usable. */
   navDisabled?: boolean;
   children: React.ReactNode;
@@ -45,9 +48,11 @@ function Sidebar({
   pathname,
   ownStore,
   competitorCount,
+  opportunityCount = 0,
   navDisabled,
   onNavigate,
 }: Omit<Props, "account" | "children"> & { pathname: string; onNavigate?: () => void }) {
+  const counts: Record<string, number> = { Competitors: competitorCount, Opportunities: opportunityCount };
   return (
     <nav aria-label="Main" className={styles.nav}>
       <ul className={styles.navList}>
@@ -65,9 +70,7 @@ function Sidebar({
               >
                 <Icon size={18} />
                 <span>{label}</span>
-                {label === "Competitors" && competitorCount > 0 ? (
-                  <span className={styles.count}>{competitorCount}</span>
-                ) : null}
+                {counts[label] > 0 ? <span className={styles.count}>{counts[label]}</span> : null}
               </Link>
             </li>
           );
@@ -96,7 +99,7 @@ function Sidebar({
 }
 
 /** Top bar + left sidebar (a drawer on phones) around every signed-in screen. */
-export function AppFrame({ account, ownStore, competitorCount, navDisabled, children }: Props) {
+export function AppFrame({ account, ownStore, competitorCount, opportunityCount, navDisabled, children }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [drawer, setDrawer] = useState(false);
@@ -141,7 +144,13 @@ export function AppFrame({ account, ownStore, competitorCount, navDisabled, chil
         </header>
         <div className={styles.columns}>
           <div className={styles.sidebar}>
-            <Sidebar pathname={pathname} ownStore={ownStore} competitorCount={competitorCount} navDisabled={navDisabled} />
+            <Sidebar
+              pathname={pathname}
+              ownStore={ownStore}
+              competitorCount={competitorCount}
+              opportunityCount={opportunityCount}
+              navDisabled={navDisabled}
+            />
           </div>
           <main className={styles.main}>{children}</main>
         </div>
@@ -159,6 +168,7 @@ export function AppFrame({ account, ownStore, competitorCount, navDisabled, chil
                 pathname={pathname}
                 ownStore={ownStore}
                 competitorCount={competitorCount}
+                opportunityCount={opportunityCount}
                 navDisabled={navDisabled}
                 onNavigate={() => setDrawer(false)}
               />

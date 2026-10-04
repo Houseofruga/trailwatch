@@ -14,6 +14,7 @@ export type OpportunityView = {
   action: string;
   evidence: Evidence;
   status: "open" | "dismissed" | "not_relevant";
+  dismissedAt: string | null;
   detectedAt: string;
   updatedAt: string;
 };
@@ -26,11 +27,12 @@ type Row = {
   action: string;
   evidence: Evidence;
   status: OpportunityView["status"];
+  dismissed_at?: string | null;
   detected_at: string;
   updated_at: string;
 };
 
-const COLUMNS = "id, kind, score, noticed, action, evidence, status, detected_at, updated_at";
+const COLUMNS = "id, kind, score, noticed, action, evidence, status, dismissed_at, detected_at, updated_at";
 const toView = (r: Row): OpportunityView => ({
   id: r.id,
   kind: r.kind,
@@ -39,6 +41,7 @@ const toView = (r: Row): OpportunityView => ({
   action: r.action,
   evidence: r.evidence,
   status: r.status,
+  dismissedAt: r.dismissed_at ?? null,
   detectedAt: r.detected_at,
   updatedAt: r.updated_at,
 });
@@ -49,12 +52,25 @@ export async function hasOpportunities(db: SupabaseClient, userId: string): Prom
   return !!data && PLANS[resolvePlan(data.email, data.plan)].opportunities;
 }
 
-/** Open opportunities, strongest first (or every status, for a "dismissed" view). */
-export async function listOpportunities(db: SupabaseClient, userId: string, opts: { all?: boolean; limit?: number } = {}): Promise<OpportunityView[]> {
+/** Open opportunities, strongest first; or every status; or only the dismissed ones (newest first). */
+export async function listOpportunities(
+  db: SupabaseClient,
+  userId: string,
+  opts: { all?: boolean; dismissed?: boolean; limit?: number } = {},
+): Promise<OpportunityView[]> {
   let q = db.from("opportunities").select(COLUMNS).eq("user_id", userId);
-  if (!opts.all) q = q.eq("status", "open");
+  if (opts.dismissed) q = q.neq("status", "open").order("dismissed_at", { ascending: false, nullsFirst: false });
+  else if (!opts.all) q = q.eq("status", "open");
   const { data } = await q.order("score", { ascending: false }).limit(opts.limit ?? C.keepPerUser);
   return ((data ?? []) as Row[]).map(toView);
+}
+
+/** How many open / dismissed opportunities the user has (nav badge, "Show dismissed (3)"). */
+export async function countOpportunities(db: SupabaseClient, userId: string, status: "open" | "dismissed"): Promise<number> {
+  let q = db.from("opportunities").select("id", { count: "exact", head: true }).eq("user_id", userId);
+  q = status === "open" ? q.eq("status", "open") : q.neq("status", "open");
+  const { count } = await q;
+  return count ?? 0;
 }
 
 export async function getOpportunity(db: SupabaseClient, userId: string, id: string): Promise<OpportunityView | null> {
@@ -73,8 +89,8 @@ export async function setOpportunityStatus(service: SupabaseClient, userId: stri
   if (!row) return false;
   const fields =
     action === "restore"
-      ? { status: "open", dismissed_score: null }
-      : { status: action === "dismiss" ? "dismissed" : "not_relevant", dismissed_score: row.score };
+      ? { status: "open", dismissed_score: null, dismissed_at: null }
+      : { status: action === "dismiss" ? "dismissed" : "not_relevant", dismissed_score: row.score, dismissed_at: new Date().toISOString() };
   const { error } = await service.from("opportunities").update(fields).eq("user_id", userId).eq("id", id);
   return !error;
 }

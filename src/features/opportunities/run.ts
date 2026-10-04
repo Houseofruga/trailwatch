@@ -123,6 +123,8 @@ export async function runOpportunitiesTick(service: SupabaseClient, budgetMs = C
           evidence: o.evidence,
           status: o.status,
           dismissed_score: o.dismissedScore,
+          // Reopened by stronger evidence: no longer dismissed.
+          ...(o.status === "open" ? { dismissed_at: null } : {}),
           updated_at: new Date().toISOString(),
         })),
         { onConflict: "user_id,key" },
