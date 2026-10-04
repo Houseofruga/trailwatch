@@ -19,6 +19,7 @@ import {
   IconImage,
   IconInfo,
   IconLock,
+  IconExternal,
   IconPackage,
   IconStore,
   IconTrendUp,
@@ -82,28 +83,43 @@ function Evidence({ o, stores, id }: { o: OpportunityView; stores: Opportunities
       <h3 className={styles.evidenceTitle}>Evidence</h3>
       <ul className={styles.products}>
         {o.evidence.competitors.flatMap((c) =>
-          c.products.map((e) => (
-            <li key={`${c.storeId}:${e.handle}`} className={styles.product}>
-              <Thumb src={e.image} />
-              <div className={styles.productText}>
-                <span className={styles.productTitle}>{e.title}</span>
-                <span className={styles.productMeta}>
-                  {c.storeName}
-                  {e.price !== null ? ` · ${money(e.price)}` : ""}
-                </span>
-                {chips(e).length ? (
-                  <div className={styles.chips}>
-                    {chips(e).map((chip) => (
-                      <span key={chip.text} className={styles.chip}>
-                        {chip.icon}
-                        {chip.text}
-                      </span>
-                    ))}
-                  </div>
+          c.products.map((e) => {
+            const domain = stores[c.storeId]?.domain;
+            const url = domain && e.handle ? `https://${domain}/products/${encodeURIComponent(e.handle)}` : null;
+            return (
+              <li key={`${c.storeId}:${e.handle}`} className={styles.product}>
+                <Thumb src={e.image} />
+                <div className={styles.productText}>
+                  {url ? (
+                    <a href={url} target="_blank" rel="noopener noreferrer" className={`${styles.productTitle} ${styles.productLink}`}>
+                      {e.title}
+                    </a>
+                  ) : (
+                    <span className={styles.productTitle}>{e.title}</span>
+                  )}
+                  <span className={styles.productMeta}>
+                    {c.storeName}
+                    {e.price !== null ? ` · ${money(e.price)}` : ""}
+                  </span>
+                  {chips(e).length ? (
+                    <div className={styles.chips}>
+                      {chips(e).map((chip) => (
+                        <span key={chip.text} className={styles.chip}>
+                          {chip.icon}
+                          {chip.text}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+                {url ? (
+                  <a href={url} target="_blank" rel="noopener noreferrer" aria-label={`Open ${e.title} on ${c.storeName}`} className={styles.openLink}>
+                    <IconExternal size={16} />
+                  </a>
                 ) : null}
-              </div>
-            </li>
-          )),
+              </li>
+            );
+          }),
         )}
       </ul>
       {unavailable.map((c) => (

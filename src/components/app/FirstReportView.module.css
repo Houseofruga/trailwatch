@@ -114,12 +114,28 @@
 
 .pageLink {
   display: flex;
+  flex-shrink: 0;
   color: var(--ink-2);
   width: 28px;
   height: 28px;
   align-items: center;
   justify-content: center;
   border-radius: 6px;
+}
+
+.pageLink:hover {
+  color: var(--ink);
+  background: var(--ui-nav-hover);
+}
+
+/* Product names open the product on their store. */
+.itemLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.itemLink:hover {
+  text-decoration: underline;
 }
 
 .footnote {

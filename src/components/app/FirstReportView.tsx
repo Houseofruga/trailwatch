@@ -48,6 +48,7 @@ function ListCard({
             {shown.map((item) => (
               <li key={item.id} className={styles.row}>
                 {render(item)}
+                <ProductLink url={item.url} title={item.title} />
               </li>
             ))}
           </ul>
@@ -68,10 +69,26 @@ function ListCard({
   );
 }
 
-function ItemText({ title, sub }: { title: string; sub?: string }) {
+/** Opens the product on their store in a new tab. */
+function ProductLink({ url, title }: { url: string; title: string }) {
+  if (!url) return null;
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer" aria-label={`Open ${title} on their store`} className={styles.pageLink}>
+      <IconExternal />
+    </a>
+  );
+}
+
+function ItemText({ title, sub, href }: { title: string; sub?: string; href?: string }) {
   return (
     <div className={styles.itemText}>
-      <span className={styles.itemTitle}>{title}</span>
+      {href ? (
+        <a href={href} target="_blank" rel="noopener noreferrer" className={`${styles.itemTitle} ${styles.itemLink}`}>
+          {title}
+        </a>
+      ) : (
+        <span className={styles.itemTitle}>{title}</span>
+      )}
       {sub ? <span className={styles.itemSub}>{sub}</span> : null}
     </div>
   );
@@ -181,7 +198,7 @@ export function FirstReportView({ report, reading, error }: { report: FirstRepor
             render={(i) => (
               <>
                 <Thumbnail src={i.image} />
-                <ItemText title={i.title} sub={i.date ? shortDate(i.date) : undefined} />
+                <ItemText title={i.title} href={i.url} sub={i.date ? shortDate(i.date) : undefined} />
                 <span className={styles.price}>{money(i.price)}</span>
               </>
             )}
@@ -196,7 +213,7 @@ export function FirstReportView({ report, reading, error }: { report: FirstRepor
               <>
                 <Thumbnail src={i.image} />
                 {/* "since …" only once history tells us when (D4). */}
-                <ItemText title={i.title} sub={i.date ? `since ${shortDate(i.date)}` : undefined} />
+                <ItemText title={i.title} href={i.url} sub={i.date ? `since ${shortDate(i.date)}` : undefined} />
                 <Badge>Sold out</Badge>
               </>
             )}
@@ -212,7 +229,7 @@ export function FirstReportView({ report, reading, error }: { report: FirstRepor
             render={(i) => (
               <>
                 <Thumbnail src={i.image} />
-                <ItemText title={i.title} />
+                <ItemText title={i.title} href={i.url} />
                 <div className={styles.priceStack}>
                   <span className={styles.priceLine}>
                     <Badge tone="attention">{`−${i.pctOff}%`}</Badge>
