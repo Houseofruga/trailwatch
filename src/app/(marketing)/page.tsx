@@ -264,7 +264,7 @@ export default async function RootPage() {
               means for your products. Every Monday, one short email tells you the move to make.
             </p>
             <div className={hero.heroCta}>
-              <Button variant="primary" tall href={SIGNUP}>
+              <Button variant="primary" tall href={SIGNUP} className={s.cta}>
                 Join the beta
               </Button>
               <span className={hero.heroCtaNote}>Free until December 31 · No card · Nothing to install</span>
@@ -527,7 +527,7 @@ export default async function RootPage() {
             </div>
           </div>
           <div className={s.offerCta}>
-            <Button variant="primary" tall href={SIGNUP}>
+            <Button variant="primary" tall href={SIGNUP} className={s.cta}>
               Join the beta
             </Button>
             {spotsLeft === null ? null : (
@@ -575,7 +575,7 @@ export default async function RootPage() {
         <div className={s.shell}>
           <h2 className={`${s.h2} ${s.h2Final}`}>Your competitors will make their next move this week. Find out the day it happens.</h2>
           <div className={s.finalCta}>
-            <Button variant="secondary" tall href={SIGNUP}>
+            <Button variant="secondary" tall href={SIGNUP} className={s.cta}>
               Join the beta
             </Button>
             <p>{spots} · Free until December 31</p>

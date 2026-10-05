@@ -18,7 +18,7 @@ export function SiteHeader({ onDark = false }: { onDark?: boolean }) {
           <Button variant="plainDark" href="/login" className={styles.login}>
             Log in
           </Button>
-          <Button variant="primary" href="/login?mode=signup">
+          <Button variant="primary" href="/login?mode=signup" className={styles.signup}>
             Join the beta
           </Button>
         </div>

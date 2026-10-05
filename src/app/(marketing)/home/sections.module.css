@@ -103,6 +103,13 @@
   box-shadow: 0 0 0 4px var(--lime);
 }
 
+/* The page's calls to action: the design's 52px button, larger than the app's. */
+.page .cta {
+  height: 52px;
+  padding: 0 26px;
+  font-size: 16px;
+}
+
 /* ---------------------------------------------------------------- 0 · strip */
 .strip {
   margin: 0;

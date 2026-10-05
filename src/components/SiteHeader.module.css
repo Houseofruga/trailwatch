@@ -27,6 +27,17 @@
   gap: 12px;
 }
 
+/* Public pages get larger header buttons than the app's 32px default. */
+.actions .login,
+.actions .signup {
+  height: 44px;
+  font-size: 15px;
+}
+
+.actions .signup {
+  padding: 0 20px;
+}
+
 /* Over a dark/photographic hero: white "Log in" and logo. */
 .onDark .login,
 .onDark .login:hover {
@@ -53,5 +64,19 @@
 
   .actions {
     gap: 6px;
+  }
+
+  .actions .login,
+  .actions .signup {
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .actions .login {
+    padding: 0 10px;
+  }
+
+  .actions .signup {
+    padding: 0 14px;
   }
 }
