@@ -494,6 +494,17 @@ export default async function RootPage() {
                   Chandan sets up your store and competitors with you.
                 </li>
               </ul>
+              <div className={s.offerCta}>
+                <Button variant="primary" tall href={SIGNUP} className={s.cta}>
+                  Join the beta
+                </Button>
+                {spotsLeft === null ? null : (
+                  <span className={s.spots}>
+                    <span className={s.dot} aria-hidden="true" />
+                    {spotsLeft} of {CAP} spots left
+                  </span>
+                )}
+              </div>
             </div>
             <div>
               <h3 className={s.small}>From January 1</h3>
@@ -525,17 +536,6 @@ export default async function RootPage() {
                 The beta discount is for the first {CAP} brands only. Everyone who joins later pays the regular price.
               </p>
             </div>
-          </div>
-          <div className={s.offerCta}>
-            <Button variant="primary" tall href={SIGNUP} className={s.cta}>
-              Join the beta
-            </Button>
-            {spotsLeft === null ? null : (
-              <span className={s.spots}>
-                <span className={s.dot} aria-hidden="true" />
-                {spotsLeft} of {CAP} spots left
-              </span>
-            )}
           </div>
         </div>
       </section>
