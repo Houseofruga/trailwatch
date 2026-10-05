@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { BETA_CONFIG, maxDiscountPct } from "@/features/beta/config";
 import { CompetitorLookup } from "../CompetitorLookup";
 import { FounderReveal } from "../FounderReveal";
+import hero from "../home.module.css";
 import { betaSpotsLeft, weeksToBlackFriday } from "./betaSpots";
 import { InView } from "./InView";
 import s from "./v2.module.css";
@@ -201,29 +202,37 @@ export default async function HomeV2() {
         Free until December 31, then up to {MAX_OFF}% off for life.
       </p>
 
-      {/* ---- 1 · hero: the painted sky from the current homepage, the live lookup, the week drawn big */}
-      <section className={s.hero}>
-        <SiteHeader onDark />
-        <div className={s.shell}>
-          <h1 className={s.h1}>Your competitor started a sale on Thursday. You found out on Monday.</h1>
-          <div className={s.heroGrid}>
-            <div className={s.heroCopy}>
-              <p className={s.heroBody}>
-                Trailwatch reads your competitors’ stores next to yours. When they launch, discount or sell out, you hear within hours what
-                it means for your products. Every Monday, one short email tells you the move to make.
-              </p>
-              <div className={s.heroCta}>
-                <Button variant="primary" tall href={SIGNUP}>
-                  Join the beta
-                </Button>
-                <p className={s.heroNote}>Free until December 31 · No card · Nothing to install on your store</p>
-              </div>
-            </div>
-            <div className={s.lookup}>
-              <CompetitorLookup />
+      {/* ---- 1 · hero: the current homepage's hero as it is (sky, copy left, live lookup right) */}
+      <section className={hero.hero}>
+        <div className={hero.sky} aria-hidden="true" />
+        <div className={hero.header}>
+          <SiteHeader onDark />
+        </div>
+        <div className={hero.heroInner}>
+          <div className={hero.heroCopy}>
+            <h1 className={hero.title}>Your competitor started a sale on Thursday. You found out on Monday.</h1>
+            <p className={hero.body}>
+              Trailwatch reads your competitors’ stores next to yours. When they launch, discount or sell out, you hear within hours what it
+              means for your products. Every Monday, one short email tells you the move to make.
+            </p>
+            <div className={hero.heroCta}>
+              <Button variant="primary" tall href={SIGNUP}>
+                Join the beta
+              </Button>
+              <span className={hero.heroCtaNote}>Free until December 31 · No card · Nothing to install</span>
             </div>
           </div>
+          <div className={hero.heroTool}>
+            <CompetitorLookup />
+          </div>
+        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className={hero.hill} src="/HillFG.webp" alt="" aria-hidden="true" />
+      </section>
 
+      {/* ---- the week, drawn big (from the design's hero) */}
+      <section className={s.weekSection}>
+        <div className={s.shell}>
           <InView className={s.reveal}>
             <figure className={s.week}>
               <figcaption className={s.weekHead}>
@@ -254,7 +263,7 @@ export default async function HomeV2() {
       </section>
 
       {/* ---- 2 · the cost of finding out late */}
-      <section className={s.section}>
+      <section className={`${s.section} ${s.afterWeek}`}>
         <div className={s.shell}>
           <h2 className={s.h2} style={{ maxWidth: 900 }}>
             You hear about most competitor moves too late to do anything.

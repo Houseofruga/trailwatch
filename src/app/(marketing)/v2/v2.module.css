@@ -1,7 +1,7 @@
 /* The reworked homepage (/v2), built from DESIGN 15-landing, direction A
    ("Paper calendar"): white, black and one lime accent, Inter throughout.
-   Two departures the owner asked for: the hero keeps the painted sky from the
-   current homepage, and the live lookup is the existing component, restyled. */
+   One departure the owner asked for: the hero is the current homepage's, as it
+   is (sky, copy, live lookup), so only the sections below follow the design. */
 
 .page {
   --ink: #111111;
@@ -128,102 +128,14 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ----------------------------------------------------------------- 1 · hero */
-/* The current homepage's painting, anchored top-left so the deep blue sits
-   behind the headline and the hill rises under the week panel. */
-.hero {
-  position: relative;
-  padding-bottom: clamp(48px, 5vw, 64px);
-  background:
-    linear-gradient(180deg, rgba(8, 44, 92, 0.42) 0%, rgba(8, 44, 92, 0.3) 45%, rgba(8, 44, 92, 0) 72%),
-    url("/fullBG.webp") 8% top / cover no-repeat,
-    #1763a6;
+/* ----------------------------------------------------- 1 · the week panel */
+/* The hero above it is the current homepage's, styled by home.module.css. */
+.weekSection {
+  padding-top: clamp(40px, 5vw, 64px);
 }
 
-.h1 {
-  margin: clamp(12px, 3vw, 40px) 0 0;
-  max-width: 1150px;
-  font-size: clamp(44px, 7.2vw, 92px);
-  line-height: 0.98;
-  letter-spacing: -0.04em;
-  font-weight: 550;
-  color: #ffffff;
-  text-wrap: balance;
-  text-shadow: 0 2px 28px rgba(8, 30, 62, 0.3);
-}
-
-.heroGrid {
-  margin-top: 40px;
-  display: grid;
-  grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
-  gap: clamp(32px, 5.6vw, 72px);
-  align-items: start;
-}
-
-.heroCopy {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
-
-.heroBody {
-  margin: 0;
-  font-size: clamp(17px, 1.6vw, 20px);
-  line-height: 1.55;
-  color: #ffffff;
-  text-shadow: 0 1px 16px rgba(8, 30, 62, 0.4);
-}
-
-.heroCta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.heroNote {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.95);
-  text-shadow: 0 1px 12px rgba(8, 30, 62, 0.45);
-}
-
-/* The existing lookup, restyled from outside so the live homepage's copy of it
-   is untouched: a rounded white card, the design's 52px input row. */
-.lookup {
-  min-width: 0;
-}
-
-.lookup > section {
-  padding: 28px;
-  border: 0;
-  border-radius: 20px;
-  box-shadow: 0 18px 44px rgba(6, 28, 58, 0.28);
-}
-
-.lookup h2 {
-  font-size: 20px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-}
-
-.lookup label {
-  font-size: 15px;
-  font-weight: 550;
-  color: var(--ink-soft);
-}
-
-.lookup input {
-  height: 52px;
-  padding: 0 16px;
-  border-radius: 8px;
-  font-size: 16px;
-}
-
-.lookup form button {
-  height: 52px;
+.afterWeek {
+  padding-top: clamp(64px, 8vw, 104px);
 }
 
 /* The week, drawn big. */
@@ -232,7 +144,7 @@
 }
 
 .week {
-  margin: clamp(40px, 5vw, 64px) 0 0;
+  margin: 0;
   padding: clamp(20px, 3.75vw, 48px);
   border-radius: clamp(16px, 1.9vw, 24px);
   background: #000000;
@@ -1051,7 +963,6 @@
 }
 
 @media (max-width: 980px) {
-  .heroGrid,
   .matchGrid,
   .offerGrid {
     grid-template-columns: minmax(0, 1fr);
@@ -1097,12 +1008,4 @@
     display: block;
   }
 
-  .heroCta {
-    align-items: stretch;
-  }
-
-  .lookup > section {
-    padding: 20px;
-    border-radius: 16px;
-  }
 }
