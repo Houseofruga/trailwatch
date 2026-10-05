@@ -296,15 +296,24 @@ export default async function RootPage() {
                 ))}
               </div>
               <p className={s.weekLabel}>Without Trailwatch</p>
-              <div className={s.weekRow}>
-                <span className={`${s.blind} ${s.fill}`}>Their sale runs. You don’t know yet.</span>
-                <span className={s.tooLate}>Too late</span>
+              <div className={s.track} aria-hidden="true">
+                <span className={`${s.span} ${s.spanBlind} ${s.fill}`} />
+                <span className={`${s.pin} ${s.pinLate}`} />
               </div>
+              <p className={s.trackNote}>
+                <span>Their sale runs. You don’t know yet.</span>
+                <strong>Too late</strong>
+              </p>
               <p className={s.weekLabel}>With Trailwatch</p>
-              <div className={s.weekRow}>
-                <span className={s.alert}>Alert 2:40 PM</span>
-                <span className={s.sameDay}>You decide the same afternoon.</span>
+              <div className={s.track} aria-hidden="true">
+                <span className={`${s.span} ${s.spanAlert}`} />
+                <span className={`${s.pin} ${s.pinAlert}`} />
               </div>
+              <p className={s.trackNote}>
+                <span>
+                  <strong className={s.lime}>Alert 2:40 PM.</strong> You decide the same afternoon.
+                </span>
+              </p>
             </figure>
           </InView>
         </div>
@@ -442,16 +451,19 @@ export default async function RootPage() {
                       <span>Today</span>
                       <span>Black Friday, November 27</span>
                     </div>
-                    <p className={s.laneLabel}>Add competitors today</p>
-                    <div className={s.lane}>
-                      <span className={s.laneFull}>{weeksLeft} weeks of normal prices on record</span>
+                    <p className={s.laneLabel}>
+                      <span>Add competitors today</span>
+                      <strong>{weeksLeft} weeks of normal prices on record</strong>
+                    </p>
+                    <div className={s.track} aria-hidden="true">
+                      <span className={`${s.span} ${s.spanFull}`} />
                     </div>
-                    <p className={s.laneLabel}>Add them on November 20</p>
-                    <div className={s.lane}>
-                      <span className={s.laneLate} style={{ left: `${100 - 100 / weeksLeft}%` }} />
-                      <span className={s.laneLateText} style={{ right: `calc(${100 / weeksLeft}% + 14px)` }}>
-                        1 week. Not enough to tell a real cut from a fake one
-                      </span>
+                    <p className={s.laneLabel}>
+                      <span>Add them on November 20</span>
+                      <strong className={s.dim}>1 week. Not enough to tell a real cut from a fake one</strong>
+                    </p>
+                    <div className={s.track} aria-hidden="true">
+                      <span className={`${s.span} ${s.spanShort}`} style={{ left: `${100 - 100 / weeksLeft}%` }} />
                     </div>
                   </figure>
                 </div>

@@ -208,63 +208,80 @@
 }
 
 .weekLabel {
-  margin: 16px 0 clamp(10px, 1.1vw, 14px);
+  margin: clamp(20px, 2.2vw, 28px) 0 clamp(12px, 1.2vw, 16px);
   font-size: clamp(13px, 1.2vw, 15px);
   font-weight: 550;
 }
 
-.weekRow {
+/* Thin tracks with markers, so the panel reads as a chart and nothing in it
+   looks like a button. Positions follow the example's times across five days. */
+.track {
   position: relative;
-  height: clamp(52px, 5.6vw, 72px);
-  font-size: clamp(13px, 1.4vw, 18px);
-  line-height: 1.3;
+  height: 10px;
+  border-radius: 999px;
+  background: #1f1f1f;
 }
 
-.weekRow > span {
+.span {
   position: absolute;
   top: 0;
   bottom: 0;
-  display: flex;
-  align-items: center;
-  border-radius: 8px;
+  border-radius: 999px;
 }
 
-.blind {
-  left: 0;
-  right: 20%;
-  padding: 0 clamp(12px, 1.6vw, 20px);
-  background: #2b2b2b;
-  color: #d4d4d4;
-  font-weight: 500;
+/* Thursday 9:00 AM to Monday 8:40 AM. */
+.spanBlind {
+  left: 7.5%;
+  right: 12.8%;
+  background: #6b6b6b;
 }
 
-.tooLate,
-.alert {
-  width: calc(20% - 8px);
-  justify-content: center;
-  text-align: center;
-  font-size: clamp(12px, 1.2vw, 15px);
-  font-weight: 650;
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-}
-
-.tooLate {
-  right: 0;
-  background: #ffffff;
-  color: var(--ink);
-}
-
-.alert {
-  left: 0;
+/* Thursday 9:00 AM to 2:40 PM. */
+.spanAlert {
+  left: 7.5%;
+  right: 87.8%;
   background: var(--lime);
-  color: #000000;
 }
 
-.sameDay {
-  left: 20%;
-  right: 0;
-  padding-left: clamp(8px, 1.25vw, 16px);
+/* A tick on the timeline, not a knob: a round marker on a track reads as a slider. */
+.pin {
+  position: absolute;
+  top: 50%;
+  width: 4px;
+  height: 26px;
+  margin: -13px 0 0 -2px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 3px #000000;
+}
+
+.pinLate {
+  left: 87.2%;
+  background: #ffffff;
+}
+
+.pinAlert {
+  left: 12.2%;
+  background: var(--lime);
+}
+
+.trackNote {
+  margin: clamp(10px, 1.1vw, 14px) 0 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: clamp(14px, 1.4vw, 18px);
+  line-height: 1.35;
+  color: #d4d4d4;
+}
+
+.trackNote strong {
+  font-weight: 650;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.trackNote .lime {
+  color: var(--lime);
 }
 
 /* The page's one motion: a bar fills from left to right, once, when it scrolls
@@ -637,56 +654,39 @@
 }
 
 .laneLabel {
-  margin: 16px 0 10px;
+  margin: clamp(18px, 2vw, 26px) 0 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
   font-size: clamp(13px, 1.2vw, 15px);
   font-weight: 550;
   color: #b8b8b8;
 }
 
-.axis + .laneLabel {
-  margin-top: 10px;
-}
-
-.lane {
-  position: relative;
-  height: clamp(52px, 5vw, 64px);
-  border-radius: 10px;
-  background: #1a1a1a;
-}
-
-.lane > span {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  border-radius: 10px;
-}
-
-.laneFull {
-  left: 0;
-  right: 0;
-  padding: 0 clamp(14px, 1.9vw, 24px);
-  background: var(--lime);
-  color: #000000;
+.laneLabel strong {
   font-size: clamp(16px, 1.6vw, 20px);
   font-weight: 650;
   letter-spacing: -0.01em;
+  color: #ffffff;
   font-variant-numeric: tabular-nums;
 }
 
-.laneLate {
-  right: 0;
-  background: #5a5a5a;
+.laneLabel .dim {
+  font-weight: 500;
+  color: #d4d4d4;
 }
 
-.laneLateText {
-  left: clamp(14px, 1.9vw, 24px);
-  justify-content: flex-end;
-  text-align: right;
-  font-size: clamp(13px, 1.3vw, 17px);
-  line-height: 1.3;
-  color: #d4d4d4;
+.spanFull {
+  left: 0;
+  right: 0;
+  background: var(--lime);
+}
+
+.spanShort {
+  right: 0;
+  background: #8a8a8a;
 }
 
 /* Pinned (wide screens, motion allowed): each layer is one screen tall, so the
