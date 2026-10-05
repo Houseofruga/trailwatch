@@ -213,6 +213,16 @@
   font-weight: 550;
 }
 
+.withMark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.withMark svg {
+  flex-shrink: 0;
+}
+
 /* Thin tracks with markers, so the panel reads as a chart and nothing in it
    looks like a button. Positions follow the example's times across five days. */
 .track {
@@ -598,6 +608,12 @@
 
 .table thead th:last-child {
   border-radius: 16px 16px 0 0;
+}
+
+.tableLogo {
+  display: block;
+  height: 24px;
+  width: auto;
 }
 
 .table tbody td:last-child {

@@ -204,7 +204,12 @@ export default async function RootPage() {
                       <td />
                       {COMPARE_HEAD.map((h) => (
                         <th key={h} scope="col">
-                          {h}
+                          {h === "Trailwatch" ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img className={s.tableLogo} src="/logo-light.svg" alt="Trailwatch" />
+                          ) : (
+                            h
+                          )}
                         </th>
                       ))}
                     </tr>
@@ -304,7 +309,17 @@ export default async function RootPage() {
                 <span>Their sale runs. You don’t know yet.</span>
                 <strong>Too late</strong>
               </p>
-              <p className={s.weekLabel}>With Trailwatch</p>
+              <p className={`${s.weekLabel} ${s.withMark}`}>
+                {/* The logo's mark (the lime loop from /logo.svg). */}
+                <svg width="20" height="18" viewBox="70 85 700 620" fill="none" aria-hidden="true">
+                  <path
+                    d="M550.681 638.5C321.681 685.5 99.9061 421.1 283.506 341.5C513.006 242 986.392 443 328.006 443C-300.994 443 195.181 87 509.181 130.5"
+                    stroke="#9FF50A"
+                    strokeWidth="56"
+                  />
+                </svg>
+                With Trailwatch
+              </p>
               <div className={s.track} aria-hidden="true">
                 <span className={`${s.span} ${s.spanAlert}`} />
                 <span className={`${s.pin} ${s.pinAlert}`} />
