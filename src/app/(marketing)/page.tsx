@@ -311,7 +311,7 @@ export default async function RootPage() {
               </p>
               <p className={`${s.weekLabel} ${s.withMark}`}>
                 {/* The logo's mark (the lime loop from /logo.svg). */}
-                <svg width="20" height="18" viewBox="70 85 700 620" fill="none" aria-hidden="true">
+                <svg width="22" height="18" viewBox="-6 96 702 580" fill="none" aria-hidden="true">
                   <path
                     d="M550.681 638.5C321.681 685.5 99.9061 421.1 283.506 341.5C513.006 242 986.392 443 328.006 443C-300.994 443 195.181 87 509.181 130.5"
                     stroke="#9FF50A"
