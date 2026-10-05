@@ -270,7 +270,7 @@ export default async function RootPage() {
               <span className={hero.heroCtaNote}>Free until December 31 · No card · Nothing to install</span>
             </div>
           </div>
-          <div className={hero.heroTool}>
+          <div className={`${hero.heroTool} ${s.bigLookup}`}>
             <CompetitorLookup />
           </div>
         </div>

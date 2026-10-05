@@ -110,6 +110,19 @@
   font-size: 16px;
 }
 
+/* The hero lookup's input and button match that size (the component itself is
+   shared with /v1, so it is sized from here). */
+.page .bigLookup form input {
+  height: 52px;
+  font-size: 16px;
+}
+
+.page .bigLookup form button {
+  height: 52px;
+  padding: 0 22px;
+  font-size: 16px;
+}
+
 /* ---------------------------------------------------------------- 0 · strip */
 .strip {
   margin: 0;
