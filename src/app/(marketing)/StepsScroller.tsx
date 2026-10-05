@@ -25,7 +25,9 @@ const STEPS = [
   },
 ];
 
-export function StepsScroller() {
+/** `heading` and `bodies` (one text per step, in order) default to the current homepage's copy. */
+export function StepsScroller({ heading = "Set it once. Then forget it.", bodies }: { heading?: string; bodies?: string[] }) {
+  const steps = STEPS.map((step, i) => ({ ...step, body: bodies?.[i] ?? step.body }));
   const sceneRef = useRef<HTMLDivElement>(null);
   const fillRefs = useRef<(HTMLSpanElement | null)[]>([]); // per-step rails (desktop)
   const hFillRef = useRef<HTMLDivElement>(null); // horizontal bar (mobile)
@@ -71,7 +73,7 @@ export function StepsScroller() {
     <div ref={sceneRef} className={styles.scene}>
       <div className={styles.stage}>
         <div className={styles.shell}>
-          <h2 className={styles.h2}>Set it once. Then forget it.</h2>
+          <h2 className={styles.h2}>{heading}</h2>
           {/* Mobile scroll-progress bar (the vertical rail below doesn't fit the
               one-step-at-a-time mobile layout). */}
           <div className={styles.railH} aria-hidden="true">
@@ -79,7 +81,7 @@ export function StepsScroller() {
           </div>
           <div className={styles.grid}>
             <div className={styles.steps}>
-              {STEPS.map((s, i) => (
+              {steps.map((s, i) => (
                 <div
                   key={s.num}
                   className={`${styles.step} ${i === active ? styles.stepActive : ""}`}
@@ -99,7 +101,7 @@ export function StepsScroller() {
               ))}
             </div>
             <div className={styles.media}>
-              {STEPS.map((s, i) => (
+              {steps.map((s, i) => (
                 <div
                   key={s.num}
                   className={`${styles.panel} ${i === active ? styles.panelActive : ""}`}

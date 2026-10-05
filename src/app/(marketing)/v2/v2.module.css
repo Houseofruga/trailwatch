@@ -466,46 +466,6 @@
   color: #b8b8b8;
 }
 
-/* ------------------------------------------------------- 4 · how it works */
-.steps {
-  list-style: none;
-  margin: clamp(40px, 5.6vw, 72px) 0 0;
-  padding: 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.steps li {
-  display: grid;
-  grid-template-columns: 120px minmax(0, 520px) minmax(0, 1fr);
-  gap: 32px;
-  align-items: baseline;
-  padding: 36px 0;
-  border-top: 1px solid var(--line);
-}
-
-.stepNo {
-  font-size: clamp(40px, 5vw, 64px);
-  line-height: 1;
-  font-weight: 550;
-  letter-spacing: -0.04em;
-  font-variant-numeric: tabular-nums;
-}
-
-.steps h3 {
-  margin: 0;
-  font-size: clamp(20px, 2.35vw, 30px);
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  font-weight: 550;
-}
-
-.steps p {
-  margin: 0;
-  font-size: clamp(16px, 1.5vw, 19px);
-  line-height: 1.55;
-  color: var(--ink-soft);
-}
-
 /* ---------------------------------------------------------- 5 · low noise */
 .noiseCols {
   margin-top: clamp(40px, 5.6vw, 72px);
@@ -966,16 +926,6 @@
   .matchGrid,
   .offerGrid {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .steps li {
-    grid-template-columns: 48px minmax(0, 1fr);
-    gap: 8px 16px;
-    padding: 24px 0;
-  }
-
-  .steps p {
-    grid-column: 2;
   }
 
   .founder {

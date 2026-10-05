@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { BETA_CONFIG, maxDiscountPct } from "@/features/beta/config";
 import { CompetitorLookup } from "../CompetitorLookup";
 import { FounderReveal } from "../FounderReveal";
+import { StepsScroller } from "../StepsScroller";
 import hero from "../home.module.css";
 import { betaSpotsLeft, weeksToBlackFriday } from "./betaSpots";
 import { InView } from "./InView";
@@ -71,18 +72,9 @@ const DAYS = [
 ];
 
 const STEPS = [
-  {
-    title: "Add your store and your competitors.",
-    body: "Paste the addresses. Not sure who they are? We suggest them.",
-  },
-  {
-    title: "We read every catalog, every few hours.",
-    body: "Every product, price, discount and sold-out item.",
-  },
-  {
-    title: "Big moves reach you within hours. The rest waits for Monday.",
-    body: "One email, two minutes, one move to make.",
-  },
+  "Add your store and your competitors. Paste the addresses. Not sure who they are? We suggest them.",
+  "We read every catalog, every few hours: every product, price, discount and sold-out item. Footer tweaks and cookie banners never reach you.",
+  "Big moves reach you within hours. The rest waits for Monday: one email, two minutes, one move to make.",
 ];
 
 const HEARD = ["A sitewide sale", "A discount of 20% or more", "A new product", "A best seller selling out", "A price now under yours"];
@@ -338,21 +330,8 @@ export default async function HomeV2() {
         </div>
       </section>
 
-      {/* ---- 4 · how it works */}
-      <section className={s.section}>
-        <div className={s.shell}>
-          <h2 className={s.h2}>Two minutes to set up. Nothing to check after that.</h2>
-          <ol className={s.steps}>
-            {STEPS.map((step, i) => (
-              <li key={step.title}>
-                <span className={s.stepNo}>{i + 1}</span>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
+      {/* ---- 4 · how it works: the current homepage's pinned three-step scroller, new copy */}
+      <StepsScroller heading="Two minutes to set up. Nothing to check after that." bodies={STEPS} />
 
       {/* ---- 5 · low noise */}
       <section className={`${s.section} ${s.tint}`}>
