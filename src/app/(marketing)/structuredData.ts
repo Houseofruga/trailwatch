@@ -1,6 +1,6 @@
-// FAQ content for the landing. The same array feeds the visible <details> list
-// and the FAQPage JSON-LD, so the structured data always matches what's on the
-// page (a requirement for FAQ rich results).
+// The site's structured data. The FAQPage JSON-LD must match the questions the
+// page shows (a requirement for FAQ rich results), so the homepage passes its own
+// list in. `FAQ` below is the previous homepage's list, still shown at /v1.
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://gettrailwatch.com";
@@ -37,7 +37,7 @@ export const FAQ: Array<{ q: string; a: string }> = [
 ];
 
 /** Combined JSON-LD graph: who we are, what the product is, and the FAQ. */
-export function structuredData(): Record<string, unknown> {
+export function structuredData(faq: Array<{ q: string; a: string }> = FAQ): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -61,7 +61,7 @@ export function structuredData(): Record<string, unknown> {
       },
       {
         "@type": "FAQPage",
-        mainEntity: FAQ.map((item) => ({
+        mainEntity: faq.map((item) => ({
           "@type": "Question",
           name: item.q,
           acceptedAnswer: { "@type": "Answer", text: item.a },

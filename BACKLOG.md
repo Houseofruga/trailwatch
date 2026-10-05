@@ -25,15 +25,19 @@ the reasoning into a commit, not here.
   checkout → plan flips to paid → cancel → reverts to free**. These need the
   owner (account creation + entering the test card can't be automated).
 
-## Landing page: rework the content around the USP (added 2026-10-05)
+## Landing page rework: live 2026-10-06
 
-The owner wants the homepage copy reworked to show the USP and how Trailwatch is
-useful for brands. Lead with: "Trailwatch tells you what your competitors changed
-this week and what it means for your own products, in a two-minute Monday email."
-Proof points, in order: it compares similar (not identical) products with yours; it
-says what a move means and what to do; low noise; no setup; founder pricing. Contrast
-with price trackers built for resellers, page monitors, and checking by hand. Marketing
-pages need a design prompt and artboards first. Not started.
+The reworked homepage is live at `/` (DESIGN 15-landing A, with the earlier hero,
+three-step scroller and cloud scene kept). The previous homepage is at `/v1`, not
+indexed. Left to do:
+
+- Delete `/v1` (`src/app/(marketing)/v1`, `MarketingSections.tsx`, the old `FAQ` in
+  `structuredData.ts`, and their styles in `page.module.css`) once the owner no
+  longer wants it for reference.
+- The page says Starter includes comparing with your own products (`SPEC.md` §4).
+  The plan checks in the code still treat it as Pro only; change before billing.
+- The live "X of 25 spots left" line appears once 5 beta spots are taken
+  (`src/app/(marketing)/home/betaSpots.ts`).
 
 ## SEO / growth — parked 2026-10-02, resumed 2026-10-04 (content pages built from DESIGN 14-content)
 
