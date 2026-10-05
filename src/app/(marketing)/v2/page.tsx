@@ -3,6 +3,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/Button";
 import { BETA_CONFIG, maxDiscountPct } from "@/features/beta/config";
+import { CloudScene } from "../CloudScene";
 import { CompetitorLookup } from "../CompetitorLookup";
 import { FounderReveal } from "../FounderReveal";
 import { StepsScroller } from "../StepsScroller";
@@ -175,6 +176,39 @@ export default async function HomeV2() {
   const spotsLeft = await betaSpotsLeft();
   const weeksLeft = weeksToBlackFriday();
   const spots = spotsLeft === null ? `${CAP} beta spots` : `${spotsLeft} of ${CAP} beta spots left`;
+
+  const compare = (
+    <section className={`${s.section} ${s.compare}`}>
+            <div className={s.shell}>
+              <h2 className={s.h2}>Built for brands that sell their own products.</h2>
+              <div className={s.tableWrap} tabIndex={0} role="region" aria-label="Comparison: Trailwatch and other ways to watch competitors">
+                <table className={s.table}>
+                  <thead>
+                    <tr>
+                      <td />
+                      {COMPARE_HEAD.map((h) => (
+                        <th key={h} scope="col">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {COMPARE_ROWS.map(([label, ...cells]) => (
+                      <tr key={label}>
+                        <th scope="row">{label}</th>
+                        {cells.map((c, i) => (
+                          <td key={i}>{c}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className={s.swipe}>Swipe to compare all four.</p>
+            </div>
+          </section>
+  );
 
   return (
     <div className={`ui ${s.page}`}>
@@ -366,70 +400,46 @@ export default async function HomeV2() {
         </div>
       </section>
 
-      {/* ---- 6 · why not what you use now */}
-      <section className={s.section}>
-        <div className={s.shell}>
-          <h2 className={s.h2}>Built for brands that sell their own products.</h2>
-          <div className={s.tableWrap} tabIndex={0} role="region" aria-label="Comparison: Trailwatch and other ways to watch competitors">
-            <table className={s.table}>
-              <thead>
-                <tr>
-                  <td />
-                  {COMPARE_HEAD.map((h) => (
-                    <th key={h} scope="col">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARE_ROWS.map(([label, ...cells]) => (
-                  <tr key={label}>
-                    <th scope="row">{label}</th>
-                    {cells.map((c, i) => (
-                      <td key={i}>{c}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className={s.swipe}>Swipe to compare all four.</p>
-        </div>
-      </section>
-
-      {/* ---- 7 · Black Friday: history can't be bought later */}
+      {/* ---- 6 → 7 · the comparison holds while a cloud flies through and reveals Black Friday
+          above the clouds (the current homepage's pinned cloud scene; stacked on phones) */}
       {weeksLeft >= 2 ? (
-        <section className={`${s.section} ${s.black}`}>
-          <div className={s.shell}>
-            <h2 className={`${s.h2} ${s.h2Huge}`}>You can’t go back and record October.</h2>
-            <p className={s.seasonBody}>
-              Trailwatch learns a competitor’s normal prices from the day you add them. Add them now, and by Black Friday you’ll have weeks of
-              history. You’ll know which of their “40% off” deals are real cuts and which have been that price all year. Add them in late
-              November, and you’ll be guessing along with everyone else.
-            </p>
-            <InView className={s.reveal}>
-              <figure className={s.timeline}>
-                <div className={s.axis}>
-                  <span>Today</span>
-                  <span>Black Friday, November 27</span>
+        <div className={s.cloudWrap}>
+          <CloudScene
+            why={compare}
+            pricing={
+              <section className={`${s.section} ${s.season}`}>
+                <div className={s.shell}>
+                  <h2 className={`${s.h2} ${s.h2Big}`}>You can’t go back and record October.</h2>
+                  <p className={s.seasonBody}>
+                    Trailwatch learns a competitor’s normal prices from the day you add them. Add them now, and by Black Friday you’ll have
+                    weeks of history. You’ll know which of their “40% off” deals are real cuts and which have been that price all year. Add
+                    them in late November, and you’ll be guessing along with everyone else.
+                  </p>
+                  <figure className={s.timeline}>
+                    <div className={s.axis}>
+                      <span>Today</span>
+                      <span>Black Friday, November 27</span>
+                    </div>
+                    <p className={s.laneLabel}>Add competitors today</p>
+                    <div className={s.lane}>
+                      <span className={s.laneFull}>{weeksLeft} weeks of normal prices on record</span>
+                    </div>
+                    <p className={s.laneLabel}>Add them on November 20</p>
+                    <div className={s.lane}>
+                      <span className={s.laneLate} style={{ left: `${100 - 100 / weeksLeft}%` }} />
+                      <span className={s.laneLateText} style={{ right: `calc(${100 / weeksLeft}% + 14px)` }}>
+                        1 week. Not enough to tell a real cut from a fake one
+                      </span>
+                    </div>
+                  </figure>
                 </div>
-                <p className={s.laneLabel}>Add competitors today</p>
-                <div className={s.lane}>
-                  <span className={`${s.laneFull} ${s.fill}`}>{weeksLeft} weeks of normal prices on record</span>
-                </div>
-                <p className={s.laneLabel}>Add them on November 20</p>
-                <div className={s.lane}>
-                  <span className={s.laneLate} style={{ left: `${100 - 100 / weeksLeft}%` }} />
-                  <span className={s.laneLateText} style={{ right: `calc(${100 / weeksLeft}% + 14px)` }}>
-                    1 week. Not enough to tell a real cut from a fake one
-                  </span>
-                </div>
-              </figure>
-            </InView>
-          </div>
-        </section>
-      ) : null}
+              </section>
+            }
+          />
+        </div>
+      ) : (
+        compare
+      )}
 
       {/* ---- 8 · the beta offer, with prices */}
       <section className={s.section}>
