@@ -673,3 +673,84 @@
 .tagMuted {
   color: var(--ink-3);
 }
+
+/* ------------------------------------------------- the reworked homepage's look */
+/* Same layout and motion; white ground and the type of DESIGN 15-landing. */
+.fresh {
+  background: #ffffff;
+}
+
+.fresh .h2 {
+  max-width: 860px;
+  font-size: clamp(34px, 4.4vw, 56px);
+  line-height: 1;
+  font-weight: 550;
+  letter-spacing: -0.035em;
+  color: #111111;
+  text-wrap: balance;
+}
+
+.fresh .step {
+  border-radius: 16px;
+}
+
+.fresh .stepActive {
+  background: #f4f4f2;
+}
+
+.fresh .stepRail {
+  top: 16px;
+  bottom: 16px;
+  border-radius: 999px;
+  background: #e6e6e3;
+}
+
+.fresh .stepNum {
+  margin-bottom: 10px;
+  font-family: inherit;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 550;
+  letter-spacing: -0.03em;
+  color: #111111;
+  font-variant-numeric: tabular-nums;
+}
+
+.fresh .stepBody {
+  font-size: 18px;
+  line-height: 1.5;
+  color: #4a4a4a;
+}
+
+.fresh .frame {
+  border-radius: 20px;
+}
+
+@media (min-width: 861px) {
+  .fresh .h2 {
+    margin-bottom: clamp(28px, 5vh, 52px);
+  }
+
+  .fresh .shell {
+    padding: 0 clamp(20px, 5vw, 64px);
+  }
+
+  .fresh .steps {
+    gap: 8px;
+  }
+
+  .fresh .step {
+    padding: 22px 28px;
+  }
+}
+
+/* Phones show one step at a time with no card around it. */
+@media (max-width: 860px) {
+  .fresh .stepActive {
+    background: transparent;
+  }
+
+  .fresh .stepBody {
+    font-size: 17px;
+  }
+}

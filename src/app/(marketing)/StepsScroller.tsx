@@ -25,8 +25,20 @@ const STEPS = [
   },
 ];
 
-/** `heading` and `bodies` (one text per step, in order) default to the current homepage's copy. */
-export function StepsScroller({ heading = "Set it once. Then forget it.", bodies }: { heading?: string; bodies?: string[] }) {
+/**
+ * `heading` and `bodies` (one text per step, in order) default to the previous
+ * homepage's copy (/v1). `fresh` gives the section the reworked homepage's look:
+ * white ground and the larger type of DESIGN 15-landing.
+ */
+export function StepsScroller({
+  heading = "Set it once. Then forget it.",
+  bodies,
+  fresh = false,
+}: {
+  heading?: string;
+  bodies?: string[];
+  fresh?: boolean;
+}) {
   const steps = STEPS.map((step, i) => ({ ...step, body: bodies?.[i] ?? step.body }));
   const sceneRef = useRef<HTMLDivElement>(null);
   const fillRefs = useRef<(HTMLSpanElement | null)[]>([]); // per-step rails (desktop)
@@ -70,7 +82,7 @@ export function StepsScroller({ heading = "Set it once. Then forget it.", bodies
   }, []);
 
   return (
-    <div ref={sceneRef} className={styles.scene}>
+    <div ref={sceneRef} className={`${styles.scene} ${fresh ? styles.fresh : ""}`}>
       <div className={styles.stage}>
         <div className={styles.shell}>
           <h2 className={styles.h2}>{heading}</h2>

@@ -387,7 +387,7 @@ export default async function RootPage() {
       </section>
 
       {/* ---- 4 · how it works: the current homepage's pinned three-step scroller, new copy */}
-      <StepsScroller heading="Two minutes to set up. Nothing to check after that." bodies={STEPS} />
+      <StepsScroller fresh heading="Two minutes to set up. Nothing to check after that." bodies={STEPS} />
 
       {/* ---- 5 · low noise */}
       <section className={`${s.section} ${s.tint}`}>
