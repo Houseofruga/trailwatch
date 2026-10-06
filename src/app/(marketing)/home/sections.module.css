@@ -160,10 +160,37 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* ------------------------------------------------------ 1 · hero, fitted */
+/* On desktop the hero ends about 110px above the bottom of the window, so the
+   top of the week panel shows and the page reads as scrollable. The lookup's
+   empty result area gives up the height: it grows with the window (up to its
+   original 430px) instead of always reserving the full amount. */
+@media (min-width: 901px) {
+  .page .heroFit {
+    min-height: 0;
+  }
+
+  .page .heroInnerFit {
+    padding-top: 32px;
+    padding-bottom: 32px;
+  }
+
+  .page .bigLookup section > [role="status"] {
+    display: flex;
+    flex-direction: column;
+    min-height: clamp(120px, calc(100svh - 504px), 430px);
+  }
+
+  .page .bigLookup section > [role="status"] > * {
+    flex: 1 0 auto;
+    min-height: 0;
+  }
+}
+
 /* ----------------------------------------------------- 1 · the week panel */
 /* The hero above it is the current homepage's, styled by home.module.css. */
 .weekSection {
-  padding-top: clamp(40px, 5vw, 64px);
+  padding-top: clamp(28px, 3vw, 40px);
 }
 
 .afterWeek {

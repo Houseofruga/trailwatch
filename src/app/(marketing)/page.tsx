@@ -256,12 +256,12 @@ export default async function RootPage() {
       </p>
 
       {/* ---- 1 · hero: the current homepage's hero as it is (sky, copy left, live lookup right) */}
-      <section className={hero.hero}>
+      <section className={`${hero.hero} ${s.heroFit}`}>
         <div className={hero.sky} aria-hidden="true" />
         <div className={hero.header}>
           <SiteHeader onDark />
         </div>
-        <div className={hero.heroInner}>
+        <div className={`${hero.heroInner} ${s.heroInnerFit}`}>
           <div className={hero.heroCopy}>
             <h1 className={hero.title}>Your competitor started a sale on Thursday. You found out on Monday.</h1>
             <p className={hero.body}>
