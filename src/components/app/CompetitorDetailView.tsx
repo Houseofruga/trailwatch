@@ -127,6 +127,20 @@ export function CompetitorDetailView({
     router.push("/competitors");
   }
 
+  // Filters the timeline to price comparisons and, if its top isn't already on
+  // screen, brings it into view so the change is visible.
+  function seeComparison() {
+    setType("undercut");
+    setPriority("all");
+    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    requestAnimationFrame(() => {
+      const timeline = document.getElementById("timeline");
+      if (!timeline) return;
+      const top = timeline.getBoundingClientRect().top;
+      if (top < 0 || top > window.innerHeight - 200) timeline.scrollIntoView({ block: "start", behavior: calm ? "auto" : "smooth" });
+    });
+  }
+
   const moreActions = (
     <PopoverMenu
       items={[{ label: "Remove competitor", icon: <IconX />, critical: true, onSelect: () => setRemove(true) }]}
@@ -322,7 +336,7 @@ export function CompetitorDetailView({
                     <p className={styles.compare}>
                       {c.comparison.similar} similar products · {c.comparison.cheaper} cheaper than yours
                     </p>
-                    <Button variant="plain" className={styles.compareLink} onClick={() => (setType("undercut"), setPriority("all"))}>
+                    <Button variant="plain" className={styles.compareLink} onClick={seeComparison}>
                       See the comparison
                     </Button>
                   </>

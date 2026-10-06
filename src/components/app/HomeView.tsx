@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import type { HomeState } from "@/app/(app)/dashboard/page";
 import { Avatar, Thumbnail } from "@/components/ui/Avatar";
 import { Banner } from "@/components/ui/Banner";
@@ -24,6 +24,39 @@ import styles from "./HomeView.module.css";
 const PAGE_SIZE = 10;
 const BETA_LIMIT = 10;
 
+const GUIDE_DISMISSED = "tw_setup_guide_dismissed";
+const GUIDE_EVENT = "tw-setup-guide";
+
+function subscribeGuide(onChange: () => void) {
+  window.addEventListener(GUIDE_EVENT, onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener(GUIDE_EVENT, onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
+
+let guideDismissedThisVisit = false;
+
+function guideIsDismissed(): boolean {
+  if (guideDismissedThisVisit) return true;
+  try {
+    return localStorage.getItem(GUIDE_DISMISSED) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function dismissGuide() {
+  guideDismissedThisVisit = true;
+  try {
+    localStorage.setItem(GUIDE_DISMISSED, "1");
+  } catch {
+    // Storage blocked: it's dismissed for this visit only.
+  }
+  window.dispatchEvent(new Event(GUIDE_EVENT));
+}
+
 type Filters = { competitor: string; type: string; priority: string };
 const NO_FILTERS: Filters = { competitor: "all", type: "all", priority: "all" };
 
@@ -41,7 +74,9 @@ export function HomeView({
   briefing: BriefingPanel;
 }) {
   const [modal, setModal] = useState(state.startsWith("add-competitor-modal"));
-  const [guideDismissed, setGuideDismissed] = useState(false);
+  // Dismissing the setup guide sticks (in this browser). Until the browser has
+  // answered, it stays hidden, so a dismissed guide never flashes on load.
+  const guideDismissed = useSyncExternalStore(subscribeGuide, guideIsDismissed, () => true);
   const [filters, setFilters] = useState<Filters>(
     state === "filters-match-nothing" ? { competitor: "dewlane", type: "launch", priority: "high" } : NO_FILTERS,
   );
@@ -153,7 +188,7 @@ export function HomeView({
 
       {!setupDone && !guideDismissed ? (
         <SetupGuide
-          onDismiss={() => setGuideDismissed(true)}
+          onDismiss={dismissGuide}
           tasks={[
             { label: "Add your store", done: summary.setup.ownStore },
             { label: "Add a competitor", done: summary.setup.competitor },
