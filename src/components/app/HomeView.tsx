@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { HomeState } from "@/app/(app)/dashboard/page";
 import { Avatar, Thumbnail } from "@/components/ui/Avatar";
 import { Banner } from "@/components/ui/Banner";
@@ -60,6 +61,9 @@ function dismissGuide() {
 type Filters = { competitor: string; type: string; priority: string };
 const NO_FILTERS: Filters = { competitor: "all", type: "all", priority: "all" };
 
+/** A filter value from the address, if it's one we offer; else "all". */
+const pick = (raw: string | null, allowed: string[]) => (raw && allowed.includes(raw) ? raw : "all");
+
 export function HomeView({
   state,
   summary,
@@ -77,10 +81,20 @@ export function HomeView({
   // Dismissing the setup guide sticks (in this browser). Until the browser has
   // answered, it stays hidden, so a dismissed guide never flashes on load.
   const guideDismissed = useSyncExternalStore(subscribeGuide, guideIsDismissed, () => true);
-  const [filters, setFilters] = useState<Filters>(
-    state === "filters-match-nothing" ? { competitor: "dewlane", type: "launch", priority: "high" } : NO_FILTERS,
+  // Filters and page come from the address (?competitor=…&type=…&priority=…&page=2)
+  // and are written back to it, so opening a move and coming back, reloading or
+  // sharing the link all return to the same list.
+  const params = useSearchParams();
+  const [filters, setFilters] = useState<Filters>(() =>
+    state === "filters-match-nothing"
+      ? { competitor: "dewlane", type: "launch", priority: "high" }
+      : {
+          competitor: pick(params.get("competitor"), competitors.map((c) => c.id)),
+          type: pick(params.get("type"), TYPE_OPTIONS.map((o) => o.value)),
+          priority: pick(params.get("priority"), PRIORITY_OPTIONS.map((o) => o.value)),
+        },
   );
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(() => Math.max(0, (Number.parseInt(params.get("page") ?? "1", 10) || 1) - 1));
   const [open, setOpen] = useState<Record<string, boolean>>({ m3: true });
 
   const loading = state === "loading";
@@ -97,7 +111,21 @@ export function HomeView({
       ),
     [moves, filters],
   );
-  const pageMoves = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+  // A page number past the end (a stale link, moves that aged out) shows the last page.
+  const lastPage = Math.max(0, Math.ceil(filtered.length / PAGE_SIZE) - 1);
+  const shownPage = Math.min(page, lastPage);
+  const pageMoves = filtered.slice(shownPage * PAGE_SIZE, (shownPage + 1) * PAGE_SIZE);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    for (const key of ["competitor", "type", "priority"] as const) {
+      if (filters[key] === "all") url.searchParams.delete(key);
+      else url.searchParams.set(key, filters[key]);
+    }
+    if (shownPage === 0) url.searchParams.delete("page");
+    else url.searchParams.set("page", String(shownPage + 1));
+    if (url.href !== window.location.href) window.history.replaceState(null, "", url);
+  }, [filters, shownPage]);
   const setFilter = (k: keyof Filters) => (v: string) => {
     setFilters((f) => ({ ...f, [k]: v }));
     setPage(0);
@@ -173,7 +201,15 @@ export function HomeView({
     };
   });
 
-  const firstReport = competitors[0] ? `/competitors/${competitors[0].id}/report` : "/competitors";
+  // With one competitor the empty state opens its snapshot; with several it
+  // opens the list, since there's a snapshot for each.
+  const emptyAction =
+    competitors.length === 1 ? (
+      <Button href={`/competitors/${competitors[0].id}/report`}>View snapshot</Button>
+    ) : (
+      <Button href="/competitors">View competitors</Button>
+    );
+  const checkEvery = competitors[0]?.checkIntervalHours ?? 2;
 
   return (
     <PageBody>
@@ -259,25 +295,25 @@ export function HomeView({
           }
           empty={
             moves.length === 0 ? (
-              <EmptyState art="radar" title="No moves yet" actions={<Button href={firstReport}>View snapshots</Button>}>
-                We check your competitors every 2 hours. First changes usually show up within a day or two.
+              <EmptyState art="radar" title="No moves yet" actions={emptyAction}>
+                We check your competitors every {checkEvery} hours. First changes usually show up within a day or two.
               </EmptyState>
             ) : (
               <EmptyState
                 art="filter"
                 title="No moves match these filters"
-                actions={<Button onClick={() => setFilters(NO_FILTERS)}>Clear filters</Button>}
+                actions={<Button onClick={() => (setFilters(NO_FILTERS), setPage(0))}>Clear filters</Button>}
               >
                 Try a different competitor or priority, or clear the filters to see everything.
               </EmptyState>
             )
           }
           pagination={{
-            from: page * PAGE_SIZE + 1,
-            to: page * PAGE_SIZE + pageMoves.length,
+            from: shownPage * PAGE_SIZE + 1,
+            to: shownPage * PAGE_SIZE + pageMoves.length,
             total: filtered.length,
-            onPrevious: page > 0 ? () => setPage((p) => p - 1) : undefined,
-            onNext: (page + 1) * PAGE_SIZE < filtered.length ? () => setPage((p) => p + 1) : undefined,
+            onPrevious: shownPage > 0 ? () => setPage(shownPage - 1) : undefined,
+            onNext: shownPage < lastPage ? () => setPage(shownPage + 1) : undefined,
           }}
         />
       </Card>

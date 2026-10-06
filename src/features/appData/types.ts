@@ -49,6 +49,8 @@ export type CompetitorRow = {
   status: CompetitorStatus;
   /** Plain-words reason for "Can't reach". */
   statusReason?: string;
+  /** How often this account's plan checks the store. */
+  checkIntervalHours: number;
 };
 
 export type WatchedPage = { label: string; url: string; changedAt: string | null };

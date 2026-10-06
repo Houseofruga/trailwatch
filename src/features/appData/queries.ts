@@ -205,6 +205,7 @@ function toRow(
       ? `We couldn't open ${s.domain} since ${shortDate(unreachableSince)}. We'll keep trying every ${interval} hours.`
       : undefined,
     unreachableSince,
+    checkIntervalHours: interval,
   };
 }
 

@@ -126,7 +126,7 @@ export function CompetitorsView({
         </Card>
       )}
 
-      {competitors.length > 0 ? <p className={styles.footnote}>We check every competitor every 2 hours.</p> : null}
+      {competitors.length > 0 ? <p className={styles.footnote}>We check every competitor every {competitors[0].checkIntervalHours} hours.</p> : null}
 
       <AddCompetitorModal
         open={modal}

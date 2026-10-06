@@ -78,6 +78,10 @@ function TopMoves({ briefing }: { briefing: Briefing }) {
               <span className={styles.moveText}>
                 <span className={styles.moveHeadline}>{t.headline}</span>
                 {t.why ? <span className={styles.moveWhy}>{t.why}</span> : null}
+                {/* No chevron and no link: the store has been removed since this briefing. */}
+                {!t.competitorId && t.competitorName ? (
+                  <span className={styles.moveWhy}>You no longer watch {t.competitorName}.</span>
+                ) : null}
               </span>
               {t.competitorId ? (
                 <span className={styles.chevron}>
