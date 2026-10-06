@@ -160,6 +160,41 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* The hero's call to action: the button, then its three reassurances as a
+   ticked list underneath. */
+.heroCta {
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.heroPoints {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  color: #ffffff;
+  text-shadow: 0 1px 12px rgba(10, 20, 40, 0.4);
+}
+
+.heroPoints li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.heroPoints svg {
+  flex-shrink: 0;
+  color: var(--lime);
+  filter: drop-shadow(0 1px 6px rgba(10, 20, 40, 0.35));
+}
+
 /* ------------------------------------------------------ 1 · hero, fitted */
 /* On desktop the hero ends about 110px above the bottom of the window, so the
    top of the week panel shows and the page reads as scrollable. The lookup's
@@ -184,6 +219,39 @@
   .page .bigLookup section > [role="status"] > * {
     flex: 1 0 auto;
     min-height: 0;
+  }
+}
+
+/* Short desktop windows (a laptop with the browser's toolbars showing): tighten
+   the hero's type and spacing so the week panel still peeks in. */
+@media (min-width: 901px) and (max-height: 720px) {
+  .page .heroInnerFit {
+    padding-top: 8px;
+    padding-bottom: 24px;
+  }
+
+  .page .heroTitleFit {
+    margin-bottom: 12px;
+    font-size: clamp(1.75rem, 3.2vw, 2.4rem);
+  }
+
+  .page .heroBodyFit {
+    font-size: 0.98rem;
+    line-height: 1.5;
+  }
+
+  .heroCta {
+    margin-top: 18px;
+    gap: 12px;
+  }
+
+  .heroPoints {
+    gap: 5px;
+    font-size: 0.9rem;
+  }
+
+  .weekSection {
+    padding-top: 20px;
   }
 }
 

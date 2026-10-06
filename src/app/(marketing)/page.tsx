@@ -263,16 +263,25 @@ export default async function RootPage() {
         </div>
         <div className={`${hero.heroInner} ${s.heroInnerFit}`}>
           <div className={hero.heroCopy}>
-            <h1 className={hero.title}>Your competitor started a sale on Thursday. You found out on Monday.</h1>
-            <p className={hero.body}>
+            <h1 className={`${hero.title} ${s.heroTitleFit}`}>Your competitor started a sale on Thursday. You found out on Monday.</h1>
+            <p className={`${hero.body} ${s.heroBodyFit}`}>
               Trailwatch reads your competitors’ stores next to yours. When they launch, discount or sell out, you hear within hours what it
               means for your products. Every Monday, one short email tells you the move to make.
             </p>
-            <div className={hero.heroCta}>
+            <div className={s.heroCta}>
               <Button variant="primary" tall href={SIGNUP} className={s.cta}>
                 Join the beta
               </Button>
-              <span className={hero.heroCtaNote}>Free until December 31 · No card · Nothing to install</span>
+              <ul className={s.heroPoints}>
+                {["Free until December 31", "No card", "Nothing to install"].map((point) => (
+                  <li key={point}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" {...stroke} strokeWidth={2.6}>
+                      <path d="M5 12l5 5 9-10" />
+                    </svg>
+                    {point}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
           <div className={`${hero.heroTool} ${s.bigLookup}`}>
