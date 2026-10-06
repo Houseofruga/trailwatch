@@ -1,8 +1,11 @@
-// Shared layout for the instant alert and the Monday briefing, built from the
-// owner's email artboards (E1, E2): grey page, brand row, white cards, one
-// dark button, a centred footer. Table-based with inline styles for
-// Gmail/Outlook/Apple Mail; one media query drops the padding to 16px on
-// phones (the 375 artboards). Pure, no I/O.
+// Shared layout for the instant alert and the Monday briefing.
+//
+// Deliberately plain (owner's decision, 2026-10-07): these were built from the
+// email artboards E1 and E2 (grey page, logo, white cards, a dark button) and
+// Gmail filed them under Promotions. They now read like a note from a person:
+// white page, no images, no boxes or buttons, left-aligned text with ordinary
+// links and thin rules between sections. The same pieces (card, button, badge…)
+// are kept so the alert and briefing renderers are unchanged. Pure, no I/O.
 
 export const SANS = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
 
@@ -24,38 +27,32 @@ const INK_2 = "#4a4a4a";
 const SUBDUED = "#616161";
 const RULE = "#ebebeb";
 
-/** A card: white (default) or the grey "one move" card. `inner` is HTML. */
+/** A section of the email. `inner` is HTML. `tone` is kept for callers; both render plain. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function card(inner: string, tone: "white" | "grey" = "white"): string {
-  const bg = tone === "grey" ? "#f3f3f3" : "#ffffff";
-  return `<tr><td style="padding:0 0 16px 0;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${bg};border:1px solid #e3e3e3;border-radius:10px;border-collapse:separate;">
-    <tr><td class="tw-card" style="padding:24px;font-family:${SANS};color:${INK};">${inner}</td></tr>
-  </table>
+  return `<tr><td style="padding:0 0 20px 0;border-top:1px solid ${RULE};">
+  <div style="padding-top:20px;font-family:${SANS};color:${INK};">${inner}</div>
 </td></tr>`;
 }
 
-/** Small uppercase heading inside a card ("What you could do", "Top moves"). */
+/** Small heading inside a section ("What you could do", "Top moves"). */
 export function eyebrow(text: string, dark = false): string {
-  return `<p style="margin:0 0 8px 0;font-size:12px;font-weight:700;color:${dark ? INK : SUBDUED};text-transform:uppercase;letter-spacing:0.04em;">${escapeHtml(text)}</p>`;
+  return `<p style="margin:0 0 8px 0;font-size:13px;font-weight:700;color:${dark ? INK : SUBDUED};">${escapeHtml(text)}</p>`;
 }
 
 export function heading(text: string): string {
-  return `<h1 style="margin:0 0 8px 0;font-size:22px;line-height:1.3;font-weight:700;color:${INK};">${escapeHtml(text)}</h1>`;
+  return `<h1 style="margin:0 0 8px 0;font-size:18px;line-height:1.35;font-weight:700;color:${INK};">${escapeHtml(text)}</h1>`;
 }
 
 export function paragraph(text: string, opts: { size?: number; muted?: boolean; bold?: boolean; margin?: string } = {}): string {
   return `<p style="margin:${opts.margin ?? "0"};font-size:${opts.size ?? 15}px;line-height:1.55;color:${opts.muted ? INK_2 : INK};${opts.bold ? "font-weight:600;" : ""}">${escapeHtml(text)}</p>`;
 }
 
-const BADGE: Record<"high" | "normal" | "low", { label: string; bg: string; ink: string }> = {
-  high: { label: "High", bg: "#ffeb78", ink: "#4f4700" },
-  normal: { label: "Normal", bg: "#d5ebff", ink: "#003a5a" },
-  low: { label: "Low", bg: "#ebebeb", ink: SUBDUED },
-};
+const BADGE: Record<"high" | "normal" | "low", string> = { high: "High", normal: "Normal", low: "Low" };
 
+/** The priority, as plain bold text. */
 export function badge(priority: "high" | "normal" | "low"): string {
-  const b = BADGE[priority];
-  return `<span style="display:inline-block;padding:2px 8px;border-radius:6px;background:${b.bg};color:${b.ink};font-size:12px;font-weight:700;line-height:18px;">${b.label}</span>`;
+  return `<strong style="font-size:13px;color:${priority === "high" ? INK : SUBDUED};">${BADGE[priority]}</strong>`;
 }
 
 /** Rows with a top rule (product lists). Cells are HTML. */
@@ -71,21 +68,18 @@ export function rows(items: { left: string; right?: string }[]): string {
     .join("")}</table>`;
 }
 
-/** The light-grey "Compared with yours" box. */
+/** A labelled line ("Compared with yours: …"). */
 export function note(label: string, text: string): string {
-  return `<div style="margin-top:16px;padding:12px;border-radius:8px;background:#f7f7f7;border:1px solid ${RULE};font-size:14px;line-height:1.5;color:${INK};"><strong>${escapeHtml(label)}</strong> ${escapeHtml(text)}</div>`;
+  return `<p style="margin:14px 0 0 0;font-size:14px;line-height:1.5;color:${INK};"><strong>${escapeHtml(label)}</strong> ${escapeHtml(text)}</p>`;
 }
 
 export function link(href: string, text: string, opts: { underline?: boolean; color?: string } = {}): string {
   return `<a href="${escapeHtml(href)}" style="color:${opts.color ?? "#005bd3"};${opts.underline ? "text-decoration:underline;text-underline-offset:2px;" : "text-decoration:none;"}">${escapeHtml(text)}</a>`;
 }
 
+/** The main link, as an ordinary bold link (no button). */
 export function button(href: string, label: string): string {
-  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
-    <td style="background:${INK};border:1px solid #000000;border-radius:8px;">
-      <a href="${escapeHtml(href)}" style="display:inline-block;padding:13px 22px;font-family:${SANS};font-size:15px;font-weight:700;color:#ffffff;text-decoration:none;">${escapeHtml(label)}</a>
-    </td>
-  </tr></table>`;
+  return `<p style="margin:0;font-family:${SANS};font-size:15px;line-height:1.5;"><a href="${escapeHtml(href)}" style="color:#005bd3;font-weight:700;text-decoration:underline;text-underline-offset:2px;">${escapeHtml(label)}</a></p>`;
 }
 
 export type ShellInput = {
@@ -105,50 +99,26 @@ export type ShellInput = {
 };
 
 export function renderShell(input: ShellInput): string {
-  const site = escapeHtml(input.siteUrl);
   return `<!doctype html>
-<html lang="en" style="margin:0;padding:0;">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light">
-<meta name="supported-color-schemes" content="light">
 <title>${escapeHtml(input.subject)}</title>
-<!--[if mso]><style>* {font-family: Arial, sans-serif !important;}</style><![endif]-->
-<style>
-  body { margin:0; padding:0; -webkit-text-size-adjust:100%; }
-  @media (max-width: 620px) {
-    .tw-wrap { padding:24px 16px 32px !important; }
-    .tw-card { padding:16px !important; }
-  }
-</style>
 </head>
-<body style="margin:0;padding:0;background:#f1f1f1;">
-<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#f1f1f1;opacity:0;">${escapeHtml(input.preheader)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f1f1f1;">
-  <tr><td align="center">
-    <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
-      <tr><td class="tw-wrap" style="padding:24px 32px 32px;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-          <tr><td style="padding:0 0 16px 0;font-family:${SANS};font-size:14px;color:${SUBDUED};">
-            <a href="${site}" style="text-decoration:none;"><img src="${site}/email-logo-dark.png" width="91" height="20" alt="Trailwatch" style="border:0;outline:none;display:inline-block;vertical-align:middle;height:20px;width:91px;"></a>
-            <span style="vertical-align:middle;">&nbsp;&middot; ${escapeHtml(input.label)}</span>
-          </td></tr>
-          ${input.cards}
-          ${
-            input.cta
-              ? `<tr><td ${input.cta.center ? 'align="center"' : ""} style="padding:0 0 8px 0;">${input.cta.html}</td></tr>`
-              : ""
-          }
-          <tr><td align="center" style="padding:8px 0 0 0;font-family:${SANS};font-size:12px;line-height:1.6;color:${SUBDUED};">
-            ${input.footerHtml}${input.sentTo ? `<br>Trailwatch &middot; Sent to ${escapeHtml(input.sentTo)}` : ""}
-            <br>&copy; 2026 House of Ruga LLP
-          </td></tr>
-        </table>
+<body style="margin:0;padding:0;background:#ffffff;">
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#ffffff;opacity:0;">${escapeHtml(input.preheader)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
+  <tr><td style="padding:20px 20px 28px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr><td style="padding:0 0 16px 0;font-family:${SANS};font-size:13px;color:${SUBDUED};">Trailwatch &middot; ${escapeHtml(input.label)}</td></tr>
+      ${input.cards}
+      ${input.cta ? `<tr><td style="padding:0 0 20px 0;">${input.cta.html}</td></tr>` : ""}
+      <tr><td style="padding:16px 0 0 0;border-top:1px solid ${RULE};font-family:${SANS};font-size:12px;line-height:1.6;color:${SUBDUED};">
+        ${input.footerHtml}${input.sentTo ? `<br>Trailwatch &middot; Sent to ${escapeHtml(input.sentTo)}` : ""}
+        <br>&copy; 2026 House of Ruga LLP
       </td></tr>
     </table>
-    <!--[if mso]></td></tr></table><![endif]-->
   </td></tr>
 </table>
 </body>
@@ -163,12 +133,11 @@ export function footerLine(siteUrl: string, movesThisMonth: number, unsubscribeH
 }
 
 /**
- * One-click rating row (beta): "Was this briefing useful?  Yes · No". Two
- * plain button-links, so it works with images off and in every client.
+ * One-click rating row (beta): "Was this briefing useful?  Yes · No", as two
+ * ordinary links, so it works with images off and in every client.
  */
 export function ratingRow(question: string, urls: { useful: string; notUseful: string }, labels: [string, string] = ["Yes", "No"]): string {
-  // DESIGN 12-Beta 12f: question then two small outlined buttons, centred.
-  const pill = (href: string, text: string) =>
-    `<a href="${escapeHtml(href)}" style="display:inline-block;padding:6px 14px;margin:0 0 0 10px;border:1px solid #cccccc;border-radius:8px;background:#ffffff;color:#303030;text-decoration:none;font-weight:600;font-size:14px;">${escapeHtml(text)}</a>`;
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="padding:4px 0 20px 0;font-family:${SANS};font-size:14px;color:#4a4a4a;">${escapeHtml(question)}${pill(urls.useful, labels[0])}${pill(urls.notUseful, labels[1])}</td></tr></table>`;
+  const choice = (href: string, text: string) =>
+    `<a href="${escapeHtml(href)}" style="color:#005bd3;font-weight:600;text-decoration:underline;text-underline-offset:2px;">${escapeHtml(text)}</a>`;
+  return `<p style="margin:0 0 20px 0;font-family:${SANS};font-size:14px;line-height:1.5;color:${INK_2};">${escapeHtml(question)} ${choice(urls.useful, labels[0])} &middot; ${choice(urls.notUseful, labels[1])}</p>`;
 }
