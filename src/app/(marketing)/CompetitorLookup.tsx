@@ -292,9 +292,13 @@ export function CompetitorLookup() {
             aria-invalid={fieldError ? true : undefined}
             aria-describedby={fieldError ? "lookup-error" : "lookup-help"}
           />
-          <Button variant="primary" tall type="submit" loading={loading}>
-            See their moves
-          </Button>
+          {/* The field has the whole row until there's something to look up
+              (Enter still submits). */}
+          {value.trim() || loading ? (
+            <Button variant="primary" tall type="submit" loading={loading} className={s.go}>
+              See their moves
+            </Button>
+          ) : null}
         </div>
         {fieldError ? (
           <p id="lookup-error" className={s.fieldError}>

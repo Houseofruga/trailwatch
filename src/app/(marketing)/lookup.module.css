@@ -311,13 +311,21 @@
   align-items: flex-start;
 }
 
-/* Phones: the button goes full width under the field (09-widget, 375). */
-@media (max-width: 600px) {
-  .row {
-    flex-direction: column;
+/* The button appears beside the field once the visitor starts typing, on
+   phones too (the row never stacks). */
+.go {
+  transition:
+    opacity 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
+
+  @starting-style {
+    opacity: 0;
+    transform: translateX(8px);
   }
-  .row > * {
-    width: 100%;
-    flex: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .go {
+    transition: none;
   }
 }
