@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Avatar, Thumbnail } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
@@ -10,6 +11,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Spinner, Stat } from "@/components/ui/Feedback";
 import { IconExternal } from "@/components/ui/icons";
 import { PageBody, PageHeader } from "@/components/ui/Page";
+import { cameStraightFrom, originOf } from "@/features/appData/backTrail";
 import { count, money, shortDate } from "@/features/appData/format";
 import type { FirstReport, ReportItem, ReportList, WatchedPage } from "@/features/appData/types";
 import { CategoriesCard } from "./CategoriesCard";
@@ -112,6 +114,21 @@ function ItemText({ title, sub, href }: { title: string; sub?: string; href?: st
 }
 
 export function FirstReportView({ report, reading, error }: { report: FirstReport | null; reading?: boolean; error?: boolean }) {
+  const router = useRouter();
+  // Back to the competitor's page: a step back in history when that page is
+  // what's behind this one (it keeps its place and its own "‹ Home" link),
+  // otherwise a plain link that carries the origin along.
+  const origin = originOf(useSearchParams().get("from"));
+  const backTo = (id: string, name: string) => ({
+    href: `/competitors/${id}${origin ? `?from=${origin}` : ""}`,
+    label: name,
+    onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || !cameStraightFrom(`/competitors/${id}`)) return;
+      e.preventDefault();
+      router.back();
+    },
+  });
+
   if (!report) {
     return (
       <PageBody>
@@ -131,7 +148,7 @@ export function FirstReportView({ report, reading, error }: { report: FirstRepor
   const header = (
     <PageHeader
       title={`${c.name} right now`}
-      breadcrumb={{ href: `/competitors/${c.id}`, label: c.name }}
+      breadcrumb={backTo(c.id, c.name)}
       leading={<Avatar name={c.name} size={32} domain={c.domain} />}
       actions={
         <>

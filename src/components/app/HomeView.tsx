@@ -15,6 +15,7 @@ import { IconChevronDown, IconChevronUp, IconPlus } from "@/components/ui/icons"
 import { IndexTable, type Row } from "@/components/ui/IndexTable";
 import { PageBody, PageHeader } from "@/components/ui/Page";
 import { FilterSelect } from "@/components/ui/Select";
+import { rememberHomeUrl } from "@/features/appData/backTrail";
 import { briefingTime, money, when } from "@/features/appData/format";
 import type { BriefingPanel, CompetitorRow, HomeSummary, Move } from "@/features/appData/types";
 import { AddCompetitorModal } from "./AddCompetitorModal";
@@ -125,6 +126,7 @@ export function HomeView({
     if (shownPage === 0) url.searchParams.delete("page");
     else url.searchParams.set("page", String(shownPage + 1));
     if (url.href !== window.location.href) window.history.replaceState(null, "", url);
+    rememberHomeUrl(`${url.pathname}${url.search}`);
   }, [filters, shownPage]);
   const setFilter = (k: keyof Filters) => (v: string) => {
     setFilters((f) => ({ ...f, [k]: v }));

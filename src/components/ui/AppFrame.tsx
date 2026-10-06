@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { recordPath } from "@/features/appData/backTrail";
 import { logOut } from "@/features/auth/actions";
 import { Avatar } from "./Avatar";
@@ -176,8 +176,24 @@ export function AppFrame({
   const [drawer, setDrawer] = useState(false);
   const [feedback, setFeedback] = useState(false);
 
-  // Lets detail pages tell whether their "back" origin is really the previous page.
-  useEffect(() => recordPath(pathname), [pathname]);
+  // Keeps this tab's trail of pages, so a detail page's "back" link can tell
+  // what is really behind it. A path change that follows the browser's back or
+  // forward is a step along the trail; one that follows a click is a new page.
+  const viaHistory = useRef(false);
+  useEffect(() => {
+    const onPop = () => (viaHistory.current = true);
+    const onClick = () => (viaHistory.current = false);
+    window.addEventListener("popstate", onPop);
+    document.addEventListener("click", onClick, true);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      document.removeEventListener("click", onClick, true);
+    };
+  }, []);
+  useEffect(() => {
+    recordPath(pathname, viaHistory.current);
+    viaHistory.current = false;
+  }, [pathname]);
 
   useEffect(() => {
     if (!drawer) return;

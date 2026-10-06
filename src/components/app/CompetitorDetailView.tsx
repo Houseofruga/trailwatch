@@ -17,7 +17,7 @@ import { FilterSelect } from "@/components/ui/Select";
 import { TimelineDay, TimelineItem, TimelineNote } from "@/components/ui/Timeline";
 import { useToast } from "@/components/ui/Toast";
 import { removeCompetitor } from "@/features/appData/actions";
-import { cameStraightFrom, ORIGINS, originOf } from "@/features/appData/backTrail";
+import { cameStraightFrom, originHref, ORIGINS, originOf } from "@/features/appData/backTrail";
 import { ago, clockTime, count, dayHeading, dayKey, money, shortDate, when } from "@/features/appData/format";
 import type { CompetitorOverview, Move } from "@/features/appData/types";
 import { CategoriesCard } from "./CategoriesCard";
@@ -69,12 +69,17 @@ export function CompetitorDetailView({
     ? {
         ...ORIGINS[origin],
         onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
-          if (e.metaKey || e.ctrlKey || e.shiftKey || !cameStraightFrom(ORIGINS[origin].href)) return;
+          if (e.metaKey || e.ctrlKey || e.shiftKey) return;
           e.preventDefault();
-          router.back();
+          // Really just came from there: step back (keeps the scroll position).
+          // Otherwise open it as the visitor left it (its filters and page).
+          if (cameStraightFrom(ORIGINS[origin].href)) router.back();
+          else router.push(originHref(origin));
         },
       }
     : { href: "/competitors", label: "Competitors" };
+  // The snapshot carries the origin along, so coming back from it still reads "‹ Home".
+  const snapshotHref = `/competitors/${competitor?.id ?? ""}/report${origin ? `?from=${origin}` : ""}`;
   const focused = highlight ?? /^#move-(.+)$/.exec(hash)?.[1];
   const fromEmail = highlight ?? (fromAlert ? focused : undefined);
   useEffect(() => {
@@ -156,7 +161,7 @@ export function CompetitorDetailView({
   );
 
   const timelineEmpty = noMovesYet ? (
-    <EmptyState art="radar" title="No moves yet" actions={<Button href={`/competitors/${c.id}/report`}>View snapshot</Button>}>
+    <EmptyState art="radar" title="No moves yet" actions={<Button href={snapshotHref}>View snapshot</Button>}>
       We read {c.name}&rsquo;s catalog {ago(c.lastCheckedAt)}. We&rsquo;ll list changes here as soon as we see them; first changes
       usually show up within a day or two.
     </EmptyState>
@@ -189,7 +194,7 @@ export function CompetitorDetailView({
         actions={
           <>
             {moreActions}
-            <Button variant="grey" href={`/competitors/${c.id}/report`}>
+            <Button variant="grey" href={snapshotHref}>
               View snapshot
             </Button>
             <Button variant="grey" href={`https://${c.domain}`} external icon={<IconExternal />}>
