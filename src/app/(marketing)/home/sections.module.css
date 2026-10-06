@@ -1,10 +1,14 @@
 /* The homepage's sections below the hero, built from DESIGN 15-landing, direction A
-   ("Paper calendar"): white, black and one lime accent, Inter throughout.
+   ("Paper calendar"): white, the site's charcoal and one lime accent, Inter throughout.
    One departure the owner asked for: the hero is the current homepage's, as it
    is (sky, copy, live lookup), so only the sections below follow the design. */
 
 .page {
-  --ink: #111111;
+  /* The site's charcoal (the primary button's fill): text, and every dark surface. */
+  --ink: #303030;
+  --dark: #303030;
+  --dark-line: #595959;
+  --dark-track: #484848;
   --ink-soft: #4a4a4a;
   --line: #e6e6e3;
   --lime: #9ff50a;
@@ -38,7 +42,7 @@
 }
 
 .black {
-  background: #000000;
+  background: var(--dark);
   color: #ffffff;
 }
 
@@ -90,7 +94,7 @@
 }
 
 .exampleDark {
-  border-color: #3a3a3a;
+  border-color: var(--dark-line);
   color: #b8b8b8;
 }
 
@@ -129,7 +133,7 @@
   min-height: 40px;
   padding: 10px 20px;
   box-sizing: border-box;
-  background: #000000;
+  background: var(--dark);
   color: #ffffff;
   font-size: 14px;
   line-height: 1.45;
@@ -162,7 +166,7 @@
   margin: 0;
   padding: clamp(20px, 3.75vw, 48px);
   border-radius: clamp(16px, 1.9vw, 24px);
-  background: #000000;
+  background: var(--dark);
   color: #ffffff;
 }
 
@@ -186,7 +190,7 @@
   flex-direction: column;
   gap: 4px;
   padding: 0 0 14px 12px;
-  border-left: 1px solid #262626;
+  border-left: 1px solid var(--dark-line);
 }
 
 .dayCol:first-child {
@@ -229,7 +233,7 @@
   position: relative;
   height: 10px;
   border-radius: 999px;
-  background: #1f1f1f;
+  background: var(--dark-track);
 }
 
 .span {
@@ -243,7 +247,7 @@
 .spanBlind {
   left: 7.5%;
   right: 12.8%;
-  background: #6b6b6b;
+  background: #9a9a9a;
 }
 
 /* Thursday 9:00 AM to 2:40 PM. */
@@ -261,7 +265,7 @@
   height: 26px;
   margin: -13px 0 0 -2px;
   border-radius: 2px;
-  box-shadow: 0 0 0 3px #000000;
+  box-shadow: 0 0 0 3px var(--dark);
 }
 
 .pinLate {
@@ -414,7 +418,7 @@
   padding: 22px;
   border-radius: 12px;
   background: var(--lime);
-  color: #000000;
+  color: var(--ink);
 }
 
 .move dt {
@@ -441,7 +445,7 @@
   flex-direction: column;
   gap: 6px;
   padding: 24px;
-  border: 1px solid #333333;
+  border: 1px solid var(--dark-line);
   border-radius: 16px;
 }
 
@@ -602,7 +606,7 @@
 /* The Trailwatch column, in black. */
 .table thead th:last-child,
 .table tbody td:last-child {
-  background: #000000;
+  background: var(--dark);
   color: #ffffff;
 }
 
@@ -617,7 +621,7 @@
 }
 
 .table tbody td:last-child {
-  border-top-color: #2a2a2a;
+  border-top-color: var(--dark-line);
   font-weight: 550;
 }
 
@@ -642,7 +646,7 @@
 /* Black Friday sits above the clouds: dark text on the light sky, the history
    timeline in a black panel like the week panel. */
 .season {
-  color: #0a2747;
+  color: var(--ink);
 }
 
 .seasonBody {
@@ -656,7 +660,7 @@
   margin: clamp(28px, 3.4vw, 44px) 0 0;
   padding: clamp(20px, 2.5vw, 32px);
   border-radius: clamp(16px, 1.9vw, 24px);
-  background: #000000;
+  background: var(--dark);
   color: #ffffff;
 }
 
@@ -702,7 +706,7 @@
 
 .spanShort {
   right: 0;
-  background: #8a8a8a;
+  background: #a6a6a6;
 }
 
 /* Pinned (wide screens, motion allowed): each layer is one screen tall, so the
