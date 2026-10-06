@@ -171,12 +171,12 @@ per migration in `PIVOT_PLAN.md`.
 - **Preview states:** in development, app pages take `?state=…` (see each page's
   `STATES`) and render mock data with buttons that save nothing. Signed-in pages need
   a login; for screenshots use a temporary unguarded route rendering the view with mocks.
-- **Feedback email to `founder@gettrailwatch.com` (open).** That address is Cloudflare
-  Email Routing (a forwarder). On 2026-10-06 a send from this machine failed with
-  "This API key is not authorized to send emails from gettrailwatch.com": the local
-  `RESEND_API_KEY` is limited to another domain. If Vercel uses the same key with
-  `EMAIL_FROM` on gettrailwatch.com, every production email fails, not only feedback.
-  The owner needs to check the key's domain permission in Resend.
+- **Email key and sender domain.** `founder@gettrailwatch.com` is Cloudflare Email
+  Routing (a forwarder). Until 2026-10-06 the `RESEND_API_KEY` was limited to
+  houseofruga.com, so sends from `weekly@gettrailwatch.com` were refused ("This API
+  key is not authorized to send emails from gettrailwatch.com"). The owner replaced
+  the key locally and in Vercel; a test from gettrailwatch.com to founder@ arrived.
+  Still to confirm: feedback sent from the live app after a redeploy.
 - **Design skills** (`.agents/`, `skills-lock.json`, uncommitted): Emil Kowalski's and
   Impeccable. Read their files as guidance; do not run Impeccable's launcher, which
   downloads and runs a program.
@@ -211,7 +211,7 @@ sessions' `.claude/worktrees`; lint `src` to check this work.
 
 1. **Outreach** (`GO_TO_MARKET.md`): pick the first 50 prospects, add each one's top
    competitor to the owner's account, start the 50 messages a week.
-2. **Owner:** check the Resend key (see Gotchas), read the nine guides, add the second
+2. **Owner:** send feedback from the live app to confirm email end to end, read the nine guides, add the second
    author-card line, submit the new pages in Search Console, set "Trailwatch" in
    `EMAIL_FROM`, the Supabase email templates, Google sign-in and the booking page.
 3. **Before billing turns on:** let Free users through the required-store step
