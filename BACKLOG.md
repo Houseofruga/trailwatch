@@ -56,6 +56,25 @@ Plan and status: `SEO_PLAN.md`. Live so far: `/tools` hub and all four free tool
 - **Old founder-edition competitor rows** (Linear, Notion… with no store) are still in the
   database; harmless, delete if the owner wants.
 
+## Email sender address (added 2026-10-07)
+
+Every email the app sends uses one sender, `EMAIL_FROM` in Vercel, currently
+`weekly@gettrailwatch.com`: the Monday briefing, alerts, welcome emails and the
+feedback / feature-request notices to the founder. It works, but "weekly@" reads
+oddly on an instant alert.
+
+- **Change the sender to a neutral address** (owner, no code): set `EMAIL_FROM` to
+  `Trailwatch <hello@gettrailwatch.com>` in Vercel and redeploy. Nothing to do in
+  Resend; the whole domain is verified there. Check the display name is spelled
+  "Trailwatch".
+- **Add `hello@` in Cloudflare Email Routing**, forwarding to the same inbox as
+  `founder@`. Replies to app emails already go to `founder@` (reply-to), but mail
+  typed by hand to the sender address would bounce without the rule.
+- **Optional, needs code:** a separate sender for the founder's own notices (for
+  example `feedback@`), via a second setting used by `src/features/beta/feedback.ts`.
+  Not needed while the subject line ("Feedback from…" / "Feature request from…")
+  already tells them apart; a mail filter on that subject does the same job.
+
 ## Data retention
 
 - **Rolling snapshot prune (~90 days).** Page snapshots currently accumulate
