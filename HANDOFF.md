@@ -5,10 +5,10 @@ account) can continue without prior chat memory. **Read `CLAUDE.md` (working rul
 and `SPEC.md` (scope) first, then this.** `PIVOT_PLAN.md` holds the phase-by-phase
 detail, decisions, and the log of every migration and env var.
 
-_Last updated: 2026-10-04. This file was rewritten for the pivot: the previous
+_Last updated: 2026-10-06. This file was rewritten for the pivot: the previous
 version described the pre-pivot "founder edition" (page URLs, weekly digest), which
 lives on `archive/founder-edition` / tag `v1-founder-edition`, and in git history up
-to `56dcdd5`. `main` is at `223565d` and fully pushed._
+to `56dcdd5`. `main` is fully pushed except the commit that carries this update._
 
 ## Product in one line
 
@@ -37,6 +37,35 @@ On top of that, since 2026-10-02:
 - **Opportunities (Part B)**: each competitor's own Best Sellers collection read
   daily, demand signals, assortment gaps, up to 3 in the Monday briefing, and the
   **Opportunities screen** (DESIGN 11, `/opportunities`, `/opportunities/dismissed`).
+
+- **Since 2026-10-04 (all live):**
+  - **Database moved to the US.** New Supabase project in US East (`jbxcluwqifgonyhbsgie`),
+    functions in `iad1` (`vercel.json`). The old Singapore project is a fallback only;
+    its values sit in `.env.local` as `OLD_…`. Accounts started fresh (not copied).
+    Scheduling is `pg_cron` + `pg_net` calling `/api/cron/catalog` every 10 minutes
+    with the vault secret `trailwatch_cron_secret` (`supabase/setup/pg_cron_catalog.sql`).
+  - **Onboarding** is three steps for both flows (Your store, required → Competitors →
+    Done), with back and forward. An account with no own store is sent to `/welcome`.
+  - **Report:** product links open on the competitor's store; a Categories card
+    (DESIGN 13, migration 0026); "Compared with your store" says it is still comparing
+    until pairs are judged.
+  - **Beta offer:** up to 20% off for life (5% on joining, 5% per feedback call, three
+    calls) and a price lock. Monthly billing only: annual was removed from the code,
+    the price-id mapping and the Refund Policy on 2026-10-06. Own-store matching is
+    in Starter as well as Pro.
+  - **Prospect preload** (migration 0027, `stores.preload`): 198 prospect stores are
+    read daily and classified last, so a prospect who signs up finds data waiting.
+  - **Name:** always "Trailwatch", never "TrailWatch".
+  - **Guides** (DESIGN 14-content): `/guides` hub and nine guides as typed data in
+    `src/features/guides/content/`, published under the owner's name.
+  - **Footer:** Free tools, Resources, Legal. No Contact link (see `BACKLOG.md`).
+  - **Homepage reworked** (DESIGN 15-landing A, live 2026-10-06): `src/app/(marketing)/page.tsx`
+    with sections in `home/sections.module.css`. It keeps the earlier hero
+    (`home.module.css`), the pinned three-step scroller (`StepsScroller`, `fresh` look)
+    and the cloud scene (`CloudScene`, comparison → Black Friday). The previous homepage
+    is at `/v1`, not indexed. The "X of 25 spots left" line appears once 5 spots are taken
+    (`home/betaSpots.ts`).
+  - **Go-to-market plan:** `GO_TO_MARKET.md`. Outreach week 1 was planned for ~2026-10-12.
 
 **Not yet verified end to end:** the `SPEC.md` §9 checks have never run in a separate
 test environment (there isn't one yet — see next steps). Sign-up from the homepage
@@ -102,13 +131,20 @@ built 1:1 from it; `CLAUDE_DESIGN_BRIEF.md` is the brief used to make it.
 
 ## Migrations
 
-`supabase/migrations/0009`–`0024` are all **applied to the hosted Supabase** (the owner
-runs each in the SQL editor; there's no direct DB connection). The latest:
-`0023_opportunities`, `0024_opportunity_dismissed_at`. Any other environment must
-apply them in order. Details per migration in `PIVOT_PLAN.md`.
+All migrations through `0027` are **applied to the hosted Supabase** (the US project;
+the owner runs each in the SQL editor, there's no direct DB connection). The latest:
+`0025` (beta member cap), `0026_store_categories`, `0027_store_preload`. A fresh
+project can be built from `supabase/setup/all_migrations_fresh_project.sql`. Details
+per migration in `PIVOT_PLAN.md`.
 
 ## Recent work (since 2026-10-02, all on `main`)
 
+- 2026-10-06: homepage rework live (`5fdec01` and follow-ups to `24aab4b`); annual
+  billing removed and Starter given own-store matching.
+- 2026-10-05: nine guides (`b48b3c3`, `fb52191`), footer columns (`f46b241`), 20% beta
+  offer with price lock (`4f804a5`).
+- 2026-10-04: US database move (`76156e2`), prospect preload (`c3145e3`), categories
+  (`d36d826`), onboarding in three steps, name change to "Trailwatch" (`88548f3`).
 - `be4160d` **Cron hotfix.** Migration 0019's `match_feedback` linked `stores` and
   `users` a second way, so the due-stores query's bare `users!inner` embed became
   ambiguous (PostgREST PGRST201), `runCatalogTick` threw, and every tick returned 500
@@ -135,6 +171,17 @@ apply them in order. Details per migration in `PIVOT_PLAN.md`.
 - **Preview states:** in development, app pages take `?state=…` (see each page's
   `STATES`) and render mock data with buttons that save nothing. Signed-in pages need
   a login; for screenshots use a temporary unguarded route rendering the view with mocks.
+- **Feedback email to `founder@gettrailwatch.com` (open).** That address is Cloudflare
+  Email Routing (a forwarder). On 2026-10-06 a send from this machine failed with
+  "This API key is not authorized to send emails from gettrailwatch.com": the local
+  `RESEND_API_KEY` is limited to another domain. If Vercel uses the same key with
+  `EMAIL_FROM` on gettrailwatch.com, every production email fails, not only feedback.
+  The owner needs to check the key's domain permission in Resend.
+- **Design skills** (`.agents/`, `skills-lock.json`, uncommitted): Emil Kowalski's and
+  Impeccable. Read their files as guidance; do not run Impeccable's launcher, which
+  downloads and runs a program.
+- **Marketing UI** is still built from the owner's Claude Design artboards. The homepage
+  departs from DESIGN 15 where the owner asked (hero, scroller, cloud scene, timelines).
 - `.env.local` points at the **single hosted Supabase project** — local runs write to it.
 
 ## Switching between Claude accounts
@@ -162,14 +209,17 @@ sessions' `.claude/worktrees`; lint `src` to check this work.
 
 ## Suggested next steps
 
-1. **Owner walkthroughs:** sign up from the homepage widget (new user, and signed in),
-   and check `/opportunities` signed in.
-2. **Matching review (A6)** once classification finishes (~2026-10-08): 50 real
-   matches with confidence and reason, and the AI cost per store.
-3. **Before real users** (`BACKLOG.md` pre-launch): a separate test environment
-   (Supabase, Resend, Paddle sandbox), then the §9 checks there; block direct
-   `*.vercel.app` access so the widget's per-IP limit can't be bypassed with a fake
-   `cf-connecting-ip` header.
-4. **AI provider decision:** stay on Groq's free tier or add an Anthropic key (paid).
-5. Parked by the owner: SEO/growth work (`BACKLOG.md`), including time-sensitive
-   Black Friday guides (publish by ~2026-10-20).
+1. **Outreach** (`GO_TO_MARKET.md`): pick the first 50 prospects, add each one's top
+   competitor to the owner's account, start the 50 messages a week.
+2. **Owner:** check the Resend key (see Gotchas), read the nine guides, add the second
+   author-card line, submit the new pages in Search Console, set "Trailwatch" in
+   `EMAIL_FROM`, the Supabase email templates, Google sign-in and the booking page.
+3. **Before billing turns on:** let Free users through the required-store step
+   (`BACKLOG.md`), create the monthly Paddle prices and the 5 to 20% discounts.
+4. **When the first real user signs up:** raise the paid-AI question again (the owner
+   chose to stay on Groq's free tier until then).
+5. **Content still to write:** comparison pages (need artboards and checked facts) and
+   category reports (need about a month of data, early November).
+6. **Before real users** (`BACKLOG.md` pre-launch): a separate test environment, then
+   the `SPEC.md` §9 checks there; block direct `*.vercel.app` access.
+7. Delete `/v1` and the old Singapore Supabase project when the owner says so.

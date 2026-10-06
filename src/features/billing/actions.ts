@@ -6,9 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { formatBillingDate } from "./formatDate";
 
 // Cancels the current user's subscription via Paddle's API, effective at the
-// end of the current billing period — not immediately. This matters most for
-// Annual: an immediate cancel would forfeit the rest of a prepaid year with no
-// refund, which we don't do. Paddle keeps the subscription `active` with a
+// end of the current billing period — not immediately, so the user keeps what
+// they have already paid for. Paddle keeps the subscription `active` with a
 // `scheduled_change` until the period actually ends, so access (and the
 // user's `plan`) is untouched here. Only when the period ends does Paddle
 // transition the subscription to `canceled` and fire `subscription.canceled`

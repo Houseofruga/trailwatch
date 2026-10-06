@@ -33,15 +33,13 @@ export type PaddleSubscriptionEvent = {
 
 /**
  * Paddle price id → plan, from the price-id env vars (the chargeable prices
- * live in the Paddle dashboard). Monthly and annual both map to their plan.
+ * live in the Paddle dashboard). Billing is monthly only.
  */
 export function paddlePricePlans(env: Record<string, string | undefined> = process.env): Record<string, Plan> {
   const map: Record<string, Plan> = {};
   for (const plan of ["starter", "pro", "agency"] as const) {
-    for (const period of ["MONTHLY", "ANNUAL"]) {
-      const id = env[`NEXT_PUBLIC_PADDLE_PRICE_${plan.toUpperCase()}_${period}`];
-      if (id) map[id] = plan;
-    }
+    const id = env[`NEXT_PUBLIC_PADDLE_PRICE_${plan.toUpperCase()}_MONTHLY`];
+    if (id) map[id] = plan;
   }
   return map;
 }

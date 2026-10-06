@@ -19,7 +19,7 @@ export type PlanConfig = {
 
 export const PLANS: Record<Plan, PlanConfig> = {
   free: { label: "Free", monthlyUsd: 0, competitors: 1, instantAlerts: false, slack: false, ownStore: false, opportunities: false, checkIntervalHours: 24, launched: true },
-  starter: { label: "Starter", monthlyUsd: 29, competitors: 3, instantAlerts: true, slack: false, ownStore: false, opportunities: false, checkIntervalHours: 6, launched: true },
+  starter: { label: "Starter", monthlyUsd: 29, competitors: 3, instantAlerts: true, slack: false, ownStore: true, opportunities: false, checkIntervalHours: 6, launched: true },
   pro: { label: "Pro", monthlyUsd: 79, competitors: 10, instantAlerts: true, slack: true, ownStore: true, opportunities: true, checkIntervalHours: 2, launched: true },
   // Not launched (AGENCY_ENABLED). The spec sets only its price, so it mirrors
   // Pro's limits until those are decided.
@@ -42,18 +42,11 @@ export function higherPlan(a: Plan, b: Plan): Plan {
 
 // --------------------------------------------------------------- pricing
 // Display-only; the chargeable prices live in the Paddle dashboard and must
-// match. Annual = 2 months free (10× monthly).
-export type BillingPeriod = "monthly" | "annual";
-export const ANNUAL_MONTHS_FREE = 2;
+// match. Billing is monthly only (SPEC.md §4): there is no annual plan.
 
-export function annualUsd(plan: Plan): number {
-  return PLANS[plan].monthlyUsd * (12 - ANNUAL_MONTHS_FREE);
-}
-
-/** The price line at a billing period, e.g. "$79" + "/mo". */
-export function formatPrice(plan: Plan, period: BillingPeriod): { amount: string; per: string } {
-  if (period === "monthly") return { amount: `$${PLANS[plan].monthlyUsd}`, per: "/mo" };
-  return { amount: `$${(annualUsd(plan) / 12).toFixed(2)}`, per: "/mo, billed annually" };
+/** The price line, e.g. "$79" + "/mo". */
+export function formatPrice(plan: Plan): { amount: string; per: string } {
+  return { amount: `$${PLANS[plan].monthlyUsd}`, per: "/mo" };
 }
 
 // ------------------------------------------------------ beta and billing
@@ -110,6 +103,4 @@ export const PLAN_PRICE: Record<Plan, string> = Object.fromEntries(
 
 // The legacy single "Pro" upgrade card.
 export const PRO_MONTHLY_USD = PLANS.pro.monthlyUsd;
-export const PRO_ANNUAL_USD = annualUsd("pro");
-export const PRO_ANNUAL_MONTHS_FREE = ANNUAL_MONTHS_FREE;
-export const formatProPrice = (period: BillingPeriod) => formatPrice("pro", period);
+export const formatProPrice = () => formatPrice("pro");

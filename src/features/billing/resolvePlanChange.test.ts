@@ -3,19 +3,17 @@ import { paddlePricePlans, resolvePlanChange } from "./resolvePlanChange";
 
 const PRICES = paddlePricePlans({
   NEXT_PUBLIC_PADDLE_PRICE_STARTER_MONTHLY: "pri_starter_m",
+  // An annual price id left in the environment is ignored: billing is monthly only.
   NEXT_PUBLIC_PADDLE_PRICE_STARTER_ANNUAL: "pri_starter_y",
   NEXT_PUBLIC_PADDLE_PRICE_PRO_MONTHLY: "pri_pro_m",
-  NEXT_PUBLIC_PADDLE_PRICE_PRO_ANNUAL: "pri_pro_y",
 });
 const items = (priceId: string) => [{ price: { id: priceId } }];
 
 describe("paddlePricePlans", () => {
-  it("maps monthly and annual price ids to their plan, skipping unset ones", () => {
+  it("maps monthly price ids to their plan and ignores annual ones", () => {
     expect(PRICES).toEqual({
       pri_starter_m: "starter",
-      pri_starter_y: "starter",
       pri_pro_m: "pro",
-      pri_pro_y: "pro",
     });
   });
 });
@@ -32,8 +30,8 @@ describe("resolvePlanChange", () => {
     expect(change).toEqual({ plan: "pro", paddleSubscriptionId: "sub_123", paddleCustomerId: "ctm_456", userId: "user-abc" });
   });
 
-  it("maps Starter prices (monthly and annual) to Starter", () => {
-    for (const price of ["pri_starter_m", "pri_starter_y"]) {
+  it("maps the Starter price to Starter", () => {
+    for (const price of ["pri_starter_m"]) {
       const change = resolvePlanChange(
         { event_type: "subscription.created", data: { id: "s", customer_id: "c", status: "active", items: items(price) } },
         PRICES,
@@ -60,7 +58,7 @@ describe("resolvePlanChange", () => {
 
   it("switches plan on subscription.updated (Starter → Pro)", () => {
     const change = resolvePlanChange(
-      { event_type: "subscription.updated", data: { id: "s", customer_id: "c", status: "active", items: items("pri_pro_y") } },
+      { event_type: "subscription.updated", data: { id: "s", customer_id: "c", status: "active", items: items("pri_pro_m") } },
       PRICES,
     );
     expect(change).toMatchObject({ plan: "pro" });

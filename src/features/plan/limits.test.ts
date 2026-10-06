@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
-  annualUsd,
   betaPlan,
   billingEnabled,
   bfcmWindow,
@@ -10,7 +9,6 @@ import {
   LIMITS,
   parsePlan,
   PLANS,
-  PRO_ANNUAL_MONTHS_FREE,
   storeCheckIntervalHours,
 } from "./limits";
 
@@ -22,7 +20,7 @@ afterEach(() => {
 describe("plans (SPEC.md §4)", () => {
   it("matches the spec's limits and features", () => {
     expect(PLANS.free).toMatchObject({ monthlyUsd: 0, competitors: 1, instantAlerts: false, slack: false, ownStore: false, checkIntervalHours: 24 });
-    expect(PLANS.starter).toMatchObject({ monthlyUsd: 29, competitors: 3, instantAlerts: true, slack: false, ownStore: false, checkIntervalHours: 6 });
+    expect(PLANS.starter).toMatchObject({ monthlyUsd: 29, competitors: 3, instantAlerts: true, slack: false, ownStore: true, checkIntervalHours: 6 });
     expect(PLANS.pro).toMatchObject({ monthlyUsd: 79, competitors: 10, instantAlerts: true, slack: true, ownStore: true, checkIntervalHours: 2 });
     expect(PLANS.agency).toMatchObject({ monthlyUsd: 199, launched: false });
   });
@@ -48,16 +46,9 @@ describe("parsePlan / higherPlan", () => {
 });
 
 describe("pricing", () => {
-  it("annual is 10× monthly (2 months free)", () => {
-    expect(annualUsd("starter")).toBe(290);
-    expect(annualUsd("pro")).toBe(790);
-    expect(PRO_ANNUAL_MONTHS_FREE).toBe(2);
-  });
-
-  it("formats monthly and per-month-annual prices", () => {
-    expect(formatPrice("starter", "monthly")).toEqual({ amount: "$29", per: "/mo" });
-    expect(formatPrice("pro", "annual")).toEqual({ amount: "$65.83", per: "/mo, billed annually" });
-    expect(formatProPrice("monthly")).toEqual({ amount: "$79", per: "/mo" });
+  it("formats the monthly price", () => {
+    expect(formatPrice("starter")).toEqual({ amount: "$29", per: "/mo" });
+    expect(formatProPrice()).toEqual({ amount: "$79", per: "/mo" });
   });
 });
 

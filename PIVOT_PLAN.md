@@ -79,7 +79,7 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
 - **Phase 6 done:**
   - **`plan/limits.ts` is the single plan config** for Free / Starter / Pro / Agency: competitors, instant alerts, Slack, own store, cadence, price, launched.
     - Agency isn't launched and mirrors Pro's limits, since the spec sets only its price.
-    - Annual = 10× monthly.
+    - Monthly only. (Annual was dropped on 2026-10-05 and removed from the code on 2026-10-06.)
   - **Gating by plan:**
     - instant alerts on Starter and up
     - Slack and own-store matching on Pro only
@@ -169,7 +169,7 @@ Source brief: `trailwatch-ecommerce-pivot-prompt.md`.
     - `NEXT_PUBLIC_BILLING_ENABLED`: leave unset for the beta; `true` opens checkout
     - `BETA_PLAN`: default `pro`
     - `BFCM_START` / `BFCM_END`: ISO datetimes
-    - `NEXT_PUBLIC_PADDLE_PRICE_STARTER_MONTHLY` / `_ANNUAL`
+    - `NEXT_PUBLIC_PADDLE_PRICE_STARTER_MONTHLY` (the `_ANNUAL` ids are no longer read)
     - the existing `NEXT_PUBLIC_PADDLE_PRICE_PRO_*` must point at the new **$79 / $790** prices
     - optional: `NEXT_PUBLIC_PADDLE_PRICE_AGENCY_*`, `NEXT_PUBLIC_PADDLE_FOUNDING_DISCOUNT_ID`
   - **Owner, in the Paddle sandbox:** create the Starter ($29 / $290) and Pro ($79 / $790) prices and a "Founding member" 40%-forever discount (superseded 2026-10-05: beta members get 5% to 20%, see SPEC.md §4).
@@ -336,7 +336,7 @@ Principle: **crawl data is global (per store) and user data is per user.** The n
 - `BFCM_START` / `BFCM_END`
 - `FREE_SIGNUPS_PER_DAY`
 - `ALERTS_PER_USER_PER_DAY`
-- Paddle price IDs for Starter/Pro (monthly and annual)
+- Paddle price IDs for Starter/Pro (monthly only)
 
 **Per phase:** tests, lint and typecheck run. I summarize, commit with a `pivot:` prefix, and **push only after your go-ahead.**
 
@@ -356,6 +356,6 @@ Follow-up answers from the owner:
 6. **Existing sandbox/test data:** payments aren't live, so **reset it and rewrite the seed with fictional DTC stores** rather than migrate.
 7. **Remove from in-app onboarding:** the AI competitor finder and the Wayback backfill. **Yes.** The marketing-site finder stays; it's out of scope. _Reversed for the finder on 2026-10-02 (owner): it is now Shopify-only, so it comes back in onboarding step 2 and the Add competitor modal (`suggestCompetitors`), built from the owner's artboards. The Wayback backfill stays removed._
 8. **Design:** Case A plus a **new-screens-only Claude Design brief**. Backend phases proceed while you design, and no new UI is built without artboards.
-9. **Pricing:** annual prices are 10× monthly (Starter **$290/yr**, Pro **$790/yr**). You create the Starter/Pro prices and the 40%-for-life "founding member" discount in the Paddle sandbox.
+9. **Pricing:** monthly only, Starter **$29** and Pro **$79** (annual prices were dropped on 2026-10-05; ignore the $290 and $790 figures elsewhere in this file). You create the Starter/Pro prices and the 40%-for-life "founding member" discount in the Paddle sandbox.
 
 Reply "all recommended", or give numbered overrides. After that I start **Phase 0**.

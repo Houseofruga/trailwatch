@@ -27,7 +27,7 @@ async function currentUser() {
 
 export type OwnStoreView = {
   store: (StoreSummary & { productCount: number | null; lastCheckedAt: string | null }) | null;
-  // Own-store matching (comparable products, undercut alerts) is a Pro feature.
+  // Own-store matching (comparable products, undercut alerts) is on Starter and up.
   matchingEnabled: boolean;
 };
 
@@ -64,7 +64,7 @@ export type SetOwnStoreResult = { ok: true; store: StoreSummary } | StoreProbeEr
 export async function setOwnStore(domain: string): Promise<SetOwnStoreResult> {
   const { user, plan } = await currentUser();
   if (!PLANS[plan].ownStore) {
-    return { ok: false, code: "plan", message: "Matching your own products is on the Pro plan." };
+    return { ok: false, code: "plan", message: "Matching your own products is on the Starter and Pro plans." };
   }
 
   const resolved = await resolveStore(domain);

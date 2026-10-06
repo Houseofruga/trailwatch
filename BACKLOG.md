@@ -34,8 +34,6 @@ indexed. Left to do:
 - Delete `/v1` (`src/app/(marketing)/v1`, `MarketingSections.tsx`, the old `FAQ` in
   `structuredData.ts`, and their styles in `page.module.css`) once the owner no
   longer wants it for reference.
-- The page says Starter includes comparing with your own products (`SPEC.md` §4).
-  The plan checks in the code still treat it as Pro only; change before billing.
 - The live "X of 25 spots left" line appears once 5 beta spots are taken
   (`src/app/(marketing)/home/betaSpots.ts`).
 
@@ -88,11 +86,11 @@ Plan and status: `SEO_PLAN.md`. Live so far: `/tools` hub and all four free tool
 
 ## Legal / compliance
 
-- **Annual auto-renewal reminder.** Some jurisdictions (e.g. California ARL, parts
-  of the EU) require a clear reminder email before an annual subscription
-  auto-renews and charges again. Confirm whether Paddle sends this on our behalf;
-  if not, add a pre-renewal reminder. Monthly plans are lower-risk here. Ties to
-  the Refund Policy's "renews automatically until you cancel" language.
+- **Free plan and the required store.** Onboarding requires your own store, but
+  `setOwnStore` refuses it on the Free plan (own-store matching is Starter and up).
+  It can't happen during the beta (everyone is on the beta plan). Before billing
+  turns on, either let Free users save a store without matching, or make the
+  store optional for them.
 
 - **Physical business address.** House of Ruga LLP currently lists only
   `trailwatch@houseofruga.com` as a contact. A registered address may be required

@@ -35,7 +35,7 @@ export default function RefundsPage() {
       </nav>
 
       <h1 className={styles.title}>Refund Policy</h1>
-      <p className={styles.updated}>Last updated: October 1, 2026</p>
+      <p className={styles.updated}>Last updated: October 6, 2026</p>
 
       <p className={styles.lead}>
         Trailwatch is free during the beta: there is nothing to pay and nothing to refund.
@@ -58,8 +58,8 @@ export default function RefundsPage() {
           >
             buyer terms
           </a>{" "}
-          also apply to your transaction. Paid plans will be billed in advance on a monthly
-          or annual cycle, in USD, and renew automatically until you cancel.
+          also apply to your transaction. Paid plans will be billed in advance each
+          month, in USD, and renew automatically until you cancel.
         </p>
       </section>
 
@@ -88,11 +88,6 @@ export default function RefundsPage() {
           <li>
             Accidental or duplicate charges, and charges immediately after an unintended
             renewal, will be refunded — just reach out promptly.
-          </li>
-          <li>
-            Annual fees are non-refundable and not pro-rated on early cancellation,
-            though you keep your plan&rsquo;s features until the end of the year you have paid for. We
-            still consider good-faith exceptions case by case.
           </li>
         </ul>
         <p className={styles.para}>
