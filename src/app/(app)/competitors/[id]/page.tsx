@@ -42,9 +42,10 @@ export default async function CompetitorPage({
   const competitorId = preview && COMPETITOR_FOR[state] ? COMPETITOR_FOR[state]! : id;
   const [competitor, moves] = preview
     ? await Promise.all([state === "not-found" ? null : mock.getCompetitorOverview(competitorId), mock.listCompetitorMoves(competitorId)])
-    : await Promise.all([real.getCompetitorOverview(id), real.listMoves({ competitorId: id, sinceDays: 30 })]);
+    : await Promise.all([real.getCompetitorOverview(id), real.listMoves({ competitorId: id })]);
+  // The same 90 days Home lists, so a move opened from Home is always here.
   // Nothing yet from a competitor added this month reads "No moves yet"; an
-  // older one with a quiet month reads "No moves in the last 30 days".
+  // older one with a quiet stretch reads "No moves in the last 90 days".
   const noMovesYet = preview
     ? state === "no-moves-yet"
     : !!competitor && moves.length === 0 && real.addedThisMonth(competitor.addedAt);

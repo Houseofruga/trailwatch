@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { returnPath } from "@/features/auth/returnPath";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/env";
 
 const APP_PREFIXES = ["/dashboard", "/competitors", "/opportunities", "/billing", "/settings", "/welcome"];
@@ -56,12 +57,20 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (!user && APP_PREFIXES.some((p) => pathname.startsWith(p))) {
+    // Remember where they were headed (an alert email's link, a bookmark) so
+    // logging in lands them there. The browser carries any #anchor along itself.
     const url = request.nextUrl.clone();
+    const wanted = returnPath(`${pathname}${request.nextUrl.search}`);
     url.pathname = "/login";
+    url.search = "";
+    if (wanted && wanted !== "/dashboard") url.searchParams.set("next", wanted);
     return NextResponse.redirect(url);
   }
 
   if (user && SIGNED_OUT_ONLY.includes(pathname)) {
+    // Already signed in and holding a "log in to continue" link: continue.
+    const wanted = pathname === "/login" ? returnPath(request.nextUrl.searchParams.get("next")) : null;
+    if (wanted) return NextResponse.redirect(new URL(wanted, request.url));
     const url = request.nextUrl.clone();
     // Signed in and coming from the homepage widget: add that competitor.
     url.pathname = pathname === "/login" && request.nextUrl.searchParams.has("preview") ? "/claim" : "/dashboard";

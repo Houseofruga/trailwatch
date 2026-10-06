@@ -94,6 +94,11 @@ export function CompetitorDetailView({
     return [...byDay.values()];
   }, [filtered]);
 
+  // The move the visitor opened is always on screen: its filters are cleared by
+  // default, and the list opens far enough to include its day.
+  const focusedDay = focused ? groups.findIndex((g) => g.some((m) => m.id === focused)) : -1;
+  const shownDays = Math.max(days, focusedDay + 1);
+
   if (!competitor) {
     return (
       <PageBody>
@@ -142,7 +147,7 @@ export function CompetitorDetailView({
       usually show up within a day or two.
     </EmptyState>
   ) : moves.length === 0 ? (
-    <EmptyState art="radar" title="No moves in the last 30 days">
+    <EmptyState art="radar" title="No moves in the last 90 days">
       We&rsquo;re still checking every {c.checkIntervalHours} hours. Quiet can be good news: nothing for you to react to.
     </EmptyState>
   ) : (
@@ -223,7 +228,7 @@ export function CompetitorDetailView({
                 </div>
                 {groups.length === 0
                   ? timelineEmpty
-                  : groups.slice(0, days).map((group) => (
+                  : groups.slice(0, shownDays).map((group) => (
                       <TimelineDay key={group[0].at} heading={dayHeading(group[0].at)}>
                         {group.map((m) => (
                           <TimelineItem
@@ -250,9 +255,9 @@ export function CompetitorDetailView({
                         ))}
                       </TimelineDay>
                     ))}
-                {groups.length > days ? (
+                {groups.length > shownDays ? (
                   <div className={styles.more}>
-                    <Button variant="plain" onClick={() => setDays((d) => d + DAYS_PER_PAGE)}>
+                    <Button variant="plain" onClick={() => setDays(shownDays + DAYS_PER_PAGE)}>
                       Show older
                     </Button>
                   </div>

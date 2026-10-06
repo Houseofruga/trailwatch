@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useState, useSyncExternalStore, useTransition } from "react";
 import { useFormStatus } from "react-dom";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -12,9 +12,15 @@ import { SIGNUP_CAP_MESSAGE } from "@/features/usage/signupCap";
 import { claimPathFor } from "@/features/preview/claimPath";
 import { logIn, resendConfirmation, signInWithGoogle, signUp, type AuthState } from "./actions";
 import { AuthCard, AuthHeading } from "./AuthShell";
+import { returnPath } from "./returnPath";
 import styles from "./AuthShell.module.css";
 
 type Mode = "signup" | "login";
+
+function subscribeHash(onChange: () => void) {
+  window.addEventListener("hashchange", onChange);
+  return () => window.removeEventListener("hashchange", onChange);
+}
 
 /** Design-review states (development only; see src/features/appData/devState.ts). */
 export type AuthPreview =
@@ -136,6 +142,11 @@ export function AuthForm({ initialMode, preview = "default" }: { initialMode: Mo
   const claimQuery = claimPath?.slice("/claim?".length) ?? "";
   const carry = claimQuery ? `&${claimQuery}` : "";
 
+  // Stopped on the way to a page in the app (an alert email's link): logging
+  // in goes on to it. The #anchor never reaches the server, so it's read here.
+  const hash = useSyncExternalStore(subscribeHash, () => window.location.hash, () => "");
+  const returnTo = mode === "login" ? returnPath(`${searchParams.get("next") ?? ""}${hash}`) ?? returnPath(searchParams.get("next")) : null;
+
   const errorCode = searchParams.get("error");
   const linkError =
     errorCode === "link"
@@ -174,12 +185,12 @@ export function AuthForm({ initialMode, preview = "default" }: { initialMode: Mo
       ) : null}
       <form action={signInWithGoogle}>
         {/* Sign-ups land on onboarding; log-ins on Home. */}
-        <input type="hidden" name="next" value={claimPath ?? (mode === "signup" ? "/welcome" : "/dashboard")} />
+        <input type="hidden" name="next" value={claimPath ?? returnTo ?? (mode === "signup" ? "/welcome" : "/dashboard")} />
         <GoogleButton disabled={capacity} />
       </form>
       <DividerWithLabel>or</DividerWithLabel>
       <form action={formAction} noValidate>
-        {claimPath ? <input type="hidden" name="next" value={claimPath} /> : null}
+        {(claimPath ?? returnTo) ? <input type="hidden" name="next" value={claimPath ?? returnTo ?? ""} /> : null}
         <Fields mode={mode} state={state} forcePending={preview === "submitting"} disabled={capacity} />
       </form>
     </AuthCard>

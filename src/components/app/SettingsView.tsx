@@ -104,6 +104,29 @@ export function SettingsView({
   }, [state, toast]);
 
   const dirty = JSON.stringify(form) !== JSON.stringify(saved);
+
+  // Unsaved changes: ask before leaving. Closing or reloading the tab gets the
+  // browser's own prompt; a link to another page in the app gets ours.
+  useEffect(() => {
+    if (!dirty) return;
+    const onUnload = (e: BeforeUnloadEvent) => e.preventDefault();
+    const onClick = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const link = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!link || link.target === "_blank" || link.hasAttribute("download")) return;
+      const to = new URL(link.href, window.location.href);
+      const samePage = to.origin === window.location.origin && to.pathname === window.location.pathname;
+      if (samePage) return;
+      if (!window.confirm("You have unsaved changes. Leave without saving?")) e.preventDefault();
+    };
+    window.addEventListener("beforeunload", onUnload);
+    // Capture phase: runs before the link's own navigation.
+    document.addEventListener("click", onClick, true);
+    return () => {
+      window.removeEventListener("beforeunload", onUnload);
+      document.removeEventListener("click", onClick, true);
+    };
+  }, [dirty]);
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   async function save() {

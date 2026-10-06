@@ -10,6 +10,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { SIGNUP_CAP_MESSAGE, signupsLeftToday } from "@/features/usage/signupCap";
+import { returnPath } from "./returnPath";
 import { isDisposableEmail } from "./trust";
 
 export type AuthState = {
@@ -110,7 +111,8 @@ export async function logIn(_prev: AuthState, formData: FormData): Promise<AuthS
   if (error) return { error: "That email and password don't match." };
 
   revalidatePath("/", "layout");
-  redirect(claimNext(formData.get("next")) ?? "/dashboard");
+  // Back to the page they were stopped on (an alert email's link), else Home.
+  redirect(claimNext(formData.get("next")) ?? returnPath(formData.get("next")) ?? "/dashboard");
 }
 
 export async function signInWithGoogle(formData: FormData) {
