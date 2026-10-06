@@ -16,7 +16,8 @@ export function PageHeader({
   subtitle,
 }: {
   title: string;
-  breadcrumb?: { href: string; label: string };
+  /** `onClick` may call preventDefault to handle the navigation itself (e.g. history back). */
+  breadcrumb?: { href: string; label: string; onClick?: React.MouseEventHandler<HTMLAnchorElement> };
   leading?: React.ReactNode;
   badges?: React.ReactNode;
   actions?: React.ReactNode;
@@ -25,7 +26,7 @@ export function PageHeader({
   return (
     <div className={styles.header}>
       {breadcrumb ? (
-        <Link href={breadcrumb.href} className={styles.breadcrumb}>
+        <Link href={breadcrumb.href} className={styles.breadcrumb} onClick={breadcrumb.onClick}>
           <IconChevronLeft />
           {breadcrumb.label}
         </Link>

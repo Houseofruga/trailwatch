@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { recordPath } from "@/features/appData/backTrail";
 import { logOut } from "@/features/auth/actions";
 import { Avatar } from "./Avatar";
 import { Badge } from "./Badge";
@@ -174,6 +175,9 @@ export function AppFrame({
   const router = useRouter();
   const [drawer, setDrawer] = useState(false);
   const [feedback, setFeedback] = useState(false);
+
+  // Lets detail pages tell whether their "back" origin is really the previous page.
+  useEffect(() => recordPath(pathname), [pathname]);
 
   useEffect(() => {
     if (!drawer) return;

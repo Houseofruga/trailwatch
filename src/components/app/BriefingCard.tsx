@@ -89,7 +89,7 @@ function TopMoves({ briefing }: { briefing: Briefing }) {
           return (
             <li key={i} className={styles.moveItem}>
               {t.competitorId ? (
-                <Link className={styles.moveRow} href={`/competitors/${t.competitorId}${t.moveId ? `#move-${t.moveId}` : ""}`}>
+                <Link className={styles.moveRow} href={`/competitors/${t.competitorId}?from=home${t.moveId ? `#move-${t.moveId}` : ""}`}>
                   {inner}
                 </Link>
               ) : (

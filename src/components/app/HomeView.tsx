@@ -69,7 +69,8 @@ export function HomeView({
   };
 
   const rows: Row[] = pageMoves.map((m) => {
-    const href = `/competitors/${m.competitorId}#move-${m.id}`;
+    // `from=home`: the competitor page's back link then returns here.
+    const href = `/competitors/${m.competitorId}?from=home#move-${m.id}`;
     const expanded = !!open[m.id];
     const toggle = m.bundle ? (
       <button

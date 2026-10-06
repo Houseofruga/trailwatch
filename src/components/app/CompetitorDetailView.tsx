@@ -17,6 +17,7 @@ import { FilterSelect } from "@/components/ui/Select";
 import { TimelineDay, TimelineItem, TimelineNote } from "@/components/ui/Timeline";
 import { useToast } from "@/components/ui/Toast";
 import { removeCompetitor } from "@/features/appData/actions";
+import { cameStraightFrom, ORIGINS, originOf } from "@/features/appData/backTrail";
 import { ago, clockTime, count, dayHeading, dayKey, money, shortDate, when } from "@/features/appData/format";
 import type { CompetitorOverview, Move } from "@/features/appData/types";
 import { CategoriesCard } from "./CategoriesCard";
@@ -59,7 +60,21 @@ export function CompetitorDetailView({
   // Arriving from Home, an alert or a briefing link (#move-<id>): highlight
   // that move. Only alert-email links (?from=alert) get the eyebrow.
   const hash = useSyncExternalStore(subscribeHash, () => window.location.hash, () => "");
-  const fromAlert = useSearchParams().get("from") === "alert";
+  const from = useSearchParams().get("from");
+  const fromAlert = from === "alert";
+  // The back link names where the visitor came from (Home's move lists), and
+  // returns them to the same spot there; otherwise it's the Competitors list.
+  const origin = originOf(from);
+  const back = origin
+    ? {
+        ...ORIGINS[origin],
+        onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || !cameStraightFrom(ORIGINS[origin].href)) return;
+          e.preventDefault();
+          router.back();
+        },
+      }
+    : { href: "/competitors", label: "Competitors" };
   const focused = highlight ?? /^#move-(.+)$/.exec(hash)?.[1];
   const fromEmail = highlight ?? (fromAlert ? focused : undefined);
   useEffect(() => {
@@ -82,7 +97,7 @@ export function CompetitorDetailView({
   if (!competitor) {
     return (
       <PageBody>
-        <PageHeader title="" breadcrumb={{ href: "/competitors", label: "Competitors" }} />
+        <PageHeader title="" breadcrumb={back} />
         <Card>
           <EmptyState art="search" title="We can't find that competitor" actions={<Button variant="primary" href="/competitors">Go to Competitors</Button>}>
             It may have been removed, or the link is out of date.
@@ -140,7 +155,7 @@ export function CompetitorDetailView({
     <PageBody>
       <PageHeader
         title={c.name}
-        breadcrumb={{ href: "/competitors", label: "Competitors" }}
+        breadcrumb={back}
         leading={<Avatar name={c.name} size={32} domain={c.domain} />}
         badges={
           pagesOnly ? (
