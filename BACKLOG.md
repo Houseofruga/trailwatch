@@ -63,13 +63,15 @@ Every email the app sends uses one sender, `EMAIL_FROM` in Vercel, currently
 feedback / feature-request notices to the founder. It works, but "weekly@" reads
 oddly on an instant alert.
 
-- **Change the sender to a neutral address** (owner, no code): set `EMAIL_FROM` to
-  `Trailwatch <hello@gettrailwatch.com>` in Vercel and redeploy. Nothing to do in
-  Resend; the whole domain is verified there. Check the display name is spelled
-  "Trailwatch".
-- **Add `hello@` in Cloudflare Email Routing**, forwarding to the same inbox as
+- **Change the sender to a person** (owner, no code; decided 2026-10-07): set
+  `EMAIL_FROM` to `Chandan from Trailwatch <chandan@gettrailwatch.com>` in Vercel
+  and redeploy. Nothing to do in Resend; the whole domain is verified there. A
+  person-style sender also helps mail reach Gmail's Primary tab.
+- **Add `chandan@` in Cloudflare Email Routing**, forwarding to the same inbox as
   `founder@`. Replies to app emails already go to `founder@` (reply-to), but mail
   typed by hand to the sender address would bounce without the rule.
+- **Match it in Supabase** if sign-in emails use custom SMTP: the sender name and
+  address under Authentication, SMTP settings.
 - **Optional, needs code:** a separate sender for the founder's own notices (for
   example `feedback@`), via a second setting used by `src/features/beta/feedback.ts`.
   Not needed while the subject line ("Feedback from…" / "Feature request from…")
