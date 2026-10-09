@@ -85,7 +85,7 @@ export type ReportItem = {
 
 export type ReportList = { items: ReportItem[]; total: number };
 
-export type Undercut = { title: string; yourTitle: string; price: number; yourPrice: number };
+export type Undercut = { title: string; yourTitle: string; price: number; yourPrice: number; perUnit?: string };
 
 export type FirstReport = {
   competitor: { id: string; name: string; domain: string; platform: "shopify" | "other" };

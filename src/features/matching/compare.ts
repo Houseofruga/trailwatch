@@ -3,7 +3,8 @@ import type { PairRow } from "./candidates";
 import { MATCHING_CONFIG } from "./config";
 import { pricePosition } from "./units";
 
-export type CheaperThanYours = { title: string; yourTitle: string; price: number; yourPrice: number };
+/** `perUnit` is set when the two are different sizes: "14% cheaper per ml". */
+export type CheaperThanYours = { title: string; yourTitle: string; price: number; yourPrice: number; perUnit?: string };
 export type CatalogComparison = { similar: number; cheaper: CheaperThanYours[] };
 
 const withSize = (title: string, size: string | null) => (size ? `${title} (${size})` : title);
@@ -11,7 +12,7 @@ const withSize = (title: string, size: string | null) => (size ? `${title} (${si
 /**
  * A competitor's catalog against yours (first report, competitor overview),
  * from the user's active matches: how many of their products match one of
- * yours, and which are priced below it like for like, biggest gap first.
+ * yours, and which are priced below it (same size, or per ml/g/item), biggest gap first.
  */
 export function compareMatched(
   competitor: CatalogProduct[],
@@ -34,9 +35,10 @@ export function compareMatched(
       yourTitle: withSize(mine.title, pos.ours.size),
       price: pos.theirs.price,
       yourPrice: pos.ours.price,
+      ...(pos.basis === "unit" && pos.theirs.size !== pos.ours.size ? { perUnit: `${Math.round(pos.pctBelow)}% cheaper per ${pos.unit === "count" ? "item" : pos.unit}` } : {}),
       gap: pos.pctBelow,
     });
   }
   cheaper.sort((a, b) => b.gap - a.gap);
-  return { similar, cheaper: cheaper.map((c) => ({ title: c.title, yourTitle: c.yourTitle, price: c.price, yourPrice: c.yourPrice })) };
+  return { similar, cheaper: cheaper.map((c) => ({ title: c.title, yourTitle: c.yourTitle, price: c.price, yourPrice: c.yourPrice, ...(c.perUnit ? { perUnit: c.perUnit } : {}) })) };
 }

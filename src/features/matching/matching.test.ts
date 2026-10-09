@@ -242,6 +242,13 @@ describe("price_position_change", () => {
     expect(out.similar).toBe(2);
     expect(out.cheaper).toEqual([{ title: "Luna Vitamin C Serum (30ml)", yourTitle: "Glowfield Radiance Serum (30ml)", price: 3800, yourPrice: 4400 }]);
   });
+
+  it("the report compares different sizes per unit, not by sticker price", () => {
+    // 50ml at $60 costs more on the shelf than your 30ml at $44, but less per ml.
+    const big = product("Luna Vitamin C Serum", [v("50ml", 6000)]);
+    const out = compareMatched([big], [ours], activeMatches([{ ...pair, compProductId: big.id }], new Map()));
+    expect(out.cheaper[0].perUnit).toBe("18% cheaper per ml");
+  });
 });
 
 describe("classifier and judge replies", () => {

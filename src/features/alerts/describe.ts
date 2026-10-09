@@ -71,12 +71,12 @@ export function describeEvent(type: EventType, payload: Payload, storeName: stri
       const name = `${storeName}'s ${isNew}${title}${theirSize ? ` (${theirSize})` : ""}`;
       if (theirs === null) return `${name} is now priced below your ${own}.`;
       if (payload.basis === "unit" && tu !== null && ou !== null) {
-        return `${name} is ${money(theirs)}, or ${unitPriceText(tu, unit)}. Your ${own} is ${unitPriceText(ou, unit)}${pct !== null ? `, ${pct}% more` : ""}.`;
+        return `${name} is ${money(theirs)}, or ${unitPriceText(tu, unit)}. Your ${own}${ownSize ? ` (${ownSize})` : ""} is ${unitPriceText(ou, unit)}${pct !== null ? `, so theirs is ${Math.round(pct)}% less` : ""}.`;
       }
       const ours = num(payload.ownPrice);
       // Same named size or one-size items: "…(Queen) is $249, 11% below your Core Sheet Set (Queen) at $279."
       const yours = `your ${own}${ownSize ? ` (${ownSize})` : ""}${ours !== null ? ` at ${money(ours)}` : ""}`;
-      return `${name} is ${money(theirs)}, ${pct !== null ? `${pct}% ` : ""}below ${yours}.`;
+      return `${name} is ${money(theirs)}, ${pct !== null ? `${Math.round(pct)}% ` : ""}below ${yours}.`;
     }
     default:
       // Page events: the classifier's one-sentence summary.

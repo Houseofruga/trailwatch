@@ -283,7 +283,7 @@ export function FirstReportView({ report, reading, error }: { report: FirstRepor
                         <span className={styles.price}>
                           {money(u.price, { whole: true })} <span className={styles.vs}>vs yours {money(u.yourPrice, { whole: true })}</span>
                         </span>
-                        <span className={styles.cheaper}>{money(u.yourPrice - u.price, { whole: true })} cheaper</span>
+                        <span className={styles.cheaper}>{u.perUnit ?? `${money(u.yourPrice - u.price, { whole: true })} cheaper`}</span>
                       </div>
                     </li>
                   ))}
