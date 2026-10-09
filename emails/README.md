@@ -1,24 +1,26 @@
 # Email templates
 
-## `auth-magic-link.html` — Supabase paste-in (owner step)
+Alerts and the Monday briefing are rendered in code (`src/features/alerts/render.ts`,
+`src/features/briefing/render.ts`) and sent through Resend, so they are not files here.
+This folder holds the two emails Supabase renders, not us. The owner pastes them in:
+Supabase Dashboard → Authentication → Emails → Templates.
 
-The **weekly digest** is rendered in code (`src/features/digest/email.ts`) and
-sent via Resend, so it is not a static file here. This folder holds the one
-email the product sends that Supabase renders, not us: the **magic-link sign-in**.
+| Template in Supabase | File | Subject to set |
+| --- | --- | --- |
+| Confirm signup | `auth-confirm-signup.html` | Confirm your email for Trailwatch |
+| Reset Password | `auth-reset-password.html` | Reset your Trailwatch password |
 
-To use it: Supabase Dashboard → Authentication → Email Templates → **Magic Link**,
-and paste the contents of `auth-magic-link.html`. It keeps the Supabase
-`{{ .ConfirmationURL }}` placeholder for the sign-in button and the paste-in link.
+Both are deliberately plain: a few lines of text and one link, with no logo, colours,
+button or layout table. A designed template reads as marketing and Gmail files it under
+Promotions (seen 2026-10-09); a plain note from a person does not give it that reason.
+Keep the `{{ .ConfirmationURL }}` placeholder exactly as written.
 
-It shares the digest's chrome and the same logo treatment:
+The app signs people in with a password or Google, so the Magic Link template is not used.
+The earlier designed magic-link template is in git history if it's ever wanted.
 
-- `email-logo-dark.png` (dark-ink wordmark) on light backgrounds, and
-  `email-logo-light.png` (light-ink wordmark) in dark mode, swapped by
-  `prefers-color-scheme`. Both live in `/public` and are served at
-  `https://gettrailwatch.com/email-logo-*.png` (referenced absolutely in the
-  template). `alt="Trailwatch"` keeps the brand legible when images are blocked.
+Two settings that matter as much as the template:
 
-The design source (all digest variants, quiet-week, dark/light) came from the
-Claude Design canvas; only the digest variants are wired into code. The
-quiet-week email is intentionally **not** sent — a quiet week sends nothing
-(the low-noise default).
+- Supabase → Authentication → Emails → SMTP Settings: the sender should be the same
+  address the app sends from (`EMAIL_FROM`), so a reader's trust in one carries to the other.
+- Resend → Domains → gettrailwatch.com: click tracking and open tracking off. Click
+  tracking rewrites the confirmation link to a tracking address.
