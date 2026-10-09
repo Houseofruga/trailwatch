@@ -86,7 +86,7 @@ describe("fallbackInterpretation (no AI)", () => {
       "Northwind Knits cut Merino Crew from $98 to $89 (-9.2%).",
     ]);
     expect(f.whatThisMeans).toBeNull();
-    expect(f.suggestedMove).toMatch(/25% price cut/);
+    expect(f.suggestedMove).toMatch(/25%-off promotion/);
   });
 });
 

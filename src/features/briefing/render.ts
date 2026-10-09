@@ -15,7 +15,6 @@ import {
   ratingRow,
   renderShell,
 } from "@/features/email/shell";
-import { inboxEmail } from "@/features/email/wording";
 import type { BriefingInput, BriefingInterpretation } from "./content";
 
 /** A competitor the reader follows: quiet ones still get a "Quiet week" line. */
@@ -217,5 +216,5 @@ export function renderBriefingEmail(opts: {
     sentTo: opts.sentTo,
   });
 
-  return inboxEmail({ subject, html, text });
+  return { subject, html, text };
 }

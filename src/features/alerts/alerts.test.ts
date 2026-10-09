@@ -49,7 +49,7 @@ describe("leadEvent / suggestedAction", () => {
   });
 
   it("gives a concrete, type-specific suggestion", () => {
-    expect(suggestedAction("promo_launched", { discountPct: 25 })).toMatch(/^Their 25% price cut is live now; consider writing to your email list/);
+    expect(suggestedAction("promo_launched", { discountPct: 25 })).toMatch(/^Their 25%-off promotion is live now; consider a counter-offer/);
     expect(suggestedAction("sold_out", { title: "Daily Greens" })).toMatch(/^Daily Greens is unavailable/);
     expect(suggestedAction("product_launched", { title: "Night Cream" })).toMatch(/^Compare Night Cream/);
   });
@@ -89,7 +89,7 @@ describe("renderAlertEmail", () => {
     for (const part of [
       "Launched Night Cream at $48",
       "What you could do",
-      "consider writing to your email list",
+      "consider a counter-offer",
       "https://gettrailwatch.com/competitors/c1",
       "Moves caught this month: 14",
       "Sent to jo@glowfield.com",
