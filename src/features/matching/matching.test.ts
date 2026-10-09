@@ -58,6 +58,7 @@ describe("parseQuantity", () => {
     ["Collagen Gummies (90 Gummies)", 90, "count"],
     ["Bath Towels Set of 4", 4, "count"],
     ["Sparkling Water 12-Pack", 12, "count"],
+    ["Turkish Ribbed Hand Towels (Pair) - Deep Plum", 2, "count"],
   ])("%s → %s %s", (text, amount, unit) => {
     expect(parseQuantity(text)).toEqual({ amount, unit });
   });
@@ -115,6 +116,12 @@ describe("pricePosition", () => {
     const pos = pricePosition(product("Wool Dryer Balls", [v("Default Title", 1500)]), product("Wool Dryer Balls", [v("Default Title", 1900)]))!;
     expect(pos.basis).toBe("item");
     expect(pos.pctBelow).toBe(21.1);
+  });
+
+  it("stays silent when an item-for-item gap is too big to be a fair comparison, or one side is a pair", () => {
+    // $59 against $198 with no sizes on either: almost certainly a single against a set.
+    expect(pricePosition(product("Ribbed Bath Towel", [v("Deep Plum", 5900)]), product("Plush Bath Towels", [v("White", 19800)]))).toBeNull();
+    expect(pricePosition(product("Washcloths (Pair)", [v("Deep Plum", 2200)]), product("Plush Washcloths", [v("White", 2600)]))).toBeNull();
   });
 });
 

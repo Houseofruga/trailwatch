@@ -39,6 +39,8 @@ export function parseQuantity(text: string): Quantity | null {
     /\b(?:pack|set|box|bundle) of (\d+)\b/.exec(t) ??
     /\b(\d+)\s*-?\s*(?:pack|pk|piece|pc)\b/.exec(t);
   if (count && Number(count[1]) > 0) return { amount: Number(count[1]), unit: "count" };
+  // "Hand Towels (Pair)": two, even with no number written.
+  if (/\bpair\b/.test(t)) return { amount: 2, unit: "count" };
   return null;
 }
 
@@ -183,7 +185,9 @@ export function pricePosition(theirs: CatalogProduct, ours: CatalogProduct, cfg 
   if (!sized(theirs) && !sized(ours) && tl.size === 0 && ol.size === 0) {
     const t = tv.reduce((a, b) => (b.price < a.price ? b : a));
     const o = ov.reduce((a, b) => (b.price < a.price ? b : a));
-    return result("item", null, side(theirs, t, t.price, null), side(ours, o, o.price, null));
+    const pos = result("item", null, side(theirs, t, t.price, null), side(ours, o, o.price, null));
+    // With no sizes to check, a huge gap usually means one of them is a set.
+    return pos.pctBelow > cfg.itemGapMaxPct ? null : pos;
   }
   return null;
 }

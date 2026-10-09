@@ -268,6 +268,8 @@ async function launchEvents(
   const events: NewEvent[] = [];
   for (const userId of userIds) {
     const verdicts = await loadVerdicts(service, userId, ownStoreId, compStoreId);
+    // Their product can match several of yours: report it once, against the closest.
+    const best = new Map<string, { confidence: number; event: NewEvent }>();
     for (const c of recent) {
       const key = verdictKey(c.own.product.id, c.comp.product.id);
       const jd = judged.get(key)!;
@@ -282,8 +284,11 @@ async function launchEvents(
       if (count) continue;
       const pair = { ownProductId: c.own.product.id, compProductId: c.comp.product.id, ...jd };
       const e = positionEvent(userId, c.comp.product, c.own.product, pair, "product_launched");
-      if (e) events.push(e);
+      if (e && jd.confidence > (best.get(c.comp.product.id)?.confidence ?? -1)) {
+        best.set(c.comp.product.id, { confidence: jd.confidence, event: e });
+      }
     }
+    events.push(...[...best.values()].map((b) => b.event));
   }
   return events.length ? recordEvents(service, compStoreId, events) : 0;
 }

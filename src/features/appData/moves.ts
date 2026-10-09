@@ -2,6 +2,7 @@
 // competitor timeline). Pure: summaries, kinds and bundling are tested.
 
 import type { EventType, Severity } from "@/features/events/types";
+import { unitPriceText } from "@/features/matching/units";
 import { money } from "./format";
 import type { BundleItem, Move, MoveKind } from "./types";
 
@@ -86,9 +87,19 @@ export function moveSummary(type: EventType, payload: Record<string, unknown>): 
       const pct = num(payload.pctBelow);
       const size = str(payload.competitorSize);
       const named = `${title}${size ? ` (${size})` : ""}`;
-      return theirs !== null && ours !== null
-        ? `Cheaper than you: ${named} is ${price(theirs)}${pct !== null ? `, ${pct}% below yours like for like` : `, yours is ${price(ours)}`}`
-        : `Cheaper than you: ${named}`;
+      if (theirs === null || ours === null) return `Cheaper than you: ${named}`;
+      // Name the product it was compared with, and the size when they differ.
+      const own = str(payload.ownTitle);
+      const ownSize = str(payload.ownSize);
+      const yours = `${own ? `your ${own}` : "yours"}${ownSize && ownSize !== size ? ` (${ownSize})` : ""}`;
+      const tu = num(payload.competitorUnitPrice);
+      const ou = num(payload.ownUnitPrice);
+      const unit = (["ml", "g", "count"] as const).find((u) => u === payload.unit) ?? null;
+      // Different sizes: the fair comparison is the price per ml, g or item.
+      if (payload.basis === "unit" && tu !== null && ou !== null) {
+        return `Cheaper than you: ${named} is ${price(theirs)} (${unitPriceText(tu, unit)}), ${yours} is ${price(ours)} (${unitPriceText(ou, unit)})`;
+      }
+      return `Cheaper than you: ${named} is ${price(theirs)}, ${pct !== null ? `${Math.round(pct)}% less than ${yours} at` : `${yours} is`} ${price(ours)}`;
     }
     default:
       // Page events carry the classifier's one sentence.

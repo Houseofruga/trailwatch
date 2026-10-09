@@ -14,6 +14,10 @@ export const MATCHING_CONFIG = {
   // price_position_change fires when a matched competitor product's unit price
   // is at least this far below yours (percent).
   pricePositionPct: 10,
+  // Products with no readable size are compared item for item. A gap above
+  // this (percent) is more likely a single against a set than a real undercut,
+  // so it isn't reported.
+  itemGapMaxPct: 50,
   // A newly matched competitor product counts as a launch for this many days
   // after it was published.
   launchWindowDays: 14,

@@ -34,6 +34,33 @@ describe("moveSummary", () => {
     expect(moveSummary("price_position_change", { title: "Linen Duvet Cover", competitorPrice: 16900, ownPrice: 18900 })).toBe(
       "Cheaper than you: Linen Duvet Cover is $169, yours is $189",
     );
+    expect(
+      moveSummary("price_position_change", {
+        title: "Linen Duvet Cover",
+        competitorPrice: 16900,
+        ownPrice: 18900,
+        ownTitle: "Flax Duvet Cover",
+        competitorSize: "queen",
+        ownSize: "queen",
+        basis: "size",
+        pctBelow: 10.6,
+      }),
+    ).toBe("Cheaper than you: Linen Duvet Cover (queen) is $169, 11% less than your Flax Duvet Cover at $189");
+    expect(
+      moveSummary("price_position_change", {
+        title: "Glow Serum",
+        competitorPrice: 3800,
+        ownPrice: 4400,
+        ownTitle: "Radiance Serum",
+        competitorSize: "30ml",
+        ownSize: "50ml",
+        competitorUnitPrice: 127,
+        ownUnitPrice: 88,
+        basis: "unit",
+        unit: "ml",
+        pctBelow: 12,
+      }),
+    ).toBe("Cheaper than you: Glow Serum (30ml) is $38 ($1.27/ml), your Radiance Serum (50ml) is $44 ($0.88/ml)");
     expect(moveSummary("policy_change", { summary: "Changed the returns policy." })).toBe("Changed the returns policy");
   });
 
