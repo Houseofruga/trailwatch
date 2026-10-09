@@ -70,8 +70,8 @@ export function SiteFooter() {
         </div>
 
         <div className={styles.copyright}>
-          © 2026 House of Ruga. All rights reserved. Trailwatch is an independent product and isn’t affiliated with
-          or endorsed by Shopify.
+          © 2026 Trailwatch, a product of House of Ruga LLP, Bengaluru, India. Trailwatch is an independent product and
+          isn’t affiliated with or endorsed by Shopify.
         </div>
       </div>
 
