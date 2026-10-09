@@ -15,6 +15,7 @@ import {
   renderShell,
   rows,
 } from "@/features/email/shell";
+import { inboxEmail } from "@/features/email/wording";
 import type { EventType, Severity } from "@/features/events/types";
 import { describeEvent, leadEvent, suggestedAction } from "./describe";
 
@@ -150,7 +151,7 @@ export function renderAlertEmail(
     sentTo,
   });
 
-  return { subject, html, text };
+  return inboxEmail({ subject, html, text });
 }
 
 function subjectFor(b: AlertBundle): string {

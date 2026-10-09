@@ -140,7 +140,7 @@ export function suggestedAction(type: EventType, payload: Payload): string {
   switch (type) {
     case "sitewide_sale_detected":
     case "promo_launched":
-      return `Their ${pct ? `${pct}%-off ` : ""}promotion is live now; consider a counter-offer to your email list before the weekend, or lean on bundles or free shipping if you'd rather not discount.`;
+      return `Their ${pct ? `${pct}% ` : ""}price cut is live now; consider writing to your email list before the weekend, or lean on bundles or included shipping if you'd rather hold your prices.`;
     case "price_position_change":
       return `Decide whether to match on ${str(payload.ownTitle, "your product")}, or defend the price with a bundle, a gift with purchase, or a sharper reason to pay more.`;
     case "sale_started":
@@ -150,6 +150,6 @@ export function suggestedAction(type: EventType, payload: Payload): string {
     case "product_launched":
       return `Compare ${title} with your closest product on price, claims and reviews, and sharpen your product page if they're positioning against you.`;
     default:
-      return "Worth a look before your next promo planning.";
+      return "Worth a look before you plan your next campaign.";
   }
 }
