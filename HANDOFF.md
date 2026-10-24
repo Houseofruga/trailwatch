@@ -5,7 +5,7 @@ account) can continue without prior chat memory. **Read `CLAUDE.md` (working rul
 and `SPEC.md` (scope) first, then this.** `PIVOT_PLAN.md` holds the phase-by-phase
 detail, decisions, and the log of every migration and env var.
 
-_Last updated: 2026-10-24. The pre-pivot "founder edition" (page URLs, weekly
+_Last updated: 2026-10-25. The pre-pivot "founder edition" (page URLs, weekly
 digest) lives on `archive/founder-edition` / tag `v1-founder-edition`, and in git
 history up to `56dcdd5`. `main` is fully pushed except the commit that carries this
 update._
@@ -100,6 +100,47 @@ On top of that, since 2026-10-02:
     Vercel's deployment protection (a Vercel login), so nothing extra is needed.
     `trailwatch.vercel.app` is an unrelated product with a similar name, not ours.
 
+- **Since 2026-10-24 (go-to-market setup, mostly outside the repo):**
+  - **Outreach is run by the owner's wife on his behalf; the owner takes the calls.** Her
+    operating manual is the **Outreach Playbook** artifact
+    (`https://claude.ai/artifact/9baCgxrhwsNEUaix4WRaWk`, source in this session's
+    scratchpad only): a "Today" checklist by weekday (India time), the product and offer,
+    a four-door funnel (cold email, communities, Reddit, X/LinkedIn), the cold-email stages,
+    an email builder, a weekly data post recipe, reply and booking scripts, tracking, rules.
+    Email, Reddit and X are written as Chandan from his accounts; Slack/Discord communities
+    as herself; LinkedIn drafted by her, posted by him. The booking link and the postal
+    address (House of Ruga LLP, #178, 2nd block, BSK 6th stage, Bengaluru, Karnataka, India
+    560061, required in cold email by CAN-SPAM) are built into every template.
+  - **Prospect tracker** = the "Prospect tracker" tab of the Trailwatch Go-to-Market artifact
+    (`https://claude.ai/artifact/BYwbsmYfB1VQa49juMQegA#prospects`): the 198 checked brands,
+    saved per row in the artifact's db (collection `prospects`, keyed by website; added
+    people are `p-…` docs with `custom: true`). Stages now run to Set up, Call booked,
+    Call done; rows have Source and Call 1–3 dates; "Add a person" covers non-list people;
+    "By source" table. Its db rules are admin-only, so the wife needs edit access.
+  - **Booking link:** Google Calendar appointment schedule on chandan@ (Business Starter, one
+    page), `https://calendar.app.google/9NCQ1zra9wKDVrUD8`, 30 min, 10 am–1 pm US Eastern
+    Mon–Thu, Meet link per booking. Set in Vercel as `FOUNDER_BOOKING_URL` (shows the app's
+    "Book a call" buttons for beta members and goes in the welcome email).
+  - **Vercel production env set by the owner (2026-10-24):** `FOUNDER_BOOKING_URL`,
+    `PREVIEW_PER_IP_PER_DAY=20` (verified live: 4 lookups in a row all returned), and
+    `EMAIL_FROM` = `Chandan from Trailwatch <chandan@gettrailwatch.com>` (owner confirmed).
+  - **Domain:** `www.gettrailwatch.com` now has a proxied CNAME and a Cloudflare redirect rule
+    (301 to the apex, path and query kept; verified). Google DKIM (`google._domainkey`,
+    2048-bit) is published and authentication started. Root SPF still has a leftover
+    `include:_spf.mx.cloudflare.net` (harmless).
+  - **Search Console:** the `gettrailwatch.com` domain property already existed; the move from
+    trailwatch.houseofruga.com is registered. As of the 2026-10-16 report: 14 of the 19
+    sitemap pages indexed; the other 5 (`/guides`, `/tools`, `/tools/sale-checker`,
+    `/tools/store-snapshot`, `/guides/find-competitor-best-sellers`) were "Discovered, not
+    indexed" and had indexing requested on 2026-10-24. The rest of "not indexed" is expected
+    (old redirects, `/login` blocked by robots). The sitemap now gives each page its real
+    last-changed date (`src/app/sitemap.ts`: update a page's `updated` date when its own
+    content changes; guides use their `date`).
+  - **Sender photo:** recipients' Gmail showed the crossed-out "deleted account" avatar for
+    chandan@ (the earlier consumer Google account on that address was deleted to create the
+    Workspace user). Owner uploaded a photo on the Workspace account and set it to "Anyone"
+    on 2026-10-24; waiting up to 48 hours for Google's cache before trying an admin setting.
+
 **Not yet verified end to end:** the `SPEC.md` §9 checks have never run in a separate
 test environment (there isn't one yet — see next steps). Sign-up from the homepage
 widget and the signed-in `/opportunities` page have only been checked with mock data;
@@ -176,7 +217,8 @@ per migration in `PIVOT_PLAN.md`.
 
 ## Recent work (since 2026-10-02, all on `main`)
 
-- 2026-10-24: page-change noise (`5f379e8`), catalog noise cut (`5190d40`).
+- 2026-10-24: sitemap real dates (`f0fe0e9`), page-change noise (`5f379e8`), catalog noise
+  cut (`5190d40`); outreach playbook and tracker artifacts (outside the repo).
 - 2026-10-09: plain Supabase templates (`1d74b6c`), email wording rewrite tried and
   reverted (`31d8b0f`, `51f6fef`), price comparisons read plainly (`7a50d6a`,
   `43c7cd2`), footer LLP line and LLPIN (`2eb4649`, `8bc1c46`).
@@ -218,9 +260,10 @@ per migration in `PIVOT_PLAN.md`.
 - **Email key and sender domain.** Since 2026-10-24 gettrailwatch.com mail is Google
   Workspace: one mailbox, `chandan@`, with `founder@` and `hello@` as aliases (add any new
   address as a Workspace alias; Cloudflare Email Routing is no longer used). App mail still
-  goes through Resend on the `send.` records. Google DKIM (`google._domainkey`) still to add. The `RESEND_API_KEY` is send-only, so it
-  can't read domain settings or sent emails. Local `.env.local` still has the old
-  `EMAIL_FROM`; production uses `chandan@gettrailwatch.com`. Owner said feedback email
+  goes through Resend on the `send.` records; Google DKIM is published. The `RESEND_API_KEY`
+  is send-only, so it can't read domain settings or sent emails. Local `.env.local` still has
+  the old `EMAIL_FROM` (override `from` in test sends); production uses
+  `Chandan from Trailwatch <chandan@gettrailwatch.com>`. Owner said feedback email
   works. Test sends go through a temporary vitest file using `resend.emails.send`.
 - **Design skills** (`.agents/`, `skills-lock.json`, uncommitted): Emil Kowalski's and
   Impeccable. Read their files as guidance; do not run Impeccable's launcher, which
@@ -241,6 +284,7 @@ tree is dirty, commits are unpushed, or this file is stale.
 - Supabase: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
 - Site and cron: `NEXT_PUBLIC_SITE_URL`, `CRON_SECRET`, `ADMIN_EMAILS`, `COMP_EMAILS`
 - Email: `RESEND_API_KEY`, `EMAIL_FROM`, optional `UNSUBSCRIBE_SECRET`
+- Beta: `FOUNDER_BOOKING_URL` (the founder's booking page; booking buttons hide without it)
 - AI: `GROQ_API_KEY` (in use), `ANTHROPIC_API_KEY` (not set), `EXA_API_KEY` (finder)
 - Paddle (sandbox; billing off in the beta): `PADDLE_API_KEY`, `PADDLE_WEBHOOK_SECRET`, `NEXT_PUBLIC_PADDLE_*`, `NEXT_PUBLIC_BILLING_ENABLED`, `BETA_PLAN`
 - Optional knobs: `MAX_AI_CALLS_PER_STORE_PER_DAY`, `ALERTS_PER_USER_PER_DAY`, `MATCHING_DAILY_TOKENS`, `PREVIEW_IP_SALT`, `PREVIEW_PER_IP_PER_DAY`, `PREVIEW_FRESH_PER_DAY`, `BFCM_START`, `BFCM_END`
@@ -256,22 +300,27 @@ sessions' `.claude/worktrees`; lint `src` to check this work.
 
 1. **Owner: walk through sign-up as a new user** on a fresh Gmail with tabs on (sign up,
    confirm, add store, add competitor, snapshot), note where the confirmation lands,
-   and have Claude send that account a briefing (email placement on an engaged account).
-2. **Owner: confirm two settings** — Resend click and open tracking off; Supabase SMTP
-   sender `chandan@gettrailwatch.com`.
-3. **Owner decision: paid AI.** Still on Groq's free tier; matching a new member takes
+   and have Claude send that account a briefing. Still never done end to end.
+2. **Owner: hand over outreach** — share the playbook and the tracker (edit access) with his
+   wife, give her access to the chandan@ Gmail and X account, and have her create the
+   Reddit account straight away (some communities need ~30-day-old accounts).
+3. **Owner: confirm** Resend click and open tracking are off, and that "Book a 30-min call"
+   shows in the app's sidebar or Settings.
+4. **Sender photo:** after ~48 hours (from 2026-10-24), check the To-field chip test; if the
+   crossed-out avatar persists, look at Workspace admin profile/photo sharing settings.
+5. **Owner decision: paid AI.** Still on Groq's free tier; matching a new member takes
    days. Decide before outreach or at the first sign-up.
-4. **Check the noise fixes on real data** after the first full week (briefing of
+6. **Check the noise fixes on real data** after the first full week (briefing of
    2026-11-02 and new page events): move counts, and whether the classifier follows
    the new promo rules.
-5. **Homepage portrait** opens on the cartoon (`FounderReveal`, starts at 90%); owner
+7. **Homepage portrait** opens on the cartoon (`FounderReveal`, starts at 90%); owner
    to pick real photo first, real only, or a drag hint.
-6. **Outreach** (`GO_TO_MARKET.md`, `trailwatch-prospects.csv`): owner will come back
-   to it. Claude can draft the message and fill a competitor finding per prospect.
-7. **Before real users** (`BACKLOG.md` pre-launch): a separate test Supabase project
+8. **Search Console:** in about a week, confirm the 5 requested pages moved to "Indexed";
+   then watch Performance.
+9. **Before real users** (`BACKLOG.md` pre-launch): a separate test Supabase project
    (owner creates it), then the `SPEC.md` §9 checks there.
-8. **Before billing turns on (by 2027-01-01):** let Free users through the required-store
+10. **Before billing turns on (by 2027-01-01):** let Free users through the required-store
    step, create the monthly Paddle prices and the 5 to 20% discounts.
-9. **Later:** comparison pages and category reports, Search Console, Google sign-in and
-   booking page, delete `/v1` and the old Singapore project when the owner says so,
-   DMARC `p=quarantine`.
+11. **Later:** comparison pages and category reports, sign-up source tracking (offered),
+   Google sign-in, delete `/v1` and the old Singapore project when the owner says so,
+   DMARC `p=quarantine`, tidy the root SPF record.
