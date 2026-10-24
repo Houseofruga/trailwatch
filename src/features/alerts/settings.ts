@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { bundleKey } from "@/features/appData/moves";
 import type { EventType } from "@/features/events/types";
 
 export type AlertSettings = {
@@ -46,16 +47,27 @@ export async function loadAlertSettings(service: SupabaseClient, userIds: string
 }
 
 /**
- * "Competitor moves caught this month: N" — every event fanned out to this user
- * since the start of the month (UTC), instant or briefing. Shown on the
+ * "Competitor moves caught this month: N" — moves fanned out to this user since
+ * the start of the month (UTC), instant or briefing, counted as the app shows
+ * them (a day's 66 price cuts at one store are one move). Shown on the
  * dashboard and in email footers.
  */
 export async function movesCaughtThisMonth(service: SupabaseClient, userId: string, now: Date = new Date()): Promise<number> {
   const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
-  const { count } = await service
+  const { data } = await service
     .from("user_events")
-    .select("id", { count: "exact", head: true })
+    .select("events(id, type, store_id, snapshot_id, detected_at, pctChange:payload->pctChange)")
     .eq("user_id", userId)
-    .gte("created_at", monthStart);
-  return count ?? 0;
+    .gte("created_at", monthStart)
+    .limit(20000);
+  type Row = { id: string; type: EventType; store_id: string; snapshot_id: string | null; detected_at: string; pctChange: unknown };
+  const keys = new Set<string>();
+  for (const r of data ?? []) {
+    const e = (Array.isArray(r.events) ? r.events[0] : r.events) as Row | null;
+    if (!e) continue;
+    keys.add(
+      bundleKey({ type: e.type, storeId: e.store_id, snapshotId: e.snapshot_id, payload: { pctChange: e.pctChange }, eventId: e.id, detectedAt: e.detected_at }),
+    );
+  }
+  return keys.size;
 }

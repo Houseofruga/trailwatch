@@ -4,7 +4,8 @@ import type { EventType, Severity } from "./types";
 // normal → Monday briefing, low → stored only. Tune the rules here, not in the
 // code that uses them.
 export const SEVERITY_CONFIG = {
-  // A single-product sale is "high" from this discount up.
+  // A single-product sale is "high" from this discount up. So is a price cut of
+  // this size when it's part of a wave (many products cut in one check).
   saleHighPctOff: 20,
   // Product tags that mark a best-seller (lowercased, compared exactly).
   bestsellerTags: ["bestseller", "best-seller", "best seller", "bestsellers", "top seller", "top-seller"],
@@ -16,7 +17,6 @@ const FIXED: Partial<Record<EventType, Severity>> = {
   promo_launched: "high",
   price_position_change: "high",
   product_launched: "high",
-  price_changed: "normal",
   restocked: "normal",
   policy_change: "normal",
   positioning_shift: "normal",
@@ -40,6 +40,10 @@ export function severityFor({ type, payload, isTopProduct = false }: SeverityInp
     return pct >= SEVERITY_CONFIG.saleHighPctOff ? "high" : "normal";
   }
   if (type === "sold_out") return isTopProduct ? "high" : "normal";
+  if (type === "price_changed") {
+    const pct = typeof payload.pctChange === "number" ? payload.pctChange : 0;
+    return typeof payload.productsCut === "number" && pct <= -SEVERITY_CONFIG.saleHighPctOff ? "high" : "normal";
+  }
   return FIXED[type] ?? "normal";
 }
 

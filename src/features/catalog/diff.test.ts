@@ -85,6 +85,27 @@ describe("diffCatalogs — every event type", () => {
 });
 
 describe("diffCatalogs — low-noise rules", () => {
+  it("checkout add-ons, test listings and plans make no moves", () => {
+    const junk = [
+      product("w", { title: "Gift Wrapping" }),
+      product("t", { title: "Rivo Flow Test – Do Not Purchase" }),
+      product("m", { title: "Monthly" }),
+    ];
+    expect(diffCatalogs([], junk, { complete: true })).toEqual([]);
+    expect(diffCatalogs(junk, [], { complete: true })).toEqual([]);
+    expect(diffCatalogs([], [product("r", { title: "Monthly Skincare Ritual Kit" })], { complete: true })).toHaveLength(1);
+  });
+
+  it("tags a wave of price cuts with its size, and leaves a few cuts untagged", () => {
+    const prev = Array.from({ length: 12 }, (_, i) => product(String(i), { variants: [variant({ price: 10000 })] }));
+    const wave = prev.map((p) => ({ ...p, variants: [variant({ price: 7000 })] }));
+    const events = diffCatalogs(prev, wave, { complete: true });
+    expect(events).toHaveLength(12);
+    expect(events.every((e) => e.payload.productsCut === 12)).toBe(true);
+    const few = prev.map((p, i) => (i < 3 ? { ...p, variants: [variant({ price: 7000 })] } : p));
+    expect(diffCatalogs(prev, few, { complete: true }).some((e) => "productsCut" in e.payload)).toBe(false);
+  });
+
   it("emits nothing when nothing changed", () => {
     expect(diffCatalogs([product("1"), product("2")], [product("2"), product("1")], { complete: true })).toEqual([]);
   });

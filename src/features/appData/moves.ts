@@ -117,20 +117,58 @@ function comparedWithYours(r: FeedRow): string | undefined {
   return `Your ${r.ownMatch.title} is ${price(ours)}, ${price(Math.abs(diff))} ${diff > 0 ? "more" : "less"}.`;
 }
 
-// Launches and sale starts found in the same catalog read are one move
-// ("Launched 5 products"), like the bundled alert.
-const BUNDLED: EventType[] = ["product_launched", "sale_started"];
+// Catalog moves of one kind at one store on the same day (UTC) are one move
+// ("Launched 5 products", "Cut prices on 66 products"), however many checks
+// they were found in, as in the alerts and the Monday briefing. Price changes
+// split by direction: cuts and rises.
+const BUNDLED: EventType[] = ["product_launched", "sale_started", "sale_ended", "price_changed", "sold_out", "restocked", "product_removed"];
 const RANK: Record<Severity, number> = { high: 2, normal: 1, low: 0 };
+
+/** Which move an event belongs to: its store, kind and day for catalog moves, else itself. */
+export function bundleKey(e: {
+  type: EventType;
+  storeId: string;
+  snapshotId: string | null;
+  payload: Record<string, unknown>;
+  eventId: string;
+  detectedAt: string;
+}): string {
+  // Catalog events carry the snapshot they were found in; page events don't and stay single.
+  if (!BUNDLED.includes(e.type) || !e.snapshotId) return e.eventId;
+  const direction = e.type === "price_changed" ? ((num(e.payload.pctChange) ?? 0) < 0 ? ":down" : ":up") : "";
+  return `${e.storeId}|${e.type}${direction}|${e.detectedAt.slice(0, 10)}`;
+}
 
 function bundleSummary(type: EventType, rows: FeedRow[]): string {
   const titles = rows.map((r) => str(r.payload.title, "a product"));
-  // "Boucle Ball Pillow (Ink), (Tobacco)" — repeat names collapse to their variant.
-  const base = titles[0].replace(/\s*\([^)]*\)\s*$/, "");
-  const short = titles.slice(0, 2).map((t, i) => (i > 0 && t.startsWith(base) && t !== base ? t.slice(base.length).trim() : t));
+  // "Boucle Ball Pillow (Ink), (Tobacco)", "Sheet Set - Olive, Plum": repeat names collapse to their variant.
+  const base = titles[0].replace(/\s*(\([^)]*\)|-\s[^-]+)\s*$/, "");
+  const short = titles
+    .slice(0, 2)
+    .map((t, i) => (i > 0 && t.startsWith(base) && t !== base ? t.slice(base.length).replace(/^\s*-\s*/, "").trim() : t));
   const more = rows.length - short.length;
   const list = `${short.join(", ")}${more > 0 ? `, +${more}` : ""}`;
-  if (type === "product_launched") return `Launched ${rows.length} products: ${list}`;
+  const n = rows.length;
   const lead = rows[0];
+  switch (type) {
+    case "product_launched":
+      return `Launched ${n} products: ${list}`;
+    case "price_changed": {
+      const from = num(lead.payload.oldPrice);
+      const to = num(lead.payload.newPrice);
+      const verb = (num(lead.payload.pctChange) ?? 0) < 0 ? "Cut" : "Raised";
+      const leadText = from !== null && to !== null ? `${titles[0]} ${price(from)} → ${price(to)}` : titles[0];
+      return `${verb} prices on ${n} products: ${leadText}, +${n - 1}`;
+    }
+    case "sale_ended":
+      return `Sale ended on ${n} products: ${list}`;
+    case "sold_out":
+      return `${n} products sold out: ${list}`;
+    case "restocked":
+      return `${n} products back in stock: ${list}`;
+    case "product_removed":
+      return `Removed ${n} products from the store: ${list}`;
+  }
   const was = num(lead.payload.compareAtPrice);
   const now = num(lead.payload.salePrice);
   const leadText = was !== null && now !== null ? `${titles[0]} ${price(was)} → ${price(now)}` : titles[0];
@@ -142,7 +180,7 @@ export function toMoves(rows: FeedRow[]): Move[] {
   const groups = new Map<string, FeedRow[]>();
   const order: string[] = [];
   for (const r of rows) {
-    const key = BUNDLED.includes(r.type) && r.snapshotId ? `${r.storeId}|${r.type}|${r.snapshotId}` : r.eventId;
+    const key = bundleKey(r);
     if (!groups.has(key)) {
       groups.set(key, []);
       order.push(key);
@@ -158,7 +196,7 @@ export function toMoves(rows: FeedRow[]): Move[] {
     const bundle: BundleItem[] | undefined = bundled
       ? group.map((r) => ({
           title: str(r.payload.title, "A product"),
-          price: num(r.payload.salePrice) ?? num(r.payload.price),
+          price: num(r.payload.salePrice) ?? num(r.payload.newPrice) ?? num(r.payload.price),
         }))
       : undefined;
     return {

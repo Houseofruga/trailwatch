@@ -128,7 +128,7 @@ async function prepare(service: SupabaseClient, week: string, now: Date): Promis
         ownMatch: r.context?.ownMatch ? { title: r.context.ownMatch.title, price: r.context.ownMatch.price } : null,
       }));
     const opportunities = withOpportunities.has(userId) ? await opportunitiesForBriefing(service, userId, now) : [];
-    const input: BriefingInput = { weekOf: week, events, ...(opportunities.length ? { opportunities } : {}) };
+    const input: BriefingInput = { weekOf: week, events, grouped: true, ...(opportunities.length ? { opportunities } : {}) };
     // A quiet week needs no model: it's ready to send as the quiet-week email.
     const { error: insertError } = await service.from("briefings").insert({
       user_id: userId,

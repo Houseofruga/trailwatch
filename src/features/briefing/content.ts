@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { CATEGORY, CATEGORY_LABEL, describeEvent, leadEvent, suggestedAction, type BriefingCategory } from "@/features/alerts/describe";
+import { CATEGORY, CATEGORY_LABEL, describeEvent, describeGroup, leadEvent, suggestedAction, type BriefingCategory } from "@/features/alerts/describe";
+import { bundleKey } from "@/features/appData/moves";
 import type { EventType, Severity } from "@/features/events/types";
 import type { BriefingOpportunity } from "@/features/opportunities/queries";
 
@@ -25,12 +26,14 @@ export type BriefingInput = {
   // Up to three Opportunities (Part B), frozen with the week; normal severity,
   // briefing only. Absent on briefings prepared before 2026-10-04.
   opportunities?: BriefingOpportunity[];
+  /** Set on briefings prepared from 2026-10-24: the model saw the week as moves (rankMoves), so `move` numbers count moves. */
+  grouped?: true;
 };
 
 // The model's part: interpretation only. Facts (the per-competitor lists) are
 // rendered from the events themselves, so the model can't invent any.
 export type BriefingInterpretation = {
-  /** `move`: the 1-based number of the move it's about, in rankEvents order (briefings from 2026-10 on). */
+  /** `move`: the 1-based number of the move it's about, in rankMoves order (rankEvents before `grouped`). */
   topMoves: { headline: string; whyItMatters: string; move?: number }[];
   whatThisMeans: string | null;
   suggestedMove: string;
@@ -83,15 +86,37 @@ export function rankEvents(events: BriefingEvent[]): BriefingEvent[] {
 }
 
 /**
- * The no-AI version: top moves are the highest-severity, newest events stated
+ * The week as moves, most important first: events of one kind from the same
+ * catalog read are one move (66 price cuts in one check is one repricing), as
+ * in the app. Each move lists its events, the most important first.
+ */
+export function rankMoves(events: BriefingEvent[]): BriefingEvent[][] {
+  const groups = new Map<string, BriefingEvent[]>();
+  events.forEach((e, i) => {
+    const key = bundleKey({ ...e, snapshotId: e.snapshotId ?? null, eventId: e.eventId ?? `i${i}` });
+    groups.set(key, [...(groups.get(key) ?? []), e]);
+  });
+  const high = (g: BriefingEvent[]) => g.some((e) => e.severity === "high");
+  return [...groups.values()]
+    .map((g) => rankEvents(g))
+    .sort((a, b) => Number(high(b)) - Number(high(a)) || b[0].detectedAt.localeCompare(a[0].detectedAt));
+}
+
+/** One sentence for a move from rankMoves. */
+export function describeMove(move: BriefingEvent[]): string {
+  return describeGroup(move, move[0].storeName);
+}
+
+/**
+ * The no-AI version: top moves are the highest-severity, newest moves stated
  * plainly, plus the templated suggestion. Used when no AI key is set or the
  * model didn't answer in time — the briefing still goes out.
  */
 export function fallbackInterpretation(input: BriefingInput): BriefingInterpretation {
-  const top = rankEvents(input.events).slice(0, 3);
-  const lead = top.length ? leadEvent(top) : null;
+  const top = rankMoves(input.events).slice(0, 3);
+  const lead = top.length ? leadEvent(top.map((m) => m[0])) : null;
   return {
-    topMoves: top.map((e, i) => ({ headline: describeEvent(e.type, e.payload, e.storeName), whyItMatters: "", move: i + 1 })),
+    topMoves: top.map((m, i) => ({ headline: describeMove(m), whyItMatters: "", move: i + 1 })),
     whatThisMeans: null,
     suggestedMove: lead ? suggestedAction(lead.type, lead.payload) : "",
   };

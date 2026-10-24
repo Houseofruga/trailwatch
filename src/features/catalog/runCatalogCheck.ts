@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { fetchRobotsTxt, robotsAllows } from "@/features/checks/fetchPage";
 import { CATALOG_CONFIG } from "./config";
 import { diffCatalogs } from "./diff";
+import { quietStockFlips, type StockHistory } from "./stockNoise";
 import { catalogPageFetcher, fetchShopifyCatalog, realSleep, type FetchCatalogResult } from "./fetchCatalog";
 import { catalogStats } from "./firstReport";
 import { hashCatalog } from "./normalize";
@@ -99,9 +100,12 @@ export async function runCatalogCheck(service: SupabaseClient, storeId: string):
     previous = snap ? await downloadSnapshot(service, snap.storage_path) : null;
   }
 
-  const events = previous
+  const diffed = previous
     ? diffCatalogs(previous.products, catalog.products, { complete: catalog.complete && previous.complete })
     : [];
+  const events = diffed.some((e) => e.type === "sold_out" || e.type === "restocked")
+    ? quietStockFlips(diffed, await stockHistory(service, storeId), new Date())
+    : diffed;
 
   const storagePath = await uploadSnapshot(service, storeId, catalog);
   const { data: snapshot, error: snapError } = await service
@@ -163,4 +167,20 @@ export async function runCatalogCheck(service: SupabaseClient, storeId: string):
   return previous
     ? { status: "changed", products: catalog.products.length, events: events.length + positions.length }
     : { status: "baseline", products: catalog.products.length };
+}
+
+/** The store's sell-outs and restocks reported in the last couple of weeks (for quietStockFlips). */
+async function stockHistory(service: SupabaseClient, storeId: string): Promise<StockHistory[]> {
+  const since = new Date(Date.now() - CATALOG_CONFIG.stockHistoryDays * 24 * 60 * 60 * 1000).toISOString();
+  const { data, error } = await service
+    .from("events")
+    .select("product_id, type, detected_at")
+    .eq("store_id", storeId)
+    .is("for_user_id", null)
+    .in("type", ["sold_out", "restocked"])
+    .gte("detected_at", since)
+    .not("product_id", "is", null)
+    .limit(10000);
+  if (error) throw new Error(`Couldn't load stock history: ${error.message}`);
+  return (data ?? []).map((r) => ({ productId: r.product_id as string, type: r.type as StockHistory["type"], at: r.detected_at as string }));
 }

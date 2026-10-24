@@ -86,6 +86,50 @@ export function describeEvent(type: EventType, payload: Payload, storeName: stri
 
 export type BriefingCategory = "launches" | "pricing" | "stock" | "positioning";
 
+/** "A and B", "A, B and 3 more": up to two names, for group sentences. */
+function someTitles(payloads: Payload[]): string {
+  const titles = [...new Set(payloads.map((p) => str(p.title)).filter(Boolean))];
+  if (titles.length <= 2) return titles.join(" and ");
+  return `${titles.slice(0, 2).join(", ")} and ${titles.length - 2} more`;
+}
+
+/**
+ * One sentence for a move made of several events of one kind from the same
+ * catalog read ("Boll & Branch cut prices on 66 products by up to 31%,
+ * including ..."). A single event is described as itself. `examples: false`
+ * leaves out the product names (alert subject lines).
+ */
+export function describeGroup(events: { type: EventType; payload: Payload }[], storeName: string, opts: { examples?: boolean } = {}): string {
+  if (events.length === 1) return describeEvent(events[0].type, events[0].payload, storeName);
+  const n = events.length;
+  const payloads = events.map((e) => e.payload);
+  const including = opts.examples === false ? "" : `, including ${someTitles(payloads)}`;
+  const maxPct = (key: string) => Math.max(0, ...payloads.map((p) => Math.abs(num(p[key]) ?? 0)));
+  switch (events[0].type) {
+    case "product_launched":
+      return `${storeName} launched ${n} products${including}.`;
+    case "sale_started": {
+      const pct = maxPct("pctOff");
+      return `${storeName} put ${n} products on sale${pct ? `, up to ${pct}% off` : ""}${including}.`;
+    }
+    case "price_changed": {
+      const pct = Math.round(maxPct("pctChange"));
+      const verb = (num(payloads[0].pctChange) ?? 0) < 0 ? "cut" : "raised";
+      return `${storeName} ${verb} prices on ${n} products${pct ? ` by up to ${pct}%` : ""}${including}.`;
+    }
+    case "sale_ended":
+      return `${storeName} ended the sale on ${n} products${including}.`;
+    case "sold_out":
+      return `${n} of ${storeName}'s products sold out${including}.`;
+    case "restocked":
+      return `${storeName} restocked ${n} products${including}.`;
+    case "product_removed":
+      return `${storeName} removed ${n} products from its store${including}.`;
+    default:
+      return describeEvent(events[0].type, events[0].payload, storeName);
+  }
+}
+
 // Where an event sits in the briefing's per-competitor breakdown (SPEC.md §5
 // Phase 4: launches, pricing/promos, stock, positioning/policy).
 export const CATEGORY: Record<EventType, BriefingCategory | null> = {

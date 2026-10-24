@@ -23,6 +23,7 @@ type DiffOptions = {
   complete: boolean;
   sitewideSaleShare?: number;
   sitewideSaleMinProducts?: number;
+  priceCutWaveMin?: number;
 };
 
 const onSale = (v: CatalogVariant) => v.compareAtPrice !== null && v.compareAtPrice > v.price;
@@ -30,6 +31,9 @@ const pctOff = (v: CatalogVariant) =>
   v.compareAtPrice ? Math.round(((v.compareAtPrice - v.price) / v.compareAtPrice) * 100) : 0;
 const pctChange = (from: number, to: number) => Math.round(((to - from) / from) * 1000) / 10;
 const inStock = (p: CatalogProduct) => p.variants.some((v) => v.available);
+// Checkout add-ons, test listings and plans (CATALOG_CONFIG.helperProductPattern) make no moves.
+const isMerchandise = (p: CatalogProduct) =>
+  !CATALOG_CONFIG.helperProductPattern.test(p.title) && !CATALOG_CONFIG.helperProductPattern.test(p.productType);
 
 function productInfo(p: CatalogProduct) {
   return {
@@ -62,8 +66,13 @@ function headline<T>(items: T[], score: (item: T) => number): T {
  *    count for launches/removals.
  *  - When a sitewide sale is detected, the per-product sale_started events it
  *    explains are folded into it (with the biggest discounts as examples).
+ *  - Checkout add-ons, test listings and plans are not merchandise: no events.
+ *  - A wave of price cuts (many products cut in one check) is tagged with its
+ *    size, `productsCut`, so it's treated as one big move (severity, bundling).
  */
-export function diffCatalogs(prev: CatalogProduct[], next: CatalogProduct[], options: DiffOptions): CatalogEvent[] {
+export function diffCatalogs(allPrev: CatalogProduct[], allNext: CatalogProduct[], options: DiffOptions): CatalogEvent[] {
+  const prev = allPrev.filter(isMerchandise);
+  const next = allNext.filter(isMerchandise);
   const share = options.sitewideSaleShare ?? CATALOG_CONFIG.sitewideSaleShare;
   const minProducts = options.sitewideSaleMinProducts ?? CATALOG_CONFIG.sitewideSaleMinProducts;
 
@@ -156,6 +165,11 @@ export function diffCatalogs(prev: CatalogProduct[], next: CatalogProduct[], opt
     inStockCount > 0 &&
     discountedInStock.length >= minProducts &&
     discountedInStock.length / inStockCount >= share;
+
+  const cuts = events.filter((e) => e.type === "price_changed" && (e.payload.pctChange as number) < 0);
+  if (cuts.length >= (options.priceCutWaveMin ?? CATALOG_CONFIG.priceCutWaveMin)) {
+    for (const e of cuts) e.payload.productsCut = cuts.length;
+  }
 
   if (isSitewide) {
     const discounts = discountedInStock.map((e) => e.payload.pctOff as number);

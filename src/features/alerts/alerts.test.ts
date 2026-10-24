@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { describeEvent, leadEvent, suggestedAction } from "./describe";
+import { describeEvent, describeGroup, leadEvent, suggestedAction } from "./describe";
 import { renderAlertEmail, renderAlertSlack, type AlertBundle } from "./render";
 import { isSlackWebhookUrl } from "./slack";
 
@@ -39,6 +39,21 @@ describe("describeEvent", () => {
   it("degrades gracefully on missing numbers", () => {
     expect(describeEvent("price_changed", { title: "X" }, "D")).toBe("D changed the price of X.");
     expect(describeEvent("product_launched", {}, "D")).toBe("D launched a product.");
+  });
+});
+
+describe("describeGroup", () => {
+  const cut = (title: string, pctChange: number) => ({ type: "price_changed" as const, payload: { title, oldPrice: 20000, newPrice: 14000, pctChange } });
+  it("says a bundled move in one sentence, with up to two names", () => {
+    expect(describeGroup([cut("Sheet Set - Camel", -31.4), cut("Sheet Set - Olive", -25), cut("Robe", -10)], "Boll & Branch")).toBe(
+      "Boll & Branch cut prices on 3 products by up to 31%, including Sheet Set - Camel, Sheet Set - Olive and 1 more.",
+    );
+    expect(describeGroup([cut("A", -31.4), cut("B", -25)], "Boll & Branch", { examples: false })).toBe("Boll & Branch cut prices on 2 products by up to 31%.");
+    const out = (title: string) => ({ type: "sold_out" as const, payload: { title } });
+    expect(describeGroup([out("A"), out("B")], "Parachute")).toBe("2 of Parachute's products sold out, including A and B.");
+  });
+  it("describes a single event as itself", () => {
+    expect(describeGroup([cut("Robe", -30)], "Dewlane")).toBe(describeEvent("price_changed", cut("Robe", -30).payload, "Dewlane"));
   });
 });
 
@@ -129,6 +144,27 @@ describe("renderAlertEmail", () => {
     const { html } = renderAlertEmail(evil, "https://x.test", 1);
     expect(html).not.toContain("<script>alert");
     expect(html).toContain("&lt;script&gt;");
+  });
+});
+
+describe("renderAlertEmail — a bundled price-cut wave", () => {
+  it("is one move, with a one-line subject and the products listed", () => {
+    const wave: AlertBundle = {
+      storeName: "Boll & Branch",
+      storeDomain: "bollandbranch.com",
+      competitorId: "c9",
+      events: [1, 2, 3].map((i) => ({
+        eventId: `w${i}`,
+        type: "price_changed" as const,
+        severity: "high" as const,
+        payload: { title: `Sheet Set ${i}`, oldPrice: 20000, newPrice: 13700, pctChange: -31.5, productsCut: 3 },
+        detectedAt: "2026-10-14T14:40:00Z",
+        snapshotId: "s1",
+      })),
+    };
+    const email = renderAlertEmail(wave, "https://gettrailwatch.com", 3);
+    expect(email.subject).toBe("Boll & Branch cut prices on 3 products by up to 32%");
+    expect(email.text).toContain("• Sheet Set 2  $137.00");
   });
 });
 

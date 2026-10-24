@@ -1,6 +1,5 @@
-import { describeEvent } from "@/features/alerts/describe";
 import { money } from "@/features/email/shell";
-import { rankEvents, type BriefingInput } from "./content";
+import { describeMove, rankMoves, type BriefingInput } from "./content";
 
 // Fixed for every user and every week, so it's sent as a cached system block
 // (prompt caching) — only the per-user event list below varies.
@@ -28,17 +27,19 @@ Rules:
 Reply with ONLY this JSON object:
 {"topMoves": [{"headline": "...", "whyItMatters": "...", "move": 1}], "whatThisMeans": "..." | null, "suggestedMove": "..."}`;
 
-/** The per-user message: the week's events, numbered in rankEvents order, capped for cost. */
-export function buildBriefingMessage(input: BriefingInput, maxEvents = 60): string {
-  const events = rankEvents(input.events).slice(0, maxEvents);
-  const lines = events.map((e, i) => {
-    const vs = e.ownMatch
-      ? ` [vs your ${e.ownMatch.title}${e.ownMatch.price !== null ? ` at ${money(e.ownMatch.price)}` : ""}]`
+/** The per-user message: the week's moves, numbered in rankMoves order, capped for cost. */
+export function buildBriefingMessage(input: BriefingInput, maxMoves = 60): string {
+  const all = rankMoves(input.events);
+  const moves = all.slice(0, maxMoves);
+  const lines = moves.map((m, i) => {
+    const lead = m[0];
+    const vs = lead.ownMatch
+      ? ` [vs your ${lead.ownMatch.title}${lead.ownMatch.price !== null ? ` at ${money(lead.ownMatch.price)}` : ""}]`
       : "";
-    return `${i + 1}. [${e.severity === "high" ? "HIGH" : "normal"}] ${e.detectedAt.slice(0, 10)} ${describeEvent(e.type, e.payload, e.storeName)}${vs}`;
+    return `${i + 1}. [${m.some((e) => e.severity === "high") ? "HIGH" : "normal"}] ${lead.detectedAt.slice(0, 10)} ${describeMove(m)}${vs}`;
   });
-  const extra = input.events.length - events.length;
-  return `Week of ${input.weekOf}. ${input.events.length} competitor moves.\n\n${lines.join("\n")}${
+  const extra = all.length - moves.length;
+  return `Week of ${input.weekOf}. ${all.length} competitor moves.\n\n${lines.join("\n")}${
     extra > 0 ? `\n(+${extra} lower-priority moves not listed)` : ""
   }`;
 }

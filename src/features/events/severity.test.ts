@@ -37,6 +37,14 @@ describe("severityFor", () => {
   });
 });
 
+describe("severityFor — price cut waves", () => {
+  it("a big cut in a wave is high; the same cut alone, or a small one in a wave, is normal", () => {
+    expect(severityFor({ type: "price_changed", payload: { pctChange: -31.4, productsCut: 66 } })).toBe("high");
+    expect(severityFor({ type: "price_changed", payload: { pctChange: -31.4 } })).toBe("normal");
+    expect(severityFor({ type: "price_changed", payload: { pctChange: -8, productsCut: 66 } })).toBe("normal");
+  });
+});
+
 describe("hasBestsellerTag", () => {
   it("matches best-seller tag variants, case-insensitively", () => {
     expect(hasBestsellerTag(["new", "Best-Seller"])).toBe(true);

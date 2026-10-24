@@ -85,15 +85,44 @@ describe("toMoves", () => {
     expect(move.bundle).toHaveLength(5);
   });
 
-  it("keeps separate reads, stores and other types apart", () => {
+  it("bundles a day's checks together, and keeps other days, stores and types apart", () => {
+    expect(toMoves([row({ eventId: "a" }), row({ eventId: "a2", snapshotId: "snap2", detectedAt: "2026-09-29T23:50:00Z" })])).toHaveLength(1);
     const moves = toMoves([
       row({ eventId: "a" }),
-      row({ eventId: "b", snapshotId: "snap2" }),
+      row({ eventId: "b", snapshotId: "snap2", detectedAt: "2026-09-30T08:00:00Z" }),
       row({ eventId: "c", storeId: "s2" }),
       row({ eventId: "d", type: "sold_out", payload: { title: "X" } }),
-      row({ eventId: "e", type: "sold_out", payload: { title: "Y" } }),
+      row({ eventId: "e", type: "policy_change", payload: { summary: "Raised the free-shipping threshold." } }),
     ]);
     expect(moves.map((m) => m.id)).toEqual(["a", "b", "c", "d", "e"]);
+  });
+
+  it("bundles a read's price cuts into one move, apart from its price rises", () => {
+    const cut = (id: string, title: string, oldPrice: number, newPrice: number) =>
+      row({ eventId: id, type: "price_changed", payload: { title, oldPrice, newPrice, pctChange: Math.round(((newPrice - oldPrice) / oldPrice) * 1000) / 10 } });
+    const moves = toMoves([
+      cut("p1", "Signature Sheet Set - Camel", 20000, 13700),
+      cut("p2", "Signature Sheet Set - Olive", 20000, 13700),
+      cut("p3", "Linen Sheet Set - Sage", 35000, 24000),
+      cut("p4", "Waffle Robe", 9800, 11800),
+    ]);
+    expect(moves.map((m) => m.summary)).toEqual([
+      "Cut prices on 3 products: Signature Sheet Set - Camel $200 → $137, +2",
+      "Price change: Waffle Robe $98 → $118",
+    ]);
+    expect(moves[0].bundle?.map((b) => b.price)).toEqual([13700, 13700, 24000]);
+  });
+
+  it("bundles a read's sell-outs, restocks and removals, naming colours once", () => {
+    const out = (id: string, title: string) => row({ eventId: id, type: "sold_out", payload: { title } });
+    const [m] = toMoves([out("o1", "Percale Bundle - Evergreen"), out("o2", "Percale Bundle - Cream"), out("o3", "Linen Sham")]);
+    expect(m.summary).toBe("3 products sold out: Percale Bundle - Evergreen, Cream, +1");
+    expect(toMoves([row({ eventId: "r1", type: "restocked", payload: { title: "A" } }), row({ eventId: "r2", type: "restocked", payload: { title: "B" } })])[0].summary).toBe(
+      "2 products back in stock: A, B",
+    );
+    expect(toMoves([row({ eventId: "x1", type: "product_removed", payload: { title: "A" } }), row({ eventId: "x2", type: "product_removed", payload: { title: "B" } })])[0].summary).toBe(
+      "Removed 2 products from the store: A, B",
+    );
   });
 
   it("adds the comparison with the reader's own product", () => {

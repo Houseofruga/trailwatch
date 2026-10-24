@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { competitorSections, fallbackInterpretation, parseInterpretation, rankEvents, type BriefingInput } from "./content";
+import { competitorSections, fallbackInterpretation, parseInterpretation, rankEvents, rankMoves, type BriefingInput } from "./content";
 import { buildBriefingMessage, BRIEFING_SYSTEM } from "./prompt";
 import { renderBriefingEmail } from "./render";
 import { briefingWeek, canSend, canSubmit, easternParts, nextBriefingAt, stopWaiting, userBriefingDue } from "./schedule";
@@ -122,6 +122,33 @@ describe("briefing prompt", () => {
   it("caps the event list for cost and says how many were left out", () => {
     const many: BriefingInput = { weekOf: "2026-10-05", events: Array.from({ length: 5 }, () => input.events[3]) };
     expect(buildBriefingMessage(many, 2)).toContain("(+3 lower-priority moves not listed)");
+  });
+});
+
+describe("the week as moves", () => {
+  const cut = (i: number, snapshotId: string): BriefingInput["events"][number] => ({
+    eventId: `c${i}`,
+    snapshotId,
+    storeId: "b",
+    storeName: "Boll & Branch",
+    type: "price_changed",
+    severity: "high",
+    payload: { title: `Sheet Set ${i}`, oldPrice: 20000, newPrice: 13700, pctChange: -31.5, productsCut: 3 },
+    detectedAt: "2026-10-14T14:40:00Z",
+  });
+  const week: BriefingInput = { weekOf: "2026-10-19", events: [...input.events, cut(1, "s1"), cut(2, "s1"), cut(3, "s1")], grouped: true };
+
+  it("counts a read's 3 price cuts as one move, ranked with the high ones", () => {
+    const moves = rankMoves(week.events);
+    expect(moves).toHaveLength(5);
+    expect(moves.find((m) => m.length === 3)?.[0].storeName).toBe("Boll & Branch");
+  });
+
+  it("gives the model one numbered line per move", () => {
+    const message = buildBriefingMessage(week);
+    expect(message).toContain("5 competitor moves.");
+    expect(message).toContain("Boll & Branch cut prices on 3 products by up to 32%, including Sheet Set 1, Sheet Set 2 and 1 more.");
+    expect(message.match(/^\d+\. /gm)).toHaveLength(5);
   });
 });
 

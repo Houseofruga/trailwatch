@@ -30,14 +30,26 @@ export const CATALOG_CONFIG = {
   // ...and at least this many of them, so a 3-product store putting one item
   // on sale doesn't read as "sitewide".
   sitewideSaleMinProducts: 5,
+  // A wave of price cuts: this many products cut in one check is one big move
+  // (a range-wide repricing), not a pile of small ones. See severity.config.ts.
+  priceCutWaveMin: 10,
+  // Stock that flips back and forth is noise, not news (seen 2026-10: one
+  // store logged 171 sell-outs and restocks on 102 products in a week).
+  // A product's sell-out is reported at most once in this many days...
+  soldOutRepeatDays: 7,
+  // ...and a restock only after the reported sell-out lasted this long.
+  restockMinOutHours: 48,
+  // How far back the check looks for those reported stock moves.
+  stockHistoryDays: 14,
   // First report: what counts as "recently launched", and how many items per
   // section ("See all" expands in place up to this many; DESIGN_TO_COMPONENTS D3).
   firstReportRecentDays: 30,
   firstReportLimit: 50,
   // Checkout add-ons that apps create as products (shipping protection, return
-  // fees, gift wrap...). Not merchandise, so the first report leaves them out.
+  // fees, gift wrap...), test listings and bare subscription plans. Not
+  // merchandise, so the first report leaves them out and they make no moves.
   helperProductPattern:
-    /\b(package|shipping|order|delivery)[ _-](protection|insurance)\b|\broute\b.*\bprotection\b|\breturns? (fee|label|shipping|coverage)\b|\bgift (card|wrap|wrapping)\b|\bshipping insurance\b/i,
+    /\b(package|shipping|order|delivery)[ _-](protection|insurance)\b|\broute\b.*\bprotection\b|\breturns? (fee|label|shipping|coverage)\b|\bgift (card|wrap|wrapping)\b|\bshipping insurance\b|\bdo not (purchase|buy)\b|\btest product\b|^(monthly|annual|yearly)( (plan|membership|subscription))?$/i,
   // Fallback cadence if the per-plan lookup fails (normal cadence comes from
   // the followers' plans — see plan/limits.ts storeCheckIntervalHours).
   defaultCheckIntervalHours: 24,

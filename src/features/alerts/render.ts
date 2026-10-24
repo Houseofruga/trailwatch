@@ -1,5 +1,5 @@
 import type { RenderedEmail } from "@/features/digest/email";
-import { toMoves, type FeedRow } from "@/features/appData/moves";
+import { bundleKey, toMoves, type FeedRow } from "@/features/appData/moves";
 import type { Move } from "@/features/appData/types";
 import {
   badge,
@@ -16,7 +16,7 @@ import {
   rows,
 } from "@/features/email/shell";
 import type { EventType, Severity } from "@/features/events/types";
-import { describeEvent, leadEvent, suggestedAction } from "./describe";
+import { describeEvent, describeGroup, leadEvent, suggestedAction } from "./describe";
 
 export type AlertEvent = {
   /** events.id: links the alert to that move on the competitor's page. */
@@ -68,9 +68,12 @@ function headlineFor(b: AlertBundle, moves: Move[]): string {
   if (moves.length > 1) return `${b.storeName} made ${moves.length} big moves`;
   const m = moves[0];
   if (m.bundle) {
-    return m.kind === "sale"
-      ? `${b.storeName} put ${m.bundle.length} products on sale`
-      : `${b.storeName} launched ${m.bundle.length} products`;
+    // The events in that one move: "Boll & Branch cut prices on 66 products by up to 31%".
+    const keyOf = (e: AlertEvent, i: number) =>
+      bundleKey({ ...e, storeId: b.storeDomain, snapshotId: e.snapshotId ?? null, eventId: e.eventId ?? `e${i}` });
+    const leadIndex = b.events.findIndex((e, i) => (e.eventId ?? `e${i}`) === m.id);
+    const key = keyOf(b.events[leadIndex], leadIndex);
+    return noStop(describeGroup(b.events.filter((e, i) => keyOf(e, i) === key), b.storeName, { examples: false }));
   }
   const lead = leadEvent(b.events);
   return noStop(describeEvent(lead.type, lead.payload, b.storeName));

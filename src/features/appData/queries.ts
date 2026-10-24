@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { BETA_CONFIG, bookingUrl } from "@/features/beta/config";
 import { DEFAULT_ALERT_SETTINGS, loadAlertSettings, movesCaughtThisMonth, MUTABLE_TYPES } from "@/features/alerts/settings";
-import { fallbackInterpretation, rankEvents, type BriefingInput, type BriefingInterpretation } from "@/features/briefing/content";
+import { fallbackInterpretation, rankEvents, rankMoves, type BriefingInput, type BriefingInterpretation } from "@/features/briefing/content";
 import { DEFAULT_BRIEFING, nextBriefingAt } from "@/features/briefing/schedule";
 import type { StoreCategory } from "@/features/categories/summarize";
 import { CATALOG_CONFIG } from "@/features/catalog/config";
@@ -580,13 +580,15 @@ export async function getBriefingPanel(): Promise<BriefingPanel> {
   const byStore = new Map(competitors.map((c) => [c.store.id, c]));
   type Row = { id: string; week_start: string; sent_at: string; input: BriefingInput; content: BriefingInterpretation | null; ai: boolean };
   const briefings = ((data ?? []) as Row[]).map((b): Briefing => {
-    const ranked = rankEvents(b.input.events);
+    const moves = rankMoves(b.input.events);
+    // What the `move` numbers count: moves (and the no-AI fallback), or events in older briefings.
+    const ranked = b.input.grouped || !b.content ? moves.map((m) => m[0]) : rankEvents(b.input.events);
     const content = b.content ?? fallbackInterpretation(b.input);
     return {
       id: b.id,
       weekStart: b.week_start,
       sentAt: b.sent_at,
-      moves: b.input.events.length,
+      moves: moves.length,
       plain: !b.ai,
       whatThisMeans: b.ai ? content.whatThisMeans : null,
       suggestedMove: content.suggestedMove,
