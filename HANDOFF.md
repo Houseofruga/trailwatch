@@ -215,8 +215,10 @@ per migration in `PIVOT_PLAN.md`.
 - **Preview states:** in development, app pages take `?state=…` (see each page's
   `STATES`) and render mock data with buttons that save nothing. Signed-in pages need
   a login; for screenshots use a temporary unguarded route rendering the view with mocks.
-- **Email key and sender domain.** `founder@`, `chandan@` and `hello@gettrailwatch.com`
-  are Cloudflare Email Routing (forwarders). The `RESEND_API_KEY` is send-only, so it
+- **Email key and sender domain.** Since 2026-10-24 gettrailwatch.com mail is Google
+  Workspace: one mailbox, `chandan@`, with `founder@` and `hello@` as aliases (add any new
+  address as a Workspace alias; Cloudflare Email Routing is no longer used). App mail still
+  goes through Resend on the `send.` records. Google DKIM (`google._domainkey`) still to add. The `RESEND_API_KEY` is send-only, so it
   can't read domain settings or sent emails. Local `.env.local` still has the old
   `EMAIL_FROM`; production uses `chandan@gettrailwatch.com`. Owner said feedback email
   works. Test sends go through a temporary vitest file using `resend.emails.send`.
