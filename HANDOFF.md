@@ -5,10 +5,10 @@ account) can continue without prior chat memory. **Read `CLAUDE.md` (working rul
 and `SPEC.md` (scope) first, then this.** `PIVOT_PLAN.md` holds the phase-by-phase
 detail, decisions, and the log of every migration and env var.
 
-_Last updated: 2026-10-06. This file was rewritten for the pivot: the previous
-version described the pre-pivot "founder edition" (page URLs, weekly digest), which
-lives on `archive/founder-edition` / tag `v1-founder-edition`, and in git history up
-to `56dcdd5`. `main` is fully pushed except the commit that carries this update._
+_Last updated: 2026-10-24. The pre-pivot "founder edition" (page URLs, weekly
+digest) lives on `archive/founder-edition` / tag `v1-founder-edition`, and in git
+history up to `56dcdd5`. `main` is fully pushed except the commit that carries this
+update._
 
 ## Product in one line
 
@@ -65,12 +65,49 @@ On top of that, since 2026-10-02:
     and the cloud scene (`CloudScene`, comparison → Black Friday). The previous homepage
     is at `/v1`, not indexed. The "X of 25 spots left" line appears once 5 spots are taken
     (`home/betaSpots.ts`).
-  - **Go-to-market plan:** `GO_TO_MARKET.md`. Outreach week 1 was planned for ~2026-10-12.
+  - **Go-to-market plan:** `GO_TO_MARKET.md`. Outreach week 1 was planned for ~2026-10-12
+    and has not started (prospect sheet untouched as of 2026-10-24).
+
+- **Since 2026-10-07 (all live):**
+  - **Noise cut (2026-10-24).** A real week had 426 moves for 3 competitors; replayed
+    through the new rules it is 56. (1) Stock flip-flops: `catalog/stockNoise.ts`
+    reports a product's sell-out at most once a week and a restock only after a
+    reported sell-out of 48h+ (`CATALOG_CONFIG.soldOutRepeatDays`, `restockMinOutHours`).
+    (2) Bundling: `appData/moves.ts` `bundleKey` makes catalog moves of one kind at one
+    store on one UTC day a single move (price cuts and rises apart). The feed, alerts
+    (`describeGroup` subject), the briefing (`rankMoves`, `BriefingInput.grouped`) and
+    the monthly counter all use it. (3) Price-cut waves: 10+ cuts in one check are
+    tagged `productsCut` and cuts of 20%+ become high. (4) Add-ons, test listings and
+    bare plans (`helperProductPattern`) make no catalog moves.
+  - **Page-change noise (2026-10-24).** Page events now store `contentHash` and
+    `previousHash`; a page switching back to a version seen in 14 days updates quietly
+    with no AI call (`checks/noiseFilter.ts` `versionsSeen`), e.g. a sale page toggling
+    between two versions every few hours. The classifier prompt says ended promos and
+    sale-page product churn aren't `promo_launched`; a promo code is reported once a
+    week per store. Old events carry no hashes, so toggles are caught from each page's
+    next change on.
+  - **Cheaper-than-you moves** name your product and price; a pair counts as two; no
+    report when an item-for-item gap is over 50% (`MATCHING_CONFIG.itemGapMaxPct`);
+    one report per competitor product. The 13 old rows were deleted by the owner.
+  - **Emails:** alerts and the briefing are plain (no logo, cards or buttons). Sender
+    is `Chandan from Trailwatch <chandan@gettrailwatch.com>`. Gmail still files them
+    under Promotions in cold tests; a neutral-wording rewrite was tried and reverted
+    (5 of 6 cold tests went to Promotions either way). Supabase's Confirm signup and
+    Reset Password templates are plain notes (`emails/`), pasted in by the owner.
+  - **Footer:** "© 2026 Trailwatch, a product of House of Ruga LLP (LLPIN: ADC-8749),
+    Bengaluru, India" plus the Shopify disclaimer.
+  - **Vercel addresses:** the project's own `*.vercel.app` addresses already sit behind
+    Vercel's deployment protection (a Vercel login), so nothing extra is needed.
+    `trailwatch.vercel.app` is an unrelated product with a similar name, not ours.
 
 **Not yet verified end to end:** the `SPEC.md` §9 checks have never run in a separate
 test environment (there isn't one yet — see next steps). Sign-up from the homepage
 widget and the signed-in `/opportunities` page have only been checked with mock data;
 the owner needs to walk through them (Claude can't create accounts on hosted services).
+As of 2026-10-24 there are 2 accounts (the owner's, and one from 2026-10-09 that never
+added a store or competitor), so a full sign-up → store → competitor → snapshot → email
+walk-through still hasn't happened. The noise changes were checked by tests and a
+replay of real data, not by viewing the signed-in screens.
 
 **Data still filling in (as of 2026-10-04):** matching had classified almost nothing
 in production until the 2026-10-04 cron hotfix; it now classifies ~15–30 products per
@@ -139,6 +176,13 @@ per migration in `PIVOT_PLAN.md`.
 
 ## Recent work (since 2026-10-02, all on `main`)
 
+- 2026-10-24: page-change noise (`5f379e8`), catalog noise cut (`5190d40`).
+- 2026-10-09: plain Supabase templates (`1d74b6c`), email wording rewrite tried and
+  reverted (`31d8b0f`, `51f6fef`), price comparisons read plainly (`7a50d6a`,
+  `43c7cd2`), footer LLP line and LLPIN (`2eb4649`, `8bc1c46`).
+- 2026-10-07: plain alert and briefing emails (`70aa9ea`), back links follow the whole
+  trail (`d737ee3`), Home remembers filters and page (`683e263`).
+
 - 2026-10-06: homepage rework live (`5fdec01` and follow-ups to `24aab4b`); annual
   billing removed and Starter given own-store matching.
 - 2026-10-05: nine guides (`b48b3c3`, `fb52191`), footer columns (`f46b241`), 20% beta
@@ -171,12 +215,11 @@ per migration in `PIVOT_PLAN.md`.
 - **Preview states:** in development, app pages take `?state=…` (see each page's
   `STATES`) and render mock data with buttons that save nothing. Signed-in pages need
   a login; for screenshots use a temporary unguarded route rendering the view with mocks.
-- **Email key and sender domain.** `founder@gettrailwatch.com` is Cloudflare Email
-  Routing (a forwarder). Until 2026-10-06 the `RESEND_API_KEY` was limited to
-  houseofruga.com, so sends from `weekly@gettrailwatch.com` were refused ("This API
-  key is not authorized to send emails from gettrailwatch.com"). The owner replaced
-  the key locally and in Vercel; a test from gettrailwatch.com to founder@ arrived.
-  Still to confirm: feedback sent from the live app after a redeploy.
+- **Email key and sender domain.** `founder@`, `chandan@` and `hello@gettrailwatch.com`
+  are Cloudflare Email Routing (forwarders). The `RESEND_API_KEY` is send-only, so it
+  can't read domain settings or sent emails. Local `.env.local` still has the old
+  `EMAIL_FROM`; production uses `chandan@gettrailwatch.com`. Owner said feedback email
+  works. Test sends go through a temporary vitest file using `resend.emails.send`.
 - **Design skills** (`.agents/`, `skills-lock.json`, uncommitted): Emil Kowalski's and
   Impeccable. Read their files as guidance; do not run Impeccable's launcher, which
   downloads and runs a program.
@@ -209,17 +252,24 @@ sessions' `.claude/worktrees`; lint `src` to check this work.
 
 ## Suggested next steps
 
-1. **Outreach** (`GO_TO_MARKET.md`): pick the first 50 prospects, add each one's top
-   competitor to the owner's account, start the 50 messages a week.
-2. **Owner:** send feedback from the live app to confirm email end to end, read the nine guides, add the second
-   author-card line, submit the new pages in Search Console, set "Trailwatch" in
-   `EMAIL_FROM`, the Supabase email templates, Google sign-in and the booking page.
-3. **Before billing turns on:** let Free users through the required-store step
-   (`BACKLOG.md`), create the monthly Paddle prices and the 5 to 20% discounts.
-4. **When the first real user signs up:** raise the paid-AI question again (the owner
-   chose to stay on Groq's free tier until then).
-5. **Content still to write:** comparison pages (need artboards and checked facts) and
-   category reports (need about a month of data, early November).
-6. **Before real users** (`BACKLOG.md` pre-launch): a separate test environment, then
-   the `SPEC.md` §9 checks there; block direct `*.vercel.app` access.
-7. Delete `/v1` and the old Singapore Supabase project when the owner says so.
+1. **Owner: walk through sign-up as a new user** on a fresh Gmail with tabs on (sign up,
+   confirm, add store, add competitor, snapshot), note where the confirmation lands,
+   and have Claude send that account a briefing (email placement on an engaged account).
+2. **Owner: confirm two settings** — Resend click and open tracking off; Supabase SMTP
+   sender `chandan@gettrailwatch.com`.
+3. **Owner decision: paid AI.** Still on Groq's free tier; matching a new member takes
+   days. Decide before outreach or at the first sign-up.
+4. **Check the noise fixes on real data** after the first full week (briefing of
+   2026-11-02 and new page events): move counts, and whether the classifier follows
+   the new promo rules.
+5. **Homepage portrait** opens on the cartoon (`FounderReveal`, starts at 90%); owner
+   to pick real photo first, real only, or a drag hint.
+6. **Outreach** (`GO_TO_MARKET.md`, `trailwatch-prospects.csv`): owner will come back
+   to it. Claude can draft the message and fill a competitor finding per prospect.
+7. **Before real users** (`BACKLOG.md` pre-launch): a separate test Supabase project
+   (owner creates it), then the `SPEC.md` §9 checks there.
+8. **Before billing turns on (by 2027-01-01):** let Free users through the required-store
+   step, create the monthly Paddle prices and the 5 to 20% discounts.
+9. **Later:** comparison pages and category reports, Search Console, Google sign-in and
+   booking page, delete `/v1` and the old Singapore project when the owner says so,
+   DMARC `p=quarantine`.
