@@ -5,7 +5,7 @@ import { AuthForm, type AuthPreview } from "@/features/auth/AuthForm";
 import { AuthShell } from "@/features/auth/AuthShell";
 
 const SIGNUP_STATES = ["default", "submitting", "field-errors", "sign-ups-full-today", "check-your-inbox"] as const;
-const LOGIN_STATES = ["default", "submitting", "wrong-password"] as const;
+const LOGIN_STATES = ["default", "submitting", "wrong-password", "unconfirmed"] as const;
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ state?: string; mode?: string }> }) {
   const sp = await searchParams;

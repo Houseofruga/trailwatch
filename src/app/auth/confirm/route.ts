@@ -8,8 +8,10 @@ import { createServiceClient } from "@/lib/supabase/service";
 // change. Unlike the OAuth PKCE code flow at /auth/callback, verifyOtp with a
 // token_hash works even when the link is opened on a different device or browser
 // than the one that requested it — which is the norm for reset/confirm emails
-// (request on a laptop, open on a phone). `next` forwards recovery to
-// /reset-password; anything else defaults to the dashboard.
+// (request on a laptop, open on a phone). That needs the Supabase templates in
+// `emails/`. A template still on Supabase's default {{ .ConfirmationURL }}
+// arrives here with a `code` instead; that works in the browser that signed up.
+// `next` forwards recovery to /reset-password; anything else defaults to the dashboard.
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const tokenHash = searchParams.get("token_hash");
@@ -19,12 +21,14 @@ export async function GET(request: NextRequest) {
   const dest =
     next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
 
-  if (!tokenHash || !type) {
+  const code = searchParams.get("code");
+  if ((!tokenHash || !type) && !code) {
     return NextResponse.redirect(`${origin}/login?error=link`);
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+  const { data, error } =
+    tokenHash && type ? await supabase.auth.verifyOtp({ type, token_hash: tokenHash }) : await supabase.auth.exchangeCodeForSession(code!);
   if (error) {
     return NextResponse.redirect(`${origin}/login?error=link`);
   }

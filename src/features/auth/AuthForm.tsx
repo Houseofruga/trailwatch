@@ -29,13 +29,15 @@ export type AuthPreview =
   | "field-errors"
   | "sign-ups-full-today"
   | "check-your-inbox"
-  | "wrong-password";
+  | "wrong-password"
+  | "unconfirmed";
 
 const PREVIEW_STATE: Partial<Record<AuthPreview, AuthState>> = {
   "field-errors": { fieldErrors: { email: "Enter an email like jo@glowfield.com.", password: "Use at least 8 characters." } },
   "sign-ups-full-today": { error: SIGNUP_CAP_MESSAGE, capacity: true },
   "check-your-inbox": { checkEmail: "jo@glowfield.com" },
   "wrong-password": { error: "That email and password don't match." },
+  unconfirmed: { unconfirmed: "jo@glowfield.com" },
 };
 
 function GoogleLogo() {
@@ -130,6 +132,31 @@ function CheckInbox({ email, onUseDifferent, next }: { email: string; onUseDiffe
   );
 }
 
+/** Log-in with an address that was never confirmed: explain, and send a fresh link. */
+function Unconfirmed({ email, next }: { email: string; next?: string }) {
+  const [sending, start] = useTransition();
+  const [sent, setSent] = useState<boolean | null>(null);
+  return (
+    <Banner
+      tone={sent ? "success" : "warning"}
+      title={sent ? "Sent. It can take a minute to arrive." : "Confirm your email first"}
+      actions={
+        sent ? undefined : (
+          <Button loading={sending} onClick={() => start(async () => setSent((await resendConfirmation(email, next)).ok))}>
+            Send the link again
+          </Button>
+        )
+      }
+    >
+      {sent
+        ? `Open the link we sent to ${email}, then you're in. Check spam if it isn't there.`
+        : sent === false
+          ? "We couldn't send it just now. Wait a minute and try again."
+          : `You haven't confirmed ${email} yet. We sent you a link when you signed up; we can send a fresh one.`}
+    </Banner>
+  );
+}
+
 export function AuthForm({ initialMode, preview = "default" }: { initialMode: Mode; preview?: AuthPreview }) {
   const searchParams = useSearchParams();
   const mode: Mode = searchParams.get("mode") === "signup" ? "signup" : initialMode;
@@ -150,7 +177,7 @@ export function AuthForm({ initialMode, preview = "default" }: { initialMode: Mo
   const errorCode = searchParams.get("error");
   const linkError =
     errorCode === "link"
-      ? "That link is invalid or has expired. Request a new one."
+      ? "That link has expired or was already used. To confirm your email, log in and we'll send a fresh link. To reset your password, use \u201cForgot password?\u201d."
       : errorCode === "capacity"
         ? SIGNUP_CAP_MESSAGE
         : errorCode
@@ -180,7 +207,9 @@ export function AuthForm({ initialMode, preview = "default" }: { initialMode: Mo
         title={mode === "signup" ? "Create your account" : "Log in to Trailwatch"}
         sub={mode === "signup" ? "Know what your competitors change, as soon as they change it." : undefined}
       />
-      {message ? (
+      {mode === "login" && state?.unconfirmed ? (
+        <Unconfirmed email={state.unconfirmed} next={claimPath} />
+      ) : message ? (
         <Banner tone={capacity ? "info" : "critical"}>{message}</Banner>
       ) : null}
       <form action={signInWithGoogle}>

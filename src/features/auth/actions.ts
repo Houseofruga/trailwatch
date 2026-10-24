@@ -22,6 +22,8 @@ export type AuthState = {
   capacity?: boolean;
   /** The reset link's session is gone or expired. */
   expired?: boolean;
+  /** Log-in refused because this address hasn't been confirmed yet. */
+  unconfirmed?: string;
 } | null;
 
 const credentials = z.object({
@@ -108,7 +110,13 @@ export async function logIn(_prev: AuthState, formData: FormData): Promise<AuthS
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
-  if (error) return { error: "That email and password don't match." };
+  if (error) {
+    // Right password, but the sign-up link was never clicked: say so, and offer a new link.
+    if (error.code === "email_not_confirmed" || /email not confirmed/i.test(error.message)) {
+      return { unconfirmed: parsed.data.email };
+    }
+    return { error: "That email and password don't match." };
+  }
 
   revalidatePath("/", "layout");
   // Back to the page they were stopped on (an alert email's link), else Home.

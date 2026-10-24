@@ -13,7 +13,12 @@ Supabase Dashboard → Authentication → Emails → Templates.
 Both are deliberately plain: a few lines of text and one link, with no logo, colours,
 button or layout table. A designed template reads as marketing and Gmail files it under
 Promotions (seen 2026-10-09); a plain note from a person does not give it that reason.
-Keep the `{{ .ConfirmationURL }}` placeholder exactly as written.
+The links point at the app's own `/auth/confirm` with `{{ .TokenHash }}`, not Supabase's
+default `{{ .ConfirmationURL }}`, so a link opened on another device (sign up on a laptop,
+confirm on a phone) still works. Keep them exactly as written. `{{ .SiteURL }}` must be
+`https://gettrailwatch.com` (Supabase → Authentication → URL Configuration → Site URL).
+On 2026-10-09 these templates briefly used `{{ .ConfirmationURL }}`, which broke that;
+`/auth/confirm` now also accepts that format, but only in the browser that signed up.
 
 The app signs people in with a password or Google, so the Magic Link template is not used.
 The earlier designed magic-link template is in git history if it's ever wanted.
