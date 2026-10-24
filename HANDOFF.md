@@ -5,7 +5,7 @@ account) can continue without prior chat memory. **Read `CLAUDE.md` (working rul
 and `SPEC.md` (scope) first, then this.** `PIVOT_PLAN.md` holds the phase-by-phase
 detail, decisions, and the log of every migration and env var.
 
-_Last updated: 2026-10-25. The pre-pivot "founder edition" (page URLs, weekly
+_Last updated: 2026-10-25 (evening). The pre-pivot "founder edition" (page URLs, weekly
 digest) lives on `archive/founder-edition` / tag `v1-founder-edition`, and in git
 history up to `56dcdd5`. `main` is fully pushed except the commit that carries this
 update._
@@ -136,6 +136,21 @@ On top of that, since 2026-10-02:
     (old redirects, `/login` blocked by robots). The sitemap now gives each page its real
     last-changed date (`src/app/sitemap.ts`: update a page's `updated` date when its own
     content changes; guides use their `date`).
+  - **Sign-in emails fixed (2026-10-25, `c3e7e58`).** The plain Supabase templates pasted on
+    2026-10-09 used `{{ .ConfirmationURL }}`, which `/auth/confirm` didn't handle, so email
+    sign-up confirmations landed on "link expired". The templates in `emails/` now link to
+    `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email|recovery&next=…` again
+    (pasted by the owner; Site URL is https://gettrailwatch.com), and `/auth/confirm` also
+    accepts a `code` as a fallback. Log-in with an unconfirmed address now says so and offers
+    "Send the link again"; the expired-link message points to that. Widget sign-ups by email
+    no longer carry the pre-added competitor through confirmation (Google sign-ups still do).
+  - **Supabase SMTP** failed with "Error sending recovery email" (old Resend key). The owner
+    created a separate Resend key `supabase-smtp` (sending access, gettrailwatch.com) for
+    Supabase's SMTP password; the app keeps its own `RESEND_API_KEY`. Verified: a reset email
+    arrived with the `/auth/confirm?token_hash=` link. Test with `resetPasswordForEmail` to the
+    owner's own address using the anon key.
+  - **Owner's Supabase dashboard login** is via GitHub account `Houseofruga` (Google sign-in on
+    GitHub fails; use username and password).
   - **Sender photo:** recipients' Gmail showed the crossed-out "deleted account" avatar for
     chandan@ (the earlier consumer Google account on that address was deleted to create the
     Workspace user). Owner uploaded a photo on the Workspace account and set it to "Anyone"
@@ -298,9 +313,10 @@ sessions' `.claude/worktrees`; lint `src` to check this work.
 
 ## Suggested next steps
 
-1. **Owner: walk through sign-up as a new user** on a fresh Gmail with tabs on (sign up,
-   confirm, add store, add competitor, snapshot), note where the confirmation lands,
-   and have Claude send that account a briefing. Still never done end to end.
+1. **Owner: walk through sign-up as a new user with email and password** (not Google) on a
+   fresh Gmail with tabs on: sign up on a laptop, open the confirmation on a phone, add store,
+   add competitor, snapshot; note where the confirmation lands, and have Claude send that
+   account a briefing. Still never done end to end; email sign-up is the untested path.
 2. **Owner: hand over outreach** — share the playbook and the tracker (edit access) with his
    wife, give her access to the chandan@ Gmail and X account, and have her create the
    Reddit account straight away (some communities need ~30-day-old accounts).
