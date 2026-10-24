@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { extractMainText } from "@/features/checks/extract";
 import { fetchPageIfAllowed } from "@/features/checks/fetchPage";
 import { hashContent } from "@/features/checks/hash";
-import { diffLines, isMeaningfulChange } from "@/features/checks/noiseFilter";
+import { diffLines, isMeaningfulChange, versionsSeen } from "@/features/checks/noiseFilter";
 import { normalizeText } from "@/features/checks/normalize";
 import { classifyPageChange } from "@/features/events/classifyPageChange";
 import { recordEvents } from "@/features/events/record";
@@ -13,6 +13,9 @@ import { nextFeaturedSince } from "@/features/opportunities/demand";
 import { featuredProductHandles } from "./discoverPages";
 
 const EXCERPT_CAP = 1000;
+// A page switching back to a version seen in its change events this recently is
+// toggling, not changing (see versionsSeen).
+const TOGGLE_LOOKBACK_DAYS = 14;
 
 export type StorePagesResult = { checked: number; changed: number; events: number; errors: number };
 
@@ -22,6 +25,7 @@ export type StorePagesResult = { checked: number; changed: number; events: numbe
  *   unchanged hash      → timestamp only, zero AI
  *   first capture       → baseline, zero AI
  *   noise-filter says trivial → new baseline, zero AI
+ *   back to a recent version  → new baseline, zero AI (the page is toggling)
  *   meaningful          → one Haiku call to classify → event
  * The homepage also refreshes the store's featured products (top-product signal).
  * One page failing doesn't stop the others.
@@ -83,6 +87,10 @@ export async function checkStorePages(service: SupabaseClient, storeId: string):
       await update(baseline);
       continue;
     }
+    if ((await recentVersions(service, page.id)).has(hash)) {
+      await update(baseline);
+      continue;
+    }
 
     totals.changed += 1;
     if (aiBudget <= 0) {
@@ -109,9 +117,17 @@ export async function checkStorePages(service: SupabaseClient, storeId: string):
         ...details,
         pageKind: page.kind,
         url: page.url,
+        // The versions this change went between, so a later switch back is recognised.
+        contentHash: hash,
+        previousHash: page.content_hash,
         excerptBefore: removed.join("\n").slice(0, EXCERPT_CAP),
         excerptAfter: added.join("\n").slice(0, EXCERPT_CAP),
       };
+      // The same promo code shown on the homepage and the sale page is one promotion.
+      if (type === "promo_launched" && details.code && (await promoAlreadySeen(service, storeId, details.code))) {
+        await update(baseline);
+        continue;
+      }
       // Saved before the baseline moves: if this throws, the page still holds
       // the old text and the next check re-detects the change.
       const event: NewEvent = {
@@ -134,4 +150,29 @@ export async function checkStorePages(service: SupabaseClient, storeId: string):
 
   await recordFetches(service, storeId, "page", totals.checked);
   return totals;
+}
+
+/** Versions this page went between in its recent change events (any severity). */
+async function recentVersions(service: SupabaseClient, pageId: string): Promise<Set<string>> {
+  const since = new Date(Date.now() - TOGGLE_LOOKBACK_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  const { data } = await service
+    .from("events")
+    .select("contentHash:payload->>contentHash, previousHash:payload->>previousHash")
+    .eq("store_page_id", pageId)
+    .gte("detected_at", since)
+    .limit(500);
+  return versionsSeen((data ?? []) as Record<string, unknown>[]);
+}
+
+/** Whether this store's promo with this code was already reported in the last week (from any page). */
+async function promoAlreadySeen(service: SupabaseClient, storeId: string, code: string): Promise<boolean> {
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const { count } = await service
+    .from("events")
+    .select("id", { count: "exact", head: true })
+    .eq("store_id", storeId)
+    .eq("type", "promo_launched")
+    .ilike("payload->>code", code)
+    .gte("detected_at", since);
+  return (count ?? 0) > 0;
 }

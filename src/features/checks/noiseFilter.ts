@@ -76,3 +76,18 @@ export function isMeaningfulChange(oldText: string, newText: string): Meaningful
     reason: `${changedCharCount}-character change exceeds the noise threshold`,
   };
 }
+
+/**
+ * The page versions (content hashes) a page's recent change events went from
+ * and to. A page that switches back to one of these is toggling between
+ * versions (an A/B test, two servers or caches answering differently), not
+ * changing: seen 2026-10 on a sale page flipping between 112 and 149 products
+ * every few hours. Events from before 2026-10-24 carry no hashes.
+ */
+export function versionsSeen(payloads: Record<string, unknown>[]): Set<string> {
+  const seen = new Set<string>();
+  for (const p of payloads) {
+    for (const h of [p.contentHash, p.previousHash]) if (typeof h === "string" && h) seen.add(h);
+  }
+  return seen;
+}

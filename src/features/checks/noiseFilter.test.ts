@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isMeaningfulChange } from "./noiseFilter";
+import { isMeaningfulChange, versionsSeen } from "./noiseFilter";
 import { normalizeText } from "./normalize";
 
 // SPEC.md §8: whitespace-only (not meaningful), price change (meaningful),
@@ -50,5 +50,13 @@ describe("isMeaningfulChange", () => {
     const result = isMeaningfulChange(text, text);
 
     expect(result.meaningful).toBe(false);
+  });
+});
+
+describe("versionsSeen", () => {
+  it("collects the before and after versions of a page's recent changes", () => {
+    const seen = versionsSeen([{ contentHash: "b", previousHash: "a" }, { contentHash: "a", previousHash: "b" }, { summary: "older event, no hashes" }]);
+    expect([...seen].sort()).toEqual(["a", "b"]);
+    expect(seen.has("c")).toBe(false);
   });
 });

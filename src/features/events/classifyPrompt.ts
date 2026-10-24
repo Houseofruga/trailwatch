@@ -27,10 +27,10 @@ Reply with ONLY a JSON object, no prose:
 {"type": "...", "summary": "...", "discountPct": number|null, "code": string|null, "freeShippingThreshold": number|null}
 
 type — exactly one of:
-- "promo_launched": a new or changed promotion — a sale, discount, promo code, bundle deal, gift with purchase, or free-shipping offer.
+- "promo_launched": a new or changed promotion that is live now — a sale, discount, promo code, bundle deal, gift with purchase, or free-shipping offer. A promotion that ended or was taken down is NOT promo_launched: use "positioning_shift" if the page now leads with something new, else "cosmetic".
 - "positioning_shift": how they present the brand or products changed — new headline, value proposition, hero message, featured category, or target customer.
 - "policy_change": shipping, returns, refunds, or warranty terms changed (costs, thresholds, time windows).
-- "cosmetic": nothing a competitor would act on — reworded boilerplate, reordering, image swaps without a new message, dates, counters.
+- "cosmetic": nothing a competitor would act on — reworded boilerplate, reordering, image swaps without a new message, dates, counters. On a sale or collection page, products being added to or removed from the list is "cosmetic" (products are tracked separately), unless a new promotion, discount level or code appears.
 
 summary — one plain-English sentence saying what changed, with the specific numbers (e.g. "Dewlane started a 25% off sitewide sale with code GLOW25."). No HTML, no markdown.
 discountPct — the headline discount percentage if a promo states one, else null.
