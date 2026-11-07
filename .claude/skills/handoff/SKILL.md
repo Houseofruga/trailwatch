@@ -36,8 +36,12 @@ other account sees it on `git pull`.
    Keep it concise and factual. If the structure of the existing file works, edit
    its sections; don't rewrite wholesale.
 
+   Also check `claude-project-monisha/` (the marketing Claude Project's knowledge):
+   if recent work changed features, plans, the offer, dates or links, update those
+   files, and refresh the `_As of_` date in `05-strategy-and-status.md`.
+
 4. **Commit and push.** Stage `HANDOFF.md` (and `CLAUDE.md` if you changed the
-   pointer). Commit with a message like `Update HANDOFF.md build state` and the
+   pointer, and `claude-project-monisha/` if you updated it). Commit with a message like `Update HANDOFF.md build state` and the
    standard co-author trailer, then `git push`. The pre-commit hook runs the
    tests — if they fail, report that and do not force the commit.
 

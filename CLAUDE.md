@@ -80,6 +80,14 @@ tag `v1-founder-edition` — never modify, rebase, or delete them, and never for
 - A pre-commit hook must block commits when tests fail.
 - Do not chase exhaustive coverage — manual QA covers the rest.
 
+## Marketing knowledge pack
+
+`claude-project-monisha/` is the knowledge for the marketing Claude Project (synced from
+GitHub). When a change alters anything a marketer would say — features, what we don't do,
+plans/prices, the beta offer, dates, links (tools, guides, booking), homepage copy, or
+outreach rules — update the matching file there in the same commit. Facts only; no
+secrets, env vars or internal infra.
+
 ## Definition of done
 
 The pivot is done when the checks in `SPEC.md` §9 pass. Bugs in secondary paths get fixed

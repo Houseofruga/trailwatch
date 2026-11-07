@@ -1,6 +1,6 @@
 # Strategy and current status
 
-_Update the "Status" section every week or two (re-upload this file) so Claude knows where things stand._
+_The "Status" section is updated in the repo every week or two and reaches the project on the next GitHub sync. If it looks stale, ask Monisha for the latest numbers._
 
 ## The strategy in one paragraph
 
